@@ -1,0 +1,190 @@
+.pageContainer {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.title {
+  font-family: var(--font-family-heading);
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.status {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  min-height: 25px;
+  font-weight: bold;
+  color: var(--color-text-primary);
+}
+
+/* ИЗМЕНЕНИЕ: Класс переименован для избежания конфликтов */
+.ticTacToeBoard {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 10px;
+  margin: 0 auto 2rem auto;
+  width: fit-content;
+}
+
+.cell {
+  width: 100px;
+  height: 100px;
+  background-color: #f0f0f0;
+  border-radius: var(--border-radius);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  user-select: none;
+}
+
+.cell:not(.filled):hover {
+  background-color: #e0e0e0;
+}
+
+.cell.filled {
+  cursor: not-allowed;
+}
+
+.playersContainer {
+  background-color: var(--color-surface);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  margin-top: 2rem;
+}
+
+.playersTitle {
+  margin-top: 0;
+  color: var(--color-text-primary);
+}
+
+.playersList {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+  color: var(--color-text-secondary);
+}
+
+.playerItem {
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--color-surface-secondary);
+}
+
+.playerItem:last-child {
+  border-bottom: none;
+}
+
+.waitingText {
+  margin-top: 1rem;
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+.controls {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.leaveButton {
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: var(--border-radius);
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: var(--color-danger);
+  color: white;
+}
+
+.leaveButton:hover {
+  background-color: #a11a1a;
+}
+
+.disabled {
+  cursor: not-allowed;
+  filter: grayscale(80%);
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 251, 248, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.overlayContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.lottieAnimation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  width: 500px;
+  height: 500px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.winnerText, .loserText, .drawText {
+  font-family: var(--font-family-heading);
+  font-size: 5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+}
+
+.winnerText {
+  color: var(--color-primary);
+}
+
+.loserText {
+  color: var(--color-error);
+}
+
+.drawText {
+  color: var(--color-text-secondary);
+}
+
+.lobbyButton {
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: var(--border-radius);
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.lobbyButton:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px -3px rgb(0 0 0 / 0.1), 0 6px 8px -4px rgb(0 0 0 / 0.1);
+}

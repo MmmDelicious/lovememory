@@ -1,0 +1,103 @@
+.calendarContainer {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  padding: 2rem;
+  position: relative;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarContainer > :global(.fc) {
+  flex-grow: 1;
+}
+
+.calendarContainer :global(.fc) {
+  --fc-border-color: var(--color-border);
+  --fc-today-bg-color: rgba(231, 122, 101, 0.1);
+  --fc-event-bg-color: var(--color-primary);
+  --fc-event-border-color: var(--color-primary);
+  --fc-event-text-color: var(--color-surface);
+}
+
+.calendarContainer :global(.fc-toolbar-title) {
+  font-family: var(--font-family-heading);
+  color: var(--color-text-primary);
+  font-size: 1.75rem;
+}
+
+.calendarContainer :global(.fc-button-primary) {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.calendarContainer :global(.fc-button-primary:hover) {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.calendarContainer :global(.fc-button-primary:focus) {
+  box-shadow: 0 0 0 3px #e77a6533;
+}
+
+.calendarContainer :global(.fc-button-primary:disabled) {
+  background-color: var(--color-border);
+  border-color: var(--color-border);
+}
+
+.calendarContainer :global(.fc-daygrid-day-number) {
+  color: var(--color-text-secondary);
+  padding: 8px;
+}
+
+.calendarContainer :global(.fc-day-today .fc-daygrid-day-number) {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.calendarContainer :global(.fc-col-header-cell-cushion) {
+  font-family: var(--font-family-body);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.calendarContainer :global(.fc-event) {
+  border-radius: 6px;
+  padding: 2px 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .calendarContainer {
+    padding: 0;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .calendarContainer :global(.fc-toolbar) {
+    padding: 0 1rem;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .calendarContainer :global(.fc-toolbar-title) {
+    font-size: 1.25rem;
+  }
+
+  .calendarContainer :global(.fc-daygrid-day-number) {
+    padding: 4px;
+    font-size: 0.8rem;
+  }
+}
+.loadingContainer {
+  display: flex;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+}

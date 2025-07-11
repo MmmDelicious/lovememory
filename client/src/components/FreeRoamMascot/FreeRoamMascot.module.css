@@ -1,0 +1,39 @@
+.mascotContainer {
+  position: fixed;
+  z-index: 9998;
+  width: 150px;
+  height: 150px;
+  transform: translate(-50%, -50%);
+  transition: top 1.5s ease-in-out, left 1.5s ease-in-out;
+  pointer-events: all; /* Разрешаем клики по маскоту */
+  cursor: pointer;
+}
+
+.mascotWrapper {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease;
+  pointer-events: none; /* Отключаем клики на самой lottie-анимации */
+}
+
+.mascotWrapper.flipped {
+  transform: scaleX(-1);
+}
+
+.speechBubble {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 15px;
+  background-color: white;
+  color: #333;
+  padding: 10px 15px;
+  border-radius: 20px;
+  border: 2px solid #a482f3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  max-width: 250px;
+  text-align: center;
+  pointer-events: none; /* Реплика не должна перехватывать клик */
+}

@@ -1,0 +1,162 @@
+@keyframes thoughtBubble {
+  0% {
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    transform-origin: bottom;
+    transform: scale(0.1) translateY(20px);
+  }
+  30% {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    opacity: 1;
+    transform: scale(0.3) translateY(10px);
+  }
+  100% {
+    border-radius: var(--border-radius);
+    width: 220px;
+    height: auto;
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeInContent {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes tumble {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(1080deg); }
+}
+
+@keyframes tumbleFall {
+  0% { transform: scaleX(var(--flip-direction, 1)) rotate(0deg); }
+  100% { transform: translateY(150%) scaleX(var(--flip-direction, 1)) rotate(720deg); }
+}
+
+.mascotContainer {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: top var(--animation-duration, 2.5s) cubic-bezier(0.65, 0, 0.35, 1), 
+              left var(--animation-duration, 2.5s) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.lottiePlayer {
+  transition: transform 0.5s;
+  pointer-events: all;
+  cursor: pointer;
+  transform: scaleX(var(--flip-direction, 1));
+}
+
+.lottiePlayer.runner { width: 120px; height: 120px; }
+.lottiePlayer.flyer { width: 80px; height: 80px; }
+.lottiePlayer.greeter { width: 150px; height: 150px; }
+
+.lottiePlayer.arrived {
+  transform: scale(0.9) scaleX(var(--flip-direction, 1));
+  cursor: pointer;
+}
+
+.lottiePlayer.tumbling .lottie-container {
+  animation: tumble var(--animation-duration, 2.5s) cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.lottiePlayer.interruptedFlyer {
+  transition: none;
+  animation: tumbleFall 1.5s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+.infoBubble {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-surface);
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  width: 200px;
+  pointer-events: none;
+  animation: fadeInContent 0.3s ease-out forwards;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.speechBubble {
+  position: absolute;
+  background: var(--color-surface);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  width: 220px;
+  pointer-events: all;
+  opacity: 0;
+  animation: thoughtBubble 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.speechBubble > * {
+  opacity: 0;
+  animation: fadeInContent 0.3s ease-out 0.5s forwards;
+}
+
+.speechBubble::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+}
+
+.speechBubble.left { top: 50%; left: 50%; transform: translate(calc(50% + 20px), -50%); }
+.speechBubble.left::after { border-right-color: var(--color-surface); left: -20px; top: 50%; transform: translateY(-50%); }
+
+.speechBubble.right { top: 50%; right: 50%; transform: translate(calc(-50% - 20px), -50%); }
+.speechBubble.right::after { border-left-color: var(--color-surface); right: -20px; top: 50%; transform: translateY(-50%); }
+
+.speechBubble.top { left: 50%; top: 50%; transform: translate(-50%, calc(50% + 20px)); }
+.speechBubble.top::after { border-bottom-color: var(--color-surface); top: -20px; left: 50%; transform: translateX(-50%); }
+
+.speechBubble.bottom { left: 50%; bottom: 50%; transform: translate(-50%, calc(-50% - 20px)); }
+.speechBubble.bottom::after { border-top-color: var(--color-surface); bottom: -20px; left: 50%; transform: translateX(-50%); }
+
+.bubbleImage {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.speechBubble p, .infoBubble p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+}
+
+.infoBubble p {
+  margin-bottom: 0;
+}
+
+.speechBubble button {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+}
+
+.speechBubble button:hover {
+  background-color: var(--color-primary-hover);
+}

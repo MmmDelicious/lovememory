@@ -1,0 +1,104 @@
+.pageContainer {
+  padding: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-family: var(--font-family-heading);
+  font-size: 2.5rem;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.createButton {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.createButton:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: 1.2rem;
+  margin-top: 0;
+  margin-bottom: 3rem;
+}
+
+.roomsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.roomCard {
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+}
+
+.roomCard h3 {
+  margin-top: 0;
+  font-family: var(--font-family-heading);
+  color: var(--color-primary);
+}
+
+.roomInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  color: var(--color-text-secondary);
+}
+
+.roomInfo strong {
+  color: var(--color-text-primary);
+}
+
+.joinButton {
+  background-color: var(--color-accent);
+  color: var(--color-text-primary);
+  border: none;
+  padding: 0.7rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: auto;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.joinButton:hover {
+  background-color: #f0e68c;
+  box-shadow: var(--shadow-md);
+}
+
+.joinButton:disabled {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+.noRooms {
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+  text-align: center;
+  grid-column: 1 / -1;
+}

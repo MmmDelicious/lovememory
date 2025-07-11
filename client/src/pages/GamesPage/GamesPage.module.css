@@ -1,0 +1,97 @@
+.pageContainer {
+  padding: 2rem;
+}
+
+.header {
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  font-family: var(--font-family-heading);
+  font-size: 2.5rem;
+  color: var(--color-text-primary);
+  margin: 0;
+  text-align: center;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: 1.2rem;
+  margin-top: 0;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.gamesList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.gameCard {
+  background-color: var(--color-surface);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.gameCard h3 {
+  margin-top: 0;
+  font-family: var(--font-family-heading);
+  color: var(--color-primary);
+}
+
+.gameDescription {
+  color: var(--color-text-secondary);
+  flex-grow: 1;
+}
+
+.gameStatus {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  width: fit-content;
+}
+
+.available {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.soon {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.selectButton {
+  background-color: var(--color-accent);
+  color: var(--color-text-primary);
+  border: none;
+  padding: 0.7rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: auto;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.selectButton:hover {
+  background-color: #f0e68c;
+  box-shadow: var(--shadow-md);
+}
+
+.selectButton:disabled {
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}

@@ -1,0 +1,47 @@
+import React from 'react';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import LoginPage from './pages/LoginPage/LoginPage';
+import RegisterPage from './pages/RegisterPage/RegisterPage';
+import DashboardPage from './pages/DashboardPage/DashboardPage';
+import PairingPage from './pages/PairingPage/PairingPage';
+import GamesPage from './pages/GamesPage/GamesPage';
+import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
+import GameRoomPage from './pages/GameRoomPage/GameRoomPage';
+import Header from './components/Header/Header';
+import './App.css';
+
+const MainLayout = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', position: 'relative' }}>
+    <Header />
+    <main className="mainContent">
+      <Outlet />
+    </main>
+  </div>
+);
+
+const AppRoutes = () => {
+  const { user } = useAuth();
+
+  return (
+    <Routes>
+      <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
+      <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <RegisterPage />} />
+      
+      <Route element={user ? <MainLayout /> : <Navigate to="/login" />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/pairing" element={<PairingPage />} />
+        <Route path="/games" element={<GamesPage />} />
+        <Route path="/games/:gameType" element={<GameLobbyPage />} />
+        <Route path="/games/room/:roomId" element={<GameRoomPage />} />
+      </Route>
+      
+      <Route 
+        path="*" 
+        element={<Navigate to={user ? "/dashboard" : "/login"} />} 
+      />
+    </Routes>
+  );
+};
+
+export default AppRoutes;
