@@ -15,3 +15,4 @@ yarn-debug.log*
 yarn-error.log*
 Misc
 .DS_Store
+nano.js

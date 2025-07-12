@@ -47,7 +47,6 @@ export const MascotProvider = ({ children }) => {
   const [globalMascot, setGlobalMascot] = useState({ position: { x: 80, y: 70 }, direction: 'left', message: '' });
   const [isAIVisible, setIsAIVisible] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
   const [isAILoading, setIsAILoading] = useState(false);
   
   const [interceptedMascot, setInterceptedMascot] = useState(null);
@@ -68,7 +67,7 @@ export const MascotProvider = ({ children }) => {
     });
   }, []);
 
-  const setGlobalMascotMessage = useCallback((message, duration = 8000) => {
+  const setGlobalMascotMessage = useCallback((message, duration = 10000) => {
     setGlobalMascot(prev => ({ ...prev, message }));
     const timer = setTimeout(() => { setGlobalMascot(prev => ({ ...prev, message: '' })); }, duration);
     return () => clearTimeout(timer);
@@ -101,6 +100,7 @@ export const MascotProvider = ({ children }) => {
     else if (config.type === 'greeter') { helperAnimation = greetAnimation; mascotType = 'greeter'; }
     else { helperAnimation = runnerAnimation; mascotType = 'runner'; }
 
+    // ВОССТАНОВЛЕННАЯ ЛОГИКА: AI-маскот активен, но чат с ним НЕ открыт.
     if (isAIVisible && !isChatOpen) {
         handleMascotInterception(config, helperAnimation);
         return;
@@ -166,25 +166,30 @@ export const MascotProvider = ({ children }) => {
       const nextState = !prev;
       if (nextState) {
         setGlobalMascot(gm => ({ ...gm, position: { x: 83, y: 55 }, message: '' }));
-        if (messages.length === 0) setMessages([{ sender: 'ai', text: 'Привет! Чем могу помочь сегодня?' }]);
       }
       return nextState;
     });
-  }, [messages.length]);
+  }, []);
 
   const sendMessageToAI = useCallback(async (prompt) => {
-    setMessages(prev => [...prev, { sender: 'user', text: prompt }]);
     setIsAILoading(true);
-    const response = await askAI(prompt);
-    setMessages(prev => [...prev, { sender: 'ai', text: response.text }]);
-    setIsAILoading(false);
-  }, []);
+    // Не используем setGlobalMascotMessage, чтобы не конфликтовать с индикатором загрузки в FreeRoamMascot
+    try {
+      const response = await askAI(prompt);
+      setGlobalMascotMessage(response.text);
+    } catch (error) {
+      console.error("Failed to get AI response:", error);
+      setGlobalMascotMessage("Что-то пошло не так... Попробуйте еще раз.");
+    } finally {
+      setIsAILoading(false);
+    }
+  }, [setGlobalMascotMessage]);
 
   const value = {
     mascot, showMascot, hideMascot, registerMascotTargets, clearMascotTargets, startMascotLoop, stopMascotLoop,
     interceptedMascot,
     globalMascot, globalMascotAnimation, isAIVisible, toggleAIMascot,
-    isChatOpen, toggleChat, messages, sendMessageToAI, isAILoading,
+    isChatOpen, toggleChat, sendMessageToAI, isAILoading,
   };
 
   return <MascotContext.Provider value={value}>{children}</MascotContext.Provider>;
