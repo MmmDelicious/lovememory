@@ -2,13 +2,15 @@ import React from 'react';
 import Lottie from 'lottie-react';
 import styles from './FreeRoamMascot.module.css';
 
-const FreeRoamMascot = ({ state, animationData, onClick }) => {
+const FreeRoamMascot = ({ state, animationData, onClick, isAILoading }) => {
   const { position, message, direction } = state;
 
   const wrapperClasses = [
     styles.mascotWrapper,
     direction === 'right' ? styles.flipped : ''
   ].join(' ');
+
+  const displayMessage = isAILoading ? "Думаю..." : message;
 
   return (
     <div
@@ -19,9 +21,9 @@ const FreeRoamMascot = ({ state, animationData, onClick }) => {
       }}
       onClick={onClick}
     >
-      {message && (
+      {displayMessage && (
         <div className={styles.speechBubble}>
-          {message}
+          {displayMessage}
         </div>
       )}
       <div className={wrapperClasses}>

@@ -11,7 +11,8 @@ const AIChatInterface = () => {
     toggleChat, 
     isAIVisible, 
     globalMascot, 
-    globalMascotAnimation 
+    globalMascotAnimation,
+    isAILoading
   } = useMascot();
   const { user } = useAuth();
 
@@ -19,17 +20,27 @@ const AIChatInterface = () => {
     return null;
   }
 
+  const aiInterfaceContainerStyle = {
+    position: 'fixed',
+    bottom: '30px',
+    right: '30px',
+    zIndex: 10000
+  };
+
   return (
     <>
-      <AIToggleButton />
       {isAIVisible && (
         <FreeRoamMascot 
           state={globalMascot} 
           animationData={globalMascotAnimation}
           onClick={toggleChat}
+          isAILoading={isAILoading}
         />
       )}
-      {isChatOpen && <AIChat />}
+      <div style={aiInterfaceContainerStyle}>
+        <AIToggleButton />
+        {isChatOpen && <AIChat />}
+      </div>
     </>
   );
 };

@@ -1,17 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useMascot } from '../../context/MascotContext';
 import styles from './AIChat.module.css';
 
 const AIChat = () => {
-  const { messages, sendMessageToAI, isAILoading } = useMascot();
+  const { sendMessageToAI, isAILoading } = useMascot();
   const [inputValue, setInputValue] = useState('');
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(scrollToBottom, [messages]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -22,22 +15,7 @@ const AIChat = () => {
   };
 
   return (
-    <div className={styles.chatWindow}>
-      <div className={styles.messageList}>
-        {messages.map((msg, index) => (
-          <div key={index} className={`${styles.message} ${styles[msg.sender]}`}>
-            {msg.text}
-          </div>
-        ))}
-        {isAILoading && (
-          <div className={`${styles.message} ${styles.ai}`}>
-            <div className={styles.typingIndicator}>
-              <span></span><span></span><span></span>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+    <div className={styles.chatInputContainer}>
       <form onSubmit={handleSubmit} className={styles.inputForm}>
         <input
           type="text"
@@ -45,6 +23,7 @@ const AIChat = () => {
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Спросите что-нибудь..."
           disabled={isAILoading}
+          autoFocus
         />
         <button type="submit" disabled={isAILoading}>➤</button>
       </form>

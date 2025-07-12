@@ -1,41 +1,44 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const axios = require('axios');
 
 const handleChat = async (req, res) => {
-  // Проверяем, включен ли режим заглушки
-  if (process.env.USE_MOCK_AI === 'true') {
-    const mockResponses = [
-      "Это очень интересный вопрос! Давайте подумаем вместе.",
-      "Я думаю, что лучшим решением будет устроить романтический ужин.",
-      "Как насчет того, чтобы пересмотреть ваш любимый фильм?",
-      "Я здесь, чтобы помочь. Что именно вас интересует?",
-      "Отличная идея! Расскажите подробнее."
-    ];
-    const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
-    
-    // Имитируем задержку ответа от AI
-    return setTimeout(() => {
-      res.json({ text: randomResponse });
-    }, 1200);
+  const gatewayUrl = process.env.AI_GATEWAY_URL;
+  if (!gatewayUrl) {
+    return res.status(500).json({ message: 'AI Gateway URL is not configured.' });
   }
 
-  // Если заглушка выключена, обращаемся к реальному API
+  const { prompt } = req.body;
+  if (!prompt) {
+    return res.status(400).json({ message: 'Prompt is required' });
+  }
+
   try {
-    const { prompt } = req.body;
-    if (!prompt) {
-      return res.status(400).json({ message: 'Prompt is required' });
-    }
+    console.log(`Forwarding prompt to AI Gateway: ${gatewayUrl}`);
+    
+    // Отправляем запрос на наш шлюз в Германии
+    const response = await axios.post(
+      gatewayUrl,
+      { prompt },
+      {
+        // КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Отключаем использование любого системного прокси
+        proxy: false
+      }
+    );
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
+    // Ответ от шлюза уже содержит нужную структуру
+    const text = response.data.choices[0]?.message?.content;
+    if (!text) throw new Error('Invalid response structure from gateway');
+    
     res.json({ text });
+
   } catch (error) {
-    console.error('Error with Gemini API:', error);
-    res.status(500).json({ message: 'Failed to get response from AI' });
+    // Теперь эта ошибка будет приходить ТОЛЬКО если недоступен сам шлюз
+    console.error(`AI Gateway request failed: ${error.message}`);
+    if (error.response) {
+        console.error('--- Gateway Error Details ---');
+        console.error('Status:', error.response.status);
+        console.error('Data:', JSON.stringify(error.response.data, null, 2));
+    }
+    res.status(500).json({ message: 'Failed to get response from AI Gateway.' });
   }
 };
 
