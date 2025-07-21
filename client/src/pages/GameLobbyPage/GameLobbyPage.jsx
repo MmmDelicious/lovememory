@@ -7,7 +7,6 @@ import { useCurrency } from '../../context/CurrencyContext';
 // ИЗМЕНЕНИЕ: Создаем словарь для названий игр. Легко расширять.
 const GAME_DISPLAY_NAMES = {
   'tic-tac-toe': 'Крестики-нолики',
-  'chess': 'Шахматы',
 };
 
 const GameLobbyPage = () => {

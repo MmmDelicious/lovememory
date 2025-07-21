@@ -6,7 +6,6 @@ import LottiePlayer from 'react-lottie-player';
 import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
 
-import ChessBoard from '../../components/ChessBoard/ChessBoard';
 
 import styles from './GameRoomPage.module.css';
 import victoryAnimation from '../../assets/victory.json';
@@ -59,7 +58,11 @@ const GameRoomPage = () => {
   }, [roomId, token, user, navigate, setCoins]);
 
   const handleMakeMove = useCallback((move) => {
-    if (!socket) return;
+    console.log('[FRONT] handleMakeMove called with:', move);
+    if (!socket) {
+      console.log('[FRONT] No socket, move not sent');
+      return;
+    }
     socket.emit('make_move', { roomId, move });
   }, [socket, roomId]);
 
@@ -123,21 +126,6 @@ const GameRoomPage = () => {
                     ))}
                 </div>
             );
-        case 'chess':
-            const playerColor = gameState.players[0] === user.id ? 'w' : 'b';
-            const isMyTurn = gameState.currentPlayerId === user.id;
-            const isGameOver = gameState.status === 'finished';
-            return (
-                <div className={styles.chessBoardContainer}>
-                    <ChessBoard
-                      initialFen={gameState.board}
-                      onMove={handleMakeMove}
-                      playerColor={playerColor}
-                      isMyTurn={isMyTurn}
-                      isGameOver={isGameOver}
-                    />
-                </div>
-            );
         default:
             return <div className={styles.boardPlaceholder}>Неизвестный тип игры.</div>;
     }
@@ -145,7 +133,7 @@ const GameRoomPage = () => {
 
   return (
     <div className={styles.pageContainer}>
-      {renderGameEndOverlay()}
+      {/* {renderGameEndOverlay()} */}
       <h1 className={styles.title}>Комната #{roomId.substring(0, 8)}</h1>
       <h2 className={styles.status}>{renderStatusMessage()}</h2>
       {renderGameBoard()}

@@ -91,13 +91,25 @@ io.on('connection', (socket) => {
         return;
       }
       
-      const playersInRoom = await room.get('players');
+      let playersInRoom = room.players || [];
+      console.log(`[SERVER] Current players in room before join:`, playersInRoom);
       if (!playersInRoom.includes(socket.user.id)) {
-        console.log(`[SERVER] Adding user ${socket.user.id} to room ${roomId}`);
-        await room.update({
-          players: sequelize.fn('array_append', sequelize.col('players'), socket.user.id)
-        });
+        if (socket.user.id === room.hostId) {
+          // hostId всегда первый
+          if (playersInRoom[0] !== room.hostId) {
+            playersInRoom = [room.hostId, ...playersInRoom.filter(id => id !== room.hostId)];
+            console.log(`[SERVER] HostId reordered to first:`, playersInRoom);
+          }
+        } else {
+          // Второй игрок добавляется только если его нет и он не hostId
+          if (!playersInRoom.includes(socket.user.id)) {
+            playersInRoom = [playersInRoom[0], socket.user.id].filter(Boolean);
+            console.log(`[SERVER] Added second player:`, playersInRoom);
+          }
+        }
+        await room.update({ players: playersInRoom });
         await room.reload();
+        console.log(`[SERVER] Players in room after join:`, room.players);
       } else {
         console.log(`[SERVER] User ${socket.user.id} is already in room ${roomId}`);
       }
@@ -112,10 +124,12 @@ io.on('connection', (socket) => {
       io.to(roomId).emit('player_list_update', playerInfo);
 
       const updatedRoom = await room.reload();
+      console.log(`[SERVER] Room players before game start:`, updatedRoom.players);
       if (updatedRoom.players.length === 2 && updatedRoom.status === 'waiting') {
         console.log(`[SERVER] Two players in room ${roomId}. Starting game...`);
         await gameController.startGame(roomId);
         const playerIds = updatedRoom.players; 
+        console.log(`[SERVER] Starting ChessGame with players:`, playerIds);
         const game = GameManager.createGame(roomId, updatedRoom.gameType, playerIds);
         const initialState = game.getState();
         console.log(`[SERVER] Emitting 'game_start' to room ${roomId} with initial state:`, initialState);
@@ -135,10 +149,11 @@ io.on('connection', (socket) => {
         console.error(`[SERVER] [ERROR] Game not found for room ${roomId}`);
         return;
     }
-
+    console.log(`[SERVER] Game players:`, game.players);
+    console.log(`[SERVER] Current turn:`, game.game.turn());
     try {
       const newState = game.makeMove(socket.user.id, move);
-      
+      console.log(`[SERVER] Move applied. New FEN:`, newState.board);
       if (newState.status === 'finished') {
         console.log(`[SERVER] Game in room ${roomId} finished. Emitting 'game_end'. State:`, newState);
         io.to(roomId).emit('game_end', newState);
