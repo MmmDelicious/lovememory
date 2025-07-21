@@ -19,6 +19,10 @@ const Event = sequelize.define('Event', {
     type: DataTypes.DATE,
     allowNull: false,
   },
+  end_date: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  },
   event_type: {
     type: DataTypes.ENUM('memory', 'plan', 'anniversary'),
     defaultValue: 'plan',

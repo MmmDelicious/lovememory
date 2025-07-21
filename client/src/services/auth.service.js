@@ -6,7 +6,7 @@ const login = async (email, password) => {
     password,
   });
   if (response.data && response.data.token && response.data.user && response.data.user.id) {
-    localStorage.setItem('user', JSON.stringify(response.data));
+    localStorage.setItem('auth', JSON.stringify(response.data));
   } else {
     throw new Error('Ответ сервера не содержит необходимых данных пользователя.');
   }
@@ -22,7 +22,7 @@ const register = async (email, password, firstName) => {
 };
 
 const logout = () => {
-  localStorage.removeItem('user');
+  localStorage.removeItem('auth');
 };
 
 const authService = {

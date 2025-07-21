@@ -16,33 +16,49 @@ const Calendar = () => {
   const calendarRef = useRef(null);
   const calendarContainerRef = useRef(null);
   const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useMascot();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const formatTime = (date) => new Date(date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
   const fetchEvents = useCallback(async () => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !user) return;
     try {
       const response = await eventService.getEvents();
-      const formattedEvents = response.data.map(event => ({
-        id: event.id,
-        title: event.title,
-        start: event.event_date.split('T')[0],
-        date: event.event_date.split('T')[0],
-        extendedProps: {
-          description: event.description,
-          rawEvent: event,
+      const formattedEvents = response.data.map(event => {
+        const hasTime = !event.event_date.endsWith('00:00:00.000Z') || (event.end_date && !event.end_date.endsWith('00:00:00.000Z'));
+        
+        let timeRange = null;
+        if (event.event_date) {
+          const startTime = formatTime(event.event_date);
+          if (event.end_date) {
+            const endTime = formatTime(event.end_date);
+            timeRange = `${startTime} - ${endTime}`;
+          } else {
+            if (startTime !== '00:00') {
+               timeRange = startTime;
+            }
+          }
         }
-      }));
+        
+        return {
+          id: event.id,
+          title: event.title,
+          start: event.event_date,
+          end: event.end_date,
+          allDay: !hasTime,
+          extendedProps: {
+            description: event.description,
+            isOwner: event.userId === user.id,
+            timeRange: timeRange,
+            rawEvent: event,
+          }
+        };
+      });
       setEvents(formattedEvents);
     } catch (error) {
       console.error("Ошибка при загрузке событий:", error);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     fetchEvents();
@@ -63,7 +79,7 @@ const Calendar = () => {
 
     const allEvents = calendarApi.getEvents();
     const targets = allEvents.reduce((acc, event) => {
-      const dayCell = cellMap.get(event.startStr);
+      const dayCell = cellMap.get(event.startStr.split('T')[0]);
       if (dayCell) {
         acc.push({
           page: 'dashboard',
@@ -102,13 +118,13 @@ const Calendar = () => {
   };
   
   const handleDateClick = (arg) => {
-    const eventOnDay = events.find(e => e.start === arg.dateStr);
-    setSelectedEvent(eventOnDay || { title: '', description: '', date: arg.dateStr });
+    const eventOnDay = events.find(e => e.start.split('T')[0] === arg.dateStr);
+    setSelectedEvent(eventOnDay?.extendedProps.rawEvent ? { ...eventOnDay.extendedProps.rawEvent, date: arg.dateStr } : { title: '', description: '', date: arg.dateStr });
     setSidebarOpen(true);
   };
   
   const handleEventClick = (clickInfo) => {
-    setSelectedEvent(clickInfo.event);
+    setSelectedEvent({ ...clickInfo.event.extendedProps.rawEvent, date: clickInfo.event.startStr });
     setSidebarOpen(true);
   };
   
@@ -119,10 +135,17 @@ const Calendar = () => {
 
   const handleSaveEvent = async (eventData) => {
     try {
+      const dataToSave = {
+        title: eventData.title,
+        description: eventData.description,
+        event_date: eventData.event_date,
+        end_date: eventData.end_date
+      };
+
       if (eventData.id) {
-        await eventService.updateEvent(eventData.id, { title: eventData.title, description: eventData.description });
+        await eventService.updateEvent(eventData.id, dataToSave);
       } else {
-        await eventService.createEvent({ title: eventData.title, description: eventData.description, event_date: eventData.date });
+        await eventService.createEvent(dataToSave);
       }
       fetchEvents();
       handleCloseSidebar();
@@ -137,6 +160,31 @@ const Calendar = () => {
     } catch (error) { console.error("Ошибка при удалении события:", error); }
   };
 
+  const handleEventDrop = async (dropInfo) => {
+    const { event } = dropInfo;
+    try {
+      await eventService.updateEvent(event.id, {
+        event_date: event.start.toISOString(),
+        end_date: event.end ? event.end.toISOString() : null,
+      });
+      fetchEvents(); 
+    } catch (error) {
+      console.error("Ошибка при обновлении даты события:", error);
+      dropInfo.revert();
+    }
+  };
+
+  const renderEventContent = (eventInfo) => {
+    return (
+      <div className={styles.eventContentWrapper}>
+        <div className={styles.eventTitle}>{eventInfo.event.title}</div>
+        {eventInfo.event.extendedProps.timeRange && (
+          <div className={styles.eventTime}>{eventInfo.event.extendedProps.timeRange}</div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={styles.calendarContainer} ref={calendarContainerRef}>
       <FullCalendar
@@ -146,8 +194,6 @@ const Calendar = () => {
         initialView={isMobile ? 'dayGridWeek' : 'dayGridMonth'}
         weekends={true}
         events={events}
-        dateClick={handleInteraction(handleDateClick)}
-        eventClick={handleInteraction(handleEventClick)}
         locale="ru"
         firstDay={1}
         headerToolbar={isMobile 
@@ -156,6 +202,14 @@ const Calendar = () => {
         }
         buttonText={{ today: 'сегодня', month: 'месяц', week: 'неделя', day: 'день' }}
         height="100%"
+        editable={true}
+        eventDrop={handleInteraction(handleEventDrop)}
+        dateClick={handleInteraction(handleDateClick)}
+        eventClick={handleInteraction(handleEventClick)}
+        eventContent={renderEventContent}
+        eventClassNames={(arg) => {
+          return arg.event.extendedProps.isOwner ? styles.eventMine : styles.eventPartner;
+        }}
       />
       <Sidebar 
         isOpen={isSidebarOpen} 

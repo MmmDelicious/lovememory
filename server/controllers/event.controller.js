@@ -57,26 +57,38 @@ exports.createEvent = async (req, res) => {
   }
 };
 
+// --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
 exports.updateEvent = async (req, res) => {
   try {
     if (!req.user || !req.user.id) {
       return res.status(401).json({ message: 'Пользователь не аутентифицирован.' });
     }
     const { id } = req.params;
-    const { title, description } = req.body;
+    // Получаем все возможные поля из тела запроса
+    const { title, description, event_date } = req.body;
+
     const event = await Event.findOne({ where: { id, userId: req.user.id } });
+
     if (!event) {
       return res.status(404).json({ message: 'Событие не найдено или у вас нет прав на его редактирование.' });
     }
-    event.title = title;
-    event.description = description;
-    await event.save();
+
+    // Создаем объект с данными для обновления
+    const updateData = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (event_date !== undefined) updateData.event_date = event_date;
+
+    // Обновляем событие только теми полями, которые были переданы
+    await event.update(updateData);
+    
     res.status(200).json(event);
   } catch (error) {
     console.error('!!! Ошибка в updateEvent:', error);
     res.status(500).json({ message: 'Ошибка на сервере', error: error.message });
   }
 };
+// --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
 exports.deleteEvent = async (req, res) => {
   try {

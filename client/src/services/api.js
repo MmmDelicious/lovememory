@@ -6,7 +6,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const storedData = localStorage.getItem('user');
+    const storedData = localStorage.getItem('auth');
     if (storedData) {
       try {
         const userData = JSON.parse(storedData);
@@ -14,7 +14,7 @@ api.interceptors.request.use(
           config.headers['Authorization'] = `Bearer ${userData.token}`;
         }
       } catch (e) {
-        console.error("Could not parse user data from localStorage", e);
+        console.error("Could not parse auth data from localStorage", e);
       }
     }
     return config;

@@ -1,3 +1,4 @@
+// client/src/pages/GameRoomPage/GameRoomPage.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
@@ -70,9 +71,8 @@ const GameRoomPage = () => {
   const renderStatusMessage = () => {
     if (!gameState || !user) return "Загрузка...";
   
-    if (gameState.status !== 'in_progress') {
-      return "Ожидание второго игрока...";
-    }
+    if (gameState.status === 'finished') return "Игра окончена";
+    if (gameState.status !== 'in_progress') return "Ожидание второго игрока...";
   
     if (gameState.currentPlayerId === user.id) {
       return "Ваш ход";
@@ -83,10 +83,7 @@ const GameRoomPage = () => {
   const renderGameEndOverlay = () => {
     if (!gameState || gameState.status !== 'finished' || !user) return null;
 
-    let resultText = '';
-    let resultStyle = '';
-    let animationData = null;
-
+    let resultText, resultStyle, animationData;
     if (gameState.winner === 'draw') {
       resultText = 'Ничья!';
       resultStyle = styles.drawText;
@@ -116,8 +113,8 @@ const GameRoomPage = () => {
 
     switch (gameState.gameType) {
         case 'tic-tac-toe':
+            // Логика для крестиков-ноликов
             return (
-                // ИЗМЕНЕНИЕ: Используем новый, специфичный класс
                 <div className={styles.ticTacToeBoard}>
                     {(gameState.board || Array(9).fill(null)).map((cell, index) => (
                     <div key={index} className={`${styles.cell} ${cell ? styles.filled : ''} ${gameState.status !== 'in_progress' ? styles.disabled : ''}`} onClick={() => handleMakeMove(index)}>

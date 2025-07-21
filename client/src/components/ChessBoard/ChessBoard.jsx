@@ -10,15 +10,29 @@ function ChessBoard({ initialFen, onMove, playerColor, isMyTurn, isGameOver }) {
 
   useEffect(() => {
     try {
-      const gameInstance = new Chess(initialFen);
-      setGame(gameInstance);
+      setGame(new Chess(initialFen));
     } catch (error) {
-      console.error("Failed to load FEN:", initialFen, error);
       setGame(new Chess());
     }
     setSelectedSquare('');
     setMoveOptions({});
   }, [initialFen]);
+
+  function selectPiece(square) {
+    const piece = game.get(square);
+    if (piece && piece.color === playerColor) {
+      setSelectedSquare(square);
+      const possibleMoves = game.moves({ square, verbose: true });
+      const options = {};
+      possibleMoves.forEach(move => {
+        options[move.to] = {
+          background: 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
+          borderRadius: '50%',
+        };
+      });
+      setMoveOptions(options);
+    }
+  }
 
   function onSquareClick(square) {
     if (isGameOver || !isMyTurn) {
@@ -27,11 +41,19 @@ function ChessBoard({ initialFen, onMove, playerColor, isMyTurn, isGameOver }) {
 
     if (selectedSquare) {
       const gameCopy = new Chess(game.fen());
-      const move = gameCopy.move({ from: selectedSquare, to: square, promotion: 'q' });
-      
+      const possibleMoves = game.moves({ square: selectedSquare, verbose: true });
+      const move = possibleMoves.find(m => m.to === square);
+
       if (move) {
-        setGame(gameCopy);
-        onMove({ from: selectedSquare, to: square });
+        const moveData = { from: selectedSquare, to: square };
+        if (move.flags.includes('p')) {
+          moveData.promotion = 'q';
+        }
+        const result = gameCopy.move(moveData);
+        if (result) {
+          setGame(gameCopy);
+          onMove(moveData);
+        }
       } else {
         const pieceOnTarget = game.get(square);
         if (pieceOnTarget && pieceOnTarget.color === playerColor) {
@@ -46,22 +68,9 @@ function ChessBoard({ initialFen, onMove, playerColor, isMyTurn, isGameOver }) {
     }
   }
 
-  function selectPiece(square) {
-    const piece = game.get(square);
-    if (piece && piece.color === playerColor) {
-      setSelectedSquare(square);
-      const possibleMoves = game.moves({ square, verbose: true });
-      const options = {};
-      possibleMoves.forEach(move => {
-        options[move.to] = { background: 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)', borderRadius: '50%' };
-      });
-      setMoveOptions(options);
-    }
-  }
-
   const squareStyles = {
     ...moveOptions,
-    ...(selectedSquare && { [selectedSquare]: { background: 'rgba(255, 255, 0, 0.4)' } })
+    ...(selectedSquare && { [selectedSquare]: { background: 'rgba(255, 255, 0, 0.4)' } }),
   };
 
   return (
@@ -70,7 +79,7 @@ function ChessBoard({ initialFen, onMove, playerColor, isMyTurn, isGameOver }) {
         position={game.fen()}
         onSquareClick={onSquareClick}
         boardOrientation={playerColor === 'w' ? 'white' : 'black'}
-        isDraggablePiece={({ piece }) => piece.color === playerColor && isMyTurn && !isGameOver}
+        isDraggablePiece={() => false}
         customSquareStyles={squareStyles}
         lightSquareStyle={{ backgroundColor: 'var(--color-background, #FFFBF8)' }}
         darkSquareStyle={{ backgroundColor: 'var(--color-secondary, #C3ACD0)' }}

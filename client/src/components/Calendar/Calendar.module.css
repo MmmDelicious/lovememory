@@ -1,12 +1,11 @@
 .calendarContainer {
   background-color: var(--color-surface);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
-  padding: 2rem;
+  padding: 2rem 2.5rem;
   position: relative;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .calendarContainer > :global(.fc) {
@@ -15,10 +14,59 @@
 
 .calendarContainer :global(.fc) {
   --fc-border-color: var(--color-border);
-  --fc-today-bg-color: rgba(231, 122, 101, 0.1);
-  --fc-event-bg-color: var(--color-primary);
-  --fc-event-border-color: var(--color-primary);
-  --fc-event-text-color: var(--color-surface);
+  --fc-today-bg-color: rgba(231, 122, 101, 0.05);
+}
+
+.calendarContainer :global(.fc-daygrid-day-events) {
+  margin: 0 !important;
+}
+
+.calendarContainer :global(.fc-daygrid-event-harness) {
+  margin: 2px 0 !important;
+}
+
+.calendarContainer :global(.fc-event) {
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease;
+  width: 100%;
+}
+
+.calendarContainer :global(.fc-event:hover) {
+  transform: translateY(-1px);
+}
+
+.eventContentWrapper {
+  padding: 4px 8px 4px 12px;
+  overflow: hidden;
+  height: 100%;
+}
+
+.eventMine .eventContentWrapper {
+  background-color: rgba(231, 122, 101, 0.1);
+  border-left: 4px solid var(--color-primary);
+}
+
+.eventPartner .eventContentWrapper {
+  background-color: rgba(195, 172, 208, 0.15);
+  border-left: 4px solid var(--color-secondary);
+}
+
+.eventTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.eventTime {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
 }
 
 .calendarContainer :global(.fc-toolbar-title) {
@@ -65,34 +113,25 @@
   text-decoration: none;
 }
 
-.calendarContainer :global(.fc-event) {
-  border-radius: 6px;
-  padding: 2px 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
 @media (max-width: 768px) {
   .calendarContainer {
-    padding: 0;
+    padding: 1rem;
     box-shadow: none;
     border-radius: 0;
   }
-
   .calendarContainer :global(.fc-toolbar) {
     padding: 0 1rem;
     margin-bottom: 0.5rem !important;
   }
-
   .calendarContainer :global(.fc-toolbar-title) {
     font-size: 1.25rem;
   }
-
   .calendarContainer :global(.fc-daygrid-day-number) {
     padding: 4px;
     font-size: 0.8rem;
   }
 }
+
 .loadingContainer {
   display: flex;
   flex-grow: 1;

@@ -1,3 +1,4 @@
+// server/index.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -58,70 +59,94 @@ app.get('/', (req, res) => {
 });
 
 io.use((socket, next) => {
+  console.log('[SERVER] New socket connection attempt.');
   const token = socket.handshake.auth.token;
   if (!token) {
+    console.error('[SERVER] [ERROR] Auth error: No token provided.');
     return next(new Error('Authentication error: No token provided.'));
   }
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
+      console.error('[SERVER] [ERROR] Auth error: Invalid token.');
       return next(new Error('Authentication error: Invalid token.'));
     }
     socket.user = { id: decoded.userId, email: decoded.email };
+    console.log(`[SERVER] Auth successful for user: ${socket.user.id}`);
     socket.join(socket.user.id);
     next();
   });
 });
 
 io.on('connection', (socket) => {
+  console.log(`[SERVER] User connected: ${socket.user.id} with socket ID ${socket.id}`);
   const userRooms = new Set();
 
   socket.on('join_room', async (roomId) => {
+    console.log(`[SERVER] User ${socket.user.id} trying to join room ${roomId}`);
     try {
       const room = await GameRoom.findByPk(roomId);
       if (!room || (room.status !== 'waiting' && room.status !== 'in_progress')) {
+        console.error(`[SERVER] [ERROR] Room ${roomId} not found or game is over.`);
         socket.emit('error', 'Комната не найдена или игра уже завершена.');
         return;
       }
-      if (!room.players.includes(socket.user.id)) {
+      
+      const playersInRoom = await room.get('players');
+      if (!playersInRoom.includes(socket.user.id)) {
+        console.log(`[SERVER] Adding user ${socket.user.id} to room ${roomId}`);
         await room.update({
           players: sequelize.fn('array_append', sequelize.col('players'), socket.user.id)
         });
         await room.reload();
+      } else {
+        console.log(`[SERVER] User ${socket.user.id} is already in room ${roomId}`);
       }
       
       await socket.join(roomId);
       userRooms.add(roomId);
+      console.log(`[SERVER] User ${socket.user.id} successfully joined socket room ${roomId}`);
       
       const allSocketsInRoom = await io.in(roomId).fetchSockets();
       const playerInfo = allSocketsInRoom.map(s => ({ id: s.user.id, email: s.user.email }));
+      console.log(`[SERVER] Emitting 'player_list_update' to room ${roomId} with players:`, playerInfo.map(p => p.id));
       io.to(roomId).emit('player_list_update', playerInfo);
 
-      if (room.players.length === 2 && room.status === 'waiting') {
+      const updatedRoom = await room.reload();
+      if (updatedRoom.players.length === 2 && updatedRoom.status === 'waiting') {
+        console.log(`[SERVER] Two players in room ${roomId}. Starting game...`);
         await gameController.startGame(roomId);
-        const playerIds = room.players; 
-        const game = GameManager.createGame(roomId, room.gameType, playerIds);
-        io.to(roomId).emit('game_start', game.getState());
+        const playerIds = updatedRoom.players; 
+        const game = GameManager.createGame(roomId, updatedRoom.gameType, playerIds);
+        const initialState = game.getState();
+        console.log(`[SERVER] Emitting 'game_start' to room ${roomId} with initial state:`, initialState);
+        io.to(roomId).emit('game_start', initialState);
       }
     } catch (error) {
-        console.error(`[join_room] Error for user ${socket.user.id} in room ${roomId}:`, error);
+        console.error(`[SERVER] [ERROR] in 'join_room' for user ${socket.user.id} in room ${roomId}:`, error);
         socket.emit('error', 'Произошла ошибка при подключении к комнате.');
     }
   });
 
   socket.on('make_move', (data) => {
     const { roomId, move } = data;
+    console.log(`[SERVER] Received 'make_move' from ${socket.user.id} in room ${roomId} with move:`, move);
     const game = GameManager.getGame(roomId);
-    if (!game) return;
+    if (!game) {
+        console.error(`[SERVER] [ERROR] Game not found for room ${roomId}`);
+        return;
+    }
 
     try {
       const newState = game.makeMove(socket.user.id, move);
       
       if (newState.status === 'finished') {
+        console.log(`[SERVER] Game in room ${roomId} finished. Emitting 'game_end'. State:`, newState);
         io.to(roomId).emit('game_end', newState);
         
         if (newState.winner && newState.winner !== 'draw') {
           const winnerId = newState.winner;
           const loserId = newState.players.find(id => id !== winnerId);
+          console.log(`[SERVER] Finalizing game. Winner: ${winnerId}, Loser: ${loserId}`);
           gameController.finalizeGame(roomId, winnerId, loserId).then(res => {
             if (res) {
               if (res.winner) io.to(res.winner.id).emit('update_coins', res.winner.coins);
@@ -131,42 +156,37 @@ io.on('connection', (socket) => {
         }
         GameManager.removeGame(roomId);
       } else {
+        console.log(`[SERVER] Move successful. Emitting 'game_update' to room ${roomId}. State:`, newState);
         io.to(roomId).emit('game_update', newState);
       }
     } catch (error) {
+      console.error(`[SERVER] [ERROR] in 'make_move':`, error.message);
       socket.emit('error', error.message);
     }
   });
 
   const handleLeaveOrDisconnect = async () => {
+    console.log(`[SERVER] User ${socket.user.id} is leaving or disconnecting.`);
     for (const roomId of userRooms) {
+      console.log(`[SERVER] Handling disconnect for room ${roomId}`);
       const game = GameManager.getGame(roomId);
       
       if (game && game.getState().status === 'in_progress') {
         const remainingPlayerId = game.players.find(id => id !== socket.user.id);
-        
+        console.log(`[SERVER] Game in progress. Player ${socket.user.id} disconnected. Remaining player: ${remainingPlayerId}`);
         if (remainingPlayerId) {
-          const finalState = {
-            ...game.getState(),
-            status: 'finished',
-            winner: remainingPlayerId,
-            isDraw: false,
-          };
+          const finalState = { ...game.getState(), status: 'finished', winner: remainingPlayerId, isDraw: false };
           io.to(roomId).emit('game_end', finalState);
-
           gameController.finalizeGame(roomId, remainingPlayerId, socket.user.id).then(res => {
-             if (res && res.winner) {
-                io.to(res.winner.id).emit('update_coins', res.winner.coins);
-             }
+             if (res && res.winner) io.to(res.winner.id).emit('update_coins', res.winner.coins);
           });
         }
         GameManager.removeGame(roomId);
       } else {
         const room = await GameRoom.findByPk(roomId);
         if (room && room.status === 'waiting') {
-            await room.update({
-                players: sequelize.fn('array_remove', sequelize.col('players'), socket.user.id)
-            });
+            console.log(`[SERVER] Removing player ${socket.user.id} from waiting room ${roomId}`);
+            await room.update({ players: sequelize.fn('array_remove', sequelize.col('players'), socket.user.id) });
             const remainingSockets = await io.in(roomId).fetchSockets();
             const players = remainingSockets.map(s => ({ id: s.user.id, email: s.user.email }));
             io.to(roomId).emit('player_list_update', players);
@@ -177,7 +197,10 @@ io.on('connection', (socket) => {
   };
 
   socket.on('leave_room', handleLeaveOrDisconnect);
-  socket.on('disconnect', handleLeaveOrDisconnect);
+  socket.on('disconnect', () => {
+    console.log(`[SERVER] Socket ${socket.id} (user ${socket.user.id}) disconnected.`);
+    handleLeaveOrDisconnect();
+  });
 });
 
 const PORT = process.env.PORT || 5000;
@@ -186,17 +209,11 @@ const startServer = async () => {
   try {
     await sequelize.authenticate();
     console.log('Database connection has been established successfully.');
-    
     await sequelize.sync();
     console.log('All models were synchronized successfully.');
-
-    server.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-
+    server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
     startBot();
     startCronJobs();
-
   } catch (error) {
     console.error('Unable to start the server:', error);
   }

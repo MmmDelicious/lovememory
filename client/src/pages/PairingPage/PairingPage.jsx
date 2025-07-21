@@ -29,7 +29,7 @@ const PairingPage = () => {
       setPairing(newPairing);
       setTelegramId(profileResponse.data.telegram_chat_id || '');
 
-      if (newPairing?.status === 'pending' && newPairing.user1Id !== user.user.id) {
+      if (newPairing?.status === 'pending' && newPairing.user1Id !== user.id) {
         showMascot({
           page: 'pairing',
           data: { requesterName: newPairing.Requester.first_name },
@@ -110,7 +110,7 @@ const PairingPage = () => {
     if (isLoading) return <p>Загрузка...</p>;
 
     if (pairing?.status === 'active') {
-      const partner = pairing.Requester.id === user.user.id ? pairing.Receiver : pairing.Requester;
+      const partner = pairing.Requester.id === user.id ? pairing.Receiver : pairing.Requester;
       return (
         <div className={styles.statusContainer}>
           <h2>Вы в паре!</h2>
@@ -121,7 +121,7 @@ const PairingPage = () => {
     }
 
     if (pairing?.status === 'pending') {
-      if (pairing.user1Id === user.user.id) {
+      if (pairing.user1Id === user.id) {
         return (
           <div className={styles.statusContainer}>
             <h2>Запрос отправлен</h2>

@@ -82,6 +82,7 @@
   color: var(--color-text-primary);
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
+  display: block;
 }
 
 .input, .textarea {
@@ -106,6 +107,20 @@
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px #e77a6533;
+}
+
+.dateTimeRow {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.dateInputWrapper {
+  flex: 2; /* Дата занимает больше места */
+}
+
+.timeInputWrapper {
+  flex: 1; /* Время занимает меньше места */
 }
 
 .actions {
