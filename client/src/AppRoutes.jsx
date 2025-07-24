@@ -5,10 +5,13 @@ import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
 import PairingPage from './pages/PairingPage/PairingPage';
-import GamesPage from './pages/GamesPage/GamesPage';
+import { GamesPage } from './pages/GamesPage/GamesPage';
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
 import GameRoomPage from './pages/GameRoomPage/GameRoomPage';
+import LoveVegasPage from './pages/LoveVegasPage';
+import PokerPage from './pages/PokerPage';
 import Header from './components/Header/Header';
+import { CurrencyProvider } from './context/CurrencyContext';
 import './App.css';
 
 const MainLayout = () => (
@@ -28,13 +31,21 @@ const AppRoutes = () => {
       <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
       <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <RegisterPage />} />
       
-      <Route element={user ? <MainLayout /> : <Navigate to="/login" />}>
+      <Route element={user ? <CurrencyProvider><MainLayout /></CurrencyProvider> : <Navigate to="/login" />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/pairing" element={<PairingPage />} />
         <Route path="/games" element={<GamesPage />} />
         <Route path="/games/:gameType" element={<GameLobbyPage />} />
         <Route path="/games/room/:roomId" element={<GameRoomPage />} />
+        <Route path="/love-vegas" element={<LoveVegasPage />} />
+        <Route path="/love-vegas/poker" element={<GameLobbyPage gameType="poker" />} />
       </Route>
+      
+      {/* Полноэкранная покерная страница без хедера */}
+      <Route 
+        path="/love-vegas/poker/:roomId" 
+        element={user ? <CurrencyProvider><PokerPage /></CurrencyProvider> : <Navigate to="/login" />} 
+      />
       
       <Route 
         path="*" 

@@ -1,50 +1,58 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import styles from './GamesPage.module.css';
+import { FaChess, FaTicketAlt } from 'react-icons/fa';
+import { PiCardsFill } from "react-icons/pi";
 
-const GAMES_LIST = [
+const CLASSIC_GAMES = [
   {
     id: 'tic-tac-toe',
     name: 'Крестики-нолики',
     description: 'Классическая игра для двух игроков. Соберите три своих знака в ряд!',
-    status: 'Доступно'
+    icon: <FaTicketAlt size={32} />,
+    path: '/games/tic-tac-toe',
+  },
+  {
+    id: 'chess',
+    name: 'Шахматы',
+    description: 'Стратегическая игра для двух игроков. Поставьте мат королю соперника.',
+    icon: <FaChess size={32} />,
+    path: '/games/chess',
   }
 ];
 
 const GamesPage = () => {
-  const navigate = useNavigate();
-
-  const handleGameSelect = (gameId) => {
-    navigate(`/games/${gameId}`);
-  };
-
   return (
     <div className={styles.pageContainer}>
-      <div className={styles.header}>
+      <header className={styles.header}>
         <h1 className={styles.title}>Игровой Хаб</h1>
-      </div>
-      <p className={styles.subtitle}>Выберите игру, чтобы посмотреть доступные комнаты или создать свою.</p>
+        <p className={styles.subtitle}>Выберите игру, чтобы весело провести время вместе.</p>
+      </header>
       
       <div className={styles.gamesList}>
-        {GAMES_LIST.map(game => (
-          <div key={game.id} className={styles.gameCard}>
-            <h3>{game.name}</h3>
-            <p className={styles.gameDescription}>{game.description}</p>
-            <span className={`${styles.gameStatus} ${game.status === 'Доступно' ? styles.available : styles.soon}`}>
-              {game.status}
-            </span>
-            <button
-              onClick={() => handleGameSelect(game.id)}
-              className={styles.selectButton}
-              disabled={game.status !== 'Доступно'}
-            >
-              Выбрать
-            </button>
-          </div>
+        {CLASSIC_GAMES.map(game => (
+          <Link to={game.path} key={game.id} className={styles.gameCard}>
+            <div className={styles.gameIcon}>{game.icon}</div>
+            <div className={styles.gameInfo}>
+                <h3 className={styles.gameName}>{game.name}</h3>
+                <p className={styles.gameDescription}>{game.description}</p>
+            </div>
+          </Link>
         ))}
       </div>
+
+      <div className={styles.divider}></div>
+
+      <Link to="/love-vegas" className={styles.loveVegasCard}>
+        <div className={styles.vegasIcon}><PiCardsFill size={40} /></div>
+        <div className={styles.vegasInfo}>
+          <h2 className={styles.loveVegasTitle}>LoveVegas</h2>
+          <p className={styles.loveVegasDescription}>Азартные игры для тех, кто любит рисковать. Только для пар!</p>
+        </div>
+        <div className={styles.vegasCta}>Перейти</div>
+      </Link>
     </div>
   );
 };
 
-export default GamesPage;
+export { GamesPage };

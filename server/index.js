@@ -119,7 +119,7 @@ io.on('connection', (socket) => {
       console.log(`[SERVER] User ${socket.user.id} successfully joined socket room ${roomId}`);
       
       const allSocketsInRoom = await io.in(roomId).fetchSockets();
-      const playerInfo = allSocketsInRoom.map(s => ({ id: s.user.id, email: s.user.email }));
+      const playerInfo = allSocketsInRoom.map(s => ({ id: s.user.id, name: s.user.email.split('@')[0] })); // Use part of email as name
       console.log(`[SERVER] Emitting 'player_list_update' to room ${roomId} with players:`, playerInfo.map(p => p.id));
       io.to(roomId).emit('player_list_update', playerInfo);
 
@@ -128,16 +128,59 @@ io.on('connection', (socket) => {
       if (updatedRoom.players.length === 2 && updatedRoom.status === 'waiting') {
         console.log(`[SERVER] Two players in room ${roomId}. Starting game...`);
         await gameController.startGame(roomId);
-        const playerIds = updatedRoom.players; 
-        console.log(`[SERVER] Starting ChessGame with players:`, playerIds);
-        const game = GameManager.createGame(roomId, updatedRoom.gameType, playerIds);
-        const initialState = game.getState();
-        console.log(`[SERVER] Emitting 'game_start' to room ${roomId} with initial state:`, initialState);
-        io.to(roomId).emit('game_start', initialState);
+        const gameType = updatedRoom.gameType;
+        console.log(`[SERVER] Starting game (${gameType}) with players:`, playerInfo);
+        const game = GameManager.createGame(roomId, gameType, playerInfo);
+
+        io.to(roomId).emit('game_start', { gameType, players: playerInfo });
+
+        if (gameType === 'poker') {
+            playerInfo.forEach(player => {
+                const stateForPlayer = game.getStateForPlayer(player.id);
+                io.to(player.id).emit('game_update', stateForPlayer);
+            });
+        } else {
+            const initialState = game.getState();
+            io.to(roomId).emit('game_update', initialState);
+        }
       }
     } catch (error) {
         console.error(`[SERVER] [ERROR] in 'join_room' for user ${socket.user.id} in room ${roomId}:`, error);
         socket.emit('error', 'Произошла ошибка при подключении к комнате.');
+    }
+  });
+
+  socket.on('get_game_state', async (roomId) => {
+    const game = GameManager.getGame(roomId);
+    if (game) {
+      if (game.gameType === 'poker') {
+        const stateForPlayer = game.getStateForPlayer(socket.user.id);
+        console.log(`[SERVER] Sending poker game state for room ${roomId} to user ${socket.user.id}`);
+        socket.emit('game_update', stateForPlayer);
+      } else {
+        const state = game.getState();
+        console.log(`[SERVER] Sending game state for room ${roomId} to user ${socket.user.id}`);
+        socket.emit('game_update', state);
+      }
+    } else {
+      // Проверяем есть ли комната в ожидании
+      try {
+        const room = await GameRoom.findByPk(roomId);
+        if (room && room.status === 'waiting') {
+          console.log(`[SERVER] Room ${roomId} is waiting for players. Sending waiting state.`);
+          socket.emit('game_update', {
+            gameType: room.gameType,
+            status: 'waiting',
+            players: [],
+            stage: 'waiting',
+            message: 'Ожидание второго игрока...'
+          });
+        } else {
+          console.log(`[SERVER] No game found for room ${roomId} on get_game_state request.`);
+        }
+      } catch (error) {
+        console.error(`[SERVER] Error checking room status:`, error);
+      }
     }
   });
 
@@ -149,30 +192,80 @@ io.on('connection', (socket) => {
         console.error(`[SERVER] [ERROR] Game not found for room ${roomId}`);
         return;
     }
-    console.log(`[SERVER] Game players:`, game.players);
-    console.log(`[SERVER] Current turn:`, game.game.turn());
+    
     try {
-      const newState = game.makeMove(socket.user.id, move);
-      console.log(`[SERVER] Move applied. New FEN:`, newState.board);
-      if (newState.status === 'finished') {
-        console.log(`[SERVER] Game in room ${roomId} finished. Emitting 'game_end'. State:`, newState);
-        io.to(roomId).emit('game_end', newState);
-        
-        if (newState.winner && newState.winner !== 'draw') {
-          const winnerId = newState.winner;
-          const loserId = newState.players.find(id => id !== winnerId);
-          console.log(`[SERVER] Finalizing game. Winner: ${winnerId}, Loser: ${loserId}`);
-          gameController.finalizeGame(roomId, winnerId, loserId).then(res => {
-            if (res) {
-              if (res.winner) io.to(res.winner.id).emit('update_coins', res.winner.coins);
-              if (res.loser) io.to(res.loser.id).emit('update_coins', res.loser.coins);
-            }
-          });
-        }
-        GameManager.removeGame(roomId);
+      const gameType = game.gameType;
+      
+      game.makeMove(socket.user.id, move);
+
+      if (gameType === 'poker') {
+        game.players.forEach(player => { // Correctly iterate over player objects
+            const stateForPlayer = game.getStateForPlayer(player.id);
+            io.to(player.id).emit('game_update', stateForPlayer);
+        });
       } else {
-        console.log(`[SERVER] Move successful. Emitting 'game_update' to room ${roomId}. State:`, newState);
+        const newState = game.getState();
         io.to(roomId).emit('game_update', newState);
+      }
+      
+      if (game.status === 'finished') {
+        console.log(`[SERVER] Game in room ${roomId} finished. Emitting 'game_end'.`);
+        
+        if (gameType === 'poker') {
+          // Для покера отправляем состояние каждому игроку
+          game.players.forEach(player => {
+            const stateForPlayer = game.getStateForPlayer(player.id);
+            io.to(player.id).emit('game_end', stateForPlayer);
+          });
+          
+          // Обрабатываем завершение покерной раздачи
+          const gameState = game.getState();
+          if (gameState.winner && gameState.winner !== 'draw') {
+            const winnerId = typeof gameState.winner === 'object' ? gameState.winner.id : gameState.winner;
+            const loserId = game.players.find(p => p.id !== winnerId).id;
+            console.log(`[SERVER] Finalizing poker game. Winner: ${winnerId}, Loser: ${loserId}`);
+            gameController.finalizeGame(roomId, winnerId, loserId).then(res => {
+              if (res) {
+                if (res.winner) io.to(res.winner.id).emit('update_coins', res.winner.coins);
+                if (res.loser) io.to(res.loser.id).emit('update_coins', res.loser.coins);
+              }
+            });
+          }
+          
+          // После завершения раздачи, запускаем новую через 3 секунды если игроки остались
+          setTimeout(() => {
+            const currentGame = GameManager.getGame(roomId);
+            if (currentGame && currentGame.players.every(p => p.stack > 0)) {
+              console.log(`[SERVER] Starting new poker hand in room ${roomId}`);
+              currentGame.startNewHand();
+              // Отправляем обновления всем игрокам
+              currentGame.players.forEach(player => {
+                const stateForPlayer = currentGame.getStateForPlayer(player.id);
+                io.to(player.id).emit('game_update', stateForPlayer);
+              });
+            } else {
+              // Игра окончательно завершена
+              GameManager.removeGame(roomId);
+            }
+          }, 3000);
+        } else {
+          // Для других игр
+          const finalState = game.getState();
+          io.to(roomId).emit('game_end', finalState);
+          
+          if (game.winner && game.winner !== 'draw') {
+            const winnerId = game.winner;
+            const loserId = game.players.find(p => p !== winnerId);
+            console.log(`[SERVER] Finalizing game. Winner: ${winnerId}, Loser: ${loserId}`);
+            gameController.finalizeGame(roomId, winnerId, loserId).then(res => {
+              if (res) {
+                if (res.winner) io.to(res.winner.id).emit('update_coins', res.winner.coins);
+                if (res.loser) io.to(res.loser.id).emit('update_coins', res.loser.coins);
+              }
+            });
+          }
+          GameManager.removeGame(roomId);
+        }
       }
     } catch (error) {
       console.error(`[SERVER] [ERROR] in 'make_move':`, error.message);
@@ -186,15 +279,42 @@ io.on('connection', (socket) => {
       console.log(`[SERVER] Handling disconnect for room ${roomId}`);
       const game = GameManager.getGame(roomId);
       
-      if (game && game.getState().status === 'in_progress') {
-        const remainingPlayerId = game.players.find(id => id !== socket.user.id);
-        console.log(`[SERVER] Game in progress. Player ${socket.user.id} disconnected. Remaining player: ${remainingPlayerId}`);
-        if (remainingPlayerId) {
-          const finalState = { ...game.getState(), status: 'finished', winner: remainingPlayerId, isDraw: false };
-          io.to(roomId).emit('game_end', finalState);
-          gameController.finalizeGame(roomId, remainingPlayerId, socket.user.id).then(res => {
-             if (res && res.winner) io.to(res.winner.id).emit('update_coins', res.winner.coins);
-          });
+      if (game && game.players && game.getState().status !== 'finished') {
+        const remainingPlayer = game.players.find(p => p.id !== socket.user.id);
+        console.log(`[SERVER] Game in progress. Player ${socket.user.id} disconnected. Remaining player: ${remainingPlayer ? remainingPlayer.id : 'none'}`);
+        if (remainingPlayer) {
+          if (game.gameType === 'poker') {
+            // Для покера - остающийся игрок получает все блайнды и ставки в банке
+            const currentPot = game.pot;
+            const leavingPlayerBet = game.players.find(p => p.id === socket.user.id)?.currentBet || 0;
+            const totalWinnings = currentPot + leavingPlayerBet;
+            
+            // Добавляем выигрыш к стеку остающегося игрока
+            remainingPlayer.stack += totalWinnings;
+            
+            console.log(`[SERVER] Poker player left. Remaining player ${remainingPlayer.id} gets ${totalWinnings} coins (pot: ${currentPot}, leaving player bet: ${leavingPlayerBet})`);
+            
+            const finalState = { 
+              ...game.getStateForPlayer(remainingPlayer.id), 
+              status: 'finished', 
+              winner: remainingPlayer, 
+              isDraw: false,
+              pot: 0, // Банк обнулен
+              message: `Соперник покинул игру. Вы получаете ${totalWinnings} фишек!`
+            };
+            io.to(remainingPlayer.id).emit('game_end', finalState);
+            
+            // Начисляем монеты в базе только остающемуся игроку (он получает свою ставку обратно)
+            gameController.finalizeGame(roomId, remainingPlayer.id, socket.user.id).then(res => {
+               if (res && res.winner) io.to(res.winner.id).emit('update_coins', res.winner.coins);
+            });
+          } else {
+            const finalState = { ...game.getStateForPlayer ? game.getStateForPlayer(remainingPlayer.id) : game.getState(), status: 'finished', winner: remainingPlayer, isDraw: false };
+            io.to(roomId).emit('game_end', finalState);
+            gameController.finalizeGame(roomId, remainingPlayer.id, socket.user.id).then(res => {
+               if (res && res.winner) io.to(res.winner.id).emit('update_coins', res.winner.coins);
+            });
+          }
         }
         GameManager.removeGame(roomId);
       } else {

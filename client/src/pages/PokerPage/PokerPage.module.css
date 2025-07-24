@@ -1,0 +1,53 @@
+.pokerPage {
+  padding: 2rem;
+  text-align: center;
+}
+
+.pokerPage h1 {
+  font-family: var(--font-family-heading);
+  color: var(--color-primary);
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.pokerPage p {
+  font-family: var(--font-family-body);
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
+}
+
+.pokerPage h2 {
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+}
+
+.cardContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.loadingScreen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  font-family: var(--font-family-body);
+  color: var(--color-secondary);
+}
+
+.mascotContainer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+.cardWrapper {
+  margin: 5px; /* Небольшой отступ для каждой карты */
+} 

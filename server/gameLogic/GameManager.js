@@ -1,5 +1,6 @@
 const TicTacToeGame = require('./TicTacToeGame');
 const ChessGame = require('./ChessGame');
+const PokerGame = require('./PokerGame');
 
 class GameManager {
   constructor() {
@@ -18,6 +19,14 @@ class GameManager {
         break;
       case 'chess':
         gameInstance = new ChessGame(players);
+        break;
+      case 'poker':
+        const initialStacks = {};
+        const playerObjects = players.map((player) => {
+          initialStacks[player.id] = 1000;
+          return { id: player.id, name: player.name };
+        });
+        gameInstance = new PokerGame(playerObjects, initialStacks);
         break;
       default:
         throw new Error(`Unsupported game type: ${gameType}`);

@@ -32,7 +32,7 @@ const User = sequelize.define('User', {
   coins: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: 100
+    defaultValue: 1000
   }
 });
 

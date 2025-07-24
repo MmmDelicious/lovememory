@@ -7,10 +7,14 @@ import { useCurrency } from '../../context/CurrencyContext';
 // ИЗМЕНЕНИЕ: Создаем словарь для названий игр. Легко расширять.
 const GAME_DISPLAY_NAMES = {
   'tic-tac-toe': 'Крестики-нолики',
+  'chess': 'Шахматы',
+  'poker': 'Покер',
 };
 
-const GameLobbyPage = () => {
-  const { gameType } = useParams();
+const GameLobbyPage = ({ gameType: gameTypeProp }) => {
+  const { gameType: gameTypeParam } = useParams();
+  const gameType = gameTypeProp || gameTypeParam;
+  
   const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -51,7 +55,8 @@ const GameLobbyPage = () => {
     try {
       const newRoom = await gameService.createRoom(bet, gameType);
       await refreshCoins();
-      navigate(`/games/room/${newRoom.id}`);
+      const path = gameType === 'poker' ? `/love-vegas/poker/${newRoom.id}` : `/games/room/${newRoom.id}`;
+      navigate(path);
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Не удалось создать комнату.';
       alert(`Ошибка: ${errorMessage}`);
@@ -59,7 +64,8 @@ const GameLobbyPage = () => {
   };
 
   const handleJoinRoom = (roomId) => {
-    navigate(`/games/room/${roomId}`);
+    const path = gameType === 'poker' ? `/love-vegas/poker/${roomId}` : `/games/room/${roomId}`;
+    navigate(path);
   };
 
   // ИСПОЛЬЗОВАНИЕ: Получаем красивое имя из словаря.

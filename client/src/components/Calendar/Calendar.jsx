@@ -8,11 +8,19 @@ import { useMascot } from '../../context/MascotContext';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Calendar.module.css';
 
+const FILTERS = [
+  { id: 'all', label: 'Все' },
+  { id: 'mine', label: 'Мои' },
+  { id: 'partner', label: 'Партнёра' },
+  { id: 'shared', label: 'Общие' },
+];
+
 const Calendar = () => {
   const [events, setEvents] = useState([]);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [filter, setFilter] = useState('all');
   const calendarRef = useRef(null);
   const calendarContainerRef = useRef(null);
   const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useMascot();
@@ -49,8 +57,9 @@ const Calendar = () => {
           extendedProps: {
             description: event.description,
             isOwner: event.userId === user.id,
-            timeRange: timeRange,
+            isShared: !!event.isShared,
             rawEvent: event,
+            timeRange: timeRange,
           }
         };
       });
@@ -163,9 +172,18 @@ const Calendar = () => {
   const handleEventDrop = async (dropInfo) => {
     const { event } = dropInfo;
     try {
+      // вычисляем дельту между старой и новой датой начала
+      const oldStart = new Date(event.extendedProps.rawEvent.event_date);
+      const oldEnd = event.extendedProps.rawEvent.end_date ? new Date(event.extendedProps.rawEvent.end_date) : null;
+      const newStart = event.start;
+      let newEnd = null;
+      if (oldEnd) {
+        const duration = oldEnd.getTime() - oldStart.getTime();
+        newEnd = new Date(newStart.getTime() + duration);
+      }
       await eventService.updateEvent(event.id, {
-        event_date: event.start.toISOString(),
-        end_date: event.end ? event.end.toISOString() : null,
+        event_date: newStart.toISOString(),
+        end_date: newEnd ? newEnd.toISOString() : null,
       });
       fetchEvents(); 
     } catch (error) {
@@ -185,15 +203,34 @@ const Calendar = () => {
     );
   };
 
+  const filteredEvents = events.filter(event => {
+    if (filter === 'all') return true;
+    if (filter === 'mine') return event.extendedProps?.isOwner && !event.extendedProps?.isShared;
+    if (filter === 'partner') return !event.extendedProps?.isOwner && !event.extendedProps?.isShared;
+    if (filter === 'shared') return event.extendedProps?.isShared;
+    return true;
+  });
+
   return (
     <div className={styles.calendarContainer} ref={calendarContainerRef}>
+      <div className={styles.filterBar}>
+        {FILTERS.map(f => (
+          <button
+            key={f.id}
+            className={`${styles.filterButton} ${filter === f.id ? styles.filterActive : ''}`.trim()}
+            onClick={() => setFilter(f.id)}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
       <FullCalendar
         ref={calendarRef}
         key={isMobile ? 'mobile' : 'desktop'}
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView={isMobile ? 'dayGridWeek' : 'dayGridMonth'}
         weekends={true}
-        events={events}
+        events={filteredEvents}
         locale="ru"
         firstDay={1}
         headerToolbar={isMobile 

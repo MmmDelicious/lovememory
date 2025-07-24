@@ -21,6 +21,8 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
   const [endDate, setEndDate] = useState('');
   const [endTime, setEndTime] = useState('');
   const [media, setMedia] = useState([]);
+  const [isShared, setIsShared] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -29,6 +31,7 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
       
       setTitle(rawEvent.title || '');
       setDescription(rawEvent.description || '');
+      setIsShared(!!rawEvent.isShared);
       
       setStartDate(formatDate(rawEvent.event_date || eventData.date));
       setStartTime(formatTime(rawEvent.event_date));
@@ -55,6 +58,11 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
 
   const handleSave = (e) => {
     e.preventDefault();
+    setError('');
+    if (!title || title.trim() === '') {
+      setError('Название обязательно');
+      return;
+    }
 
     const combineDateTime = (date, time) => {
       if (!date) return null;
@@ -69,7 +77,8 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
       title, 
       description,
       event_date: finalStartDate,
-      end_date: finalEndDate
+      end_date: finalEndDate,
+      isShared
     });
   };
 
@@ -99,40 +108,53 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
 
   return (
     <>
-      <div className={styles.overlay} onClick={onClose}></div>
+      <div className={`${styles.overlay} ${isOpen ? styles.open : ''}`} onClick={onClose}></div>
       <div className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
-        <button className={styles.closeButton} onClick={onClose}>×</button>
-        <h2 className={styles.title}>{formattedDate}</h2>
+        <div className={styles.header}>
+            <h2 className={styles.title}>{formattedDate}</h2>
+            <button className={styles.closeButton} onClick={onClose}>×</button>
+        </div>
         <form onSubmit={handleSave} className={styles.form}>
           <div className={styles.scrollableContent}>
-            <label htmlFor="title">Название</label>
-            <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Название события" className={styles.input} />
-            
+            <div className={styles.formGroup}>
+              <label htmlFor="title">Название <span className={styles.required}>*</span></label>
+              <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Название события" className={styles.input} required />
+            </div>
+
+            {error && <div className={styles.error}>{error}</div>}
+
             <div className={styles.dateTimeRow}>
-              <div className={styles.dateInputWrapper}>
+              <div className={styles.formGroup}>
                 <label htmlFor="startDate">Дата начала</label>
                 <input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={styles.input} />
               </div>
-              <div className={styles.timeInputWrapper}>
+              <div className={styles.formGroup}>
                 <label htmlFor="startTime">Время</label>
                 <input id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className={styles.input} />
               </div>
             </div>
 
             <div className={styles.dateTimeRow}>
-              <div className={styles.dateInputWrapper}>
+              <div className={styles.formGroup}>
                 <label htmlFor="endDate">Дата окончания</label>
                 <input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className={styles.input} />
               </div>
-              <div className={styles.timeInputWrapper}>
+              <div className={styles.formGroup}>
                 <label htmlFor="endTime">Время</label>
                 <input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className={styles.input} />
               </div>
             </div>
-
-            <label htmlFor="description">Описание</label>
-            <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Добавьте описание..." className={styles.textarea} rows="5"></textarea>
             
+            <div className={styles.formGroup}>
+              <label htmlFor="description">Описание</label>
+              <textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Добавьте описание..." className={styles.textarea} rows="5"></textarea>
+            </div>
+            
+            <div className={styles.checkboxRow}>
+              <input id="isShared" type="checkbox" checked={isShared} onChange={e => setIsShared(e.target.checked)} />
+              <label htmlFor="isShared">Показывать партнёру</label>
+            </div>
+
             {eventData.id && (
               <div className={styles.mediaSection}>
                 <h3>Фотографии</h3>
