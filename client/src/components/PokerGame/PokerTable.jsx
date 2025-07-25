@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import PlayingCard from '../PlayingCard/PlayingCard';
 import Button from '../Button/Button';
 import styles from './PokerTable.module.css';
+import avatarImage from './assets/avatar.png';
 
 const PokerTable = ({ gameState, onAction, userId }) => {
   // Early return ДОЛЖЕН быть самым первым, до всех хуков
@@ -77,8 +78,6 @@ const PokerTable = ({ gameState, onAction, userId }) => {
   if (gameState.status === 'waiting' || gameState.stage === 'waiting' || (players && players.length < 2)) {
     return (
       <div className={styles.gameContainer}>
-        <div className={styles.opponentArea}></div>
-        
         <div className={styles.pokerTable}>
           <div className={styles.deckContainer}>
             <PlayingCard faceUp={false} />
@@ -91,8 +90,6 @@ const PokerTable = ({ gameState, onAction, userId }) => {
             </div>
           </div>
         </div>
-        
-        <div className={styles.playerArea}></div>
       </div>
     );
   }
@@ -111,6 +108,11 @@ const PokerTable = ({ gameState, onAction, userId }) => {
     return playerIndex + 1; // Позиции 1-4 для остальных игроков
   };
 
+  // Функция для получения аватара  
+  const getAvatarUrl = () => {
+    return avatarImage;
+  };
+
   const renderPlayerArea = (player, position) => {
     if (!player) return null;
 
@@ -119,32 +121,67 @@ const PokerTable = ({ gameState, onAction, userId }) => {
     const isActive = player.id === currentPlayerId && gameState.status !== 'finished';
 
     return (
-      <div className={`${styles.playerPosition} ${styles[`playerPosition${position}`]} ${isActive ? styles.active : ''}`}>
-        <div className={styles.playerCards}>
-          {(player.hand && player.hand.length > 0) ? player.hand.map((card, index) => (
-            <div
-              key={index}
-              className={`${styles.cardWrapper} ${dealingPhase ? styles.cardDealing : ''}`}
-              style={{ animationDelay: `${index * 0.2 + (isMainPlayer ? 0 : 0.1)}s` }}
-            >
-              <PlayingCard 
-                suit={card.suit} 
-                rank={card.rank} 
-                faceUp={showCards} 
-                isWinning={isWinningCard(card)}
-              />
-            </div>
-          )) : null}
-        </div>
+      <div key={player.id} className={`${styles.playerPosition} ${styles[`playerPosition${position}`]} ${isActive ? styles.active : ''}`}>
+        {/* Аватар игрока */}
+        <img 
+          className={styles.avatar} 
+          src={getAvatarUrl()} 
+          alt={`${player.name}'s avatar`} 
+        />
+        
+        {/* Информация об игроке */}
         <div className={styles.playerInfo}>
           <div className={styles.playerName}>
             {player.name} {player.isDealer && '🎯'}
           </div>
           <div className={styles.playerStats}>
-            <span className={styles.stack}>💰{player.stack}</span>
+            <span className={styles.stack}>
+              <img 
+                src="https://i.ibb.co/9hbdxJ3/chips-icon.png" 
+                alt="chips icon" 
+                className={styles.chipsIcon}
+                style={{ width: '21px', height: '21px', marginRight: '7px' }}
+              />
+              {player.stack}
+            </span>
             {player.currentBet > 0 && <span className={styles.bet}>Ставка: {player.currentBet}</span>}
             {!player.inHand && <span className={styles.folded}>Пас</span>}
           </div>
+        </div>
+
+        {/* Карты игрока */}
+        <div className={styles.playerCards}>
+          {isMainPlayer ? (
+            // Для основного игрока показываем реальные карты
+            (player.hand && player.hand.length > 0) ? player.hand.map((card, index) => (
+              <div
+                key={index}
+                className={`${styles.cardWrapper} ${dealingPhase ? styles.cardDealing : ''}`}
+                style={{ animationDelay: `${index * 0.2}s` }}
+              >
+                <PlayingCard 
+                  suit={card.suit} 
+                  rank={card.rank} 
+                  faceUp={showCards} 
+                  isWinning={isWinningCard(card)}
+                />
+              </div>
+            )) : null
+          ) : (
+            // Для остальных игроков всегда показываем 2 рубашки
+            [0, 1].map((index) => (
+              <div
+                key={index}
+                className={`${styles.cardWrapper} ${dealingPhase ? styles.cardDealing : ''}`}
+                style={{ animationDelay: `${index * 0.2 + 0.1}s` }}
+              >
+                <PlayingCard 
+                  faceUp={showCards} 
+                  isWinning={false}
+                />
+              </div>
+            ))
+          )}
         </div>
       </div>
     );
@@ -157,22 +194,12 @@ const PokerTable = ({ gameState, onAction, userId }) => {
   return (
     <div className={styles.gameContainer}>
       <div className={styles.pokerTable}>
-
-        
-
+        {/* Deck container */}
         <div className={styles.deckContainer}>
           <PlayingCard faceUp={false} />
         </div>
         
-        <div className={styles.potContainer}>
-          <div className={styles.chipStack}>
-            <div className={`${styles.chip} ${styles.red}`}>5</div>
-            <div className={`${styles.chip} ${styles.blue}`}>10</div>
-            <div className={`${styles.chip} ${styles.green}`}>25</div>
-          </div>
-          <span className={styles.pot}>{pot}</span>
-        </div>
-        
+        {/* Stage display */}
         <div className={styles.stageContainer}>
           <div className={styles.stage}>
             {stage === 'pre-flop' && 'Пре-флоп'}
@@ -183,6 +210,7 @@ const PokerTable = ({ gameState, onAction, userId }) => {
           </div>
         </div>
 
+        {/* Community Cards */}
         <div className={styles.communityCards}>
           {communityCards.map((card, index) => (
             <div
@@ -203,12 +231,47 @@ const PokerTable = ({ gameState, onAction, userId }) => {
           ))}
         </div>
 
+        {/* Central BET plaque */}
+        <div className={styles.bettingArea}>
+          <button className={styles.betButton}>BET</button>
+          <div className={styles.betAmount}>{pot}</div>
+        </div>
+
+        {/* Table chips */}
+        <div className={styles.chipStack}>
+          <div className={`${styles.chip} ${styles.red}`}></div>
+          <div className={`${styles.chip} ${styles.blue}`}></div>
+          <div className={`${styles.chip} ${styles.green}`}></div>
+        </div>
+
         {/* Рендерим всех игроков в их позициях вокруг стола */}
         {players.map((player) => 
           renderPlayerArea(player, getPlayerPosition(player.id))
         )}
       </div>
 
+      {/* Decorative elements */}
+      <div className={styles.decorations}>
+        <div className={`${styles.decoHeart} ${styles.heart1}`}></div>
+        <div className={`${styles.decoHeart} ${styles.heart2}`}></div>
+        <div className={`${styles.decoHeart} ${styles.heart3}`}></div>
+        <div className={`${styles.decoHeart} ${styles.heart4}`}></div>
+        <div className={`${styles.decoHeart} ${styles.heart5}`}></div>
+        <div className={`${styles.decoHeart} ${styles.heart6}`}></div>
+        <img 
+          className={styles.rose} 
+          src="https://i.ibb.co/Y0KjC0p/rose.png" 
+          alt="rose decoration" 
+        />
+      </div>
+
+      {/* Likes counter */}
+      <div className={styles.likesCounter}>
+        <span className={styles.heartIcon}>♡</span>
+        <span className={styles.count}>10</span>
+      </div>
+
+      {/* Action buttons */}
       {isPlayerTurn && gameState.status !== 'finished' && (
         <div className={styles.actions}>
           {allowedActions.includes('fold') && <Button onClick={() => onAction('fold')}>Сбросить</Button>}

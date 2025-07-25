@@ -10,10 +10,10 @@ const suitSymbols = {
 };
 
 const suitColorClasses = {
-  'H': styles.hearts,
-  'D': styles.diamonds,
-  'C': styles.clubs,
-  'S': styles.spades,
+  'H': 'hearts',
+  'D': 'diamonds',
+  'C': 'clubs',
+  'S': 'spades',
 };
 
 const PlayingCard = ({ suit, rank, faceUp = true, isWinning = false, isCommunity = false }) => {
@@ -40,24 +40,15 @@ const PlayingCard = ({ suit, rank, faceUp = true, isWinning = false, isCommunity
   
   const cardClasses = [
     styles.card,
-    colorClass,
+    colorClass ? styles[colorClass] : '',
     isWinning ? styles.winning : '',
     isCommunity ? styles.community : ''
   ].filter(Boolean).join(' ');
 
   return (
     <div className={cardClasses}>
-      <div className={styles.topLeft}>
-        <span className={styles.rank}>{displayRank}</span>
-        <span className={styles.suit}>{symbol}</span>
-      </div>
-      <div className={styles.centerSuit}>
-        {symbol}
-      </div>
-      <div className={styles.bottomRight}>
-        <span className={styles.rank}>{displayRank}</span>
-        <span className={styles.suit}>{symbol}</span>
-      </div>
+      <span className={styles.rank}>{displayRank}</span>
+      <span className={`${styles.suit} ${colorClass ? styles[colorClass] : ''}`}>{symbol}</span>
     </div>
   );
 };

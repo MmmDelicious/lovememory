@@ -103,8 +103,14 @@ const PokerPage = () => {
     
     if (!gameState) {
         return (
-            <div className={styles.pokerPage}>
-                <div className={styles.gameArea}>
+            <div className={styles.pokerApp}>
+                <header className={styles.appHeader}>
+                    <h1 className={styles.appTitle}>WORLD POKER CLUB</h1>
+                    <button className={styles.leaveButton} onClick={handleExit}>
+                        LEAVE
+                    </button>
+                </header>
+                <main className={styles.gameBoard}>
                     <div style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -119,23 +125,26 @@ const PokerPage = () => {
                             <div>Загрузка покерного стола...</div>
                         </div>
                     </div>
-                </div>
+                </main>
             </div>
         );
     }
 
     return (
-        <div className={styles.pokerPage}>
-            <button className={styles.exitButton} onClick={handleExit} title="Выйти в игровой хаб">
-                ←
-            </button>
-            <div className={styles.gameArea}>
+        <div className={styles.pokerApp}>
+            <header className={styles.appHeader}>
+                <h1 className={styles.appTitle}>WORLD POKER CLUB</h1>
+                <button className={styles.leaveButton} onClick={handleExit}>
+                    LEAVE
+                </button>
+            </header>
+            <main className={styles.gameBoard}>
                 <PokerTable 
                     gameState={gameState}
                     onAction={handleAction} 
                     userId={user.id}
                 />
-            </div>
+            </main>
         </div>
     );
 };
