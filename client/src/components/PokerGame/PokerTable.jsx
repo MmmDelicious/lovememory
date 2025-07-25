@@ -5,41 +5,41 @@ import Button from '../Button/Button';
 import styles from './PokerTable.module.css';
 
 const PokerTable = ({ gameState, onAction, userId }) => {
+  // Early return ДОЛЖЕН быть самым первым, до всех хуков
+  if (!gameState) return null;
+
+  // ВСЕ хуки должны быть в самом начале, до любых conditional returns
   const [raiseAmount, setRaiseAmount] = useState(0);
   const [animatingCards, setAnimatingCards] = useState([]);
   const [dealingPhase, setDealingPhase] = useState(false);
   const [prevStage, setPrevStage] = useState(null);
 
-  if (!gameState) return null;
-
   const { players, communityCards, pot, currentPlayerId, stage, allowedActions, minRaiseAmount, currentBet, winningHandCards } = gameState;
+
+  // Перемещаем все хуки сюда, чтобы они выполнялись всегда
+  const currentPlayer = useMemo(() => 
+    players ? players.find(p => p.id === userId) : null, 
+    [players, userId]
+  );
   
-  if (gameState.status === 'waiting' || gameState.stage === 'waiting' || (players && players.length < 2)) {
-    return (
-      <div className={styles.gameContainer}>
-        <div className={styles.opponentArea}></div>
-        
-        <div className={styles.pokerTable}>
-          <div className={styles.deckContainer}>
-            <PlayingCard faceUp={false} />
-          </div>
-          
-          <div className={styles.waitingContainer}>
-            <div className={styles.waitingMessage}>
-              <div className={styles.waitingIcon}>⏳</div>
-              <div className={styles.waitingText}>Ожидание второго игрока...</div>
-            </div>
-          </div>
-        </div>
-        
-        <div className={styles.playerArea}></div>
-      </div>
-    );
-  }
+  const maxBet = useMemo(() => 
+    players && players.length > 0 ? Math.max(...players.map(p => p.currentBet)) : 0, 
+    [players]
+  );
   
-  const currentPlayer = players.find(p => p.id === userId);
-  const maxBet = Math.max(...players.map(p => p.currentBet));
-  const callAmount = currentPlayer ? Math.min(maxBet - currentPlayer.currentBet, currentPlayer.stack) : 0;
+  const callAmount = useMemo(() => 
+    currentPlayer ? Math.min(maxBet - currentPlayer.currentBet, currentPlayer.stack) : 0, 
+    [currentPlayer, maxBet]
+  );
+
+  const mainPlayerStack = useMemo(() => {
+    const player = players ? players.find(p => p.id === userId) : null;
+    return player ? player.stack : 0;
+  }, [players, userId]);
+
+  const minRaise = minRaiseAmount || 0;
+  const maxRaise = mainPlayerStack;
+  const isPlayerTurn = currentPlayerId === userId;
 
   useEffect(() => {
     if (prevStage !== stage) {
@@ -68,6 +68,34 @@ const PokerTable = ({ gameState, onAction, userId }) => {
       }
     }
   }, [stage, prevStage]);
+
+  useEffect(() => {
+    setRaiseAmount(minRaise);
+  }, [minRaise]);
+
+  // Теперь все conditional returns идут ПОСЛЕ всех хуков
+  if (gameState.status === 'waiting' || gameState.stage === 'waiting' || (players && players.length < 2)) {
+    return (
+      <div className={styles.gameContainer}>
+        <div className={styles.opponentArea}></div>
+        
+        <div className={styles.pokerTable}>
+          <div className={styles.deckContainer}>
+            <PlayingCard faceUp={false} />
+          </div>
+          
+          <div className={styles.waitingContainer}>
+            <div className={styles.waitingMessage}>
+              <div className={styles.waitingIcon}>⏳</div>
+              <div className={styles.waitingText}>Ожидание второго игрока...</div>
+            </div>
+          </div>
+        </div>
+        
+        <div className={styles.playerArea}></div>
+      </div>
+    );
+  }
 
   const isWinningCard = (card) => {
     if (!winningHandCards || winningHandCards.length === 0) return false;
@@ -121,20 +149,6 @@ const PokerTable = ({ gameState, onAction, userId }) => {
       </div>
     );
   };
-  
-  const isPlayerTurn = currentPlayerId === userId;
-  
-  const mainPlayerStack = useMemo(() => {
-    const player = players.find(p => p.id === userId);
-    return player ? player.stack : 0;
-  }, [players, userId]);
-
-  const minRaise = minRaiseAmount || 0;
-  const maxRaise = mainPlayerStack;
-
-  useState(() => {
-    setRaiseAmount(minRaise);
-  }, [minRaise]);
 
   const handleRaiseChange = (e) => {
     setRaiseAmount(Number(e.target.value));
