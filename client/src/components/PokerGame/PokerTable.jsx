@@ -4,6 +4,7 @@ import PlayingCard from '../PlayingCard/PlayingCard';
 import Button from '../Button/Button';
 import styles from './PokerTable.module.css';
 import avatarImage from './assets/avatar.png';
+import Avatar from '../Avatar/Avatar';
 
 const PokerTable = ({ gameState, onAction, userId }) => {
   // Early return ДОЛЖЕН быть самым первым, до всех хуков
@@ -123,10 +124,12 @@ const PokerTable = ({ gameState, onAction, userId }) => {
     return (
       <div key={player.id} className={`${styles.playerPosition} ${styles[`playerPosition${position}`]} ${isActive ? styles.active : ''}`}>
         {/* Аватар игрока */}
-        <img 
-          className={styles.avatar} 
-          src={getAvatarUrl()} 
-          alt={`${player.name}'s avatar`} 
+        <Avatar
+          src={getAvatarUrl()}
+          alt={`${player.name}'s avatar`}
+          className={styles.avatar}
+          size="medium"
+          variant="circle"
         />
         
         {/* Информация об игроке */}

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import styles from './GameLobbyPage.module.css';
 import gameService from '../../services/game.service';
 import { useCurrency } from '../../context/CurrencyContext';
+import CreateRoomModal from '../../components/CreateRoomModal/CreateRoomModal';
 
 // ИЗМЕНЕНИЕ: Создаем словарь для названий игр. Легко расширять.
 const GAME_DISPLAY_NAMES = {
@@ -17,6 +18,7 @@ const GameLobbyPage = ({ gameType: gameTypeProp }) => {
   
   const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const { refreshCoins } = useCurrency();
 
@@ -42,12 +44,9 @@ const GameLobbyPage = ({ gameType: gameTypeProp }) => {
     fetchRooms();
   }, [gameType]);
 
-  const handleCreateRoom = async () => {
-    const betString = prompt("Введите вашу ставку:", "10");
-    if (betString === null) return;
-
-    const bet = parseInt(betString, 10);
-    if (isNaN(bet) || bet <= 0) {
+  const handleCreateRoom = async (formData) => {
+    const { bet } = formData;
+    if (!bet || bet <= 0) {
       alert("Ставка должна быть положительным числом.");
       return;
     }
@@ -55,6 +54,7 @@ const GameLobbyPage = ({ gameType: gameTypeProp }) => {
     try {
       const newRoom = await gameService.createRoom(bet, gameType);
       await refreshCoins();
+      setIsModalOpen(false); // Закрываем модалку после успеха
       const path = gameType === 'poker' ? `/love-vegas/poker/${newRoom.id}` : `/games/room/${newRoom.id}`;
       navigate(path);
     } catch (error) {
@@ -76,7 +76,7 @@ const GameLobbyPage = ({ gameType: gameTypeProp }) => {
     <div className={styles.pageContainer}>
       <div className={styles.header}>
         <h1 className={styles.title}>{gameName}</h1>
-        <button onClick={handleCreateRoom} className={styles.createButton}>
+        <button onClick={() => setIsModalOpen(true)} className={styles.createButton}>
           Создать комнату
         </button>
       </div>
@@ -109,6 +109,13 @@ const GameLobbyPage = ({ gameType: gameTypeProp }) => {
           )}
         </div>
       )}
+      
+      <CreateRoomModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCreateRoom}
+        gameType={gameName}
+      />
     </div>
   );
 };

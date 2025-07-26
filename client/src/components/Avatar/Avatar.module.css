@@ -1,0 +1,33 @@
+.avatar {
+  display: block;
+  object-fit: cover;
+}
+
+/* Variants */
+.circle {
+  border-radius: 50%;
+}
+
+.rounded {
+  border-radius: 8px;
+}
+
+.square {
+  border-radius: 0;
+}
+
+/* Sizes */
+.small {
+  width: 40px;
+  height: 40px;
+}
+
+.medium {
+  width: 80px;
+  height: 85px;
+}
+
+.large {
+  width: 120px;
+  height: 120px;
+} 
