@@ -1,0 +1,111 @@
+.filtersContainer {
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+}
+
+.filtersGrid {
+  overflow: hidden;
+}
+
+/* Компактные фильтры в одну строку */
+.compactFiltersRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.compactFilterButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.compactFilterButton:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.additionalSelect {
+  padding: 6px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  margin-left: auto;
+  min-width: 120px;
+}
+
+.additionalSelect:hover,
+.additionalSelect:focus {
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
+}
+
+/* Убрали старые стили дополнительных фильтров */
+
+.filterActive {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.filterActive:hover {
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  color: white;
+}
+
+.filterIcon {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.filterLabel {
+  line-height: 1;
+}
+
+@media (max-width: 768px) {
+  .filtersContainer {
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .compactFiltersRow {
+    gap: 4px;
+  }
+  
+  .compactFilterButton {
+    padding: 5px 8px;
+    font-size: 0.75rem;
+  }
+  
+  .additionalSelect {
+    font-size: 0.75rem;
+    min-width: 100px;
+    margin-left: 8px;
+  }
+} 

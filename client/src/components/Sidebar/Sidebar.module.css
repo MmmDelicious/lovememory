@@ -63,9 +63,23 @@
   font-family: var(--font-family-heading);
   margin: 0;
   padding: 2rem 2rem 1rem;
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   color: var(--color-text-primary);
+}
+
+.dateInfo {
+  padding: 0 2rem 1rem;
   border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dateLabel,
+.timeLabel {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
 .form {
@@ -205,4 +219,32 @@
   user-select: none;
   font-weight: 500;
   margin-bottom: 0;
+}
+
+.recurrenceSection {
+  margin-top: 1rem;
+}
+
+.recurrenceButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.recurrenceButton:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-primary);
+}
+
+.recurrenceIcon {
+  font-size: 1rem;
 }

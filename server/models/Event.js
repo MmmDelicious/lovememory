@@ -24,9 +24,39 @@ const Event = sequelize.define('Event', {
     allowNull: true,
   },
   event_type: {
-    type: DataTypes.ENUM('memory', 'plan', 'anniversary'),
+    type: DataTypes.ENUM(
+      'memory',      // воспоминания
+      'plan',        // планы
+      'anniversary', // годовщины
+      'birthday',    // дни рождения
+      'travel',      // путешествия
+      'date',        // свидания
+      'gift',        // подарки
+      'milestone'    // важные моменты
+    ),
     defaultValue: 'plan',
   },
+  isShared: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  is_recurring: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  recurrence_rule: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+  },
+  parent_event_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'Events',
+      key: 'id',
+    },
+  },
+
   userId: {
     type: DataTypes.UUID,
     allowNull: false,

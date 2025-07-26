@@ -1,6 +1,6 @@
 .calendarContainer {
   background-color: var(--color-surface);
-  padding: 2rem 2.5rem;
+  padding: 1rem 1.5rem;
   position: relative;
   flex-grow: 1;
   display: flex;
@@ -22,7 +22,7 @@
 }
 
 .calendarContainer :global(.fc-daygrid-event-harness) {
-  margin: 2px 0 !important;
+  margin: 1px 0 !important;
 }
 
 .calendarContainer :global(.fc-event) {
@@ -39,7 +39,7 @@
 }
 
 .eventContentWrapper {
-  padding: 4px 8px 4px 12px;
+  padding: 3px 6px 3px 8px;
   overflow: hidden;
   height: 100%;
 }
@@ -55,19 +55,23 @@
 }
 
 .eventTitle {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 3px;
 }
 
-.eventTime {
+.eventIcon {
   font-size: 0.7rem;
-  color: var(--color-text-secondary);
-  margin-top: 2px;
+  flex-shrink: 0;
 }
+
+/* Время события теперь показывается только в сайдбаре */
 
 .calendarContainer :global(.fc-toolbar-title) {
   font-family: var(--font-family-heading);
@@ -115,20 +119,20 @@
 
 @media (max-width: 768px) {
   .calendarContainer {
-    padding: 1rem;
+    padding: 0.75rem;
     box-shadow: none;
     border-radius: 0;
   }
   .calendarContainer :global(.fc-toolbar) {
-    padding: 0 1rem;
+    padding: 0 0.5rem;
     margin-bottom: 0.5rem !important;
   }
   .calendarContainer :global(.fc-toolbar-title) {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
   }
   .calendarContainer :global(.fc-daygrid-day-number) {
-    padding: 4px;
-    font-size: 0.8rem;
+    padding: 3px;
+    font-size: 0.75rem;
   }
 }
 
@@ -141,50 +145,4 @@
   color: var(--color-text-secondary);
 }
 
-.filterBar {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.filterButton {
-  background-color: var(--color-surface);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-  padding: 8px 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  box-shadow: var(--shadow-sm);
-  outline: none;
-}
-
-.filterButton:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-.filterButton:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-text-secondary);
-  color: var(--color-text-primary);
-}
-
-.filterActive {
-  background-color: var(--color-primary);
-  color: #fff;
-  border-color: var(--color-primary);
-  font-weight: 600;
-  box-shadow: var(--shadow-md);
-}
-
-.filterActive:hover {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
-  color: #fff;
-}
+/* Старые стили фильтров удалены - теперь используется SearchAndFilter компонент */

@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const { Event, Media, User, Pair } = require('../models');
+// const RecurringEventService = require('../services/recurringEvent.service'); // временно отключено
 
 exports.getEvents = async (req, res) => {
   try {
@@ -21,16 +22,34 @@ exports.getEvents = async (req, res) => {
       userIds.push(partnerId);
     }
 
-    const events = await Event.findAll({
+    // Получаем события пользователя (личные + общие которые он создал)
+    const userEvents = await Event.findAll({
       where: {
-        userId: {
-          [Op.in]: userIds,
-        },
+        userId: userId
       },
       order: [['event_date', 'DESC']],
       include: [{ model: User, attributes: ['email', 'first_name'] }]
     });
-    res.status(200).json(events);
+
+    let allEvents = [...userEvents];
+
+    // Если есть пара, добавляем общие события партнера
+    if (activePair) {
+      const partnerId = activePair.user1Id === userId ? activePair.user2Id : activePair.user1Id;
+      
+      const partnerSharedEvents = await Event.findAll({
+        where: {
+          userId: partnerId,
+          isShared: true // Только общие события партнера
+        },
+        order: [['event_date', 'DESC']],
+        include: [{ model: User, attributes: ['email', 'first_name'] }]
+      });
+
+      allEvents = [...allEvents, ...partnerSharedEvents];
+    }
+
+    res.status(200).json(allEvents);
   } catch (error) {
     console.error('!!! Ошибка в getEvents:', error);
     res.status(500).json({ message: 'Ошибка на сервере', error: error.message });
@@ -42,12 +61,24 @@ exports.createEvent = async (req, res) => {
     if (!req.user || !req.user.id) {
       return res.status(401).json({ message: 'Пользователь не аутентифицирован.' });
     }
-    const { title, description, event_date, event_type } = req.body;
+    const { 
+      title, 
+      description, 
+      event_date, 
+      event_type, 
+      isShared, 
+      is_recurring, 
+      recurrence_rule 
+    } = req.body;
+
     const newEvent = await Event.create({
       title,
       description,
       event_date: event_date || new Date(),
       event_type,
+      isShared: isShared || false,
+      is_recurring: is_recurring || false,
+      recurrence_rule: recurrence_rule || null,
       userId: req.user.id,
     });
     res.status(201).json(newEvent);
@@ -65,7 +96,16 @@ exports.updateEvent = async (req, res) => {
     }
     const { id } = req.params;
     // Получаем все возможные поля из тела запроса
-    const { title, description, event_date } = req.body;
+    const { 
+      title, 
+      description, 
+      event_date, 
+      end_date, 
+      event_type, 
+      isShared, 
+      is_recurring, 
+      recurrence_rule 
+    } = req.body;
 
     const event = await Event.findOne({ where: { id, userId: req.user.id } });
 
@@ -78,6 +118,11 @@ exports.updateEvent = async (req, res) => {
     if (title !== undefined) updateData.title = title;
     if (description !== undefined) updateData.description = description;
     if (event_date !== undefined) updateData.event_date = event_date;
+    if (end_date !== undefined) updateData.end_date = end_date;
+    if (event_type !== undefined) updateData.event_type = event_type;
+    if (isShared !== undefined) updateData.isShared = isShared;
+    if (is_recurring !== undefined) updateData.is_recurring = is_recurring;
+    if (recurrence_rule !== undefined) updateData.recurrence_rule = recurrence_rule;
 
     // Обновляем событие только теми полями, которые были переданы
     await event.update(updateData);

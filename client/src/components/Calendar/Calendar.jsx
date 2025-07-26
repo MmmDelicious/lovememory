@@ -4,16 +4,21 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import eventService from '../../services/event.service';
 import Sidebar from '../Sidebar/Sidebar';
+import CalendarFilters from './SearchAndFilter';
 import { useMascot } from '../../context/MascotContext';
 import { useAuth } from '../../context/AuthContext';
 import styles from './Calendar.module.css';
 
-const FILTERS = [
-  { id: 'all', label: 'Все' },
-  { id: 'mine', label: 'Мои' },
-  { id: 'partner', label: 'Партнёра' },
-  { id: 'shared', label: 'Общие' },
-];
+const EVENT_TYPE_COLORS = {
+  memory: '#8B5CF6',     // фиолетовый
+  plan: '#3B82F6',       // синий
+  anniversary: '#EF4444', // красный
+  birthday: '#F59E0B',   // оранжевый
+  travel: '#10B981',     // зеленый
+  date: '#EC4899',       // розовый
+  gift: '#F97316',       // оранжевый
+  milestone: '#6366F1'   // индиго
+};
 
 const Calendar = () => {
   const [events, setEvents] = useState([]);
@@ -54,10 +59,13 @@ const Calendar = () => {
           start: event.event_date,
           end: event.end_date,
           allDay: !hasTime,
+          backgroundColor: EVENT_TYPE_COLORS[event.event_type] || EVENT_TYPE_COLORS.plan,
+          borderColor: EVENT_TYPE_COLORS[event.event_type] || EVENT_TYPE_COLORS.plan,
           extendedProps: {
             description: event.description,
             isOwner: event.userId === user.id,
             isShared: !!event.isShared,
+            eventType: event.event_type,
             rawEvent: event,
             timeRange: timeRange,
           }
@@ -133,7 +141,11 @@ const Calendar = () => {
   };
   
   const handleEventClick = (clickInfo) => {
-    setSelectedEvent({ ...clickInfo.event.extendedProps.rawEvent, date: clickInfo.event.startStr });
+    setSelectedEvent({ 
+      ...clickInfo.event.extendedProps.rawEvent, 
+      date: clickInfo.event.startStr,
+      timeRange: clickInfo.event.extendedProps.timeRange
+    });
     setSidebarOpen(true);
   };
   
@@ -148,7 +160,11 @@ const Calendar = () => {
         title: eventData.title,
         description: eventData.description,
         event_date: eventData.event_date,
-        end_date: eventData.end_date
+        end_date: eventData.end_date,
+        event_type: eventData.event_type,
+        isShared: eventData.isShared,
+        is_recurring: eventData.is_recurring,
+        recurrence_rule: eventData.recurrence_rule
       };
 
       if (eventData.id) {
@@ -192,38 +208,89 @@ const Calendar = () => {
     }
   };
 
+  const getEventTypeIcon = (eventType) => {
+    const icons = {
+      memory: '💭',
+      plan: '📅',
+      anniversary: '💕',
+      birthday: '🎂',
+      travel: '✈️',
+      date: '💖',
+      gift: '🎁',
+      milestone: '⭐'
+    };
+    return icons[eventType] || '📅';
+  };
+
   const renderEventContent = (eventInfo) => {
     return (
       <div className={styles.eventContentWrapper}>
-        <div className={styles.eventTitle}>{eventInfo.event.title}</div>
-        {eventInfo.event.extendedProps.timeRange && (
-          <div className={styles.eventTime}>{eventInfo.event.extendedProps.timeRange}</div>
-        )}
+        <div className={styles.eventTitle}>
+          <span className={styles.eventIcon}>
+            {getEventTypeIcon(eventInfo.event.extendedProps.eventType)}
+          </span>
+          {eventInfo.event.title}
+        </div>
+        {/* Убираем время из отображения - будет показываться в сайдбаре */}
       </div>
     );
   };
 
-  const filteredEvents = events.filter(event => {
-    if (filter === 'all') return true;
-    if (filter === 'mine') return event.extendedProps?.isOwner && !event.extendedProps?.isShared;
-    if (filter === 'partner') return !event.extendedProps?.isOwner && !event.extendedProps?.isShared;
-    if (filter === 'shared') return event.extendedProps?.isShared;
-    return true;
-  });
+  const getDateFilters = () => {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay() + 1);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    
+    return { now, startOfWeek, endOfWeek, startOfMonth, endOfMonth };
+  };
+
+  // Убрали функцию поиска
+
+  const matchesFilter = (event) => {
+    const { now, startOfWeek, endOfWeek, startOfMonth, endOfMonth } = getDateFilters();
+    const eventDate = new Date(event.start);
+    
+    switch (filter) {
+      case 'all':
+        return true;
+      case 'mine':
+        return event.extendedProps?.isOwner; // Все мои события (личные + общие)
+      case 'shared':
+        return event.extendedProps?.isShared; // Только общие события
+      case 'partner':
+        return !event.extendedProps?.isOwner; // Только события партнера
+      case 'upcoming':
+        return eventDate >= now;
+      case 'this_week':
+        return eventDate >= startOfWeek && eventDate <= endOfWeek;
+      case 'this_month':
+        return eventDate >= startOfMonth && eventDate <= endOfMonth;
+      case 'birthdays':
+        return event.extendedProps?.eventType === 'birthday';
+      case 'anniversaries':
+        return event.extendedProps?.eventType === 'anniversary';
+      case 'memories':
+        return event.extendedProps?.eventType === 'memory';
+      case 'travel':
+        return event.extendedProps?.eventType === 'travel';
+      default:
+        return true;
+    }
+  };
+
+  const filteredEvents = events.filter(event => matchesFilter(event));
 
   return (
     <div className={styles.calendarContainer} ref={calendarContainerRef}>
-      <div className={styles.filterBar}>
-        {FILTERS.map(f => (
-          <button
-            key={f.id}
-            className={`${styles.filterButton} ${filter === f.id ? styles.filterActive : ''}`.trim()}
-            onClick={() => setFilter(f.id)}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+      <CalendarFilters 
+        onFilterChange={setFilter}
+        activeFilter={filter}
+      />
       <FullCalendar
         ref={calendarRef}
         key={isMobile ? 'mobile' : 'desktop'}
@@ -237,7 +304,13 @@ const Calendar = () => {
           ? { left: 'prev', center: 'title', right: 'next' }
           : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek,dayGridDay' }
         }
-        buttonText={{ today: 'сегодня', month: 'месяц', week: 'неделя', day: 'день' }}
+        buttonText={{ 
+          today: 'сегодня', 
+          month: 'месяц', 
+          week: 'неделя', 
+          day: 'день',
+          list: 'список'
+        }}
         height="100%"
         editable={true}
         eventDrop={handleInteraction(handleEventDrop)}

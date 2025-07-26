@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styles from './Sidebar.module.css';
 import Button from '../Button/Button';
 import eventService from '../../services/event.service';
+import RecurrenceSelector from '../Calendar/RecurrenceSelector';
 
 const formatDate = (date) => {
   if (!date) return '';
@@ -22,8 +23,23 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
   const [endTime, setEndTime] = useState('');
   const [media, setMedia] = useState([]);
   const [isShared, setIsShared] = useState(false);
+  const [eventType, setEventType] = useState('plan');
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceRule, setRecurrenceRule] = useState(null);
+  const [showRecurrenceModal, setShowRecurrenceModal] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
+
+  const EVENT_TYPES = [
+    { value: 'plan', label: 'Планы', icon: '📅' },
+    { value: 'memory', label: 'Воспоминания', icon: '💭' },
+    { value: 'anniversary', label: 'Годовщины', icon: '💕' },
+    { value: 'birthday', label: 'Дни рождения', icon: '🎂' },
+    { value: 'travel', label: 'Путешествия', icon: '✈️' },
+    { value: 'date', label: 'Свидания', icon: '💖' },
+    { value: 'gift', label: 'Подарки', icon: '🎁' },
+    { value: 'milestone', label: 'Важные моменты', icon: '⭐' }
+  ];
 
   useEffect(() => {
     if (eventData) {
@@ -32,6 +48,9 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
       setTitle(rawEvent.title || '');
       setDescription(rawEvent.description || '');
       setIsShared(!!rawEvent.isShared);
+      setEventType(rawEvent.event_type || 'plan');
+      setIsRecurring(!!rawEvent.is_recurring);
+      setRecurrenceRule(rawEvent.recurrence_rule || null);
       
       setStartDate(formatDate(rawEvent.event_date || eventData.date));
       setStartTime(formatTime(rawEvent.event_date));
@@ -78,7 +97,10 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
       description,
       event_date: finalStartDate,
       end_date: finalEndDate,
-      isShared
+      event_type: eventType,
+      isShared,
+      is_recurring: isRecurring,
+      recurrence_rule: isRecurring ? recurrenceRule : null
     });
   };
 
@@ -111,14 +133,39 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
       <div className={`${styles.overlay} ${isOpen ? styles.open : ''}`} onClick={onClose}></div>
       <div className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
         <div className={styles.header}>
-            <h2 className={styles.title}>{formattedDate}</h2>
+            <h2 className={styles.title}>
+              {eventData.title || 'Новое событие'}
+            </h2>
             <button className={styles.closeButton} onClick={onClose}>×</button>
+        </div>
+        
+        <div className={styles.dateInfo}>
+          <span className={styles.dateLabel}>📅 {formattedDate}</span>
+          {eventData.timeRange && (
+            <span className={styles.timeLabel}>⏰ {eventData.timeRange}</span>
+          )}
         </div>
         <form onSubmit={handleSave} className={styles.form}>
           <div className={styles.scrollableContent}>
             <div className={styles.formGroup}>
               <label htmlFor="title">Название <span className={styles.required}>*</span></label>
               <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Название события" className={styles.input} required />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="eventType">Тип события</label>
+              <select 
+                id="eventType" 
+                value={eventType} 
+                onChange={(e) => setEventType(e.target.value)} 
+                className={styles.input}
+              >
+                {EVENT_TYPES.map(type => (
+                  <option key={type.value} value={type.value}>
+                    {type.icon} {type.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {error && <div className={styles.error}>{error}</div>}
@@ -155,6 +202,39 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
               <label htmlFor="isShared">Показывать партнёру</label>
             </div>
 
+            <div className={styles.checkboxRow}>
+              <input 
+                id="isRecurring" 
+                type="checkbox" 
+                checked={isRecurring} 
+                onChange={e => {
+                  setIsRecurring(e.target.checked);
+                  if (!e.target.checked) {
+                    setRecurrenceRule(null);
+                  }
+                }} 
+              />
+              <label htmlFor="isRecurring">Повторяющееся событие</label>
+            </div>
+
+            {isRecurring && (
+              <div className={styles.recurrenceSection}>
+                <button 
+                  type="button"
+                  className={styles.recurrenceButton}
+                  onClick={() => setShowRecurrenceModal(true)}
+                >
+                  <span className={styles.recurrenceIcon}>🔄</span>
+                  <span>
+                    {recurrenceRule ? 
+                      `${recurrenceRule.freq.toLowerCase()} ${recurrenceRule.interval > 1 ? `(каждые ${recurrenceRule.interval})` : ''}` : 
+                      'Настроить повторение'
+                    }
+                  </span>
+                </button>
+              </div>
+            )}
+
             {eventData.id && (
               <div className={styles.mediaSection}>
                 <h3>Фотографии</h3>
@@ -177,6 +257,13 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
             {eventData.id && <Button onClick={handleDelete} type="secondary">Удалить</Button>}
           </div>
         </form>
+        
+        <RecurrenceSelector
+          isOpen={showRecurrenceModal}
+          onClose={() => setShowRecurrenceModal(false)}
+          onSave={(rule) => setRecurrenceRule(rule)}
+          initialRule={recurrenceRule}
+        />
       </div>
     </>
   );
