@@ -10,6 +10,7 @@ const GAME_DISPLAY_NAMES = {
   'tic-tac-toe': 'Крестики-нолики',
   'chess': 'Шахматы',
   'poker': 'Покер',
+  'quiz': 'Квиз',
 };
 
 const GameLobbyPage = ({ gameType: gameTypeProp }) => {

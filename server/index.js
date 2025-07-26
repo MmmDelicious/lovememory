@@ -32,6 +32,9 @@ const io = new Server(server, {
   }
 });
 
+// Хранилище для интервалов обновления квиза
+const quizUpdateIntervals = new Map();
+
 app.use(cors({
   credentials: true,
   origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -139,6 +142,13 @@ io.on('connection', (socket) => {
                 const stateForPlayer = game.getStateForPlayer(player.id);
                 io.to(player.id).emit('game_update', stateForPlayer);
             });
+        } else if (gameType === 'quiz') {
+            // Для квиза отправляем начальное состояние и запускаем периодические обновления
+            const initialState = game.getState();
+            io.to(roomId).emit('game_update', initialState);
+            
+            // Запускаем периодические обновления таймера для квиза
+            startQuizTimerUpdates(roomId, game);
         } else {
             const initialState = game.getState();
             io.to(roomId).emit('game_update', initialState);
@@ -203,6 +213,15 @@ io.on('connection', (socket) => {
             const stateForPlayer = game.getStateForPlayer(player.id);
             io.to(player.id).emit('game_update', stateForPlayer);
         });
+      } else if (gameType === 'quiz') {
+        // Для квиза отправляем обновленное состояние всем игрокам
+        const newState = game.getState();
+        io.to(roomId).emit('game_update', newState);
+        
+        // Если игра завершилась, обрабатываем завершение квиза
+        if (newState.status === 'finished') {
+          handleQuizGameEnd(roomId, game);
+        }
       } else {
         const newState = game.getState();
         io.to(roomId).emit('game_update', newState);
@@ -248,6 +267,8 @@ io.on('connection', (socket) => {
               GameManager.removeGame(roomId);
             }
           }, 3000);
+        } else if (gameType === 'quiz') {
+          // Квиз уже обработан выше в handleQuizGameEnd
         } else {
           // Для других игр
           const finalState = game.getState();
@@ -273,36 +294,26 @@ io.on('connection', (socket) => {
     }
   });
 
-  const handleLeaveOrDisconnect = async () => {
-    console.log(`[SERVER] User ${socket.user.id} is leaving or disconnecting.`);
-    for (const roomId of userRooms) {
-      console.log(`[SERVER] Handling disconnect for room ${roomId}`);
-      const game = GameManager.getGame(roomId);
+  const handleLeaveOrDisconnect = async (roomId) => {
+    if (roomId && userRooms.has(roomId)) {
+      console.log(`[SERVER] User ${socket.user.id} leaving room ${roomId}`);
       
-      if (game && game.players && game.getState().status !== 'finished') {
-        const remainingPlayer = game.players.find(p => p.id !== socket.user.id);
-        console.log(`[SERVER] Game in progress. Player ${socket.user.id} disconnected. Remaining player: ${remainingPlayer ? remainingPlayer.id : 'none'}`);
-        if (remainingPlayer) {
+      // Остановка обновлений квиза если пользователь покинул комнату
+      stopQuizTimerUpdates(roomId);
+      
+      const game = GameManager.getGame(roomId);
+      if (game) {
+        const remainingSockets = (await io.in(roomId).fetchSockets()).filter(s => s.id !== socket.id);
+        if (remainingSockets.length === 0) {
+          console.log(`[SERVER] No players left in room ${roomId}. Removing game.`);
+          GameManager.removeGame(roomId);
+        } else if (remainingSockets.length === 1) {
+          const remainingPlayer = remainingSockets[0].user;
+          console.log(`[SERVER] Only one player (${remainingPlayer.id}) left in room ${roomId}. They win by default.`);
+          
           if (game.gameType === 'poker') {
-            // Для покера - остающийся игрок получает все блайнды и ставки в банке
-            const currentPot = game.pot;
-            const leavingPlayerBet = game.players.find(p => p.id === socket.user.id)?.currentBet || 0;
-            const totalWinnings = currentPot + leavingPlayerBet;
-            
-            // Добавляем выигрыш к стеку остающегося игрока
-            remainingPlayer.stack += totalWinnings;
-            
-            console.log(`[SERVER] Poker player left. Remaining player ${remainingPlayer.id} gets ${totalWinnings} coins (pot: ${currentPot}, leaving player bet: ${leavingPlayerBet})`);
-            
-            const finalState = { 
-              ...game.getStateForPlayer(remainingPlayer.id), 
-              status: 'finished', 
-              winner: remainingPlayer, 
-              isDraw: false,
-              pot: 0, // Банк обнулен
-              message: `Соперник покинул игру. Вы получаете ${totalWinnings} фишек!`
-            };
-            io.to(remainingPlayer.id).emit('game_end', finalState);
+            const finalState = { ...game.getStateForPlayer(remainingPlayer.id), status: 'finished', winner: remainingPlayer, isDraw: false };
+            io.to(roomId).emit('game_end', finalState);
             
             // Начисляем монеты в базе только остающемуся игроку (он получает свою ставку обратно)
             gameController.finalizeGame(roomId, remainingPlayer.id, socket.user.id).then(res => {
@@ -334,9 +345,88 @@ io.on('connection', (socket) => {
   socket.on('leave_room', handleLeaveOrDisconnect);
   socket.on('disconnect', () => {
     console.log(`[SERVER] Socket ${socket.id} (user ${socket.user.id}) disconnected.`);
-    handleLeaveOrDisconnect();
+    // При отключении обрабатываем все комнаты пользователя
+    for (const roomId of userRooms) {
+      handleLeaveOrDisconnect(roomId);
+    }
   });
 });
+
+// Функция для запуска периодических обновлений таймера квиза
+function startQuizTimerUpdates(roomId, game) {
+  // Очищаем предыдущий интервал если он был
+  stopQuizTimerUpdates(roomId);
+  
+  console.log(`[SERVER] Starting quiz timer updates for room ${roomId}`);
+  
+  const interval = setInterval(() => {
+    if (game.status !== 'in_progress') {
+      console.log(`[SERVER] Quiz game in room ${roomId} is no longer in progress. Stopping timer updates.`);
+      stopQuizTimerUpdates(roomId);
+      return;
+    }
+    
+    const gameState = game.getState();
+    if (gameState.currentQuestion) {
+      // Отправляем обновление состояния всем игрокам
+      io.to(roomId).emit('game_update', gameState);
+      
+      // Если время вышло, принудительно переходим к следующему вопросу
+      if (game.isTimeUp()) {
+        console.log(`[SERVER] Time is up for question in room ${roomId}. Force advancing.`);
+        game.forceNextQuestion();
+        
+        const newState = game.getState();
+        io.to(roomId).emit('game_update', newState);
+        
+        // Если игра завершилась, обрабатываем завершение
+        if (newState.status === 'finished') {
+          handleQuizGameEnd(roomId, game);
+          stopQuizTimerUpdates(roomId);
+        }
+      }
+    }
+  }, 1000); // Обновляем каждую секунду
+  
+  quizUpdateIntervals.set(roomId, interval);
+}
+
+// Функция для остановки периодических обновлений
+function stopQuizTimerUpdates(roomId) {
+  const interval = quizUpdateIntervals.get(roomId);
+  if (interval) {
+    clearInterval(interval);
+    quizUpdateIntervals.delete(roomId);
+    console.log(`[SERVER] Stopped quiz timer updates for room ${roomId}`);
+  }
+}
+
+// Функция для обработки завершения квиза
+function handleQuizGameEnd(roomId, game) {
+  console.log(`[SERVER] Quiz game in room ${roomId} finished. Processing end game.`);
+  
+  // Останавливаем обновления таймера
+  stopQuizTimerUpdates(roomId);
+  
+  const finalState = game.getState();
+  io.to(roomId).emit('game_end', finalState);
+  
+  // Начисляем монеты
+  if (game.winner && game.winner !== 'draw') {
+    const winnerId = game.winner;
+    const loserId = game.players.find(p => p !== winnerId);
+    console.log(`[SERVER] Finalizing quiz game. Winner: ${winnerId}, Loser: ${loserId}`);
+    gameController.finalizeGame(roomId, winnerId, loserId).then(res => {
+      if (res) {
+        if (res.winner) io.to(res.winner.id).emit('update_coins', res.winner.coins);
+        if (res.loser) io.to(res.loser.id).emit('update_coins', res.loser.coins);
+      }
+    });
+  }
+  
+  // Удаляем игру из менеджера
+  GameManager.removeGame(roomId);
+}
 
 const PORT = process.env.PORT || 5000;
 

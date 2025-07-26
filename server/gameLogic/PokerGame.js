@@ -306,40 +306,16 @@ class PokerGame {
     }
 
     getStateForPlayer(playerId) {
+        const state = this.getState();
         const player = this.players.find(p => p.id === playerId);
-        const allowed = this._getAllowedActions(player);
-        const winnersInfo = this.winnersInfo;
         
-        let winningHandCards = [];
-        if (winnersInfo) {
-            winningHandCards = winnersInfo.flatMap(info => info.handCards);
-        }
-
-        // Защита от неопределенного currentPlayerIndex
-        const currentPlayer = this.currentPlayerIndex !== undefined && this.players[this.currentPlayerIndex] ?
-            this.players[this.currentPlayerIndex] : null;
-
         return {
-            gameType: this.gameType,
-            stage: this.stage,
-            pot: this.pot,
-            communityCards: this.communityCards,
-            currentPlayerId: currentPlayer ? currentPlayer.id : null,
-            allowedActions: allowed.actions,
-            minRaiseAmount: allowed.minRaise,
-            currentBet: Math.max(...this.players.map(p => p.currentBet)),
-            status: this.status,
-            winnersInfo: this.winnersInfo || null,
-            winningHandCards: winningHandCards,
-            players: this.players.map(p => ({
-                id: p.id,
-                name: p.name,
-                stack: p.stack,
-                currentBet: p.currentBet,
-                inHand: p.inHand,
-                isDealer: this.players.indexOf(p) === this.dealerPosition,
-                hand: p.id === playerId || this.stage === 'showdown' ? p.hand : [{}, {}]
-            }))
+            ...state,
+            yourHand: player ? player.hand : [],
+            yourStack: player ? player.stack : 0,
+            yourCurrentBet: player ? player.currentBet : 0,
+            canMakeAction: this.getCurrentPlayer()?.id === playerId,
+            validActions: this.getCurrentPlayer()?.id === playerId ? this.getValidActions() : []
         };
     }
 
@@ -363,6 +339,27 @@ class PokerGame {
             pot: this.pot,
             winnersInfo: this.winnersInfo
         };
+    }
+
+    getCurrentPlayer() {
+        if (this.currentPlayerIndex !== undefined && this.players[this.currentPlayerIndex]) {
+            return this.players[this.currentPlayerIndex];
+        }
+        return null;
+    }
+
+    getValidActions() {
+        const currentPlayer = this.getCurrentPlayer();
+        if (!currentPlayer) return [];
+        
+        const allowed = this._getAllowedActions(currentPlayer);
+        return allowed.actions || [];
+    }
+
+    // Очистка ресурсов при удалении игры
+    cleanup() {
+        // Для покера особой очистки не требуется
+        console.log(`[POKER] Game cleanup completed`);
     }
 }
 

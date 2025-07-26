@@ -80,6 +80,12 @@ class TicTacToeGame {
     // Если нет победителя и нет пустых клеток - ничья
     return this.board.includes(null) ? null : 'draw';
   }
+
+  // Очистка ресурсов при удалении игры
+  cleanup() {
+    // Для крестиков-ноликов особой очистки не требуется
+    console.log(`[TIC-TAC-TOE] Game cleanup completed`);
+  }
 }
 
 module.exports = TicTacToeGame;

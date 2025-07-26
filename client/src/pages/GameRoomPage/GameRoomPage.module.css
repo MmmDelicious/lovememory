@@ -188,3 +188,376 @@
   transform: translateY(-2px);
   box-shadow: 0 12px 20px -3px rgb(0 0 0 / 0.1), 0 6px 8px -4px rgb(0 0 0 / 0.1);
 }
+
+/* Quiz Styles */
+.quizContainer {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5e6d3 0%, #f0d5b8 100%);
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  font-family: 'Arial', sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.quizHeader {
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.playerProfiles {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.playerProfile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.playerAvatar {
+  width: 80px;
+  height: 80px;
+  border: 3px solid #d4b895;
+  box-shadow: 0 4px 16px rgba(139, 69, 19, 0.2);
+}
+
+.playerName {
+  font-size: 18px;
+  font-weight: bold;
+  color: #8b4513;
+  text-align: center;
+}
+
+.playerScore {
+  font-size: 14px;
+  color: #a0522d;
+  font-weight: 600;
+}
+
+.questionSection {
+  text-align: center;
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.questionProgress {
+  font-size: 14px;
+  color: #8b4513;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.timer {
+  font-size: 16px;
+  color: #d2691e;
+  font-weight: bold;
+  margin-bottom: 20px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.questionText {
+  font-size: 22px;
+  color: #654321;
+  font-weight: bold;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0 20px;
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.optionButton {
+  padding: 16px 20px;
+  border: 2px solid #e8b4a0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  color: #654321;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.optionButton:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: #d4956f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.15);
+}
+
+.optionButton:active {
+  transform: translateY(0);
+  background: #e8b4a0;
+  color: white;
+}
+
+.optionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.optionButton.selected {
+  background: #e8b4a0;
+  color: white;
+  border-color: #d4956f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+}
+
+.submitButton {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #e8b4a0 0%, #d4956f 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d4956f 0%, #b8804a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 69, 19, 0.3);
+}
+
+.answerStatus {
+  text-align: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  color: #654321;
+  font-weight: bold;
+  font-size: 16px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.gameOverTitle {
+  text-align: center;
+  color: #654321;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.finalScores {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.finalScores .playerScore {
+  font-size: 20px;
+  color: #8b4513;
+  font-weight: bold;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  border: 2px solid #e8b4a0;
+}
+
+/* Question Results Styles - УДАЛЕНО, больше не используется */
+
+/* Game End Screen Styles */
+.gameEndContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 600px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 25px;
+  box-shadow: 0 20px 40px rgba(139, 69, 19, 0.3);
+  border: 3px solid #e8b4a0;
+  position: relative;
+  text-align: center;
+}
+
+.gameEndContainer .lottieAnimation {
+  position: absolute;
+  top: -250px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: 400px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.scoresTitle {
+  font-size: 22px;
+  color: #654321;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.finalPlayerScore {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 25px;
+  margin: 10px 0;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 15px;
+  border: 2px solid #e8b4a0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #654321;
+  min-width: 300px;
+}
+
+.finalPlayerScore.winnerScore {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border-color: #daa520;
+  color: #b8860b;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+.scoreValue {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.winnerBadge {
+  font-size: 24px;
+  margin-left: 10px;
+}
+
+.coinsInfo {
+  margin: 25px 0;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 15px;
+  border: 2px solid #d4b895;
+}
+
+.coinsMessage {
+  font-size: 16px;
+  color: #654321;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.returnButton {
+  padding: 15px 40px;
+  background: linear-gradient(135deg, #e8b4a0 0%, #d4956f 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 6px 20px rgba(139, 69, 19, 0.3);
+}
+
+.returnButton:hover {
+  background: linear-gradient(135deg, #d4956f 0%, #b8804a 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(139, 69, 19, 0.4);
+}
+
+.gameOverTitle {
+  font-family: var(--font-family-heading);
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Responsive design for game end screen */
+@media (max-width: 768px) {
+  .gameEndContainer {
+    padding: 25px;
+    max-width: 90%;
+  }
+  
+  .gameOverTitle {
+    font-size: 2.5rem;
+  }
+  
+  .finalPlayerScore {
+    min-width: auto;
+    font-size: 16px;
+    padding: 12px 20px;
+  }
+  
+  .returnButton {
+    padding: 12px 30px;
+    font-size: 16px;
+  }
+  
+  .gameEndContainer .lottieAnimation {
+    width: 300px;
+    height: 300px;
+    top: -200px;
+  }
+}
+
+/* Responsive design for quiz */
+@media (max-width: 768px) {
+  .quizContainer {
+    margin: 10px;
+    padding: 15px;
+  }
+  
+  .playerAvatar {
+    width: 60px;
+    height: 60px;
+    font-size: 18px;
+  }
+  
+  .questionText {
+    font-size: 18px;
+    padding: 0 10px;
+  }
+  
+  .optionsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .optionButton {
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+}

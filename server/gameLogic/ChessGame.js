@@ -19,21 +19,23 @@ class ChessGame {
   }
 
   getState() {
-    const isGameOver = this.game.isGameOver();
-    const state = {
+    // Возвращаем состояние в упрощенном виде
+    return {
       gameType: this.gameType,
-      status: isGameOver ? 'finished' : 'in_progress',
+      status: this.status,
       players: this.players,
       currentPlayerId: this.getCurrentPlayerId(),
       winner: this.winner,
       isDraw: this.isDraw,
-      board: this.game.fen(),
-      turn: this.game.turn(),
-      isCheckmate: this.game.isCheckmate(),
-      isStalemate: this.game.isStalemate(),
+      board: this.board,
+      turn: this.turn
     };
-    // console.log("[ChessGame] Getting state:", state);
-    return state;
+  }
+
+  // Очистка ресурсов при удалении игры
+  cleanup() {
+    // Для шахмат особой очистки не требуется
+    console.log(`[CHESS] Game cleanup completed`);
   }
 
   makeMove(playerId, move) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './GamesPage.module.css';
-import { FaChess, FaTicketAlt } from 'react-icons/fa';
+import { FaChess, FaTicketAlt, FaBrain } from 'react-icons/fa';
 import { PiCardsFill } from "react-icons/pi";
 
 const CLASSIC_GAMES = [
@@ -18,6 +18,13 @@ const CLASSIC_GAMES = [
     description: 'Стратегическая игра для двух игроков. Поставьте мат королю соперника.',
     icon: <FaChess size={32} />,
     path: '/games/chess',
+  },
+  {
+    id: 'quiz',
+    name: 'Квиз',
+    description: 'Интеллектуальная игра для двух игроков. Отвечайте на вопросы быстрее соперника!',
+    icon: <FaBrain size={32} />,
+    path: '/games/quiz',
   }
 ];
 
