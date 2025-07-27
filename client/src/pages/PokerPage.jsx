@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import PokerTable from '../components/PokerGame/PokerTable';
 import styles from './PokerPage.module.css';
 
@@ -10,6 +11,7 @@ const SOCKET_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const PokerPage = () => {
     const { roomId } = useParams();
     const { token, user } = useAuth();
+    const { setCoins } = useCurrency();
     const navigate = useNavigate();
     const [socket, setSocket] = useState(null);
     const [gameState, setGameState] = useState(null);
@@ -28,6 +30,17 @@ const PokerPage = () => {
 
         newSocket.on('game_update', (newState) => {
             console.log("Game state updated: ", newState);
+            console.log("Received poker state details:", {
+                status: newState?.status,
+                stage: newState?.stage,
+                playersCount: newState?.players?.length,
+                pot: newState?.pot,
+                currentPlayerId: newState?.currentPlayerId,
+                allowedActions: newState?.allowedActions,
+                yourHand: newState?.yourHand?.length,
+                communityCards: newState?.communityCards?.length,
+                canMakeAction: newState?.canMakeAction
+            });
             setGameState(prevState => {
                 if (newState.status === 'waiting' || newState.stage === 'waiting') {
                     return {
@@ -56,15 +69,32 @@ const PokerPage = () => {
             setGameState(finalState);
         });
         
+        newSocket.on('rebuy_success', (data) => {
+            console.log('Rebuy successful:', data);
+            alert(`Докупка успешна! Новый стек: ${data.newStack} фишек`);
+            // Обновляем монеты через контекст (они обновятся автоматически через update_coins)
+        });
+        
+        newSocket.on('update_coins', (newCoinsAmount) => {
+            // Обновляем баланс монет через CurrencyContext
+            setCoins(newCoinsAmount);
+        });
+        
         newSocket.on('error', (error) => {
             console.error("Socket Error:", error);
             alert(`Ошибка: ${error}`);
         });
 
         setSocket(newSocket);
+        
+        // Сохраняем socket и roomId глобально для использования в PokerTable
+        window.pokerSocket = newSocket;
+        window.pokerRoomId = roomId;
 
         return () => {
             console.log('Disconnecting socket...');
+            delete window.pokerSocket;
+            delete window.pokerRoomId;
             newSocket.disconnect();
         };
     }, [roomId, token, user.id]);

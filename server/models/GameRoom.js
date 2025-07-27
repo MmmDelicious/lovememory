@@ -21,6 +21,18 @@ const GameRoom = sequelize.define('GameRoom', {
     allowNull: false,
     defaultValue: 0,
   },
+  // Для покера: тип стола (standard, premium, elite)
+  tableType: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
+  },
+  // Блайнды для покера в формате "5/10"
+  blinds: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
+  },
   hostId: {
     type: DataTypes.UUID,
     allowNull: false,

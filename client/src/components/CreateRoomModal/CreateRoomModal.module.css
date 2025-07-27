@@ -57,3 +57,136 @@
   gap: 12px;
   margin-top: 16px;
 } 
+
+/* Новые стили для покерных столов */
+.tableSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.tableOption {
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.tableOption::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tableOption:hover {
+  border-color: #FFD700;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+}
+
+.tableOption:hover::before {
+  opacity: 1;
+}
+
+.tableOption.selected {
+  border-color: #FFD700;
+  background: linear-gradient(135deg, #FFF8DC 0%, #F0E68C 100%);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.tableOption.selected::before {
+  opacity: 1;
+}
+
+.tableName {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+.tableBlinds {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+.tableBuyIn {
+  color: #e67e22;
+  font-weight: 600;
+  font-size: 0.95rem;
+  position: relative;
+  z-index: 1;
+}
+
+.chipsConversion {
+  position: absolute;
+  right: 0.75rem;
+  color: #6c757d;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* Специальные стили для элитного стола */
+.tableOption:nth-child(3) {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  border-color: #FFD700;
+}
+
+.tableOption:nth-child(3) .tableName {
+  color: #FFD700;
+}
+
+.tableOption:nth-child(3) .tableBlinds {
+  color: #bdc3c7;
+}
+
+.tableOption:nth-child(3) .tableBuyIn {
+  color: #f39c12;
+}
+
+.tableOption:nth-child(3).selected {
+  background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.4);
+}
+
+/* Премиум стол */
+.tableOption:nth-child(2) {
+  background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+  color: white;
+}
+
+.tableOption:nth-child(2) .tableName {
+  color: #f8f9fa;
+}
+
+.tableOption:nth-child(2) .tableBlinds {
+  color: #e8daef;
+}
+
+.tableOption:nth-child(2) .tableBuyIn {
+  color: #f7dc6f;
+}
+
+.tableOption:nth-child(2).selected {
+  background: linear-gradient(135deg, #7d3c98 0%, #8e44ad 100%);
+} 

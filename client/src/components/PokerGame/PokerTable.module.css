@@ -132,13 +132,12 @@
     gap: 2px;
 }
 
+/* Stack display styling */
 .stack {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    color: var(--text-color);
     font-weight: 600;
+    color: #2c3e50;
 }
 
 .bet {
@@ -366,34 +365,42 @@
 
 /* Waiting state */
 .waitingContainer {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 30;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
 }
 
 .waitingMessage {
-    text-align: center;
-    background: var(--player-info-bg);
-    color: var(--text-color);
-    padding: 2rem 3rem;
-    border-radius: 20px;
-    border: 2px solid var(--table-border);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(26, 37, 47, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  padding: 30px 40px;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .waitingIcon {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    animation: waitingSpin 2s ease-in-out infinite;
+  font-size: 48px;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.6));
 }
 
 .waitingText {
-    font-family: var(--primary-font);
-    font-size: 1.3rem;
-    font-weight: 500;
-    color: var(--text-color);
+  color: #FFD700;
+  font-size: 24px;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  margin-bottom: 8px;
+}
+
+.waitingSubtext {
+  color: #bdc3c7;
+  font-size: 14px;
+  font-weight: 400;
+  opacity: 0.8;
 }
 
 @keyframes waitingSpin {
@@ -595,6 +602,202 @@
     font-weight: bold;
     font-size: 23px;
     color: var(--text-color);
+}
+
+/* Balance display */
+.balanceDisplay {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(26, 37, 47, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.balanceItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.balanceIcon {
+  font-size: 20px;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+}
+
+.balanceAmount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #FFD700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+.balanceLabel {
+  font-size: 11px;
+  color: #bdc3c7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.rebuyButton {
+  margin-left: 10px;
+  background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(230, 126, 34, 0.3);
+}
+
+.rebuyButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+/* Rebuy modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.rebuyModal {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 400px;
+  width: 90%;
+  border: 2px solid #FFD700;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.rebuyModal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 215, 0, 0.05) 0%, transparent 50%, rgba(255, 215, 0, 0.05) 100%);
+  pointer-events: none;
+}
+
+.modalTitle {
+  color: #FFD700;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 15px;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  position: relative;
+  z-index: 1;
+}
+
+.modalText {
+  color: #ecf0f1;
+  text-align: center;
+  margin-bottom: 25px;
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+}
+
+.rebuyInputGroup {
+  margin-bottom: 25px;
+  position: relative;
+  z-index: 1;
+}
+
+.rebuyLabel {
+  display: block;
+  color: #bdc3c7;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.rebuyInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.rebuyInput {
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.rebuyInput:focus {
+  outline: none;
+  border-color: #FFD700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.currencyIcon {
+  position: absolute;
+  left: 12px;
+  font-size: 16px;
+  z-index: 1;
+}
+
+.chipsConversion {
+  position: absolute;
+  right: 12px;
+  color: #f39c12;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.modalActions button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  min-width: 120px;
 }
 
 /* Responsive Styles (Mobile) */
@@ -821,4 +1024,11 @@
 /* Legacy compatibility */
 .opponentArea, .playerArea {
     display: none;
+} 
+
+/* Player chips icon */
+.chipsIcon {
+  font-size: 16px;
+  margin-right: 7px;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6));
 } 

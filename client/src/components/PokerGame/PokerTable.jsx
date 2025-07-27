@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import PlayingCard from '../PlayingCard/PlayingCard';
 import Button from '../Button/Button';
+import { useCurrency } from '../../context/CurrencyContext';
 import styles from './PokerTable.module.css';
 import avatarImage from './assets/avatar.png';
 import Avatar from '../Avatar/Avatar';
@@ -15,8 +16,12 @@ const PokerTable = ({ gameState, onAction, userId }) => {
   const [animatingCards, setAnimatingCards] = useState([]);
   const [dealingPhase, setDealingPhase] = useState(false);
   const [prevStage, setPrevStage] = useState(null);
+  const [showRebuyModal, setShowRebuyModal] = useState(false);
+  const [rebuyAmount, setRebuyAmount] = useState(100);
+  
+  const { coins, refreshCoins } = useCurrency();
 
-  const { players, communityCards, pot, currentPlayerId, stage, allowedActions, minRaiseAmount, currentBet, winningHandCards } = gameState;
+  const { players = [], communityCards = [], pot = 0, currentPlayerId, stage, allowedActions = [], minRaiseAmount = 0, currentBet = 0, winningHandCards = [] } = gameState || {};
 
   // Перемещаем все хуки сюда, чтобы они выполнялись всегда
   const currentPlayer = useMemo(() => 
@@ -76,7 +81,7 @@ const PokerTable = ({ gameState, onAction, userId }) => {
   }, [minRaise]);
 
   // Теперь все conditional returns идут ПОСЛЕ всех хуков
-  if (gameState.status === 'waiting' || gameState.stage === 'waiting' || (players && players.length < 2)) {
+  if (!gameState || gameState.status === 'waiting' || gameState.stage === 'waiting' || (players && players.length < 2)) {
     return (
       <div className={styles.gameContainer}>
         <div className={styles.pokerTable}>
@@ -87,7 +92,59 @@ const PokerTable = ({ gameState, onAction, userId }) => {
           <div className={styles.waitingContainer}>
             <div className={styles.waitingMessage}>
               <div className={styles.waitingIcon}>⏳</div>
-              <div className={styles.waitingText}>Ожидание второго игрока...</div>
+              <div className={styles.waitingText}>
+                {gameState?.message || 'Ожидание второго игрока...'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Специальный экран ожидания для игроков, присоединившихся во время раздачи
+  if (gameState.status === 'waiting_for_next_hand') {
+    return (
+      <div className={styles.gameContainer}>
+        <div className={styles.pokerTable}>
+          <div className={styles.deckContainer}>
+            <PlayingCard faceUp={false} />
+          </div>
+          
+          <div className={styles.waitingContainer}>
+            <div className={styles.waitingMessage}>
+              <div className={styles.waitingIcon}>🃏</div>
+              <div className={styles.waitingText}>
+                {gameState.message || 'Дождитесь завершения текущей раздачи...'}
+              </div>
+              <div className={styles.waitingSubtext}>
+                Вы присоединитесь к игре в следующей раздаче
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Экран ожидания игроков
+  if (gameState.status === 'waiting_for_players') {
+    return (
+      <div className={styles.gameContainer}>
+        <div className={styles.pokerTable}>
+          <div className={styles.deckContainer}>
+            <PlayingCard faceUp={false} />
+          </div>
+          
+          <div className={styles.waitingContainer}>
+            <div className={styles.waitingMessage}>
+              <div className={styles.waitingIcon}>👥</div>
+              <div className={styles.waitingText}>
+                Ожидание других игроков...
+              </div>
+              <div className={styles.waitingSubtext}>
+                Минимум 2 игрока для начала раздачи
+              </div>
             </div>
           </div>
         </div>
@@ -104,8 +161,18 @@ const PokerTable = ({ gameState, onAction, userId }) => {
   const getPlayerPosition = (playerId) => {
     if (playerId === userId) return 0; // Основной игрок всегда в позиции 0 (внизу)
     
-    const otherPlayers = players.filter(p => p.id !== userId);
+    const otherPlayers = (players || []).filter(p => p && p.id && p.id !== userId);
     const playerIndex = otherPlayers.findIndex(p => p.id === playerId);
+    
+    // Защита от дублирования позиций
+    if (playerIndex === -1) {
+      // Если игрок не найден, используем хеш от ID или name для уникальной позиции
+      const fallbackPosition = playerId 
+        ? Math.abs(playerId.toString().split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % 4 + 1
+        : Math.floor(Math.random() * 4) + 1;
+      return fallbackPosition;
+    }
+    
     return playerIndex + 1; // Позиции 1-4 для остальных игроков
   };
 
@@ -139,12 +206,7 @@ const PokerTable = ({ gameState, onAction, userId }) => {
           </div>
           <div className={styles.playerStats}>
             <span className={styles.stack}>
-              <img 
-                src="https://i.ibb.co/9hbdxJ3/chips-icon.png" 
-                alt="chips icon" 
-                className={styles.chipsIcon}
-                style={{ width: '21px', height: '21px', marginRight: '7px' }}
-              />
+              <span className={styles.chipsIcon}>🪙</span>
               {player.stack}
             </span>
             {player.currentBet > 0 && <span className={styles.bet}>Ставка: {player.currentBet}</span>}
@@ -156,7 +218,7 @@ const PokerTable = ({ gameState, onAction, userId }) => {
         <div className={styles.playerCards}>
           {isMainPlayer ? (
             // Для основного игрока показываем реальные карты
-            (player.hand && player.hand.length > 0) ? player.hand.map((card, index) => (
+            (player.hand && player.hand.length > 0) ? (player.hand || []).map((card, index) => (
               <div
                 key={index}
                 className={`${styles.cardWrapper} ${dealingPhase ? styles.cardDealing : ''}`}
@@ -193,6 +255,29 @@ const PokerTable = ({ gameState, onAction, userId }) => {
   const handleRaiseChange = (e) => {
     setRaiseAmount(Number(e.target.value));
   };
+
+  const handleRebuy = async () => {
+    try {
+      // Нужно получить roomId и socket из пропсов или контекста
+      // Для демонстрации используем window.pokerSocket если доступен
+      if (window.pokerSocket && window.pokerRoomId) {
+        window.pokerSocket.emit('rebuy_chips', { 
+          roomId: window.pokerRoomId, 
+          coinsAmount: rebuyAmount 
+        });
+        
+        // Обработчик ответа будет установлен в PokerPage
+        setShowRebuyModal(false);
+      } else {
+        console.log(`Rebuy ${rebuyAmount} coins for ${rebuyAmount * 10} chips`);
+        alert('Функция докупки будет доступна в следующем обновлении');
+        setShowRebuyModal(false);
+      }
+    } catch (error) {
+      console.error('Rebuy failed:', error);
+      alert('Ошибка при докупке фишек');
+    }
+  };
   
   return (
     <div className={styles.gameContainer}>
@@ -215,7 +300,7 @@ const PokerTable = ({ gameState, onAction, userId }) => {
 
         {/* Community Cards */}
         <div className={styles.communityCards}>
-          {communityCards.map((card, index) => (
+          {(communityCards || []).map((card, index) => (
             <div
               key={index}
               className={`${styles.communityCardWrapper} ${
@@ -248,9 +333,11 @@ const PokerTable = ({ gameState, onAction, userId }) => {
         </div>
 
         {/* Рендерим всех игроков в их позициях вокруг стола */}
-        {players.map((player) => 
-          renderPlayerArea(player, getPlayerPosition(player.id))
-        )}
+        {(players || []).map((player, index) => (
+          <Fragment key={player.id || `player-${index}-${player.name || 'unknown'}`}>
+            {renderPlayerArea(player, getPlayerPosition(player.id))}
+          </Fragment>
+        ))}
       </div>
 
       {/* Decorative elements */}
@@ -261,11 +348,7 @@ const PokerTable = ({ gameState, onAction, userId }) => {
         <div className={`${styles.decoHeart} ${styles.heart4}`}></div>
         <div className={`${styles.decoHeart} ${styles.heart5}`}></div>
         <div className={`${styles.decoHeart} ${styles.heart6}`}></div>
-        <img 
-          className={styles.rose} 
-          src="https://i.ibb.co/Y0KjC0p/rose.png" 
-          alt="rose decoration" 
-        />
+        <div className={styles.rose}>🌹</div>
       </div>
 
       {/* Likes counter */}
@@ -274,14 +357,76 @@ const PokerTable = ({ gameState, onAction, userId }) => {
         <span className={styles.count}>10</span>
       </div>
 
+      {/* Coins and chips balance display */}
+      <div className={styles.balanceDisplay}>
+        <div className={styles.balanceItem}>
+          <span className={styles.balanceIcon}>🪙</span>
+          <span className={styles.balanceAmount}>{coins}</span>
+          <span className={styles.balanceLabel}>Монеты</span>
+        </div>
+        <div className={styles.balanceItem}>
+          <span className={styles.balanceIcon}>🎰</span>
+          <span className={styles.balanceAmount}>{mainPlayerStack}</span>
+          <span className={styles.balanceLabel}>Фишки</span>
+        </div>
+        {currentPlayer && currentPlayer.stack < 200 && (
+          <Button 
+            onClick={() => setShowRebuyModal(true)}
+            variant="secondary"
+            className={styles.rebuyButton}
+          >
+            Докупить фишки
+          </Button>
+        )}
+      </div>
+
+      {/* Rebuy modal */}
+      {showRebuyModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.rebuyModal}>
+            <h3 className={styles.modalTitle}>Докупка фишек</h3>
+            <p className={styles.modalText}>
+              Ваш стек: {mainPlayerStack} фишек. Минимальная докупка: 100 монет = 1000 фишек
+            </p>
+            <div className={styles.rebuyInputGroup}>
+              <label className={styles.rebuyLabel}>Количество монет (100-500):</label>
+              <div className={styles.rebuyInputWrapper}>
+                <span className={styles.currencyIcon}>🪙</span>
+                <input
+                  type="number"
+                  value={rebuyAmount}
+                  onChange={(e) => setRebuyAmount(Math.max(100, Math.min(500, parseInt(e.target.value) || 100)))}
+                  className={styles.rebuyInput}
+                  min="100"
+                  max="500"
+                />
+                <span className={styles.chipsConversion}>= {rebuyAmount * 10} фишек</span>
+              </div>
+            </div>
+            <div className={styles.modalActions}>
+              <Button onClick={() => setShowRebuyModal(false)} variant="secondary">
+                Отмена
+              </Button>
+              <Button 
+                onClick={handleRebuy}
+                variant="primary"
+                disabled={coins < rebuyAmount}
+              >
+                Докупить за {rebuyAmount} 🪙
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Action buttons */}
-      {isPlayerTurn && gameState.status !== 'finished' && (
+      {isPlayerTurn && gameState && gameState.status !== 'finished' && (
         <div className={styles.actions}>
-          {allowedActions.includes('fold') && <Button onClick={() => onAction('fold')}>Сбросить</Button>}
-          {allowedActions.includes('check') && <Button onClick={() => onAction('check')}>Чек</Button>}
-          {allowedActions.includes('call') && <Button onClick={() => onAction('call')}>Уравнять {callAmount > 0 ? ` (${callAmount})` : ''}</Button>}
+          {(allowedActions || []).includes('fold') && <Button onClick={() => onAction('fold')}>Сбросить</Button>}
+          {(allowedActions || []).includes('check') && <Button onClick={() => onAction('check')}>Чек</Button>}
+          {(allowedActions || []).includes('call') && <Button onClick={() => onAction('call')}>Уравнять {callAmount > 0 ? ` (${callAmount})` : ''}</Button>}
           
-          {allowedActions.includes('raise') && (
+          {(allowedActions || []).includes('raise') && (
             <div className={styles.raiseContainer}>
               <Button onClick={() => onAction('raise', raiseAmount)} variant="primary">
                 Повысить до {raiseAmount}

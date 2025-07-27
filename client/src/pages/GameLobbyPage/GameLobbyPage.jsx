@@ -93,15 +93,30 @@ const GameLobbyPage = ({ gameType: gameTypeProp }) => {
                 <h3>Комната #{room.id.substring(0, 8)}</h3>
                 <div className={styles.roomInfo}>
                   <span>Хост: <strong>{room.Host?.first_name || 'Неизвестно'}</strong></span>
-                  <span>Ставка: <strong>{room.bet} 🪙</strong></span>
-                  <span>Игроки: <strong>{(room.players || []).length} / 2</strong></span>
+                  {room.gameType === 'poker' ? (
+                    <>
+                      <span>Бай-ин: <strong>{room.bet} 🪙 = {room.bet * 10} фишек</strong></span>
+                      <span>Блайнды: <strong>{room.blinds || '5/10'}</strong></span>
+                      <span>Стол: <strong>
+                        {room.tableType === 'premium' ? '🔥 Премиум' : 
+                         room.tableType === 'elite' ? '💎 Элитный' : 
+                         '⭐ Стандартный'}
+                      </strong></span>
+                      <span>Игроки: <strong>{(room.players || []).length} / 5</strong></span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Ставка: <strong>{room.bet} 🪙</strong></span>
+                      <span>Игроки: <strong>{(room.players || []).length} / 2</strong></span>
+                    </>
+                  )}
                 </div>
                 <button 
                   onClick={() => handleJoinRoom(room.id)} 
                   className={styles.joinButton}
-                  disabled={(room.players || []).length >= 2}
+                  disabled={(room.players || []).length >= (room.gameType === 'poker' ? 5 : 2)}
                 >
-                  {(room.players || []).length >= 2 ? 'Заполнено' : 'Присоединиться'}
+                  {(room.players || []).length >= (room.gameType === 'poker' ? 5 : 2) ? 'Заполнено' : 'Присоединиться'}
                 </button>
               </div>
             ))

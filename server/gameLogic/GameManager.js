@@ -30,10 +30,24 @@ class GameManager {
         const playerObjects = players.map((player) => {
           const playerId = player.id || player;
           const playerName = player.name || player;
-          initialStacks[playerId] = 1000;
+          // Конвертируем монеты в фишки: 1 монета = 10 фишек
+          // Бай-ин берем из roomBuyIn или дефолт 100 монет = 1000 фишек
+          const buyInCoins = player.buyInCoins || 100;
+          initialStacks[playerId] = buyInCoins * 10;
           return { id: playerId, name: playerName };
         });
-        gameInstance = new PokerGame(playerObjects, initialStacks);
+        
+        // Определяем блайнды на основе бай-ина
+        let blinds = { small: 5, big: 10 }; // Дефолт для 100 монет
+        const buyInCoins = players[0]?.buyInCoins || 100;
+        if (buyInCoins >= 250) {
+          blinds = { small: 25, big: 50 }; // Для 250+ монет
+        }
+        if (buyInCoins >= 1000) {
+          blinds = { small: 100, big: 200 }; // Для 1000+ монет  
+        }
+        
+        gameInstance = new PokerGame(playerObjects, initialStacks, blinds);
         break;
       case 'quiz':
         // Для квиза нужны только ID игроков
