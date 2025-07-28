@@ -4,6 +4,7 @@ import { useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
+import DayDetailPage from './pages/DayDetailPage/DayDetailPage';
 import PairingPage from './pages/PairingPage/PairingPage';
 import { GamesPage } from './pages/GamesPage/GamesPage';
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
@@ -33,6 +34,7 @@ const AppRoutes = () => {
       
       <Route element={user ? <CurrencyProvider><MainLayout /></CurrencyProvider> : <Navigate to="/login" />}>
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/day/:date" element={<DayDetailPage />} />
         <Route path="/pairing" element={<PairingPage />} />
         <Route path="/games" element={<GamesPage />} />
         <Route path="/games/:gameType" element={<GameLobbyPage />} />

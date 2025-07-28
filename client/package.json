@@ -14,9 +14,9 @@
     "@fullcalendar/daygrid": "^6.1.18",
     "@fullcalendar/interaction": "^6.1.18",
     "@fullcalendar/react": "^6.1.18",
-
     "axios": "^1.10.0",
     "chess.js": "^1.4.0",
+    "date-fns": "^4.1.0",
     "lottie-react": "^2.4.1",
     "node-cron": "^4.2.0",
     "node-telegram-bot-api": "^0.66.0",

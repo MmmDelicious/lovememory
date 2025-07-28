@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -21,11 +22,13 @@ const EVENT_TYPE_COLORS = {
 };
 
 const Calendar = () => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [filter, setFilter] = useState('all');
+  const [selectedDate, setSelectedDate] = useState(null);
   const calendarRef = useRef(null);
   const calendarContainerRef = useRef(null);
   const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useMascot();
@@ -135,12 +138,14 @@ const Calendar = () => {
   };
   
   const handleDateClick = (arg) => {
+    setSelectedDate(arg.dateStr);
     const eventOnDay = events.find(e => e.start.split('T')[0] === arg.dateStr);
     setSelectedEvent(eventOnDay?.extendedProps.rawEvent ? { ...eventOnDay.extendedProps.rawEvent, date: arg.dateStr } : { title: '', description: '', date: arg.dateStr });
     setSidebarOpen(true);
   };
   
   const handleEventClick = (clickInfo) => {
+    setSelectedDate(clickInfo.event.startStr.split('T')[0]);
     setSelectedEvent({ 
       ...clickInfo.event.extendedProps.rawEvent, 
       date: clickInfo.event.startStr,
@@ -152,6 +157,13 @@ const Calendar = () => {
   const handleCloseSidebar = () => {
     setSidebarOpen(false);
     setSelectedEvent(null);
+    setSelectedDate(null);
+  };
+
+  const handleViewDay = () => {
+    if (selectedDate) {
+      navigate(`/day/${selectedDate}`);
+    }
   };
 
   const handleSaveEvent = async (eventData) => {
@@ -327,6 +339,8 @@ const Calendar = () => {
         eventData={selectedEvent}
         onSave={handleSaveEvent}
         onDelete={handleDeleteEvent}
+        selectedDate={selectedDate}
+        onViewDay={handleViewDay}
       />
     </div>
   );

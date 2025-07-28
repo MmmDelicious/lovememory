@@ -14,7 +14,7 @@ const formatTime = (date) => {
   return new Date(date).toTimeString().slice(0, 5);
 };
 
-const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
+const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete, selectedDate, onViewDay }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -255,6 +255,11 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete }) => {
           <div className={styles.actions}>
             <Button type="primary" submit>Сохранить</Button>
             {eventData.id && <Button onClick={handleDelete} type="secondary">Удалить</Button>}
+            {selectedDate && (
+              <Button onClick={onViewDay} type="outline">
+                Посмотреть день
+              </Button>
+            )}
           </div>
         </form>
         
