@@ -1,18 +1,18 @@
 import api from './api';
 
 const getRooms = async (gameType) => {
-  const response = await api.get('/games/rooms', {
-    params: { gameType }
-  });
+  const response = await api.get('/games', { params: { gameType } });
   return response.data;
 };
 
-const createRoom = async (bet, gameType) => {
-  const response = await api.post('/games/rooms', { bet, gameType });
+const createRoom = async (roomData) => {
+  const response = await api.post('/games/room', roomData);
   return response.data;
 };
 
-export default {
+const gameService = {
   getRooms,
   createRoom,
 };
+
+export default gameService;

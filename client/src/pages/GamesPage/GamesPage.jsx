@@ -4,60 +4,58 @@ import styles from './GamesPage.module.css';
 import { FaChess, FaTicketAlt, FaBrain } from 'react-icons/fa';
 import { PiCardsFill } from "react-icons/pi";
 
-const CLASSIC_GAMES = [
+const GAME_ITEMS = [
   {
     id: 'tic-tac-toe',
     name: 'Крестики-нолики',
-    description: 'Классическая игра для двух игроков. Соберите три своих знака в ряд!',
-    icon: <FaTicketAlt size={32} />,
+    category: 'Классика',
+    icon: <FaTicketAlt size={48} />,
     path: '/games/tic-tac-toe',
   },
   {
     id: 'chess',
     name: 'Шахматы',
-    description: 'Стратегическая игра для двух игроков. Поставьте мат королю соперника.',
-    icon: <FaChess size={32} />,
+    category: 'Стратегия',
+    icon: <FaChess size={48} />,
     path: '/games/chess',
   },
   {
     id: 'quiz',
     name: 'Квиз',
-    description: 'Интеллектуальная игра для двух игроков. Отвечайте на вопросы быстрее соперника!',
-    icon: <FaBrain size={32} />,
+    category: 'Викторина',
+    icon: <FaBrain size={48} />,
     path: '/games/quiz',
+  },
+  {
+    id: 'love-vegas',
+    name: 'LoveVegas',
+    category: 'Карточные',
+    icon: <PiCardsFill size={48} />,
+    path: '/love-vegas',
   }
 ];
 
 const GamesPage = () => {
   return (
-    <div className={styles.pageContainer}>
+    <div className={styles.container}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Игровой Хаб</h1>
-        <p className={styles.subtitle}>Выберите игру, чтобы весело провести время вместе.</p>
+        <h1 className={styles.title}>Game Room</h1>
+        <p className={styles.subtitle}>Play some fun games with your partner.</p>
       </header>
       
-      <div className={styles.gamesList}>
-        {CLASSIC_GAMES.map(game => (
-          <Link to={game.path} key={game.id} className={styles.gameCard}>
-            <div className={styles.gameIcon}>{game.icon}</div>
-            <div className={styles.gameInfo}>
-                <h3 className={styles.gameName}>{game.name}</h3>
-                <p className={styles.gameDescription}>{game.description}</p>
+      <main className={styles.grid}>
+        {GAME_ITEMS.map(item => (
+          <Link to={item.path} key={item.id} className={styles.card}>
+            <div className={styles.cardIconWrapper}>
+              {item.icon}
+            </div>
+            <div className={styles.cardContent}>
+              <h3 className={styles.cardTitle}>{item.name}</h3>
+              <p className={styles.cardCategory}>{item.category}</p>
             </div>
           </Link>
         ))}
-      </div>
-
-      <div className={styles.divider}></div>
-
-      <Link to="/love-vegas" className={styles.loveVegasCard}>
-        <div className={styles.vegasIcon}><PiCardsFill size={40} /></div>
-        <div className={styles.vegasInfo}>
-          <h2 className={styles.loveVegasTitle}>LoveVegas</h2>
-          <p className={styles.loveVegasDescription}>Азартные игры для тех, кто любит рисковать. Только для пар!</p>
-        </div>
-        <div className={styles.vegasCta}>Перейти</div>
-      </Link>
+      </main>
     </div>
   );
 };

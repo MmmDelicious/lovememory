@@ -1,40 +1,35 @@
 import React from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+
+import MainLayout from './layouts/MainLayout/MainLayout';
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
-import DayDetailPage from './pages/DayDetailPage/DayDetailPage';
 import PairingPage from './pages/PairingPage/PairingPage';
 import { GamesPage } from './pages/GamesPage/GamesPage';
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
 import GameRoomPage from './pages/GameRoomPage/GameRoomPage';
 import LoveVegasPage from './pages/LoveVegasPage';
-import PokerPage from './pages/PokerPage';
-import Header from './components/Header/Header';
-import { CurrencyProvider } from './context/CurrencyContext';
-import './App.css';
-
-const MainLayout = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', position: 'relative' }}>
-    <Header />
-    <main className="mainContent">
-      <Outlet />
-    </main>
-  </div>
-);
+import PokerPage from './pages/PokerPage/PokerPage';
 
 const AppRoutes = () => {
   const { user } = useAuth();
 
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    );
+  }
+
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
-      <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <RegisterPage />} />
-      
-      <Route element={user ? <CurrencyProvider><MainLayout /></CurrencyProvider> : <Navigate to="/login" />}>
+      <Route element={<MainLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/day/:date" element={<DayDetailPage />} />
         <Route path="/pairing" element={<PairingPage />} />
         <Route path="/games" element={<GamesPage />} />
         <Route path="/games/:gameType" element={<GameLobbyPage />} />
@@ -43,16 +38,11 @@ const AppRoutes = () => {
         <Route path="/love-vegas/poker" element={<GameLobbyPage gameType="poker" />} />
       </Route>
       
-      {/* Полноэкранная покерная страница без хедера */}
-      <Route 
-        path="/love-vegas/poker/:roomId" 
-        element={user ? <CurrencyProvider><PokerPage /></CurrencyProvider> : <Navigate to="/login" />} 
-      />
+      <Route path="/love-vegas/poker/:roomId" element={<PokerPage />} />
       
-      <Route 
-        path="*" 
-        element={<Navigate to={user ? "/dashboard" : "/login"} />} 
-      />
+      <Route path="/login" element={<Navigate to="/dashboard" />} />
+      <Route path="/register" element={<Navigate to="/dashboard" />} />
+      <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
 };

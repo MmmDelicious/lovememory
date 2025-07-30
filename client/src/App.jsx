@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-// ИСПРАВЛЕНИЕ: MascotProvider импортируется как именованный экспорт (в фигурных скобках)
 import { MascotProvider } from './context/MascotContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import AppRoutes from './AppRoutes';

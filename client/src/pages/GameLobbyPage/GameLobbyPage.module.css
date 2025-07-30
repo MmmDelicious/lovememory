@@ -1,104 +1,248 @@
-.pageContainer {
-  padding: 2rem;
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
+  margin-bottom: 2rem;
 }
 
 .title {
   font-family: var(--font-family-heading);
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   color: var(--color-text-primary);
   margin: 0;
 }
 
+.controls {
+  margin-bottom: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.searchWrapper {
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.9rem 1rem 0.9rem 2.75rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(231, 122, 101, 0.15);
+}
+
+.filterWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filterLabel {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  text-align: center;
+}
+
+.filterSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 5px;
+  outline: none;
+  opacity: 0.9;
+  transition: opacity .2s;
+}
+
+.filterSlider:hover {
+  opacity: 1;
+}
+
+.filterSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  cursor: pointer;
+  border-radius: 50%;
+  border: 3px solid var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.filterSlider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  cursor: pointer;
+  border-radius: 50%;
+  border: 3px solid var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
 .createButton {
   background-color: var(--color-primary);
-  color: white;
+  color: #ffffff;
   border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: var(--border-radius);
-  font-size: 1rem;
-  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-weight: 600;
+  transition: background-color 0.2s, transform 0.2s;
 }
 
 .createButton:hover {
-  background-color: var(--color-primary-dark);
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
 }
 
-.subtitle {
+.desktopButton {
+  display: none; 
+}
+
+.mobileButton {
+  display: block;
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-size: 1.1rem;
+  margin-top: -1rem;
+  margin-bottom: 2.5rem;
+}
+
+.statusText {
+  text-align: center;
   color: var(--color-text-secondary);
-  font-size: 1.2rem;
-  margin-top: 0;
-  margin-bottom: 3rem;
+  font-size: 1rem;
+  padding: 2rem 0;
+  grid-column: 1 / -1;
 }
 
-.roomsList {
+.error {
+  color: var(--color-error);
+}
+
+.roomsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
 }
 
 .roomCard {
   background-color: var(--color-surface);
-  padding: 1.5rem;
+  padding: 1.25rem;
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
-  display: flex;
-  flex-direction: column;
-}
-
-.roomCard h3 {
-  margin-top: 0;
-  font-family: var(--font-family-heading);
-  color: var(--color-primary);
-}
-
-.roomInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin: 1rem 0;
-  color: var(--color-text-secondary);
-}
-
-.roomInfo strong {
-  color: var(--color-text-primary);
-}
-
-.joinButton {
-  background-color: var(--color-accent);
-  color: var(--color-text-primary);
-  border: none;
-  padding: 0.7rem 1rem;
-  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
   cursor: pointer;
-  font-weight: bold;
-  margin-top: auto;
-  transition: background-color 0.2s, box-shadow 0.2s;
-  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.joinButton:hover {
-  background-color: #f0e68c;
+.roomCard:hover {
+  transform: translateY(-4px);
   box-shadow: var(--shadow-md);
 }
 
-.joinButton:disabled {
-  background-color: var(--color-surface-secondary);
-  color: var(--color-text-secondary);
+.roomCard.disabled {
+  opacity: 0.6;
   cursor: not-allowed;
+  background-color: #f9f9f9;
 }
 
-.noRooms {
+.roomCard.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.cardContent {
+  margin-bottom: 1.5rem;
+}
+
+.createdBy {
   color: var(--color-text-secondary);
-  font-size: 1.1rem;
-  text-align: center;
-  grid-column: 1 / -1;
+  font-size: 0.9rem;
+}
+
+.hostName {
+  font-family: var(--font-family-heading);
+  font-size: 2rem;
+  color: var(--color-text-primary);
+  margin: 0.25rem 0 0;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.betInfo, .idInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-secondary);
+}
+
+.betInfo span, .idInfo span {
+  font-weight: 500;
+}
+
+.coinIcon {
+  width: 20px;
+  height: 20px;
+  background-color: #FFD700;
+  border-radius: 50%;
+  border: 2px solid #E5C100;
+}
+
+.roomId {
+  color: var(--color-text-primary);
+}
+
+@media (min-width: 768px) {
+  .roomsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .mobileButton {
+    display: none;
+  }
+
+  .desktopButton {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-size: 1rem;
+  }
+
+  .title {
+    font-size: 3rem;
+  }
 }

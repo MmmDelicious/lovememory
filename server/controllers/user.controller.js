@@ -1,48 +1,19 @@
-const { User } = require('../models');
+const userService = require('../services/user.service');
 
-exports.getProfile = async (req, res) => {
+exports.getProfile = async (req, res, next) => {
   try {
-    const user = await User.findByPk(req.user.id, {
-      attributes: ['id', 'email', 'first_name', 'telegram_chat_id', 'coins']
-    });
-    if (!user) {
-      return res.status(404).json({ message: 'Пользователь не найден.' });
-    }
+    const user = await userService.getProfile(req.user.id);
     res.status(200).json(user);
   } catch (error) {
-    console.error('!!! Ошибка в getProfile:', error);
-    res.status(500).json({ message: 'Ошибка на сервере' });
+    next(error);
   }
 };
 
-exports.updateProfile = async (req, res) => {
+exports.updateProfile = async (req, res, next) => {
   try {
-    const { telegram_chat_id } = req.body;
-    const user = await User.findByPk(req.user.id);
-
-    if (!user) {
-      return res.status(404).json({ message: 'Пользователь не найден.' });
-    }
-
-    if (telegram_chat_id) {
-        const existingUser = await User.findOne({ where: { telegram_chat_id } });
-        if (existingUser && existingUser.id !== req.user.id) {
-            return res.status(400).json({ message: 'Этот Telegram ID уже привязан к другому аккаунту.' });
-        }
-    }
-    
-    user.telegram_chat_id = telegram_chat_id || null;
-    await user.save();
-    
-    res.status(200).json({
-        id: user.id,
-        email: user.email,
-        first_name: user.first_name,
-        telegram_chat_id: user.telegram_chat_id,
-        coins: user.coins
-    });
+    const updatedUser = await userService.updateProfile(req.user.id, req.body);
+    res.status(200).json(updatedUser);
   } catch (error) {
-    console.error('!!! Ошибка в updateProfile:', error);
-    res.status(500).json({ message: 'Ошибка на сервере' });
+    next(error);
   }
 };

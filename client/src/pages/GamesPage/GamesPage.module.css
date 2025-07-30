@@ -1,128 +1,110 @@
-.pageContainer {
-  max-width: 1000px;
+.container {
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem;
   animation: fadeIn 0.5s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .header {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
 }
 
 .title {
   font-family: var(--font-family-heading);
-  font-size: 2.8rem;
+  font-size: 3rem;
   color: var(--color-text-primary);
   margin: 0 0 0.5rem;
 }
 
 .subtitle {
-  color: var(--color-text-secondary);
   font-size: 1.1rem;
-  margin: 0;
+  color: var(--color-text-secondary);
+  max-width: 450px;
+  margin: 0 auto;
 }
 
-.gamesList {
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
 }
 
-.gameCard {
+.card {
   background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  align-items: center;
-  padding: 1.5rem;
+  padding: 2rem;
   text-decoration: none;
   color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.gameCard:hover {
-  transform: translateY(-5px);
+.card:hover {
+  transform: translateY(-6px);
   box-shadow: var(--shadow-md);
 }
 
-.gameIcon {
+.cardIconWrapper {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
   color: var(--color-primary);
-  margin-right: 1.5rem;
 }
 
-.gameName {
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cardTitle {
   font-family: var(--font-family-heading);
-  font-size: 1.25rem;
+  font-size: 1.75rem;
   color: var(--color-text-primary);
   margin: 0 0 0.25rem;
 }
 
-.gameDescription {
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-
-.divider {
-  height: 1px;
-  background-color: var(--color-border);
-  margin: 3rem 0;
-}
-
-.loveVegasCard {
-  background: linear-gradient(135deg, #4a3f3f, #2c2525);
-  border-radius: var(--border-radius);
-  padding: 2rem;
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: #fff;
-  box-shadow: var(--shadow-md);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.loveVegasCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 20px -4px rgba(0,0,0,0.2);
-}
-
-.vegasIcon {
-  margin-right: 1.5rem;
-  color: var(--color-primary);
-}
-
-.loveVegasTitle {
-  font-family: var(--font-family-heading);
-  font-size: 1.75rem;
-  margin: 0 0 0.25rem;
-  color: #fff;
-}
-
-.loveVegasDescription {
-  margin: 0;
-  opacity: 0.8;
+.cardCategory {
   font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin: 0;
 }
 
-.vegasInfo {
-  flex-grow: 1;
-}
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 
-.vegasCta {
-  background-color: var(--color-primary);
-  color: #fff;
-  padding: 0.75rem 1.5rem;
-  border-radius: 50px;
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
+  .title {
+    font-size: 2.5rem;
+  }
 
-.loveVegasCard:hover .vegasCta {
-  background-color: var(--color-primary-hover);
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .card {
+    padding: 1.5rem;
+  }
+
+  .cardIconWrapper {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 1rem;
+  }
+
+  .cardTitle {
+    font-size: 1.5rem;
+  }
 }

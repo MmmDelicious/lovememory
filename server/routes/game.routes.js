@@ -1,9 +1,16 @@
-const Router = require('express');
-const router = new Router();
-const gameController = require('../controllers/game.controller.js');
-const authMiddleware = require('../middleware/auth.middleware.js');
+const { Router } = require('express');
+const gameController = require('../controllers/game.controller');
+const authMiddleware = require('../middleware/auth.middleware');
 
-router.post('/rooms', authMiddleware, gameController.createRoom);
-router.get('/rooms', authMiddleware, gameController.getRooms);
+const router = Router();
+
+// Защищаем все игровые маршруты
+router.use(authMiddleware);
+
+// GET /api/games -> для получения списка комнат
+router.get('/', gameController.getRooms);
+
+// POST /api/games/room -> для создания комнаты
+router.post('/room', gameController.createRoom);
 
 module.exports = router;

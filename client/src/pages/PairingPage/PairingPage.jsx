@@ -1,69 +1,45 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import pairService from '../../services/pair.service';
-import userService from '../../services/user.service';
+import React, { useState, useEffect } from 'react';
 import styles from './PairingPage.module.css';
 import Button from '../../components/Button/Button';
 import { useAuth } from '../../context/AuthContext';
 import { useMascot } from '../../context/MascotContext';
+import { usePairing } from '../../hooks/usePairing';
 
 const PairingPage = () => {
-  const [pairing, setPairing] = useState(null);
-  const [telegramId, setTelegramId] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const {
+    pairing,
+    telegramId,
+    isLoading,
+    error,
+    sendRequest,
+    acceptRequest,
+    deletePairing,
+    saveTelegramId,
+    setError
+  } = usePairing(user);
+  
   const [email, setEmail] = useState('');
-  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const [localTelegramId, setLocalTelegramId] = useState('');
   const { showMascot } = useMascot();
 
-  const fetchData = useCallback(async () => {
-    if (!isAuthenticated) return;
-
-    try {
-      setIsLoading(true);
-      setError('');
-      const [pairResponse, profileResponse] = await Promise.all([
-        pairService.getStatus(),
-        userService.getProfile(),
-      ]);
-      const newPairing = pairResponse.data;
-      setPairing(newPairing);
-      setTelegramId(profileResponse.data.telegram_chat_id || '');
-
-      if (newPairing?.status === 'pending' && newPairing.user1Id !== user.id) {
-        showMascot({
-          page: 'pairing',
-          data: { requesterName: newPairing.Requester.first_name },
-          buttonText: "Да, принять!",
-          onActionClick: () => handleAccept(newPairing.id),
-          position: { x: window.innerWidth * 0.75, y: window.innerHeight / 2 },
-          type: 'flyer',
-          side: 'top',
-        });
-      }
-
-    } catch (err) {
-      setError('Не удалось загрузить данные. Попробуйте позже.');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isAuthenticated, user, showMascot]);
+  useEffect(() => {
+    setLocalTelegramId(telegramId);
+  }, [telegramId]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchData();
+    if (pairing?.status === 'pending' && pairing.user1Id !== user.id) {
+      showMascot({
+        page: 'pairing',
+        data: { requesterName: pairing.Requester.first_name },
+        buttonText: "Да, принять!",
+        onActionClick: () => handleAccept(pairing.id),
+        position: { x: window.innerWidth * 0.75, y: window.innerHeight / 2 },
+        type: 'flyer',
+        side: 'top',
+      });
     }
-  }, [isAuthenticated, fetchData]);
-
-  const handleAccept = async (requestId) => {
-    try {
-      const idToAccept = requestId || pairing.id;
-      await pairService.acceptRequest(idToAccept);
-      fetchData();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Не удалось принять запрос.');
-    }
-  };
+  }, [pairing, user, showMascot]);
 
   const handleSendRequest = async (e) => {
     e.preventDefault();
@@ -73,18 +49,25 @@ const PairingPage = () => {
       return;
     }
     try {
-      await pairService.sendRequest(email);
-      fetchData();
+      await sendRequest(email);
     } catch (err) {
       setError(err.response?.data?.message || 'Произошла ошибка при отправке запроса.');
+    }
+  };
+
+  const handleAccept = async (requestId) => {
+    try {
+      const idToAccept = requestId || pairing.id;
+      await acceptRequest(idToAccept);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Не удалось принять запрос.');
     }
   };
 
   const handleDelete = async () => {
     if (window.confirm('Вы уверены, что хотите отменить это действие?')) {
       try {
-        await pairService.deletePairing(pairing.id);
-        fetchData();
+        await deletePairing(pairing.id);
       } catch (err) {
         setError(err.response?.data?.message || 'Не удалось выполнить действие.');
       }
@@ -94,13 +77,12 @@ const PairingPage = () => {
   const handleTelegramIdSave = async (e) => {
     e.preventDefault();
     try {
-        await userService.updateProfile({ telegram_chat_id: telegramId });
-        alert('Telegram ID успешно сохранен!');
-        fetchData();
+      await saveTelegramId(localTelegramId);
+      alert('Telegram ID успешно сохранен!');
     } catch(err) {
-        setError(err.response?.data?.message || 'Не удалось сохранить Telegram ID.');
+      setError(err.response?.data?.message || 'Не удалось сохранить Telegram ID.');
     }
-  }
+  };
 
   if (isAuthLoading) {
     return <p>Инициализация...</p>;
@@ -150,13 +132,8 @@ const PairingPage = () => {
         <form onSubmit={handleSendRequest} className={styles.form}>
           <label htmlFor="email">Email партнёра</label>
           <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="partner@example.com"
-            required
-            className={styles.input}
+            id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+            placeholder="partner@example.com" required className={styles.input}
           />
           <Button type="primary" submit>Отправить приглашение</Button>
         </form>
@@ -170,19 +147,14 @@ const PairingPage = () => {
         {renderPairingContent()}
         {error && <p className={styles.error}>{error}</p>}
       </div>
-
       <div className={`${styles.card} fade-in`}>
           <h2>Уведомления в Telegram</h2>
           <p>Получайте ежедневные напоминания о событиях. Вставьте ваш Chat ID, полученный от бота, в поле ниже.</p>
           <form onSubmit={handleTelegramIdSave} className={styles.form}>
               <label htmlFor="telegramId">Ваш Telegram Chat ID</label>
               <input
-                  id="telegramId"
-                  type="text"
-                  value={telegramId}
-                  onChange={(e) => setTelegramId(e.target.value)}
-                  placeholder="123456789"
-                  className={styles.input}
+                  id="telegramId" type="text" value={localTelegramId} onChange={(e) => setLocalTelegramId(e.target.value)}
+                  placeholder="123456789" className={styles.input}
               />
               <Button type="primary" submit>Сохранить ID</Button>
           </form>

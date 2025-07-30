@@ -1,53 +1,138 @@
-.pokerPage {
-  padding: 2rem;
-  text-align: center;
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:wght@400;700&display=swap');
+
+:root {
+    --primary-font: 'Lora', serif;
+    --title-font: 'Playfair Display', serif;
+    --bg-color: #fdedde;
+    --text-color: #443a32;
+    --primary-accent: #e8826b;
+    --secondary-accent: #cb7459;
+    --card-bg: #fcefdf;
 }
 
-.pokerPage h1 {
-  font-family: var(--font-family-heading);
-  color: var(--color-primary);
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
+/* Base Styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: var(--primary-font);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow: hidden;
 }
 
-.pokerPage p {
-  font-family: var(--font-family-body);
-  color: var(--color-text-secondary);
-  font-size: 1.1rem;
-  margin-bottom: 3rem;
+/* App Container */
+.pokerApp {
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-color);
+    position: relative;
+    overflow: hidden;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
-.pokerPage h2 {
-  margin-top: 3rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0.5rem;
+.pokerApp::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://www.transparenttextures.com/patterns/noise.png');
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 100;
 }
 
-.cardContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  justify-content: center;
-  align-items: center;
+/* Header */
+.appHeader {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 26px 52px;
+    box-sizing: border-box;
+    z-index: 101;
 }
 
-.loadingScreen {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  font-size: 1.5rem;
-  font-family: var(--font-family-body);
-  color: var(--color-secondary);
+.appTitle {
+    font-family: var(--title-font);
+    font-size: 31px;
+    color: var(--text-color);
+    margin: 0;
+    font-weight: 700;
 }
 
-.mascotContainer {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000;
+.leaveButton {
+    background-color: var(--primary-accent);
+    color: var(--card-bg);
+    border: none;
+    padding: 13px 26px;
+    border-radius: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: var(--primary-font);
+    font-size: 18px;
+    transition: all 0.2s ease;
 }
-.cardWrapper {
-  margin: 5px; /* Небольшой отступ для каждой карты */
+
+.leaveButton:hover {
+    background-color: var(--secondary-accent);
+    transform: translateY(-2px);
+}
+
+/* Game Board */
+.gameBoard {
+    position: relative;
+    width: 100%;
+    height: calc(100% - 100px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+
+/* Legacy compatibility - hide old styles */
+.pokerPage,
+.exitButton,
+.gameArea {
+    display: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+    .pokerApp {
+        width: 450px;
+        height: 800px;
+        border-radius: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin: auto;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .appHeader {
+        padding: 10px 20px;
+    }
+
+    .appTitle {
+        font-size: 24px;
+    }
+
+    .leaveButton {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-size: 16px;
+    }
+
+    .gameBoard {
+        height: calc(100% - 70px);
+    }
 } 
