@@ -24,6 +24,28 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  gender: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      isIn: [['male', 'female', 'other']],
+    },
+  },
+  age: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      min: 18,
+      max: 99,
+    },
+  },
+  city: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      len: [1, 100],
+    },
+  },
   telegram_chat_id: {
     type: DataTypes.STRING,
     allowNull: true,

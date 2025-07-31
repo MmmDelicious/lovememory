@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useEffect, Fragment } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import PlayingCard from '../PlayingCard/PlayingCard';
 import Button from '../Button/Button';
 import { useCurrency } from '../../context/CurrencyContext';
 import styles from './PokerTable.module.css';
-import avatarImage from './assets/avatar.png';
-import Avatar from '../Avatar/Avatar';
+import WaitingDisplay from './WaitingDisplay/WaitingDisplay';
+import Player from './Player/Player';
 
 const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
   if (!gameState) return null;
@@ -19,7 +19,7 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
   
   const { coins } = useCurrency();
 
-  const { players = [], communityCards = [], pot = 0, currentPlayerId, stage, validActions = [], minRaiseAmount = 0, currentBet = 0, winningHandCards = [] } = gameState || {};
+  const { players = [], communityCards = [], pot = 0, currentPlayerId, stage, validActions = [], minRaiseAmount = 0, winningHandCards = [], yourHand = [] } = gameState || {};
 
   const currentPlayer = useMemo(() => 
     players ? players.find(p => p.id === userId) : null, 
@@ -37,9 +37,8 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
   );
 
   const mainPlayerStack = useMemo(() => {
-    const player = players ? players.find(p => p.id === userId) : null;
-    return player ? player.stack : 0;
-  }, [players, userId]);
+    return currentPlayer ? currentPlayer.stack : 0;
+  }, [currentPlayer]);
 
   const minRaise = minRaiseAmount || 0;
   const maxRaise = mainPlayerStack;
@@ -74,7 +73,7 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
   }, [stage, prevStage]);
 
   useEffect(() => {
-    if (gameState && gameState.stage === 'pre-flop' && gameState.yourHand && gameState.yourHand.length > 0) {
+    if (gameState && gameState.stage === 'pre-flop' && yourHand && yourHand.length > 0) {
       setDealingPhase(true);
       setTimeout(() => setDealingPhase(false), 2000);
     }
@@ -92,92 +91,32 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
     setRaiseAmount(minRaise);
   }, [minRaise]);
 
-  if (!gameState || gameState.status === 'waiting' || gameState.stage === 'waiting' || (players && players.length < 2)) {
+  const isWaiting = gameState.status !== 'in_progress';
+  
+  if (isWaiting) {
     return (
       <div className={styles.gameContainer}>
         <div className={styles.pokerTable}>
           <div className={styles.deckContainer}>
             <PlayingCard faceUp={false} />
           </div>
-          
-          <div className={styles.waitingContainer}>
-            <div className={styles.waitingMessage}>
-              <div className={styles.waitingIcon}>⏳</div>
-              <div className={styles.waitingText}>
-                {gameState?.message || 'Ожидание второго игрока...'}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (gameState.status === 'waiting_for_next_hand') {
-    return (
-      <div className={styles.gameContainer}>
-        <div className={styles.pokerTable}>
-          <div className={styles.deckContainer}>
-            <PlayingCard faceUp={false} />
-          </div>
-          
-          <div className={styles.waitingContainer}>
-            <div className={styles.waitingMessage}>
-              <div className={styles.waitingIcon}>🃏</div>
-              <div className={styles.waitingText}>
-                {gameState.message || 'Дождитесь завершения текущей раздачи...'}
-              </div>
-              <div className={styles.waitingSubtext}>
-                Вы присоединитесь к игре в следующей раздаче
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (gameState.status === 'waiting_for_players') {
-    return (
-      <div className={styles.gameContainer}>
-        <div className={styles.pokerTable}>
-          <div className={styles.deckContainer}>
-            <PlayingCard faceUp={false} />
-          </div>
-          
-          <div className={styles.waitingContainer}>
-            <div className={styles.waitingMessage}>
-              <div className={styles.waitingIcon}>👥</div>
-              <div className={styles.waitingText}>
-                Ожидание других игроков...
-              </div>
-              <div className={styles.waitingSubtext}>
-                Минимум 2 игрока для начала раздачи
-              </div>
-            </div>
-          </div>
+          <WaitingDisplay 
+            status={gameState.status} 
+            message={gameState.message} 
+            playerCount={players.length} 
+          />
         </div>
       </div>
     );
   }
 
   const isWinningCard = (card) => {
-    if (!winningHandCards || winningHandCards.length === 0) return false;
+    if (!card || !winningHandCards || winningHandCards.length === 0) return false;
     return winningHandCards.some(wc => wc.rank === card.rank && wc.suit === card.suit);
   };
-
-  const getAvatarUrl = () => {
-    return avatarImage;
-  };
-
-  // --- Вспомогательные константы для 5 мест ---
-  const SEAT_POSITIONS = [0, 1, 2, 3, 4]; // 0 — ты, 1-4 — остальные по кругу
-
-  // --- Новый getPlayerSeatMap ---
-  // Возвращает массив из 5 мест: либо игрок, либо null (если место пустое)
+  
   const getPlayerSeatMap = () => {
-    if (!players || players.length === 0) return [null, null, null, null, null];
-    // Твой игрок всегда seat 0
+    if (!players || players.length === 0) return Array(5).fill(null);
     const mainPlayer = players.find(p => p.id === userId);
     const others = players.filter(p => p.id !== userId);
     const seats = [mainPlayer || null];
@@ -185,84 +124,6 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
       seats.push(others[i] || null);
     }
     return seats;
-  };
-
-  // --- Новый renderPlayerArea ---
-  const renderPlayerArea = (player, seatIndex) => {
-    if (!player) {
-      // Пустое место
-      return (
-        <div key={`empty-seat-${seatIndex}`} className={`${styles.playerPosition} ${styles[`playerPosition${seatIndex}`]} ${styles.emptySeat}`}> 
-          <div className={styles.emptyAvatar}> 
-            <span role="img" aria-label="empty">🪑</span>
-          </div>
-          <div className={styles.emptyText}>Свободно</div>
-        </div>
-      );
-    }
-    const isMainPlayer = player.id === userId;
-    const showCards = (stage === 'showdown') || isMainPlayer || (gameState.status === 'finished');
-    const isActive = player.id === currentPlayerId && gameState.status !== 'finished';
-    const isWinner = winnerAnimation === player.id;
-    return (
-      <div key={player.id} className={`${styles.playerPosition} ${styles[`playerPosition${seatIndex}`]} ${isActive ? styles.active : ''} ${isWinner ? styles.winner : ''}`}>
-        <Avatar
-          src={getAvatarUrl()}
-          alt={`${player.name}'s avatar`}
-          className={styles.avatar}
-          size="medium"
-          variant="circle"
-        />
-        
-        <div className={styles.playerInfo}>
-          <div className={styles.playerName}>
-            {player.name} {player.isDealer && '🎯'}
-          </div>
-          <div className={styles.playerStats}>
-            <span className={styles.stack}>
-              <span className={styles.chipsIcon}>🪙</span>
-              {isMainPlayer ? gameState.yourStack : player.stack}
-            </span>
-            {(isMainPlayer ? gameState.yourCurrentBet : player.currentBet) > 0 && (
-              <span className={styles.bet}>Ставка: {isMainPlayer ? gameState.yourCurrentBet : player.currentBet}</span>
-            )}
-            {!player.inHand && <span className={styles.folded}>Пас</span>}
-          </div>
-        </div>
-
-        <div className={styles.playerCards}>
-          {isMainPlayer ? (
-            (gameState.yourHand && gameState.yourHand.length > 0) ? (gameState.yourHand || []).map((card, index) => (
-              <div
-                key={index}
-                className={`${styles.cardWrapper} ${dealingPhase ? styles.cardDealing : ''}`}
-                style={{ animationDelay: `${index * 0.2}s` }}
-              >
-                <PlayingCard 
-                  suit={card.suit} 
-                  rank={card.rank} 
-                  faceUp={showCards} 
-                  isWinning={isWinningCard(card)}
-                />
-              </div>
-            )) : null
-          ) : (
-            [0, 1].map((index) => (
-              <div
-                key={index}
-                className={`${styles.cardWrapper} ${dealingPhase ? styles.cardDealing : ''}`}
-                style={{ animationDelay: `${index * 0.2 + 0.1}s` }}
-              >
-                <PlayingCard 
-                  faceUp={showCards} 
-                  isWinning={false}
-                />
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    );
   };
 
   const handleRaiseChange = (e) => {
@@ -321,9 +182,29 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
           <div className={`${styles.chip} ${styles.blue}`}></div>
           <div className={`${styles.chip} ${styles.green}`}></div>
         </div>
-
+        
         {getPlayerSeatMap().map((player, seatIndex) => (
-          <Fragment key={player?.id || `seat-${seatIndex}`}>{renderPlayerArea(player, seatIndex)}</Fragment>
+          <div key={player?.id || `seat-${seatIndex}`} className={`${styles.playerPosition} ${styles[`playerPosition${seatIndex}`]}`}>
+            {player ? (
+              <Player 
+                player={player}
+                isMainPlayer={player.id === userId}
+                showCards={stage === 'showdown' || player.id === userId || gameState.status === 'finished'}
+                isActive={player.id === currentPlayerId && gameState.status !== 'finished'}
+                isWinner={winnerAnimation === player.id}
+                dealingPhase={dealingPhase}
+                yourHand={yourHand}
+                isWinningCard={isWinningCard}
+              />
+            ) : (
+              <div className={styles.emptySeat}> 
+                <div className={styles.emptyAvatar}> 
+                  <span role="img" aria-label="empty">🪑</span>
+                </div>
+                <div className={styles.emptyText}>Свободно</div>
+              </div>
+            )}
+          </div>
         ))}
       </div>
 

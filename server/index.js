@@ -55,15 +55,6 @@ const startServer = async () => {
 
     server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
     
-    // Периодическая очистка пустых комнат каждые 5 минут
-    setInterval(async () => {
-      try {
-        await gameService.cleanupOrphanedRooms(io);
-      } catch (error) {
-        console.error('[SERVER] Error in periodic room cleanup:', error);
-      }
-    }, 5 * 60 * 1000); // 5 минут
-    
     startBot();
     startCronJobs();
   } catch (error) {

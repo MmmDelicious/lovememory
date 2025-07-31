@@ -3,16 +3,34 @@ const { User } = require('../models');
 
 class AuthService {
   async register(userData) {
-    const { email, password, first_name } = userData;
+    const { email, password, first_name, gender, age, city } = userData;
 
-    if (!email || !password) {
-      const error = new Error('Email и пароль обязательны.');
+    if (!email || !password || !gender || !age || !city) {
+      const error = new Error('Все поля обязательны.');
       error.statusCode = 400;
       throw error;
     }
     
     if (password.length < 6) {
       const error = new Error('Пароль должен быть не менее 6 символов.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (!['male', 'female', 'other'].includes(gender)) {
+      const error = new Error('Недопустимое значение пола.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (age < 18 || age > 99) {
+      const error = new Error('Возраст должен быть от 18 до 99 лет.');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (city.length > 100) {
+      const error = new Error('Название города слишком длинное.');
       error.statusCode = 400;
       throw error;
     }
@@ -28,6 +46,9 @@ class AuthService {
       email,
       password_hash: password,
       first_name,
+      gender,
+      age,
+      city,
     });
 
     return { message: 'Пользователь успешно зарегистрирован.' };
@@ -67,6 +88,9 @@ class AuthService {
         id: user.id,
         email: user.email,
         first_name: user.first_name,
+        gender: user.gender,
+        age: user.age,
+        city: user.city,
         coins: user.coins,
       }
     };

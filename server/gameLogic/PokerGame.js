@@ -28,7 +28,8 @@ class PokerGame {
         this.players = playersInfo.map(p => ({
             id: p.id,
             name: p.name,
-            stack: p.buyInCoins * 10, // Конвертируем монеты в фишки: 1 монета = 10 фишек
+            gender: p.gender,
+            stack: p.buyInCoins * 10,
             hand: [],
             currentBet: 0,
             inHand: true,
@@ -51,7 +52,8 @@ class PokerGame {
         this.players.push({
             id: playerInfo.id,
             name: playerInfo.name,
-            stack: playerInfo.buyInCoins * 10, // Конвертируем монеты в фишки: 1 монета = 10 фишек
+            gender: playerInfo.gender,
+            stack: playerInfo.buyInCoins * 10,
             hand: [],
             currentBet: 0,
             inHand: false,
@@ -307,7 +309,7 @@ class PokerGame {
         return {
             gameType: this.gameType,
             status: this.status,
-            players: this.players.map(p => ({ id: p.id, name: p.name, stack: p.stack, currentBet: p.currentBet, inHand: p.inHand, hasActed: p.hasActed, isWaitingToPlay: p.isWaitingToPlay })),
+            players: this.players.map(p => ({ id: p.id, name: p.name, gender: p.gender, stack: p.stack, currentBet: p.currentBet, inHand: p.inHand, hasActed: p.hasActed, isWaitingToPlay: p.isWaitingToPlay })),
             currentPlayerId: this.status === 'in_progress' && currentPlayer ? currentPlayer.id : null,
             winner: winner,
             isDraw: this.winnersInfo ? this.winnersInfo.length > 1 : false,

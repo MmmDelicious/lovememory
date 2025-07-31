@@ -1,0 +1,129 @@
+.playerContainer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.3s ease;
+    width: 120px;
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 4px solid #f8f4ef;
+    background-color: #e0d5c9;
+    z-index: 2;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.playerInfo {
+    background-color: #c49f72;
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.playerName {
+    font-size: 16px;
+    font-weight: 700;
+    color: #443a32;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
+.stack {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #e9d9c9;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #443a32;
+}
+
+.chipsIcon {
+    font-size: 1rem;
+}
+
+.playerCards {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 10px;
+    height: 70px;
+    min-width: 100px;
+}
+
+.hiddenCardsPlaceholder {
+    height: 70px;
+}
+
+.cardWrapper {
+    transform-origin: bottom center;
+}
+
+.cardDealing {
+    animation: deal-card 0.5s ease-out forwards;
+}
+
+.active .avatar {
+    border-color: #e8826b;
+    box-shadow: 0 0 15px 2px rgba(232, 130, 107, 0.7);
+}
+
+.winner {
+    transform: scale(1.05);
+}
+
+.winner .avatar {
+    border-color: gold;
+    box-shadow: 0 0 20px gold, 0 0 10px yellow;
+}
+
+.betIndicator {
+    position: absolute;
+    top: -10px;
+    right: -5px;
+    background-color: #e8826b;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.foldedIndicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-10deg);
+    background: rgba(0,0,0,0.6);
+    color: #ffdddd;
+    padding: 5px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-transform: uppercase;
+    z-index: 10;
+}
+
+@keyframes deal-card {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

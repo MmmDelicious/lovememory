@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import authService from '../../services/auth.service';
 import Button from '../../components/Button/Button';
 import StaticMascot from '../../components/StaticMascot/StaticMascot';
+import GenderSelector from '../../components/GenderSelector/GenderSelector';
 import greetAnimation from '../../assets/greet.json' with { type: 'json' };
 import styles from './RegisterPage.module.css';
 
@@ -61,6 +62,24 @@ const errorPhrasesPassword = [
   'Без пароля не пускаем, придумайте что-нибудь.',
 ];
 
+const errorPhrasesGender = [
+  'Пол не указали? Это важно, выберите, пожалуйста.',
+  'Без пола не обойтись, давайте заполним.',
+  'Пол забыли? Ну, так не пойдёт, выбирайте.',
+];
+
+const errorPhrasesAge = [
+  'Возраст не указали? Без него не зарегистрируем.',
+  'Возраст меньше 18? У нас тут не детский сад!',
+  'Возраст пустой? Давайте укажем, сколько вам лет.',
+];
+
+const errorPhrasesCity = [
+  'Город не указали? Откуда вы к нам пришли?',
+  'Город пустой? Без него анкета неполная.',
+  'Город забыли? Напишите, пожалуйста.',
+];
+
 const annoyedPhrases = [
   'Пожалуйста, не надо так настойчиво кликать.',
   'Я всё вижу, кликать не обязательно!',
@@ -90,6 +109,9 @@ const RegisterPage = () => {
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [gender, setGender] = useState('');
+  const [age, setAge] = useState('');
+  const [city, setCity] = useState('');
   const [clickCount, setClickCount] = useState(0);
   const [greeting] = useState(
     `${getTimeBasedGreeting()}, ${getDayBasedPhrase()} ${registerPhrases[Math.floor(Math.random() * registerPhrases.length)]}`
@@ -101,7 +123,6 @@ const RegisterPage = () => {
   const storyTimerRef = useRef(null);
 
   useEffect(() => {
-    // Таймер бездействия: 10 секунд — лёгкое напоминание, 20 секунд — история
     idleTimerRef.current = setTimeout(() => {
       handleSetTemporaryMessage(idlePhrases[Math.floor(Math.random() * idlePhrases.length)], 5000, greeting);
     }, 10000);
@@ -149,8 +170,20 @@ const RegisterPage = () => {
       handleSetTemporaryMessage(errorPhrasesPassword[Math.floor(Math.random() * errorPhrasesPassword.length)], 5000, greeting);
       return;
     }
+    if (!gender) {
+      handleSetTemporaryMessage(errorPhrasesGender[Math.floor(Math.random() * errorPhrasesGender.length)], 5000, greeting);
+      return;
+    }
+    if (!age || age < 18 || age > 99) {
+      handleSetTemporaryMessage(errorPhrasesAge[Math.floor(Math.random() * errorPhrasesAge.length)], 5000, greeting);
+      return;
+    }
+    if (!city) {
+      handleSetTemporaryMessage(errorPhrasesCity[Math.floor(Math.random() * errorPhrasesCity.length)], 5000, greeting);
+      return;
+    }
     try {
-      await authService.register(email, password, firstName);
+      await authService.register(email, password, firstName, gender, parseInt(age), city);
       navigate('/login');
     } catch (err) {
       const serverMessage = err.response?.data?.message || 'Попробуйте, пожалуйста, снова.';
@@ -161,7 +194,6 @@ const RegisterPage = () => {
   };
 
   const handleInputChange = () => {
-    // Сбрасываем таймеры бездействия и историй при вводе
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     if (storyTimerRef.current) clearTimeout(storyTimerRef.current);
     idleTimerRef.current = setTimeout(() => {
@@ -214,6 +246,37 @@ const RegisterPage = () => {
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
+                handleInputChange();
+              }}
+              required
+            />
+            <GenderSelector
+              selectedGender={gender}
+              onGenderChange={(value) => {
+                setGender(value);
+                handleInputChange();
+              }}
+            />
+            <input
+              type="number"
+              placeholder="Возраст"
+              className={styles.input}
+              value={age}
+              onChange={(e) => {
+                setAge(e.target.value);
+                handleInputChange();
+              }}
+              min="18"
+              max="99"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Город"
+              className={styles.input}
+              value={city}
+              onChange={(e) => {
+                setCity(e.target.value);
                 handleInputChange();
               }}
               required

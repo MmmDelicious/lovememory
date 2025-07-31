@@ -13,11 +13,14 @@ const login = async (email, password) => {
   return response.data;
 };
 
-const register = async (email, password, firstName) => {
+const register = async (email, password, firstName, gender, age, city) => {
   return await api.post('/auth/register', {
     email,
     password,
     first_name: firstName,
+    gender,
+    age,
+    city,
   });
 };
 

@@ -1,6 +1,6 @@
 const { Server } = require("socket.io");
 const jwt = require('jsonwebtoken');
-const { GameRoom } = require('../models');
+const { GameRoom, User } = require('../models');
 const gameService = require('../services/game.service');
 const GameManager = require('../gameLogic/GameManager');
 
@@ -75,12 +75,20 @@ function initSocket(server, app) {
                     console.log(`[SERVER] Starting game in room ${roomId} with ${currentSockets.length} players`);
                     await gameService.startGame(roomId);
                     const gameType = room.gameType;
+                    
+                    const userIds = currentSockets.map(s => s.user.id);
+                    const users = await User.findAll({ where: { id: userIds }, attributes: ['id', 'email', 'gender'] });
+                    const usersMap = new Map(users.map(u => [u.id, u]));
 
-                    const playerBuyInInfo = currentSockets.map(s => ({
-                        id: s.user.id,
-                        name: s.user.email.split('@')[0],
-                        buyInCoins: room.bet
-                    }));
+                    const playerBuyInInfo = currentSockets.map(s => {
+                        const user = usersMap.get(s.user.id);
+                        return {
+                            id: s.user.id,
+                            name: user ? user.email.split('@')[0] : s.user.email.split('@')[0],
+                            gender: user ? user.gender : 'male',
+                            buyInCoins: room.bet
+                        };
+                    });
                     
                     const game = GameManager.createGame(roomId, gameType, playerBuyInInfo);
                     io.to(roomId).emit('game_start', { gameType, players: playerInfo, maxPlayers: room.maxPlayers });
@@ -99,9 +107,11 @@ function initSocket(server, app) {
                 console.log(`[SERVER] User ${socket.user.id} joining in-progress game in room ${roomId}`);
                 const game = GameManager.getGame(roomId);
                 if (game && game.gameType === 'poker') {
+                    const user = await User.findByPk(socket.user.id, { attributes: ['id', 'email', 'gender'] });
                     const newPlayerInfo = {
                         id: socket.user.id,
-                        name: socket.user.email.split('@')[0],
+                        name: user ? user.email.split('@')[0] : socket.user.email.split('@')[0],
+                        gender: user ? user.gender : 'male',
                         buyInCoins: room.bet,
                     };
                     game.addPlayer(newPlayerInfo);

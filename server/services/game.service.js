@@ -43,23 +43,8 @@ class GameService {
       })
     );
 
-    // Автоматически удаляем пустые комнаты
-    const nonEmptyRooms = [];
-    for (const room of roomsWithPlayerCount) {
-      if (room.playerCount === 0) {
-        console.log(`[SERVER] Auto-deleting empty room ${room.id}`);
-        try {
-          await this.deleteRoom(room.id);
-        } catch (error) {
-          console.error(`[SERVER] Failed to auto-delete room ${room.id}:`, error);
-        }
-      } else {
-        nonEmptyRooms.push(room);
-      }
-    }
-
-    console.log(`[SERVER] Returning ${nonEmptyRooms.length} non-empty rooms for ${gameType}`);
-    return nonEmptyRooms;
+    console.log(`[SERVER] Returning ${roomsWithPlayerCount.length} rooms for ${gameType}`);
+    return roomsWithPlayerCount;
   }
 
   async createRoom(hostId, roomData) {
