@@ -7,7 +7,7 @@ import styles from './CreateRoomModal.module.css';
 const CreateRoomModal = ({ isOpen, onClose, onSubmit, gameType }) => {
   const [bet, setBet] = useState(10);
   const [error, setError] = useState('');
-  const [selectedTable, setSelectedTable] = useState('standard'); // standard, premium, elite
+  const [selectedTable, setSelectedTable] = useState('standard');
 
   const handleSubmit = () => {
     if (bet <= 0) {
@@ -15,14 +15,22 @@ const CreateRoomModal = ({ isOpen, onClose, onSubmit, gameType }) => {
       return;
     }
     
-    // Для покера проверяем минимальный бай-ин
-    if (gameType === 'Покер' && bet < 100) {
-      setError('Минимальный бай-ин для покера: 100 монет.');
-      return;
+    const payload = {
+      bet,
+      maxPlayers: gameType === 'poker' ? 5 : 2
+    };
+
+    if (gameType === 'Покер') {
+      const tableInfo = getTableInfo(selectedTable);
+      if (bet < tableInfo.minBuyIn || bet > tableInfo.maxBuyIn) {
+        setError(`Для этого стола бай-ин должен быть между ${tableInfo.minBuyIn} и ${tableInfo.maxBuyIn}.`);
+        return;
+      }
+      payload.tableType = selectedTable;
     }
     
     setError('');
-    onSubmit({ bet, tableType: selectedTable });
+    onSubmit(payload);
   };
 
   const getTableInfo = (tableType) => {
@@ -44,7 +52,6 @@ const CreateRoomModal = ({ isOpen, onClose, onSubmit, gameType }) => {
       
       return (
         <div className={styles.fieldGroup}>
-          {/* Выбор типа стола */}
           <label className={styles.label}>Тип стола:</label>
           <div className={styles.tableSelector}>
             {['standard', 'premium', 'elite'].map((type) => {
@@ -55,7 +62,7 @@ const CreateRoomModal = ({ isOpen, onClose, onSubmit, gameType }) => {
                   className={`${styles.tableOption} ${selectedTable === type ? styles.selected : ''}`}
                   onClick={() => {
                     setSelectedTable(type);
-                    setBet(info.minBuyIn); // Устанавливаем минимальный бай-ин
+                    setBet(info.minBuyIn);
                   }}
                 >
                   <div className={styles.tableName}>{info.name}</div>
@@ -68,7 +75,6 @@ const CreateRoomModal = ({ isOpen, onClose, onSubmit, gameType }) => {
             })}
           </div>
 
-          {/* Выбор бай-ина */}
           <label htmlFor="bet-input" className={styles.label}>
             Ваш бай-ин ({tableInfo.minBuyIn}-{tableInfo.maxBuyIn} монет):
           </label>
@@ -78,7 +84,7 @@ const CreateRoomModal = ({ isOpen, onClose, onSubmit, gameType }) => {
               id="bet-input"
               type="number"
               value={bet}
-              onChange={(e) => setBet(parseInt(e.target.value, 10))}
+              onChange={(e) => setBet(parseInt(e.target.value, 10) || 0)}
               className={styles.input}
               min={tableInfo.minBuyIn}
               max={tableInfo.maxBuyIn}
@@ -91,7 +97,6 @@ const CreateRoomModal = ({ isOpen, onClose, onSubmit, gameType }) => {
       );
     }
     
-    // Для других игр оставляем стандартный интерфейс
     return (
       <div className={styles.fieldGroup}>
         <label htmlFor="bet-input" className={styles.label}>
@@ -103,7 +108,7 @@ const CreateRoomModal = ({ isOpen, onClose, onSubmit, gameType }) => {
             id="bet-input"
             type="number"
             value={bet}
-            onChange={(e) => setBet(parseInt(e.target.value, 10))}
+            onChange={(e) => setBet(parseInt(e.target.value, 10) || 0)}
             className={styles.input}
             min="1"
             placeholder="Например, 10"
@@ -138,4 +143,4 @@ CreateRoomModal.propTypes = {
   gameType: PropTypes.string.isRequired,
 };
 
-export default CreateRoomModal; 
+export default CreateRoomModal;

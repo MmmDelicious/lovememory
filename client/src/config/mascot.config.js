@@ -1,0 +1,25 @@
+export const MASCOT_CONFIG = {
+    IDLE_MOVE_INTERVAL: 20000,
+    IDLE_TALK_INTERVAL: 45000,
+    LOOP_INTERVAL: 15000,
+    BASE_DURATION: 8000,
+    RANDOM_DURATION: 4000,
+    DEFAULT_MESSAGE_DURATION: 10000,
+    INTERCEPTION_MESSAGE_DURATION: 5000,
+    INTERCEPTION_ANIMATION_DURATION: 1500,
+    INTERCEPTION_DELAY: 1500,
+    AI_CHAT_POSITION: { x: 83, y: 55 },
+    IDLE_PHRASES: [
+      "Какие планы на вечер? Могу подкинуть идею для свидания!",
+      "Давно не заглядывали в календарь... Там есть что-то интересное?",
+      "Может, сыграем в игру, чтобы расслабиться?",
+      "Помните, как было здорово в тот день? Эх, хорошие воспоминания.",
+      "Я здесь, если понадобится помощь или совет!",
+    ],
+    INTERCEPTION_LINES: [
+      "Эй! Я тут главный помощник!",
+      "Куда собрался? У нас тут своя атмосфера!",
+      "А ну брысь! Я первый занял!",
+      "Посторонним вход воспрещен!",
+    ],
+  };

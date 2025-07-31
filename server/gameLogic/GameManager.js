@@ -26,17 +26,7 @@ class GameManager {
         gameInstance = new ChessGame(chessPlayers);
         break;
       case 'poker':
-        const initialStacks = {};
-        const playerObjects = players.map((player) => {
-          const playerId = player.id || player;
-          const playerName = player.name || player;
-          // Конвертируем монеты в фишки: 1 монета = 10 фишек
-          // Бай-ин берем из roomBuyIn или дефолт 100 монет = 1000 фишек
-          const buyInCoins = player.buyInCoins || 100;
-          initialStacks[playerId] = buyInCoins * 10;
-          return { id: playerId, name: playerName };
-        });
-        
+        console.log('[GameManager] Creating poker game with players:', players);
         // Определяем блайнды на основе бай-ина
         let blinds = { small: 5, big: 10 }; // Дефолт для 100 монет
         const buyInCoins = players[0]?.buyInCoins || 100;
@@ -47,7 +37,9 @@ class GameManager {
           blinds = { small: 100, big: 200 }; // Для 1000+ монет  
         }
         
-        gameInstance = new PokerGame(playerObjects, initialStacks, blinds);
+        console.log(`[GameManager] Setting blinds: ${blinds.small}/${blinds.big} for buyIn: ${buyInCoins} coins`);
+        gameInstance = new PokerGame(players, blinds);
+        console.log('[GameManager] Poker game created successfully');
         break;
       case 'quiz':
         // Для квиза нужны только ID игроков

@@ -1,6 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-// БЫЛО: import eventService from '../services/event.service';
-// СТАЛО:
 import { eventService } from '../services';
 
 const EVENT_TYPE_COLORS = {
@@ -17,6 +15,7 @@ const EVENT_TYPE_COLORS = {
 const formatTime = (date) => new Date(date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
 const formatEvent = (event, userId) => {
+  if (!event) return null;
   const hasTime = !event.event_date.endsWith('00:00:00.000Z') || (event.end_date && !event.end_date.endsWith('00:00:00.000Z'));
   let timeRange = null;
   if (event.event_date) {
@@ -55,12 +54,16 @@ export const useEvents = (userId) => {
   const [error, setError] = useState(null);
 
   const fetchEvents = useCallback(async () => {
+    if (!userId) {
+      setIsLoading(false);
+      return;
+    }
     try {
       setIsLoading(true);
       const response = await eventService.getEvents();
       const data = response.data;
       setRawEvents(data);
-      const formatted = data.map(event => formatEvent(event, userId));
+      const formatted = data.map(event => formatEvent(event, userId)).filter(Boolean);
       setFormattedEvents(formatted);
     } catch (err) {
       setError(err);
@@ -71,24 +74,35 @@ export const useEvents = (userId) => {
   }, [userId]);
 
   useEffect(() => {
-    if (userId) {
-      fetchEvents();
-    }
-  }, [userId, fetchEvents]);
+    fetchEvents();
+  }, [fetchEvents]);
 
   const createEvent = async (eventData) => {
-    await eventService.createEvent(eventData);
-    fetchEvents(); 
+    const response = await eventService.createEvent(eventData);
+    const newEvent = response.data;
+    const formattedNewEvent = formatEvent(newEvent, userId);
+    
+    setRawEvents(prev => [...prev, newEvent]);
+    if (formattedNewEvent) {
+      setFormattedEvents(prev => [...prev, formattedNewEvent]);
+    }
   };
 
   const updateEvent = async (eventId, eventData) => {
-    await eventService.updateEvent(eventId, eventData);
-    fetchEvents();
+    const response = await eventService.updateEvent(eventId, eventData);
+    const updatedEvent = response.data;
+    const formattedUpdatedEvent = formatEvent(updatedEvent, userId);
+
+    setRawEvents(prev => prev.map(e => e.id === eventId ? updatedEvent : e));
+    if (formattedUpdatedEvent) {
+      setFormattedEvents(prev => prev.map(e => e.id === eventId ? formattedUpdatedEvent : e));
+    }
   };
 
   const deleteEvent = async (eventId) => {
     await eventService.deleteEvent(eventId);
-    fetchEvents();
+    setRawEvents(prev => prev.filter(e => e.id !== eventId));
+    setFormattedEvents(prev => prev.filter(e => e.id !== eventId));
   };
 
   return { 

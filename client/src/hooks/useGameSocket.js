@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 
@@ -38,6 +38,17 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
       setGameState(newGameState);
     };
 
+    const handlePlayerListUpdate = (players) => {
+      console.log('[CLIENT] Received player list update:', players);
+      setGameState(prevState => {
+        if (!prevState) {
+          return { players, status: 'waiting' };
+        }
+        return { ...prevState, players };
+      });
+    };
+
+    socket.on('player_list_update', handlePlayerListUpdate);
     socket.on('game_start', handleStateUpdate);
     socket.on('game_update', handleStateUpdate);
     socket.on('game_end', handleStateUpdate);
@@ -53,6 +64,12 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
 
     return () => {
       console.log('[SOCKET] Cleaning up socket connection.');
+      socket.off('player_list_update');
+      socket.off('game_start');
+      socket.off('game_update');
+      socket.off('game_end');
+      socket.off('update_coins');
+      socket.off('error');
       socket.disconnect();
     };
   }, [roomId, token, navigate, setCoinsCallback]);

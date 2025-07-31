@@ -10,17 +10,17 @@ import './App.css';
 
 function App() {
   return (
-    <MascotProvider>
-      <AuthProvider>
-        <CurrencyProvider>
+    <AuthProvider>
+      <CurrencyProvider>
+        <MascotProvider>
           <Router>
             <GlobalMascot />
             <AIChatInterface />
             <AppRoutes />
           </Router>
-        </CurrencyProvider>
-      </AuthProvider>
-    </MascotProvider>
+        </MascotProvider>
+      </CurrencyProvider>
+    </AuthProvider>
   );
 }
 

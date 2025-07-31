@@ -4,21 +4,9 @@ import flyerAnimation from '../assets/2.json';
 import greetAnimation from '../assets/greet.json';
 import globalMascotAnimation from '../assets/AI.json';
 import { askAI } from '../services/ai.service';
+import { MASCOT_CONFIG } from '../config/mascot.config.js';
 
 const MascotContext = createContext();
-
-const IDLE_MOVE_INTERVAL = 20000;
-const IDLE_TALK_INTERVAL = 45000;
-const IDLE_PHRASES = [
-  "Какие планы на вечер? Могу подкинуть идею для свидания!",
-  "Давно не заглядывали в календарь... Там есть что-то интересное?",
-  "Может, сыграем в игру, чтобы расслабиться?",
-  "Помните, как было здорово в тот день? Эх, хорошие воспоминания.",
-  "Я здесь, если понадобится помощь или совет!",
-];
-const MASCOT_LOOP_INTERVAL = 15000;
-const MASCOT_BASE_DURATION = 8000;
-const MASCOT_RANDOM_DURATION = 4000;
 
 export const useMascot = () => useContext(MascotContext);
 
@@ -67,7 +55,7 @@ export const MascotProvider = ({ children }) => {
     });
   }, []);
 
-  const setGlobalMascotMessage = useCallback((message, duration = 10000) => {
+  const setGlobalMascotMessage = useCallback((message, duration = MASCOT_CONFIG.DEFAULT_MESSAGE_DURATION) => {
     setGlobalMascot(prev => ({ ...prev, message }));
     const timer = setTimeout(() => { setGlobalMascot(prev => ({ ...prev, message: '' })); }, duration);
     return () => clearTimeout(timer);
@@ -79,16 +67,15 @@ export const MascotProvider = ({ children }) => {
     const targetY = Math.min(95, Math.max(5, (rect.top + rect.height / 2) / window.innerHeight * 100));
     const targetPosition = { x: targetX, y: targetY };
 
-    const funnyLines = [ "Эй! Я тут главный помощник!", "Куда собрался? У нас тут своя атмосфера!", "А ну брысь! Я первый занял!", "Посторонним вход воспрещен!" ];
-    const line = funnyLines[Math.floor(Math.random() * funnyLines.length)];
+    const line = MASCOT_CONFIG.INTERCEPTION_LINES[Math.floor(Math.random() * MASCOT_CONFIG.INTERCEPTION_LINES.length)];
 
     moveGlobalMascotToPosition(targetPosition);
-    setGlobalMascotMessage(line, 5000);
+    setGlobalMascotMessage(line, MASCOT_CONFIG.INTERCEPTION_MESSAGE_DURATION);
 
     setTimeout(() => {
         setInterceptedMascot({ position: targetPosition, animationData: helperAnimation });
-        setTimeout(() => setInterceptedMascot(null), 1500); 
-    }, 1500);
+        setTimeout(() => setInterceptedMascot(null), MASCOT_CONFIG.INTERCEPTION_ANIMATION_DURATION); 
+    }, MASCOT_CONFIG.INTERCEPTION_DELAY);
 
   }, [moveGlobalMascotToPosition, setGlobalMascotMessage]);
 
@@ -99,8 +86,7 @@ export const MascotProvider = ({ children }) => {
     if (config.type === 'flyer') { helperAnimation = flyerAnimation; mascotType = 'flyer'; }
     else if (config.type === 'greeter') { helperAnimation = greetAnimation; mascotType = 'greeter'; }
     else { helperAnimation = runnerAnimation; mascotType = 'runner'; }
-
-    // ВОССТАНОВЛЕННАЯ ЛОГИКА: AI-маскот активен, но чат с ним НЕ открыт.
+    
     if (isAIVisible && !isChatOpen) {
         handleMascotInterception(config, helperAnimation);
         return;
@@ -130,9 +116,9 @@ export const MascotProvider = ({ children }) => {
         const today = new Date(); today.setHours(0, 0, 0, 0);
         const eventDate = new Date(target.data.event.event_date);
         const isPast = eventDate < today;
-        showMascot({ ...target, buttonText: isPast ? 'Вспомнить' : 'Посмотреть', type: isFlyer ? 'flyer' : 'runner', side: isFlyer ? 'top' : undefined, duration: MASCOT_BASE_DURATION + Math.random() * MASCOT_RANDOM_DURATION, });
+        showMascot({ ...target, buttonText: isPast ? 'Вспомнить' : 'Посмотреть', type: isFlyer ? 'flyer' : 'runner', side: isFlyer ? 'top' : undefined, duration: MASCOT_CONFIG.BASE_DURATION + Math.random() * MASCOT_CONFIG.RANDOM_DURATION, });
     };
-    const intervalId = setInterval(triggerRandomMascot, MASCOT_LOOP_INTERVAL);
+    const intervalId = setInterval(triggerRandomMascot, MASCOT_CONFIG.LOOP_INTERVAL);
     return () => clearInterval(intervalId);
   }, [isLoopActive, mascotTargets, isMobile, showMascot]);
 
@@ -146,11 +132,11 @@ export const MascotProvider = ({ children }) => {
   
   useEffect(() => {
     if (isAIVisible && !isChatOpen) {
-      const moveInterval = setInterval(moveGlobalMascot, IDLE_MOVE_INTERVAL);
+      const moveInterval = setInterval(moveGlobalMascot, MASCOT_CONFIG.IDLE_MOVE_INTERVAL);
       const talkInterval = setInterval(() => {
-        const phrase = IDLE_PHRASES[Math.floor(Math.random() * IDLE_PHRASES.length)];
+        const phrase = MASCOT_CONFIG.IDLE_PHRASES[Math.floor(Math.random() * MASCOT_CONFIG.IDLE_PHRASES.length)];
         setGlobalMascotMessage(phrase);
-      }, IDLE_TALK_INTERVAL);
+      }, MASCOT_CONFIG.IDLE_TALK_INTERVAL);
       return () => { clearInterval(moveInterval); clearInterval(talkInterval); };
     }
   }, [isAIVisible, isChatOpen, moveGlobalMascot, setGlobalMascotMessage]);
@@ -165,7 +151,7 @@ export const MascotProvider = ({ children }) => {
     setIsChatOpen(prev => {
       const nextState = !prev;
       if (nextState) {
-        setGlobalMascot(gm => ({ ...gm, position: { x: 83, y: 55 }, message: '' }));
+        setGlobalMascot(gm => ({ ...gm, position: MASCOT_CONFIG.AI_CHAT_POSITION, message: '' }));
       }
       return nextState;
     });
@@ -173,7 +159,6 @@ export const MascotProvider = ({ children }) => {
 
   const sendMessageToAI = useCallback(async (prompt) => {
     setIsAILoading(true);
-    // Не используем setGlobalMascotMessage, чтобы не конфликтовать с индикатором загрузки в FreeRoamMascot
     try {
       const response = await askAI(prompt);
       setGlobalMascotMessage(response.text);

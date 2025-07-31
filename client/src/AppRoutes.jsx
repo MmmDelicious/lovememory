@@ -10,11 +10,15 @@ import PairingPage from './pages/PairingPage/PairingPage';
 import { GamesPage } from './pages/GamesPage/GamesPage';
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
 import GameRoomPage from './pages/GameRoomPage/GameRoomPage';
-import LoveVegasPage from './pages/LoveVegasPage';
+import LoveVegasPage from './pages/LoveVegasPage/LoveVegasPage';
 import PokerPage from './pages/PokerPage/PokerPage';
 
 const AppRoutes = () => {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return null;
+  }
 
   if (!user) {
     return (

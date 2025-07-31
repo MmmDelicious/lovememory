@@ -21,17 +21,20 @@ const GameRoom = sequelize.define('GameRoom', {
     allowNull: false,
     defaultValue: 0,
   },
-  // Для покера: тип стола (standard, premium, elite)
   tableType: {
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: null,
   },
-  // Блайнды для покера в формате "5/10"
   blinds: {
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: null,
+  },
+  maxPlayers: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 2,
   },
   hostId: {
     type: DataTypes.UUID,
@@ -41,14 +44,11 @@ const GameRoom = sequelize.define('GameRoom', {
       key: 'id',
     },
   },
-  // --- ДОБАВЛЕНО ---
-  // Это поле будет хранить массив ID игроков в комнате.
   players: {
     type: DataTypes.ARRAY(DataTypes.UUID),
     allowNull: false,
     defaultValue: [],
   }
-  // --- КОНЕЦ ДОБАВЛЕНИЯ ---
 });
 
 GameRoom.associate = (models) => {

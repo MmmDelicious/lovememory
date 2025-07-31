@@ -8,14 +8,18 @@ export const useCurrency = () => useContext(CurrencyContext);
 
 export const CurrencyProvider = ({ children }) => {
   const [coins, setCoins] = useState(0);
-  const auth = useAuth();
-  const user = auth ? auth.user : null;
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   const fetchCoins = useCallback(async () => {
+    if (isAuthLoading) {
+      return;
+    }
+
     if (!user) {
       setCoins(0);
       return;
     }
+    
     try {
       const response = await userService.getProfile();
       setCoins(response.data.coins);
@@ -23,7 +27,7 @@ export const CurrencyProvider = ({ children }) => {
       console.error("Failed to fetch user coins:", error);
       setCoins(0);
     }
-  }, [user]);
+  }, [user, isAuthLoading]);
 
   useEffect(() => {
     fetchCoins();

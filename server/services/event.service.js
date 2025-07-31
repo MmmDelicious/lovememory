@@ -3,8 +3,6 @@ const { Event, Media, User, Pair } = require('../models');
 
 class EventService {
   async getEventsForUser(userId) {
-    let userIds = [userId];
-
     const activePair = await Pair.findOne({
       where: {
         status: 'active',
@@ -12,50 +10,42 @@ class EventService {
       },
     });
 
+    let whereClause = { userId: userId };
+
     if (activePair) {
       const partnerId = activePair.user1Id === userId ? activePair.user2Id : activePair.user1Id;
-      userIds.push(partnerId);
+      whereClause = {
+        [Op.or]: [
+          { userId: userId },
+          { userId: partnerId, isShared: true }
+        ]
+      };
     }
 
-    const userEvents = await Event.findAll({
-      where: {
-        userId: userId
-      },
+    const allEvents = await Event.findAll({
+      where: whereClause,
       order: [['event_date', 'DESC']],
       include: [{ model: User, attributes: ['email', 'first_name'] }]
     });
-
-    let allEvents = [...userEvents];
-
-    if (activePair) {
-      const partnerId = activePair.user1Id === userId ? activePair.user2Id : activePair.user1Id;
-      
-      const partnerSharedEvents = await Event.findAll({
-        where: {
-          userId: partnerId,
-          isShared: true
-        },
-        order: [['event_date', 'DESC']],
-        include: [{ model: User, attributes: ['email', 'first_name'] }]
-      });
-
-      allEvents = [...allEvents, ...partnerSharedEvents];
-    }
 
     return allEvents;
   }
 
   async createEvent(userId, eventData) {
-    const { title, description, event_date, event_type, isShared, is_recurring, recurrence_rule } = eventData;
-    return Event.create({
+    const { title, description, event_date, end_date, event_type, isShared, is_recurring, recurrence_rule } = eventData;
+    const newEvent = await Event.create({
       title,
       description,
       event_date: event_date || new Date(),
+      end_date: end_date || null,
       event_type,
       isShared: isShared || false,
       is_recurring: is_recurring || false,
       recurrence_rule: recurrence_rule || null,
       userId: userId,
+    });
+    return Event.findByPk(newEvent.id, {
+        include: [{ model: User, attributes: ['email', 'first_name'] }]
     });
   }
 
@@ -69,7 +59,9 @@ class EventService {
     }
     
     await event.update(updateData);
-    return event;
+    return Event.findByPk(event.id, {
+        include: [{ model: User, attributes: ['email', 'first_name'] }]
+    });
   }
 
   async deleteEvent(eventId, userId) {

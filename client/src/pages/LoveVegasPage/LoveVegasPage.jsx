@@ -29,4 +29,4 @@ const LoveVegasPage = () => {
     );
 };
 
-export default LoveVegasPage; 
+export default LoveVegasPage;

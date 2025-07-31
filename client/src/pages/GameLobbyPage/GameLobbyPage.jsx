@@ -35,7 +35,7 @@ const GameLobbyPage = ({ gameType: gameTypeProp }) => {
 
   const handleJoinRoom = (roomId) => {
     const room = rooms.find(r => r.id === roomId);
-    if (!room || (room.players || []).length >= (room.gameType === 'poker' ? 5 : 2)) return;
+    if (!room) return;
     const path = gameType === 'poker' ? `/love-vegas/poker/${roomId}` : `/games/room/${roomId}`;
     navigate(path);
   };
@@ -98,17 +98,24 @@ const GameLobbyPage = ({ gameType: gameTypeProp }) => {
         <div className={styles.roomsGrid}>
           {filteredRooms.length > 0 ? (
             filteredRooms.map(room => {
-              const isFull = (room.players || []).length >= (room.gameType === 'poker' ? 5 : 2);
+              const isFull = room.playerCount >= room.maxPlayers;
+              const isInProgress = room.status === 'in_progress';
               return (
                 <div 
                   key={room.id} 
-                  className={`${styles.roomCard} ${isFull ? styles.disabled : ''}`}
+                  className={`${styles.roomCard} ${isFull ? styles.disabled : ''} ${isInProgress ? styles.inProgress : ''}`}
                   onClick={() => handleJoinRoom(room.id)}
                 >
                   <div className={styles.cardContent}>
                     <span className={styles.createdBy}>Created by</span>
                     <h3 className={styles.hostName}>{room.Host?.first_name || 'Anonymous'}</h3>
+                    {isInProgress && (
+                      <div className={styles.statusBadge}>Игра идет</div>
+                    )}
                   </div>
+                   <div className={styles.playerCount}>
+                      {room.playerCount} / {room.maxPlayers}
+                   </div>
                   <div className={styles.cardFooter}>
                     <div className={styles.betInfo}>
                       <div className={styles.coinIcon}></div>

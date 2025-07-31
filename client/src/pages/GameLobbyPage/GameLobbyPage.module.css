@@ -162,6 +162,7 @@
   flex-direction: column;
   justify-content: space-between;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  position: relative;
 }
 
 .roomCard:hover {
@@ -224,6 +225,45 @@
 
 .roomId {
   color: var(--color-text-primary);
+}
+
+.playerCount {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--color-primary);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: center;
+}
+
+.roomCard.disabled .playerCount {
+  background: #6c757d;
+}
+
+.statusBadge {
+  background: #ff6b35;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+.roomCard.inProgress {
+  border-color: #ff6b35;
+  background-color: #fff8f6;
+}
+
+.roomCard.inProgress:hover {
+  border-color: #ff5722;
+  background-color: #fff5f2;
 }
 
 @media (min-width: 768px) {
