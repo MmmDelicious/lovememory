@@ -1,4 +1,5 @@
 const gameService = require('../services/game.service');
+const GameManager = require('../gameLogic/GameManager');
 
 class GameController {
   async getRooms(req, res, next) {
@@ -16,6 +17,40 @@ class GameController {
       const hostId = req.user.id;
       const newRoom = await gameService.createRoom(hostId, req.body);
       res.status(201).json(newRoom);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getValidMoves(req, res, next) {
+    try {
+      const { roomId, square } = req.body;
+      const game = GameManager.getGame(roomId);
+      
+      if (!game || game.gameType !== 'chess') {
+        return res.status(400).json({ error: 'Invalid game or game type' });
+      }
+      
+      // Проверяем, что это ход игрока
+      if (game.getCurrentPlayerId() !== req.user.id) {
+        return res.status(400).json({ error: 'Not your turn' });
+      }
+      
+      // Проверяем, что игрок запрашивает ходы для своей фигуры
+      const piece = game.game.get(square);
+      if (!piece) {
+        return res.status(400).json({ error: 'No piece at square' });
+      }
+      
+      const playerIndex = game.players.indexOf(req.user.id);
+      const playerColor = playerIndex === 0 ? 'w' : 'b';
+      
+      if (piece.color !== playerColor) {
+        return res.status(400).json({ error: 'Cannot move opponent\'s piece' });
+      }
+      
+      const validMoves = game.getValidMoves(square);
+      res.status(200).json({ validMoves });
     } catch (error) {
       next(error);
     }

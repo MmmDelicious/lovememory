@@ -171,6 +171,7 @@ class GameService {
         for (const p of finalPlayers) {
             const user = await User.findByPk(p.id, { transaction: t, lock: true });
             if (user) {
+                // В новой логике stack уже в монетах, поэтому просто возвращаем разницу
                 const netChange = p.stack - initialBuyIn;
                 user.coins += netChange;
                 if (user.coins < 0) user.coins = 0;

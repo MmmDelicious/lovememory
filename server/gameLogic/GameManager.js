@@ -21,21 +21,19 @@ class GameManager {
         gameInstance = new TicTacToeGame(ticTacToePlayers);
         break;
       case 'chess':
-        // Для шахмат нужны только ID игроков
+        // Для шахмат нужны только ID игроков в правильном порядке
         const chessPlayers = players.map(player => player.id || player);
+        // Убеждаемся, что первый игрок - белые, второй - черные
+        console.log(`[GameManager] Creating chess game with players:`, chessPlayers);
         gameInstance = new ChessGame(chessPlayers);
         break;
       case 'poker':
         console.log('[GameManager] Creating poker game with players:', players);
-        // Определяем блайнды на основе бай-ина
-        let blinds = { small: 5, big: 10 }; // Дефолт для 100 монет
+        // Определяем блайнды пропорционально бай-ину (5% и 10% от бай-ина)
         const buyInCoins = players[0]?.buyInCoins || 100;
-        if (buyInCoins >= 250) {
-          blinds = { small: 25, big: 50 }; // Для 250+ монет
-        }
-        if (buyInCoins >= 1000) {
-          blinds = { small: 100, big: 200 }; // Для 1000+ монет  
-        }
+        const smallBlind = Math.max(1, Math.floor(buyInCoins * 0.05)); // 5% от бай-ина, минимум 1
+        const bigBlind = Math.max(2, Math.floor(buyInCoins * 0.1));   // 10% от бай-ина, минимум 2
+        const blinds = { small: smallBlind, big: bigBlind };
         
         console.log(`[GameManager] Setting blinds: ${blinds.small}/${blinds.big} for buyIn: ${buyInCoins} coins`);
         gameInstance = new PokerGame(players, blinds);

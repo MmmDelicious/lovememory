@@ -1,6 +1,8 @@
 const { Op } = require('sequelize');
 const { Event, Media, User, Pair } = require('../models');
 
+console.log('Models loaded:', { Event: !!Event, Media: !!Media, User: !!User, Pair: !!Pair });
+
 class EventService {
   async getEventsForUser(userId) {
     const activePair = await Pair.findOne({
@@ -120,6 +122,46 @@ class EventService {
     }
 
     return Media.findAll({ where: { eventId: eventId } });
+  }
+
+  async moveMediaToEvent(mediaId, targetEventId, userId) {
+    try {
+      // Проверяем, что медиа существует и принадлежит пользователю
+      const media = await Media.findByPk(mediaId, {
+        include: [{ model: Event }]
+      });
+
+      if (!media) {
+        const error = new Error('Медиа не найдено');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      if (!media.Event || media.Event.userId !== userId) {
+        const error = new Error('У вас нет прав на перемещение этого медиа');
+        error.statusCode = 403;
+        throw error;
+      }
+
+      // Проверяем, что целевое событие существует и принадлежит пользователю
+      const targetEvent = await Event.findOne({ 
+        where: { id: targetEventId, userId: userId } 
+      });
+
+      if (!targetEvent) {
+        const error = new Error('Целевое событие не найдено или у вас нет прав на него');
+        error.statusCode = 404;
+        throw error;
+      }
+
+      // Перемещаем медиа
+      await media.update({ eventId: targetEventId });
+
+      return { message: 'Медиа успешно перемещено' };
+    } catch (error) {
+      console.error('Error in moveMediaToEvent:', error);
+      throw error;
+    }
   }
 }
 

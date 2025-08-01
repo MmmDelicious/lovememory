@@ -19,6 +19,9 @@ const GameRoomPage = () => {
 
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+  const [selectedSquare, setSelectedSquare] = useState(null);
+  const [validMoves, setValidMoves] = useState([]);
+  const [quizTimer, setQuizTimer] = useState(15);
 
   useEffect(() => {
     if (gameState?.gameType === 'quiz' && gameState?.currentQuestion) {
@@ -26,9 +29,35 @@ const GameRoomPage = () => {
       if (gameState.currentQuestion.questionNumber !== gameState.lastQuestionNumber) {
         setSelectedAnswer(null);
         setIsAnswerSubmitted(false);
+        setQuizTimer(15); // Сбрасываем таймер для нового вопроса
       }
     }
   }, [gameState?.currentQuestion?.questionNumber]);
+
+  // Клиентский таймер для квиза
+  useEffect(() => {
+    if (gameState?.gameType === 'quiz' && gameState?.status === 'in_progress' && !isAnswerSubmitted) {
+      const timer = setInterval(() => {
+        setQuizTimer(prev => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [gameState?.gameType, gameState?.status, isAnswerSubmitted]);
+
+  // Очищаем возможные ходы при смене хода в шахматах
+  useEffect(() => {
+    if (gameState?.gameType === 'chess' && gameState?.currentPlayerId !== user.id) {
+      setSelectedSquare(null);
+      setValidMoves([]);
+    }
+  }, [gameState?.currentPlayerId, gameState?.gameType, user.id]);
 
   const handleReturnToLobby = () => {
     const gameType = gameState?.gameType || '';
@@ -36,10 +65,112 @@ const GameRoomPage = () => {
   };
 
   const handleQuizMove = (move) => {
-    if (isAnswerSubmitted || (gameState?.currentQuestion?.timeRemaining <= 0)) return;
+    if (isAnswerSubmitted || quizTimer <= 0) return;
     setSelectedAnswer(move);
     setIsAnswerSubmitted(true);
     makeMove(move);
+  };
+
+  const handleChessSquareClick = (square) => {
+    if (gameState.status !== 'in_progress' || gameState.currentPlayerId !== user.id) return;
+    
+    // Проверяем, что это наша фигура
+    const piece = gameState.board[square];
+    if (!piece) {
+      // Если клетка пустая и у нас выбран квадрат, пытаемся сделать ход
+      if (selectedSquare) {
+        console.log(`[CLIENT] Making move from ${selectedSquare} to ${square}`);
+        handleChessMove(selectedSquare, square);
+      }
+      return;
+    }
+    
+    // Определяем цвет фигуры
+    const isPlayerWhite = gameState.players[0] === user.id;
+    const isWhitePiece = piece === piece.toUpperCase(); // Заглавные = белые, строчные = черные
+    
+    console.log(`[CLIENT] Clicked square ${square}, piece: ${piece}, isPlayerWhite: ${isPlayerWhite}, isWhitePiece: ${isWhitePiece}`);
+    
+    // Проверяем, что это наша фигура
+    if ((isPlayerWhite && !isWhitePiece) || (!isPlayerWhite && isWhitePiece)) {
+      // Это фигура соперника, нельзя выбирать
+      console.log(`[CLIENT] Cannot select opponent's piece`);
+      return;
+    }
+    
+    if (selectedSquare === square) {
+      setSelectedSquare(null);
+      setValidMoves([]);
+      return;
+    }
+    
+    // Выбираем квадрат
+    console.log(`[CLIENT] Selecting square ${square}`);
+    setSelectedSquare(square);
+    // Временно убираем запрос возможных ходов
+    // fetchValidMoves(square);
+  };
+
+  const handleChessMove = (from, to) => {
+    if (gameState.status !== 'in_progress' || gameState.currentPlayerId !== user.id) return;
+    
+    // Временно убираем проверку возможных ходов
+    // if (!validMoves.includes(to)) {
+    //   console.log('Invalid move:', from, 'to', to);
+    //   return;
+    // }
+    
+    const move = {
+      from: from,
+      to: to
+    };
+    
+    // Добавляем повышение только если пешка дошла до последней линии
+    const isPawnMove = gameState.board[from]?.toLowerCase() === 'p';
+    const isPromotionRank = to[1] === '8' || to[1] === '1';
+    
+    if (isPawnMove && isPromotionRank) {
+      move.promotion = 'q'; // Автоматическое повышение до ферзя
+    }
+    
+    makeMove(move);
+    setSelectedSquare(null);
+    setValidMoves([]);
+  };
+
+  const fetchValidMoves = async (square) => {
+    try {
+      // Проверяем, что это наша фигура
+      const piece = gameState.board[square];
+      if (!piece) return;
+      
+      const isPlayerWhite = gameState.players[0] === user.id;
+      const isWhitePiece = piece === piece.toUpperCase(); // Заглавные = белые, строчные = черные
+      
+      // Проверяем, что это наша фигура
+      if ((isPlayerWhite && !isWhitePiece) || (!isPlayerWhite && isWhitePiece)) {
+        return;
+      }
+      
+      const response = await fetch(`/api/games/valid-moves`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          roomId: roomId,
+          square: square
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setValidMoves(data.validMoves || []);
+      }
+    } catch (error) {
+      console.error('Error fetching valid moves:', error);
+    }
   };
 
   const renderStatusMessage = () => {
@@ -49,8 +180,12 @@ const GameRoomPage = () => {
 
     if (gameState.gameType === 'quiz') {
       if (isAnswerSubmitted) return "Ответ принят! Ожидание...";
-      if (gameState.currentQuestion?.timeRemaining <= 0) return "Время вышло!";
+      if (quizTimer <= 0) return "Время вышло!";
       return "Выберите ответ";
+    }
+
+    if (gameState.gameType === 'chess') {
+      return gameState.currentPlayerId === user.id ? "Ваш ход" : "Ход соперника";
     }
 
     return gameState.currentPlayerId === user.id ? "Ваш ход" : "Ход соперника";
@@ -85,7 +220,7 @@ const GameRoomPage = () => {
     }
 
     if (!gameState.currentQuestion) return <div className={styles.boardPlaceholder}>Загрузка вопроса...</div>;
-    const { question, options, questionNumber, totalQuestions, timeRemaining } = gameState.currentQuestion;
+    const { question, options, questionNumber, totalQuestions } = gameState.currentQuestion;
 
     return (
       <div className={styles.quizContainer}>
@@ -100,7 +235,7 @@ const GameRoomPage = () => {
         </div>
         <div className={styles.questionSection}>
           <div className={styles.questionProgress}>Вопрос {questionNumber} из {totalQuestions}</div>
-          <div className={styles.timer}>{timeRemaining}с</div>
+          <div className={styles.timer}>{quizTimer}с</div>
           <h2 className={styles.questionText}>{question}</h2>
         </div>
         <div className={styles.optionsGrid}>
@@ -108,11 +243,127 @@ const GameRoomPage = () => {
             <button key={index}
               className={`${styles.optionButton} ${selectedAnswer === index ? styles.selected : ''}`}
               onClick={() => handleQuizMove(index)}
-              disabled={isAnswerSubmitted || timeRemaining <= 0}>
+              disabled={isAnswerSubmitted || quizTimer <= 0}>
               {option}
             </button>
           ))}
         </div>
+      </div>
+    );
+  };
+
+  const renderChessBoard = () => {
+    if (!gameState.board) return <div className={styles.boardPlaceholder}>Загрузка шахматной доски...</div>;
+    
+    // Отладочная информация
+    console.log('[CLIENT] Chess game state:', {
+      players: gameState.players,
+      currentPlayerId: gameState.currentPlayerId,
+      user: user.id,
+      isPlayerWhite: gameState.players[0] === user.id,
+      turn: gameState.turn
+    });
+    
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    const ranks = ['8', '7', '6', '5', '4', '3', '2', '1'];
+    
+    // Определяем, нужно ли перевернуть доску
+    const isPlayerWhite = gameState.players[0] === user.id;
+    const shouldFlipBoard = !isPlayerWhite; // Если игрок черные, переворачиваем доску
+    
+    const getSquareClass = (file, rank) => {
+      const square = `${file}${rank}`;
+      const isLight = (files.indexOf(file) + ranks.indexOf(rank)) % 2 === 0;
+      let className = `${styles.chessSquare} ${isLight ? styles.light : styles.dark}`;
+      
+      if (selectedSquare === square) {
+        className += ` ${styles.selected}`;
+      }
+      
+      // Временно убираем отображение возможных ходов
+      // if (gameState.currentPlayerId === user.id && validMoves.includes(square)) {
+      //   const piece = gameState.board[square];
+      //   if (piece) {
+      //     className += ` ${styles.capture}`;
+      //   } else {
+      //     className += ` ${styles.validMove}`;
+      //   }
+      // }
+      
+      if (gameState.status !== 'in_progress' || gameState.currentPlayerId !== user.id) {
+        className += ` ${styles.disabled}`;
+      }
+      
+      return className;
+    };
+    
+    const getPieceSymbol = (piece) => {
+      const symbols = {
+        'k': '♔', 'q': '♕', 'r': '♖', 'b': '♗', 'n': '♘', 'p': '♙',
+        'K': '♚', 'Q': '♛', 'R': '♜', 'B': '♝', 'N': '♞', 'P': '♟'
+      };
+      return symbols[piece] || '';
+    };
+    
+    // Создаем массив квадратов в правильном порядке
+    const squares = [];
+    for (let rankIndex = 0; rankIndex < ranks.length; rankIndex++) {
+      for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
+        const rank = ranks[rankIndex];
+        const file = files[fileIndex];
+        const square = `${file}${rank}`;
+        const piece = gameState.board[square];
+        squares.push({ square, piece, rank, file });
+      }
+    }
+    
+    // Если нужно перевернуть доску, меняем порядок
+    if (shouldFlipBoard) {
+      squares.reverse();
+    }
+    
+    return (
+      <div className={styles.chessContainer}>
+        <div className={styles.chessInfo}>
+          <div className={`${styles.chessPlayer} ${gameState.currentPlayerId === gameState.players[0] ? styles.active : ''}`}>
+            <div className={`${styles.chessPlayerColor} ${styles.white}`}></div>
+            <span className={styles.chessPlayerName}>
+              {gameState.players[0] === user.id ? 'Вы (Белые)' : 'Соперник (Белые)'}
+            </span>
+          </div>
+          <div className={`${styles.chessPlayer} ${gameState.currentPlayerId === gameState.players[1] ? styles.active : ''}`}>
+            <div className={`${styles.chessPlayerColor} ${styles.black}`}></div>
+            <span className={styles.chessPlayerName}>
+              {gameState.players[1] === user.id ? 'Вы (Черные)' : 'Соперник (Черные)'}
+            </span>
+          </div>
+        </div>
+        
+        <div className={styles.chessBoard}>
+          {squares.map(({ square, piece, rank, file }) => (
+            <div
+              key={square}
+              className={getSquareClass(file, rank)}
+              onClick={() => handleChessSquareClick(square)}
+            >
+              {piece && getPieceSymbol(piece)}
+            </div>
+          ))}
+        </div>
+        
+        {gameState.moveHistory && gameState.moveHistory.length > 0 && (
+          <div className={styles.chessMoveHistory}>
+            <h3>История ходов</h3>
+            {gameState.moveHistory.map((move, index) => (
+              <div key={index} className={styles.chessMove}>
+                <span className={styles.chessMoveNumber}>{Math.floor(index / 2) + 1}.</span>
+                <span className={styles.chessMoveText}>
+                  {move}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
@@ -134,6 +385,8 @@ const GameRoomPage = () => {
             ))}
           </div>
         );
+      case 'chess':
+        return renderChessBoard();
       case 'quiz':
         return renderQuizGame();
       default:

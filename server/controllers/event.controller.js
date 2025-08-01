@@ -57,3 +57,16 @@ exports.getMediaForEvent = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.moveMediaToEvent = async (req, res, next) => {
+  try {
+    const { mediaId } = req.params;
+    const { targetEventId } = req.body;
+    console.log('Moving media:', { mediaId, targetEventId, userId: req.user.id });
+    const result = await eventService.moveMediaToEvent(mediaId, targetEventId, req.user.id);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error('Error in moveMediaToEvent controller:', error);
+    next(error);
+  }
+};

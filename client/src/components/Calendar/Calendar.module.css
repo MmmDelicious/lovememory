@@ -35,6 +35,32 @@
   --fc-today-bg-color: rgba(231, 122, 101, 0.05);
 }
 
+/* Убираем курсор текстового ввода */
+.calendarContainer :global(.fc) * {
+  caret-color: transparent !important;
+  outline: none !important;
+}
+
+.calendarContainer :global(.fc) *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.calendarContainer :global(.fc-daygrid-day) {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.calendarContainer :global(.fc-daygrid-day-number) {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
+}
+
 .calendarContainer :global(.fc-daygrid-day-events) {
   margin: 0 !important;
 }
@@ -164,3 +190,42 @@
 }
 
 /* Старые стили фильтров удалены - теперь используется SearchAndFilter компонент */
+
+/* Контекстное меню */
+.contextMenu {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 4px 0;
+  min-width: 180px;
+  font-size: 14px;
+  font-family: var(--font-family-body);
+}
+
+.contextMenuItem {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contextMenuItem:hover {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.contextMenuItem:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.contextMenuItem:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.contextMenuItem:only-child {
+  border-radius: 8px;
+}

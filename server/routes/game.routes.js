@@ -13,4 +13,7 @@ router.get('/', gameController.getRooms);
 // POST /api/games/room -> для создания комнаты
 router.post('/room', gameController.createRoom);
 
+// POST /api/games/valid-moves -> для получения возможных ходов в шахматах
+router.post('/valid-moves', gameController.getValidMoves);
+
 module.exports = router;

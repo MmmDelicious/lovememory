@@ -6,12 +6,16 @@ import MainLayout from './layouts/MainLayout/MainLayout';
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
+import DayDetailPage from './pages/DayDetailPage/DayDetailPage';
 import PairingPage from './pages/PairingPage/PairingPage';
 import { GamesPage } from './pages/GamesPage/GamesPage';
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
 import GameRoomPage from './pages/GameRoomPage/GameRoomPage';
 import LoveVegasPage from './pages/LoveVegasPage/LoveVegasPage';
 import PokerPage from './pages/PokerPage/PokerPage';
+import ErrorPage from './pages/ErrorPage/ErrorPage';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import ErrorTest from './components/ErrorTest/ErrorTest';
 
 const AppRoutes = () => {
   const { user, isLoading } = useAuth();
@@ -22,32 +26,41 @@ const AppRoutes = () => {
 
   if (!user) {
     return (
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/error" element={<ErrorPage />} />
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      </ErrorBoundary>
     );
   }
 
   return (
-    <Routes>
-      <Route element={<MainLayout />}>
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/pairing" element={<PairingPage />} />
-        <Route path="/games" element={<GamesPage />} />
-        <Route path="/games/:gameType" element={<GameLobbyPage />} />
-        <Route path="/games/room/:roomId" element={<GameRoomPage />} />
-        <Route path="/love-vegas" element={<LoveVegasPage />} />
-        <Route path="/love-vegas/poker" element={<GameLobbyPage gameType="poker" />} />
-      </Route>
-      
-      <Route path="/love-vegas/poker/:roomId" element={<PokerPage />} />
-      
-      <Route path="/login" element={<Navigate to="/dashboard" />} />
-      <Route path="/register" element={<Navigate to="/dashboard" />} />
-      <Route path="*" element={<Navigate to="/dashboard" />} />
-    </Routes>
+    <ErrorBoundary>
+      <Routes>
+        <Route element={<MainLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/pairing" element={<PairingPage />} />
+          <Route path="/games" element={<GamesPage />} />
+          <Route path="/games/:gameType" element={<GameLobbyPage />} />
+          <Route path="/games/room/:roomId" element={<GameRoomPage />} />
+          <Route path="/love-vegas" element={<LoveVegasPage />} />
+          <Route path="/love-vegas/poker" element={<GameLobbyPage gameType="poker" />} />
+        </Route>
+        
+        <Route path="/day/:date" element={<DayDetailPage />} />
+        
+        <Route path="/love-vegas/poker/:roomId" element={<PokerPage />} />
+        <Route path="/error" element={<ErrorPage />} />
+        <Route path="/error-test" element={<ErrorTest />} />
+        
+        <Route path="/login" element={<Navigate to="/dashboard" />} />
+        <Route path="/register" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to="/dashboard" />} />
+      </Routes>
+    </ErrorBoundary>
   );
 };
 

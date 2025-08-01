@@ -33,6 +33,7 @@
   flex-direction: column;
   animation: slideInSidebar 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
   transform: translateX(100%);
+  user-select: none;
 }
 
 .sidebar.open {
@@ -115,6 +116,7 @@
   color: var(--color-text-primary);
   transition: border-color 0.2s, box-shadow 0.2s;
   font-family: var(--font-family-body);
+  user-select: text;
 }
 
 .input::placeholder, .textarea::placeholder {

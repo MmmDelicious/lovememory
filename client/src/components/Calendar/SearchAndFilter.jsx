@@ -23,8 +23,13 @@ const CalendarFilters = ({ onFilterChange, activeFilter }) => {
 
   // Убрали функцию поиска
 
+  const handleContainerClick = (e) => {
+    // Предотвращаем всплытие события клика до родительского контейнера
+    e.stopPropagation();
+  };
+
   return (
-    <div className={styles.filtersContainer}>
+    <div className={styles.filtersContainer} onClick={handleContainerClick}>
       <div className={styles.filtersGrid}>
         {/* Компактные основные фильтры */}
         <div className={styles.compactFiltersRow}>

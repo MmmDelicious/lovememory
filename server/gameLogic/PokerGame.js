@@ -29,17 +29,22 @@ class PokerGame {
             id: p.id,
             name: p.name,
             gender: p.gender,
-            stack: p.buyInCoins * 10,
+            stack: p.buyInCoins, // 1 фишка = 1 монетка
             hand: [],
             currentBet: 0,
             inHand: true,
             hasActed: false,
             isWaitingToPlay: false,
+            isAllIn: false,
         }));
         
         this.blinds = blinds;
         this.dealerPosition = -1;
         this.status = 'in_progress';
+        this.lastRaiser = null;
+        this.lastRaiseAmount = 0; // Добавляем отслеживание суммы последнего рейза
+        this.turnTimeout = null; // Таймаут для хода
+        this.turnTimeLimit = 30000; // 30 секунд на ход
         this.startNewHand();
     }
 
@@ -53,16 +58,19 @@ class PokerGame {
             id: playerInfo.id,
             name: playerInfo.name,
             gender: playerInfo.gender,
-            stack: playerInfo.buyInCoins * 10,
+            stack: playerInfo.buyInCoins, // 1 фишка = 1 монетка
             hand: [],
             currentBet: 0,
             inHand: false,
             hasActed: false,
             isWaitingToPlay: true,
+            isAllIn: false,
         });
     }
 
     startNewHand() {
+        this._clearTurnTimeout(); // Очищаем таймаут при начале новой раздачи
+        
         this.players.forEach(p => {
             if (p.isWaitingToPlay) {
                 p.isWaitingToPlay = false;
@@ -71,6 +79,7 @@ class PokerGame {
             p.currentBet = 0;
             p.inHand = p.stack > 0;
             p.hasActed = false;
+            p.isAllIn = false;
         });
 
         const activePlayers = this.players.filter(p => p.inHand);
@@ -95,19 +104,39 @@ class PokerGame {
 
         this.lastAction = null;
         this.lastRaiser = null;
+        this.lastRaiseAmount = 0; // Сбрасываем сумму последнего рейза
         this._dealCards();
         this._postBlindsAndStartBetting();
+        this._setTurnTimeout(); // Устанавливаем таймаут для первого игрока
     }
 
     makeMove(playerId, move) {
         const playerIndex = this.players.findIndex(p => p.id === playerId);
+        if (playerIndex === -1) throw new Error("Player not found.");
         if (playerIndex !== this.currentPlayerIndex) throw new Error("Not your turn.");
         
         const player = this.players[playerIndex];
+        if (!player.inHand) throw new Error("Player is not in hand.");
+        
         const { action, value } = move;
         const allowed = this._getAllowedActions(player);
 
         if (!allowed.actions.includes(action)) throw new Error(`Action ${action} is not allowed.`);
+
+        // Валидация значения для рейза
+        if (action === ACTIONS.RAISE) {
+            if (value < allowed.minRaise || value > allowed.maxRaise) {
+                throw new Error(`Raise amount ${value} is out of range [${allowed.minRaise}, ${allowed.maxRaise}].`);
+            }
+            // Проверяем, что у игрока достаточно фишек
+            const requiredAmount = value - player.currentBet;
+            if (requiredAmount > player.stack) {
+                throw new Error(`Insufficient chips for raise. Required: ${requiredAmount}, Available: ${player.stack}`);
+            }
+        }
+
+        // Очищаем таймаут при успешном ходе
+        this._clearTurnTimeout();
 
         switch (action) {
             case ACTIONS.FOLD:
@@ -119,26 +148,18 @@ class PokerGame {
                 this._postBet(player, allowed.callAmount);
                 break;
             case ACTIONS.RAISE:
-                if (value < allowed.minRaise || value > allowed.maxRaise) {
-                    throw new Error(`Raise amount ${value} is out of range [${allowed.minRaise}, ${allowed.maxRaise}].`);
-                }
-                this._postBet(player, value - player.currentBet);
+                const raiseAmount = value - player.currentBet;
+                this._postBet(player, raiseAmount);
                 this.lastRaiser = player;
-                this.players.forEach(p => {
-                    if (p.id !== player.id && p.inHand && p.stack > 0) {
-                        p.hasActed = false;
-                    }
-                });
+                this.lastRaiseAmount = value; // Сохраняем сумму рейза
+                this._resetActionFlags(player.id);
                 break;
             case ACTIONS.BET:
-                 this._postBet(player, value);
-                 this.lastRaiser = player;
-                this.players.forEach(p => {
-                    if (p.id !== player.id && p.inHand && p.stack > 0) {
-                        p.hasActed = false;
-                    }
-                });
-                 break;
+                this._postBet(player, value);
+                this.lastRaiser = player;
+                this.lastRaiseAmount = value; // Сохраняем сумму ставки
+                this._resetActionFlags(player.id);
+                break;
         }
 
         player.hasActed = true;
@@ -176,29 +197,91 @@ class PokerGame {
     }
 
     _advanceTurn() {
-        if (this.players.filter(p => p.inHand).length <= 1) return this._endHand();
-        const activePlayers = this.players.filter(p => p.inHand && p.stack > 0);
-        if (activePlayers.every(p => p.hasActed)) return this._endBettingRound();
+        console.log(`[PokerGame] _advanceTurn called. Current index: ${this.currentPlayerIndex}, active players: ${this.players.filter(p => p.inHand).length}`);
+        
+        if (this.players.filter(p => p.inHand).length <= 1) {
+            console.log(`[PokerGame] Only 1 or fewer active players, ending hand`);
+            return this._endHand();
+        }
+        
+        const activePlayers = this.players.filter(p => p.inHand);
+        if (activePlayers.every(p => p.hasActed)) {
+            console.log(`[PokerGame] All active players have acted, ending betting round`);
+            return this._endBettingRound();
+        }
+        
+        const oldIndex = this.currentPlayerIndex;
         this.currentPlayerIndex = this._getPlayerAfterIndex(this.currentPlayerIndex);
+        console.log(`[PokerGame] Advanced turn from index ${oldIndex} to ${this.currentPlayerIndex}`);
+        
+        // Устанавливаем таймаут для текущего игрока
+        this._setTurnTimeout();
+    }
+
+    _setTurnTimeout() {
+        // Очищаем предыдущий таймаут
+        if (this.turnTimeout) {
+            clearTimeout(this.turnTimeout);
+        }
+        
+        // Устанавливаем новый таймаут
+        this.turnTimeout = setTimeout(() => {
+            this._handleTurnTimeout();
+        }, this.turnTimeLimit);
+    }
+
+    _handleTurnTimeout() {
+        const currentPlayer = this.getCurrentPlayer();
+        if (currentPlayer && currentPlayer.inHand) {
+            console.log(`[PokerGame] Player ${currentPlayer.name} timed out, auto-folding`);
+            
+            // Автоматический фолд
+            currentPlayer.inHand = false;
+            currentPlayer.hasActed = true;
+            
+            console.log(`[PokerGame] After auto-fold: currentPlayerIndex=${this.currentPlayerIndex}, activePlayers=${this.players.filter(p => p.inHand).length}`);
+            
+            // Продолжаем игру
+            this._advanceTurn();
+        }
+    }
+
+    _clearTurnTimeout() {
+        if (this.turnTimeout) {
+            clearTimeout(this.turnTimeout);
+            this.turnTimeout = null;
+        }
     }
     
     _endBettingRound() {
+        this._clearTurnTimeout(); // Очищаем таймаут
         this._collectBets();
         if (this.players.filter(p => p.inHand).length <= 1) return this._endHand();
+        
         if (this.stage === STAGES.RIVER) {
             this.stage = STAGES.SHOWDOWN;
             return this._endHand();
         }
-        this.stage = this.stage === STAGES.PRE_FLOP ? STAGES.FLOP : this.stage === STAGES.FLOP ? STAGES.TURN : STAGES.RIVER;
+        
+        this.stage = this.stage === STAGES.PRE_FLOP ? STAGES.FLOP : 
+                    this.stage === STAGES.FLOP ? STAGES.TURN : STAGES.RIVER;
+        
         if (this.stage === STAGES.FLOP) this._dealCommunityCards(3);
         else this._dealCommunityCards(1);
+        
         this.lastRaiser = null;
-        this.players.forEach(p => { if (p.inHand) p.hasActed = false; });
+        this.lastRaiseAmount = 0; // Сбрасываем сумму рейза
+        this.players.forEach(p => { 
+            if (p.inHand) p.hasActed = false; 
+        });
+        
+        // Начинаем с игрока после дилера
         this.currentPlayerIndex = this._getPlayerAfterIndex(this.dealerPosition);
-        if (this.players.filter(p => p.inHand && p.stack > 0).length < 2) this._endBettingRound();
+        this._setTurnTimeout(); // Устанавливаем таймаут для нового раунда
     }
 
     _endHand() {
+        this._clearTurnTimeout(); // Очищаем таймаут
         this._collectBets();
         const winnersInfo = this._determineWinners();
         this._awardPot(winnersInfo);
@@ -207,30 +290,122 @@ class PokerGame {
     }
 
     _determineWinners() {
-       const contenders = this.players.filter(p => p.inHand);
-        if (contenders.length === 1) return [{ player: contenders[0], handName: "the pot", handCards: [], pot: this.pot }];
+        const contenders = this.players.filter(p => p.inHand);
+        if (contenders.length === 1) {
+            return [{ 
+                player: contenders[0], 
+                handName: "the pot", 
+                handCards: contenders[0].hand, 
+                pot: this.pot 
+            }];
+        }
+        
         const hands = contenders.map(p => {
-            const cardStrings = p.hand.map(c => c.rank + c.suit.toLowerCase()).concat(this.communityCards.map(c => c.rank + c.suit.toLowerCase()));
+            const cardStrings = p.hand.map(c => c.rank + c.suit.toLowerCase())
+                .concat(this.communityCards.map(c => c.rank + c.suit.toLowerCase()));
             const solvedHand = Hand.solve(cardStrings);
             solvedHand.player = p;
             return solvedHand;
         });
+        
         const winningHands = Hand.winners(hands);
-        return winningHands.map(h => ({ player: this.players.find(p => p.id === h.player.id), handName: h.name, handCards: h.cards.map(c => ({ rank: c.value, suit: c.suit.toUpperCase() })), pot: this.pot / winningHands.length }));
+        return winningHands.map(h => ({ 
+            player: this.players.find(p => p.id === h.player.id), 
+            handName: h.name, 
+            handCards: h.cards.map(c => ({ rank: c.value, suit: c.suit.toUpperCase() })), 
+            pot: this.pot / winningHands.length 
+        }));
     }
 
-    _awardPot(winners) { winners.forEach(info => { const p = this.players.find(p => p.id === info.player.id); if (p) p.stack += info.pot; }); }
-    _collectBets() { this.players.forEach(p => { this.pot += p.currentBet; p.currentBet = 0; }); }
+    _awardPot(winners) { 
+        // Сначала распределяем side pots
+        this.sidePots.forEach(sidePot => {
+            const eligibleWinners = winners.filter(w => 
+                sidePot.eligiblePlayers.includes(w.player.id)
+            );
+            
+            if (eligibleWinners.length > 0) {
+                const amountPerWinner = sidePot.amount / eligibleWinners.length;
+                eligibleWinners.forEach(winner => {
+                    const player = this.players.find(p => p.id === winner.player.id);
+                    if (player) player.stack += amountPerWinner;
+                });
+            }
+        });
+
+        // Затем распределяем основной пот
+        if (this.pot > 0) {
+            winners.forEach(info => { 
+                const p = this.players.find(p => p.id === info.player.id); 
+                if (p) p.stack += info.pot; 
+            }); 
+        }
+    }
+    
+    _collectBets() { 
+        // Создаем side pots при алл-ине
+        this._createSidePots();
+        
+        this.players.forEach(p => { 
+            this.pot += p.currentBet; 
+            p.currentBet = 0; 
+        }); 
+    }
+
+    _createSidePots() {
+        if (this.sidePots.length > 0) return; // Уже созданы
+
+        const activePlayers = this.players.filter(p => p.inHand);
+        if (activePlayers.length <= 1) return;
+
+        // Проверяем, есть ли алл-ин
+        const allInPlayers = activePlayers.filter(p => p.isAllIn);
+        if (allInPlayers.length === 0) return;
+
+        // Сортируем игроков по размеру их ставок
+        const sortedPlayers = [...activePlayers].sort((a, b) => a.currentBet - b.currentBet);
+        
+        let remainingPot = 0;
+        let lastBet = 0;
+
+        sortedPlayers.forEach(player => {
+            const currentBet = player.currentBet;
+            if (currentBet > lastBet) {
+                // Создаем side pot для ставок от lastBet до currentBet
+                const sidePotAmount = (currentBet - lastBet) * sortedPlayers.filter(p => p.currentBet >= currentBet).length;
+                
+                if (sidePotAmount > 0) {
+                    this.sidePots.push({
+                        amount: sidePotAmount,
+                        eligiblePlayers: sortedPlayers.filter(p => p.currentBet >= currentBet).map(p => p.id)
+                    });
+                }
+                
+                lastBet = currentBet;
+            }
+        });
+
+        // Основной пот для оставшихся ставок
+        remainingPot = this.players.reduce((total, p) => total + p.currentBet, 0);
+        if (remainingPot > 0) {
+            this.pot = remainingPot;
+        }
+    }
     
     _postBlindsAndStartBetting() {
         const smallBlindIndex = this._getPlayerAfterIndex(this.dealerPosition, false);
         const bigBlindIndex = this._getPlayerAfterIndex(smallBlindIndex, false);
         const smallBlindPlayer = this.players[smallBlindIndex];
         const bigBlindPlayer = this.players[bigBlindIndex];
+        
         this._postBet(smallBlindPlayer, this.blinds.small);
         this._postBet(bigBlindPlayer, this.blinds.big);
+        
         this.pot = this.players.reduce((total, p) => total + p.currentBet, 0);
         this.lastRaiser = bigBlindPlayer;
+        this.lastRaiseAmount = this.blinds.big; // Устанавливаем сумму рейза как большой блайнд
+        
+        // Начинаем с игрока после большого блайнда
         this.currentPlayerIndex = this._getPlayerAfterIndex(bigBlindIndex);
     }
 
@@ -238,32 +413,79 @@ class PokerGame {
         const actualAmount = Math.min(amount, player.stack);
         player.stack -= actualAmount;
         player.currentBet += actualAmount;
+        
+        // Проверяем алл-ин
+        if (player.stack === 0 && actualAmount > 0) {
+            player.isAllIn = true;
+        }
     }
 
-    _dealCards() { this.players.forEach(p => { if (p.inHand) p.hand = [this.deck.pop(), this.deck.pop()]; }); }
-    _dealCommunityCards(count) { for(let i=0; i<count; i++) this.communityCards.push(this.deck.pop()); }
-    _createDeck() { const s='HDCS',r='23456789TJQKA'; return r.split('').flatMap(rank=>s.split('').map(suit=>({rank,suit}))); }
-    _shuffleDeck() { for (let i=this.deck.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1));[this.deck[i],this.deck[j]]=[this.deck[j],this.deck[i]];} }
+    _resetActionFlags(excludePlayerId) {
+        this.players.forEach(p => {
+            if (p.id !== excludePlayerId && p.inHand) {
+                p.hasActed = false;
+            }
+        });
+    }
+
+    _dealCards() { 
+        this.players.forEach(p => { 
+            if (p.inHand) p.hand = [this.deck.pop(), this.deck.pop()]; 
+        }); 
+    }
+    
+    _dealCommunityCards(count) { 
+        for(let i=0; i<count; i++) this.communityCards.push(this.deck.pop()); 
+    }
+    
+    _createDeck() { 
+        const s='HDCS',r='23456789TJQKA'; 
+        return r.split('').flatMap(rank=>s.split('').map(suit=>({rank,suit}))); 
+    }
+    
+    _shuffleDeck() { 
+        for (let i=this.deck.length-1;i>0;i--) { 
+            const j=Math.floor(Math.random()*(i+1));
+            [this.deck[i],this.deck[j]]=[this.deck[j],this.deck[i]];
+        } 
+    }
     
     _getPlayerAfterIndex(startIndex, inHandOnly = true) {
         if (this.players.length === 0) return 0;
         let index = startIndex;
         let attempts = 0;
+        const maxAttempts = this.players.length * 2;
+        
         do {
             index = (index + 1) % this.players.length;
             const player = this.players[index];
-            if (inHandOnly && player && !player.inHand) continue;
-            if (player && player.stack === 0) continue; 
+            
+            if (!player) {
+                attempts++;
+                continue;
+            }
+            
+            if (inHandOnly && !player.inHand) {
+                attempts++;
+                continue;
+            }
+            
+            // Нашли подходящего игрока
             return index;
-        } while (++attempts < this.players.length * 2);
+        } while (attempts < maxAttempts);
+        
+        // Если не нашли подходящего игрока, возвращаем следующий индекс
+        console.log(`[PokerGame] Warning: Could not find next player after index ${startIndex}, returning next index`);
         return (startIndex + 1) % this.players.length; 
     }
 
     _getAllowedActions(player) {
         if (!player || player.id !== this.players[this.currentPlayerIndex]?.id) return { actions: [] };
+        
         const maxBet = Math.max(...this.players.map(p => p.currentBet));
         const canRaise = player.stack > 0;
         let actions = [];
+        
         if (maxBet > player.currentBet) {
             actions.push('fold', 'call'); 
             if (player.stack > maxBet - player.currentBet) actions.push('raise');
@@ -271,12 +493,31 @@ class PokerGame {
             actions.push('check');
             if (canRaise) actions.push('raise');
         }
+        
         const callAmount = Math.min(maxBet - player.currentBet, player.stack);
+        
+        // Исправленная логика минимального рейза
         let minRaise;
-        if (this.lastRaiser) minRaise = maxBet + (maxBet - this.lastRaiser.currentBet);
-        else minRaise = maxBet + this.blinds.big;
+        if (this.lastRaiseAmount > 0) {
+            // Если был предыдущий рейз, минимальный рейз = последняя сумма рейза + размер большого блайнда
+            minRaise = this.lastRaiseAmount + this.blinds.big;
+        } else {
+            // Если рейза не было, минимальный рейз = текущая максимальная ставка + размер большого блайнда
+            minRaise = maxBet + this.blinds.big;
+        }
+        
+        // Минимальный рейз должен быть больше текущей ставки игрока
         minRaise = Math.max(minRaise, player.currentBet + 1);
-        return { actions, callAmount, minRaise, maxRaise: player.stack + player.currentBet };
+        
+        // Максимальный рейз = стек игрока + его текущая ставка
+        const maxRaise = player.stack + player.currentBet;
+        
+        return { 
+            actions, 
+            callAmount, 
+            minRaise, 
+            maxRaise
+        };
     }
 
     getStateForPlayer(playerId) {
@@ -290,6 +531,10 @@ class PokerGame {
                 .map(p => ({ playerId: p.id, hand: p.hand }));
         }
 
+        // Получаем разрешенные действия для текущего игрока
+        const allowedActions = this.getCurrentPlayer()?.id === playerId && !player?.isWaitingToPlay ? 
+            this._getAllowedActions(player) : { actions: [], minRaise: 0 };
+
         return {
             ...state,
             yourHand: player ? player.hand : [],
@@ -297,19 +542,36 @@ class PokerGame {
             yourCurrentBet: player ? player.currentBet : 0,
             isObserving: player ? player.isWaitingToPlay : false,
             canMakeAction: this.getCurrentPlayer()?.id === playerId && !player?.isWaitingToPlay,
-            validActions: this.getCurrentPlayer()?.id === playerId && !player?.isWaitingToPlay ? this.getValidActions() : [],
+            validActions: allowedActions.actions || [],
+            minRaiseAmount: allowedActions.minRaise || 0,
+            maxRaiseAmount: allowedActions.maxRaise || 0,
+            callAmount: allowedActions.callAmount || 0,
+            initialBuyIn: this.initialBuyIn,
             winningHandCards: this.winnersInfo ? this.winnersInfo.flatMap(w => w.handCards || []) : [],
             visibleHands: visibleHands
         };
     }
 
     getState() {
-        const winner = this.winnersInfo && this.winnersInfo.length > 0 ? (this.winnersInfo.length === 1 ? this.winnersInfo[0].player : 'draw') : null;
+        const winner = this.winnersInfo && this.winnersInfo.length > 0 ? 
+            (this.winnersInfo.length === 1 ? this.winnersInfo[0].player.id : 'draw') : null;
         const currentPlayer = this.players[this.currentPlayerIndex];
         return {
             gameType: this.gameType,
             status: this.status,
-            players: this.players.map(p => ({ id: p.id, name: p.name, gender: p.gender, stack: p.stack, currentBet: p.currentBet, inHand: p.inHand, hasActed: p.hasActed, isWaitingToPlay: p.isWaitingToPlay })),
+            players: this.players.map(p => ({ 
+                id: p.id, 
+                name: p.name, 
+                gender: p.gender, 
+                stack: p.stack, 
+                currentBet: p.currentBet, 
+                inHand: p.inHand, 
+                hasActed: p.hasActed, 
+                isWaitingToPlay: p.isWaitingToPlay,
+                isAllIn: p.isAllIn,
+                hand: p.hand, // Добавляем карты игрока
+                cards: p.hand // Для совместимости с клиентом
+            })),
             currentPlayerId: this.status === 'in_progress' && currentPlayer ? currentPlayer.id : null,
             winner: winner,
             isDraw: this.winnersInfo ? this.winnersInfo.length > 1 : false,
@@ -322,7 +584,10 @@ class PokerGame {
 
     getCurrentPlayer() { return this.players[this.currentPlayerIndex] || null; }
     getValidActions() { const p = this.getCurrentPlayer(); return p ? (this._getAllowedActions(p).actions || []) : []; }
-    cleanup() { console.log(`[POKER] Game cleanup completed`); }
+    cleanup() { 
+        this._clearTurnTimeout(); // Очищаем таймаут при завершении игры
+        console.log(`[POKER] Game cleanup completed`); 
+    }
 }
 
 module.exports = PokerGame;

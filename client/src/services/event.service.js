@@ -32,6 +32,10 @@ const uploadFile = (eventId, file) => {
   });
 };
 
+const moveMediaToEvent = (mediaId, targetEventId) => {
+  return api.put(`/media/${mediaId}/move`, { targetEventId });
+};
+
 const eventService = {
   getEvents,
   createEvent,
@@ -39,6 +43,7 @@ const eventService = {
   deleteEvent,
   getMediaForEvent,
   uploadFile,
+  moveMediaToEvent,
   API_BASE_URL,
 };
 

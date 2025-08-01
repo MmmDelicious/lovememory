@@ -25,4 +25,8 @@ const Media = sequelize.define('Media', {
   },
 });
 
+Media.associate = (models) => {
+  Media.belongsTo(models.Event, { foreignKey: 'eventId' });
+};
+
 module.exports = Media;

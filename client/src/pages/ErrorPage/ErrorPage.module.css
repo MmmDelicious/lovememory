@@ -1,0 +1,144 @@
+.errorContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f6f3;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(139, 69, 19, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(160, 82, 45, 0.03) 0%, transparent 50%);
+  font-family: 'Georgia', serif;
+}
+
+.errorContent {
+  text-align: center;
+  max-width: 400px;
+  padding: 2rem;
+}
+
+.errorIcon {
+  margin-bottom: 2rem;
+}
+
+.toolsIcon {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+  background-color: #e6e0d6;
+  border: 2px solid #d4c4a8;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrench {
+  position: absolute;
+  width: 40px;
+  height: 8px;
+  background-color: #8b4513;
+  border-radius: 4px;
+  transform: rotate(-15deg) translateX(-8px);
+}
+
+.wrench::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  width: 12px;
+  height: 12px;
+  background-color: #8b4513;
+  border-radius: 50%;
+}
+
+.screwdriver {
+  position: absolute;
+  width: 6px;
+  height: 35px;
+  background-color: #8b4513;
+  border-radius: 3px;
+  transform: rotate(15deg) translateX(8px);
+}
+
+.screwdriver::before {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: -2px;
+  width: 10px;
+  height: 8px;
+  background-color: #8b4513;
+  border-radius: 2px;
+}
+
+.errorCode {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #5d4037;
+  margin: 0 0 1rem 0;
+  letter-spacing: 2px;
+}
+
+.errorMessage {
+  font-size: 1.2rem;
+  color: #5d4037;
+  margin: 0 0 2rem 0;
+  line-height: 1.5;
+}
+
+.homeButton {
+  background-color: #d2691e;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.homeButton:hover {
+  background-color: #b8860b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.homeButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 480px) {
+  .errorContent {
+    padding: 1rem;
+  }
+  
+  .errorCode {
+    font-size: 2.5rem;
+  }
+  
+  .errorMessage {
+    font-size: 1rem;
+  }
+  
+  .toolsIcon {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .wrench {
+    width: 30px;
+    height: 6px;
+  }
+  
+  .screwdriver {
+    width: 4px;
+    height: 25px;
+  }
+} 

@@ -114,7 +114,18 @@ function initSocket(server, app) {
                         gender: user ? user.gender : 'male',
                         buyInCoins: room.bet,
                     };
-                    game.addPlayer(newPlayerInfo);
+                    
+                    // Проверяем, есть ли уже такой игрок в игре
+                    const existingPlayer = game.players.find(p => p.id === socket.user.id);
+                    if (existingPlayer) {
+                        // Игрок переподключается - обновляем его статус
+                        existingPlayer.isWaitingToPlay = false;
+                        console.log(`[SERVER] Player ${socket.user.id} reconnected to existing game`);
+                    } else {
+                        // Новый игрок присоединяется как наблюдатель
+                        game.addPlayer(newPlayerInfo);
+                        console.log(`[SERVER] Player ${socket.user.id} joined as observer`);
+                    }
                     
                     game.players.forEach(player => {
                         const stateForPlayer = game.getStateForPlayer(player.id);
@@ -141,17 +152,60 @@ function initSocket(server, app) {
       } else {
         try {
           const room = await GameRoom.findByPk(roomId);
-          if (room && room.status === 'waiting') {
-             const socketsInRoom = await io.in(roomId).fetchSockets();
-             const players = socketsInRoom.map(s => ({ id: s.user.id, name: s.user.email.split('@')[0] }));
-             socket.emit('game_update', {
+          if (room) {
+            if (room.status === 'waiting') {
+              const socketsInRoom = await io.in(roomId).fetchSockets();
+              const players = socketsInRoom.map(s => ({ id: s.user.id, name: s.user.email.split('@')[0] }));
+              socket.emit('game_update', {
                 gameType: room.gameType,
                 status: 'waiting',
                 players: players,
                 maxPlayers: room.maxPlayers,
-                stage: 'waiting',
-                message: 'Ожидание игроков...'
-             });
+                stage: 'waiting'
+              });
+            } else if (room.status === 'in_progress') {
+              // Игра была в процессе, но GameManager сбросился при перезагрузке сервера
+              console.log(`[SERVER] Recovering game for room ${roomId} after server restart`);
+              
+              const socketsInRoom = await io.in(roomId).fetchSockets();
+              if (socketsInRoom.length >= 2) {
+                // Восстанавливаем игру
+                const userIds = socketsInRoom.map(s => s.user.id);
+                const users = await User.findAll({ where: { id: userIds }, attributes: ['id', 'email', 'gender'] });
+                const usersMap = new Map(users.map(u => [u.id, u]));
+
+                const playerBuyInInfo = socketsInRoom.map(s => {
+                  const user = usersMap.get(s.user.id);
+                  return {
+                    id: s.user.id,
+                    name: user ? user.email.split('@')[0] : s.user.email.split('@')[0],
+                    gender: user ? user.gender : 'male',
+                    buyInCoins: room.bet
+                  };
+                });
+                
+                const recoveredGame = GameManager.createGame(roomId, room.gameType, playerBuyInInfo);
+                
+                if (recoveredGame.gameType === 'poker') {
+                  recoveredGame.players.forEach(player => {
+                    const stateForPlayer = recoveredGame.getStateForPlayer(player.id);
+                    io.to(player.id).emit('game_update', stateForPlayer);
+                  });
+                } else {
+                  const initialState = recoveredGame.getState();
+                  io.to(roomId).emit('game_update', initialState);
+                }
+              } else {
+                // Недостаточно игроков для восстановления
+                socket.emit('game_update', {
+                  gameType: room.gameType,
+                  status: 'waiting',
+                  players: socketsInRoom.map(s => ({ id: s.user.id, name: s.user.email.split('@')[0] })),
+                  maxPlayers: room.maxPlayers,
+                  stage: 'waiting'
+                });
+              }
+            }
           }
         } catch (error) {
           console.error(`[SERVER] Error checking room status:`, error);
@@ -189,9 +243,17 @@ function initSocket(server, app) {
               const currentGame = GameManager.getGame(roomId);
               if (currentGame && currentGame.players.length > 1 && currentGame.players.every(p => p.stack > 0)) {
                 currentGame.startNewHand();
+                
+                // Отправляем состояние всем игрокам сразу
                 currentGame.players.forEach(player => {
                   const stateForPlayer = currentGame.getStateForPlayer(player.id);
                   io.to(player.id).emit('game_update', stateForPlayer);
+                });
+                
+                // Отправляем событие о начале новой раздачи после обновления состояния
+                io.to(roomId).emit('new_hand_started', { 
+                  gameType: 'poker', 
+                  players: currentGame.players.map(p => ({ id: p.id, name: p.name }))
                 });
               } else if (currentGame) {
                 const room = await GameRoom.findByPk(roomId);
@@ -224,6 +286,68 @@ function initSocket(server, app) {
         }
       } catch (error) {
         console.error(`[SERVER] [ERROR] in 'make_move':`, error.message);
+        socket.emit('error', error.message);
+      }
+    });
+
+    socket.on('rebuy', async (data) => {
+      const { roomId } = data;
+      const game = GameManager.getGame(roomId);
+      if (!game || game.gameType !== 'poker') {
+        socket.emit('error', 'Rebuy is only available in poker games.');
+        return;
+      }
+
+      try {
+        const player = game.players.find(p => p.id === socket.user.id);
+        if (!player) {
+          socket.emit('error', 'Player not found in game.');
+          return;
+        }
+
+        const room = await GameRoom.findByPk(roomId);
+        if (!room) {
+          socket.emit('error', 'Room not found.');
+          return;
+        }
+
+        const user = await User.findByPk(socket.user.id);
+        if (!user) {
+          socket.emit('error', 'User not found.');
+          return;
+        }
+
+        // Проверяем, что у пользователя достаточно монет для ребая
+        const rebuyAmount = room.bet - player.stack;
+        if (rebuyAmount <= 0) {
+          socket.emit('error', 'No rebuy needed.');
+          return;
+        }
+
+        if (user.coins < rebuyAmount) {
+          socket.emit('error', `Insufficient coins for rebuy. Need ${rebuyAmount} coins, have ${user.coins}.`);
+          return;
+        }
+
+        // Выполняем ребай
+        user.coins -= rebuyAmount;
+        player.stack += rebuyAmount;
+        await user.save();
+
+        // Отправляем обновленное состояние всем игрокам
+        game.players.forEach(gamePlayer => {
+          const stateForPlayer = game.getStateForPlayer(gamePlayer.id);
+          io.to(gamePlayer.id).emit('game_update', stateForPlayer);
+        });
+
+        // Отправляем обновленные монеты пользователю
+        socket.emit('update_coins', user.coins);
+        socket.emit('rebuy_success', { newStack: player.stack });
+
+        console.log(`[SERVER] User ${socket.user.id} rebought ${rebuyAmount} coins. New stack: ${player.stack}`);
+
+      } catch (error) {
+        console.error(`[SERVER] [ERROR] in 'rebuy':`, error.message);
         socket.emit('error', error.message);
       }
     });
@@ -281,17 +405,20 @@ function initSocket(server, app) {
         const playerInfo = remainingSockets.map(s => ({ id: s.user.id, name: s.user.email.split('@')[0] }));
         io.to(roomId).emit('player_list_update', playerInfo);
 
+        // Проверяем, нужно ли завершить игру из-за недостатка игроков
         const currentGame = GameManager.getGame(roomId);
         if (currentGame && currentGame.status === 'in_progress' && remainingSockets.length < 2) {
-          const remainingPlayerId = remainingSockets[0].user.id;
-          
           if (currentGame.gameType !== 'poker') {
               console.log(`[SERVER] Non-poker game with less than 2 players, ending game`);
+              const remainingPlayerId = remainingSockets[0].user.id;
               io.to(roomId).emit('game_end', { ...currentGame.getState(), status: 'finished', winner: {id: remainingPlayerId} });
               const res = await gameService.finalizeGame(roomId, remainingPlayerId, socket.user.id);
                if (res && res.winner) io.to(res.winner.id).emit('update_coins', res.winner.coins);
                io.emit('room_list_updated');
                GameManager.removeGame(roomId);
+          } else {
+              // Для покера - оставляем игру в покое, игрок может вернуться
+              console.log(`[SERVER] Poker game with less than 2 players, keeping game active for potential rejoin`);
           }
         }
       }

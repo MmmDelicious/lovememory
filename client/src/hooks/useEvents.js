@@ -16,7 +16,24 @@ const formatTime = (date) => new Date(date).toLocaleTimeString('ru-RU', { hour: 
 
 const formatEvent = (event, userId) => {
   if (!event) return null;
-  const hasTime = !event.event_date.endsWith('00:00:00.000Z') || (event.end_date && !event.end_date.endsWith('00:00:00.000Z'));
+  
+  // Улучшенная логика определения событий без времени
+  const startDate = new Date(event.event_date);
+  const endDate = event.end_date ? new Date(event.end_date) : null;
+  
+  // Событие считается allDay если:
+  // 1. Время начала 00:00 UTC
+  // 2. Время окончания 00:00 UTC (если есть) или отсутствует
+  const isStartMidnight = startDate.getUTCHours() === 0 && 
+                         startDate.getUTCMinutes() === 0 && 
+                         startDate.getUTCSeconds() === 0;
+  const isEndMidnight = !endDate || 
+                       (endDate.getUTCHours() === 0 && 
+                        endDate.getUTCMinutes() === 0 && 
+                        endDate.getUTCSeconds() === 0);
+  
+  const hasTime = !isStartMidnight || !isEndMidnight;
+  
   let timeRange = null;
   if (event.event_date) {
     const startTime = formatTime(event.event_date);

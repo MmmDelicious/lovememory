@@ -4,45 +4,75 @@ import PlayingCard from '../PlayingCard/PlayingCard';
 import Button from '../Button/Button';
 import { useCurrency } from '../../context/CurrencyContext';
 import styles from './PokerTable.module.css';
-import WaitingDisplay from './WaitingDisplay/WaitingDisplay';
 import Player from './Player/Player';
 
 const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
-  if (!gameState) return null;
-
   const [raiseAmount, setRaiseAmount] = useState(0);
   const [animatingCards, setAnimatingCards] = useState([]);
   const [dealingPhase, setDealingPhase] = useState(false);
   const [prevStage, setPrevStage] = useState(null);
   const [showRebuyModal, setShowRebuyModal] = useState(false);
   const [winnerAnimation, setWinnerAnimation] = useState(null);
+  const [turnTimer, setTurnTimer] = useState(30); // 30 секунд на ход
   
   const { coins } = useCurrency();
 
-  const { players = [], communityCards = [], pot = 0, currentPlayerId, stage, validActions = [], minRaiseAmount = 0, winningHandCards = [], yourHand = [] } = gameState || {};
+  const { 
+    players = [], 
+    communityCards = [], 
+    pot = 0, 
+    currentPlayerId, 
+    stage, 
+    validActions = [], 
+    minRaiseAmount = 0, 
+    maxRaiseAmount = 0,
+    callAmount = 0,
+    winningHandCards = [], 
+    yourHand = [],
+    status = 'waiting',
+    winnersInfo = []
+  } = gameState || {};
 
   const currentPlayer = useMemo(() => 
     players ? players.find(p => p.id === userId) : null, 
     [players, userId]
+  );
+  const currentTurnPlayer = useMemo(() => 
+    players ? players.find(p => p.id === currentPlayerId) : null, 
+    [players, currentPlayerId]
   );
   
   const maxBet = useMemo(() => 
     players && players.length > 0 ? Math.max(...players.map(p => p.currentBet)) : 0, 
     [players]
   );
-  
-  const callAmount = useMemo(() => 
-    currentPlayer ? Math.min(maxBet - currentPlayer.currentBet, currentPlayer.stack) : 0, 
-    [currentPlayer, maxBet]
-  );
 
   const mainPlayerStack = useMemo(() => {
     return currentPlayer ? currentPlayer.stack : 0;
   }, [currentPlayer]);
 
+  // Исправленная логика: используем значения с сервера
   const minRaise = minRaiseAmount || 0;
-  const maxRaise = mainPlayerStack;
+  const maxRaise = maxRaiseAmount || mainPlayerStack;
   const isPlayerTurn = currentPlayerId === userId;
+
+  // Таймер для всех: сбрасывается при изменении gameState
+  useEffect(() => {
+    setTurnTimer(30);
+    if (!currentPlayerId || status !== 'in_progress') return;
+    
+    const interval = setInterval(() => {
+      setTurnTimer(prev => {
+        if (prev <= 1) {
+          // Не делаем автоматический фолд здесь - это должно обрабатываться на сервере
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [gameState]); // Изменено: сбрасываем таймер при любом изменении gameState
 
   useEffect(() => {
     if (prevStage !== stage) {
@@ -91,28 +121,17 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
     setRaiseAmount(minRaise);
   }, [minRaise]);
 
-  const isWaiting = gameState.status !== 'in_progress';
-  
-  if (isWaiting) {
-    return (
-      <div className={styles.gameContainer}>
-        <div className={styles.pokerTable}>
-          <div className={styles.deckContainer}>
-            <PlayingCard faceUp={false} />
-          </div>
-          <WaitingDisplay 
-            status={gameState.status} 
-            message={gameState.message} 
-            playerCount={players.length} 
-          />
-        </div>
-      </div>
-    );
-  }
-
   const isWinningCard = (card) => {
     if (!card || !winningHandCards || winningHandCards.length === 0) return false;
-    return winningHandCards.some(wc => wc.rank === card.rank && wc.suit === card.suit);
+    
+    // Проверяем карту на соответствие выигрышным картам
+    return winningHandCards.some(winningCard => {
+      // Сравниваем ранг и масть
+      const rankMatch = winningCard.rank === card.rank;
+      const suitMatch = winningCard.suit === card.suit;
+      
+      return rankMatch && suitMatch;
+    });
   };
   
   const getPlayerSeatMap = () => {
@@ -127,21 +146,33 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
   };
 
   const handleRaiseChange = (e) => {
-    setRaiseAmount(Number(e.target.value));
+    const newValue = Number(e.target.value);
+    if (newValue >= minRaise && newValue <= maxRaise) {
+      setRaiseAmount(newValue);
+    }
   };
 
   const handleRebuyClick = () => {
     onRebuy();
     setShowRebuyModal(false);
   };
-  
+
+  const handleAction = (action, value = 0) => {
+    if (action === 'raise') {
+      if (value < minRaise || value > maxRaise) {
+        alert(`Некорректная сумма рейза. Допустимый диапазон: ${minRaise} - ${maxRaise}`);
+        return;
+      }
+    }
+    onAction(action, value);
+  };
+
   return (
     <div className={styles.gameContainer}>
       <div className={styles.pokerTable}>
         <div className={styles.deckContainer}>
           <PlayingCard faceUp={false} />
         </div>
-        
         <div className={styles.stageContainer}>
           <div className={styles.stage}>
             {stage === 'pre-flop' && 'Пре-флоп'}
@@ -150,8 +181,16 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
             {stage === 'river' && 'Ривер'}
             {stage === 'showdown' && 'Вскрытие'}
           </div>
+          {stage === 'showdown' && winnersInfo && winnersInfo.length > 0 && (
+            <div className={styles.combinationInfo}>
+              {winnersInfo.map((winner, index) => (
+                <div key={index} className={styles.winnerInfo}>
+                  {winner.player.name}: {winner.handName}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-
         <div className={styles.communityCards}>
           {(communityCards || []).map((card, index) => (
             <div
@@ -171,26 +210,23 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
             </div>
           ))}
         </div>
-
         <div className={`${styles.bettingArea} ${winnerAnimation ? styles.chipFlying : ''}`}>
           <button className={styles.betButton}>BET</button>
           <div className={styles.betAmount}>{pot || 0}</div>
         </div>
-
         <div className={styles.chipStack}>
           <div className={`${styles.chip} ${styles.red}`}></div>
           <div className={`${styles.chip} ${styles.blue}`}></div>
           <div className={`${styles.chip} ${styles.green}`}></div>
         </div>
-        
         {getPlayerSeatMap().map((player, seatIndex) => (
           <div key={player?.id || `seat-${seatIndex}`} className={`${styles.playerPosition} ${styles[`playerPosition${seatIndex}`]}`}>
             {player ? (
               <Player 
                 player={player}
                 isMainPlayer={player.id === userId}
-                showCards={stage === 'showdown' || player.id === userId || gameState.status === 'finished'}
-                isActive={player.id === currentPlayerId && gameState.status !== 'finished'}
+                showCards={player.id === userId || stage === 'showdown' || status === 'finished'}
+                isActive={player.id === currentPlayerId && status !== 'finished'}
                 isWinner={winnerAnimation === player.id}
                 dealingPhase={dealingPhase}
                 yourHand={yourHand}
@@ -207,7 +243,6 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
           </div>
         ))}
       </div>
-
       <div className={styles.decorations}>
         <div className={`${styles.decoHeart} ${styles.heart1}`}></div>
         <div className={`${styles.decoHeart} ${styles.heart2}`}></div>
@@ -217,12 +252,10 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
         <div className={`${styles.decoHeart} ${styles.heart6}`}></div>
         <div className={styles.rose}>🌹</div>
       </div>
-
       <div className={styles.likesCounter}>
         <span className={styles.heartIcon}>♡</span>
         <span className={styles.count}>10</span>
       </div>
-
       <div className={styles.balanceDisplay}>
         <div className={styles.balanceItem}>
           <span className={styles.balanceIcon}>🪙</span>
@@ -232,25 +265,25 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
         <div className={styles.balanceItem}>
           <span className={styles.balanceIcon}>🎰</span>
           <span className={styles.balanceAmount}>{mainPlayerStack}</span>
-          <span className={styles.balanceLabel}>Фишки</span>
+          <span className={styles.balanceLabel}>Монеты в игре</span>
         </div>
-        {currentPlayer && currentPlayer.stack < 200 && (
+        {currentPlayer && gameState.initialBuyIn && currentPlayer.stack < gameState.initialBuyIn && (
           <Button 
             onClick={() => setShowRebuyModal(true)}
             variant="secondary"
             className={styles.rebuyButton}
           >
-            Докупить фишки
+            Докупить монеты
           </Button>
         )}
       </div>
-
       {showRebuyModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.rebuyModal}>
-            <h3 className={styles.modalTitle}>Докупка фишек</h3>
+            <h3 className={styles.modalTitle}>Докупка монет</h3>
             <p className={styles.modalText}>
-              Вы можете докупить фишки до начального стека.
+              Вы можете докупить монеты до начального стека ({gameState.initialBuyIn} монет).
+              Стоимость: {gameState.initialBuyIn - (currentPlayer?.stack || 0)} монет.
               Это действие необратимо для текущей раздачи.
             </p>
             <div className={styles.modalActions}>
@@ -260,38 +293,62 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
               <Button 
                 onClick={handleRebuyClick}
                 variant="primary"
-                disabled={coins < 100}
+                disabled={coins < (gameState.initialBuyIn - (currentPlayer?.stack || 0))}
               >
-                Докупить
+                Докупить ({gameState.initialBuyIn - (currentPlayer?.stack || 0)} монет)
               </Button>
             </div>
           </div>
         </div>
       )}
-
-      {isPlayerTurn && gameState && gameState.status !== 'finished' && (
+      {/* Таймер для всех игроков */}
+      {currentPlayerId && status === 'in_progress' && currentTurnPlayer && (
+        <div className={styles.turnTimer}>
+          <div className={styles.timerBar}>
+            <div 
+              className={styles.timerProgress} 
+              style={{ 
+                width: `${Math.max(0, (turnTimer / 30) * 100)}%`,
+                backgroundColor: turnTimer <= 10 ? '#ff6b6b' : '#51cf66'
+              }}
+            ></div>
+          </div>
+          <div className={styles.timerText}>
+            {Math.max(0, turnTimer)}с — ходит {currentTurnPlayer.name}
+          </div>
+        </div>
+      )}
+      {isPlayerTurn && gameState && status !== 'finished' && (
         <div className={styles.actions}>
-          {(validActions || []).includes('fold') && <Button onClick={() => onAction('fold')}>Сбросить</Button>}
-          {(validActions || []).includes('check') && <Button onClick={() => onAction('check')}>Чек</Button>}
-          {(validActions || []).includes('call') && <Button onClick={() => onAction('call')}>Уравнять {callAmount > 0 ? ` (${callAmount})` : ''}</Button>}
-          
+          {(validActions || []).includes('fold') && <Button onClick={() => handleAction('fold')}>Сбросить</Button>}
+          {(validActions || []).includes('check') && <Button onClick={() => handleAction('check')}>Чек</Button>}
+          {(validActions || []).includes('call') && callAmount > 0 && (
+            <Button onClick={() => handleAction('call')}>Уравнять ({callAmount})</Button>
+          )}
           {(validActions || []).includes('raise') && (
-            <div className={styles.raiseContainer}>
-              <Button onClick={() => onAction('raise', raiseAmount)} variant="primary">
+            <>
+              <Button onClick={() => handleAction('raise', raiseAmount)}>
                 Рейз {raiseAmount}
               </Button>
-              <div style={{ fontSize: '12px', color: '#666', marginBottom: '5px' }}>
-                Мин: {minRaise} | Макс: {maxRaise}
+              <div className={styles.raiseContainer}>
+                <input 
+                  type="range"
+                  min={minRaise}
+                  max={maxRaise}
+                  value={raiseAmount}
+                  onChange={handleRaiseChange}
+                  className={styles.raiseSlider}
+                />
+                <div style={{ 
+                  fontSize: '11px', 
+                  color: 'var(--color-text-secondary)', 
+                  textAlign: 'center',
+                  fontWeight: '500'
+                }}>
+                  {minRaise} - {maxRaise}
+                </div>
               </div>
-              <input 
-                type="range"
-                min={minRaise}
-                max={maxRaise}
-                value={raiseAmount}
-                onChange={handleRaiseChange}
-                className={styles.raiseSlider}
-              />
-            </div>
+            </>
           )}
         </div>
       )}

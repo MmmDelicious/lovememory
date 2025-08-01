@@ -43,20 +43,26 @@ const Player = ({ player, isMainPlayer, showCards, isActive, isWinner, dealingPh
                             </div>
                         )) : <div className={styles.hiddenCardsPlaceholder} />
                     ) : (
-                        [0, 1].map((index) => (
-                            <div
-                                key={index}
-                                className={`${styles.cardWrapper} ${dealingPhase ? styles.cardDealing : ''}`}
-                                style={{ animationDelay: `${index * 0.2 + 0.1}s` }}
-                            >
-                                <PlayingCard 
-                                    suit={player.cards ? player.cards[index]?.suit : null}
-                                    rank={player.cards ? player.cards[index]?.rank : null}
-                                    faceUp={showCards && player.inHand} 
-                                    isWinning={showCards && player.cards ? isWinningCard(player.cards[index]) : false}
-                                />
-                            </div>
-                        ))
+                        [0, 1].map((index) => {
+                            // Получаем карты игрока - либо из hand, либо из cards
+                            const playerCards = player.hand || player.cards || [];
+                            const card = playerCards[index];
+                            
+                            return (
+                                <div
+                                    key={index}
+                                    className={`${styles.cardWrapper} ${dealingPhase ? styles.cardDealing : ''}`}
+                                    style={{ animationDelay: `${index * 0.2 + 0.1}s` }}
+                                >
+                                    <PlayingCard 
+                                        suit={card ? card.suit : null}
+                                        rank={card ? card.rank : null}
+                                        faceUp={showCards && player.inHand} 
+                                        isWinning={showCards && card ? isWinningCard(card) : false}
+                                    />
+                                </div>
+                            );
+                        })
                     )}
                 </div>
             )}

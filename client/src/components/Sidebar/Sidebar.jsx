@@ -85,7 +85,15 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete, selectedDate, o
 
     const combineDateTime = (date, time) => {
       if (!date) return null;
-      return time ? new Date(`${date}T${time}`).toISOString() : new Date(date).toISOString();
+      if (time) {
+        // Создаем дату в локальном времени и конвертируем в UTC
+        const localDateTime = new Date(`${date}T${time}`);
+        const utcDateTime = new Date(localDateTime.getTime() - localDateTime.getTimezoneOffset() * 60000);
+        return utcDateTime.toISOString();
+      } else {
+        // Для событий без времени создаем дату в начале дня UTC
+        return new Date(`${date}T00:00:00.000Z`).toISOString();
+      }
     };
 
     const finalStartDate = combineDateTime(startDate, startTime);
@@ -131,7 +139,7 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete, selectedDate, o
   return (
     <>
       <div className={`${styles.overlay} ${isOpen ? styles.open : ''}`} onClick={onClose}></div>
-      <div className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+      <div className={`${styles.sidebar} ${isOpen ? styles.open : ''}`} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
             <h2 className={styles.title}>
               {eventData.title || 'Новое событие'}

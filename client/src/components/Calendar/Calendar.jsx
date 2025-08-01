@@ -17,6 +17,7 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [filter, setFilter] = useState('all');
   const [selectedDate, setSelectedDate] = useState(null);
+  const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, event: null });
   const calendarRef = useRef(null);
   const calendarContainerRef = useRef(null);
   const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useMascot();
@@ -71,8 +72,64 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
 
   const handleInteraction = (handler) => (...args) => {
     hideMascot();
+    // Убираем фокус с любого элемента
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
     handler(...args);
   };
+
+  const handleContextMenu = (event, clickInfo) => {
+    event.preventDefault();
+    setContextMenu({
+      show: true,
+      x: event.clientX,
+      y: event.clientY,
+      event: clickInfo
+    });
+  };
+
+  const handleContextMenuClose = () => {
+    setContextMenu({ show: false, x: 0, y: 0, event: null });
+  };
+
+  const handleContextMenuAction = (action) => {
+    const { event } = contextMenu.event;
+    
+    switch (action) {
+      case 'delete':
+        handleDeleteEvent(event.id);
+        break;
+      case 'view':
+        const eventDate = event.startStr.split('T')[0];
+        navigate(`/day/${eventDate}`);
+        break;
+      case 'edit':
+        setSelectedDate(event.startStr.split('T')[0]);
+        setSelectedEvent({ 
+          ...event.extendedProps.rawEvent, 
+          date: event.startStr,
+          timeRange: event.extendedProps.timeRange
+        });
+        setSidebarOpen(true);
+        break;
+    }
+    
+    handleContextMenuClose();
+  };
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (contextMenu.show) {
+        handleContextMenuClose();
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [contextMenu.show]);
   
   const handleDateClick = (arg) => {
     setSelectedDate(arg.dateStr);
@@ -89,6 +146,15 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
       timeRange: clickInfo.event.extendedProps.timeRange
     });
     setSidebarOpen(true);
+  };
+
+  const handleEventRightClick = (clickInfo) => {
+    const event = new MouseEvent('contextmenu', {
+      clientX: clickInfo.jsEvent.clientX,
+      clientY: clickInfo.jsEvent.clientY,
+      bubbles: true
+    });
+    handleContextMenu(event, clickInfo);
   };
   
   const handleCloseSidebar = () => {
@@ -143,10 +209,17 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
         const duration = oldEnd.getTime() - oldStart.getTime();
         newEnd = new Date(newStart.getTime() + duration);
       }
-      await onUpdateEvent(event.id, {
+      
+      // Сохраняем даты в UTC формате
+      const updateData = {
         event_date: newStart.toISOString(),
-        end_date: newEnd ? newEnd.toISOString() : null,
-      });
+      };
+      
+      if (newEnd) {
+        updateData.end_date = newEnd.toISOString();
+      }
+      
+      await onUpdateEvent(event.id, updateData);
     } catch (error) {
       console.error("Ошибка при обновлении даты события:", error);
       dropInfo.revert();
@@ -174,23 +247,36 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
 
   const getDateFilters = () => {
     const now = new Date();
+    // Устанавливаем время в начало дня для корректного сравнения
+    now.setHours(0, 0, 0, 0);
+    
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay() + 1);
+    startOfWeek.setHours(0, 0, 0, 0);
+    
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+    
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    endOfMonth.setHours(23, 59, 59, 999);
+    
     return { now, startOfWeek, endOfWeek, startOfMonth, endOfMonth };
   };
 
   const matchesFilter = (event) => {
     const { now, startOfWeek, endOfWeek, startOfMonth, endOfMonth } = getDateFilters();
     const eventDate = new Date(event.start);
+    // Устанавливаем время в начало дня для корректного сравнения
+    eventDate.setHours(0, 0, 0, 0);
+    
     switch (filter) {
       case 'all': return true;
       case 'mine': return event.extendedProps?.isOwner;
       case 'shared': return event.extendedProps?.isShared;
-
       case 'partner': return !event.extendedProps?.isOwner;
       case 'upcoming': return eventDate >= now;
       case 'this_week': return eventDate >= startOfWeek && eventDate <= endOfWeek;
@@ -207,8 +293,15 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
   
 
 
+  const handleCalendarContainerClick = () => {
+    // Убираем фокус при клике на контейнер календаря
+    if (document.activeElement) {
+      document.activeElement.blur();
+    }
+  };
+
   return (
-    <div className={styles.calendarContainer} ref={calendarContainerRef}>
+    <div className={styles.calendarContainer} ref={calendarContainerRef} onClick={handleCalendarContainerClick}>
       <div className={styles.filtersWrapper}>
         <CalendarFilters onFilterChange={setFilter} activeFilter={filter} />
 
@@ -235,6 +328,7 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
             events={filteredEvents}
             locale="ru"
             firstDay={1}
+            timeZone="local"
             headerToolbar={isMobile 
               ? { left: 'prev', center: 'title', right: 'next' }
               : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek,dayGridDay' }
@@ -247,9 +341,48 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
             eventClick={handleInteraction(handleEventClick)}
             eventContent={renderEventContent}
             eventClassNames={(arg) => arg.event.extendedProps.isOwner ? styles.eventMine : styles.eventPartner}
+            eventDidMount={(info) => {
+              info.el.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                handleContextMenu(e, { event: info.event, jsEvent: e });
+              });
+            }}
           />
         )}
       </div>
+      
+      {/* Контекстное меню */}
+      {contextMenu.show && (
+        <div 
+          className={styles.contextMenu}
+          style={{ 
+            position: 'fixed', 
+            top: contextMenu.y, 
+            left: contextMenu.x,
+            zIndex: 1000
+          }}
+        >
+          <div 
+            className={styles.contextMenuItem}
+            onClick={() => handleContextMenuAction('edit')}
+          >
+            ✏️ Редактировать
+          </div>
+          <div 
+            className={styles.contextMenuItem}
+            onClick={() => handleContextMenuAction('view')}
+          >
+            👁️ Посмотреть день
+          </div>
+          <div 
+            className={styles.contextMenuItem}
+            onClick={() => handleContextMenuAction('delete')}
+          >
+            🗑️ Удалить событие
+          </div>
+        </div>
+      )}
+      
       <Sidebar 
         isOpen={isSidebarOpen} 
         onClose={handleCloseSidebar}
