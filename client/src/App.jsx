@@ -6,7 +6,7 @@ import { CurrencyProvider } from './context/CurrencyContext';
 import AppRoutes from './AppRoutes';
 import GlobalMascot from './components/GlobalMascot/GlobalMascot';
 import AIChatInterface from './components/AIChatInterface/AIChatInterface';
-import './App.css';
+
 
 function App() {
   return (

@@ -1,6 +1,6 @@
 import React from 'react';
-import manAvatar from '../../assets/man.PNG';
-import womanAvatar from '../../assets/woman.PNG';
+import maleAvatar from '../../assets/man.png';
+import femaleAvatar from '../../assets/woman.png';
 import styles from './GenderSelector.module.css';
 
 const GenderSelector = ({ selectedGender, onGenderChange }) => {
@@ -12,7 +12,9 @@ const GenderSelector = ({ selectedGender, onGenderChange }) => {
           className={`${styles.avatarOption} ${selectedGender === 'male' ? styles.selected : ''}`}
           onClick={() => onGenderChange('male')}
         >
-          <img src={manAvatar} alt="Мужской" className={styles.avatar} />
+          <div className={styles.avatarWrapper}>
+            <img src={maleAvatar} alt="Мужской" className={styles.avatar} />
+          </div>
           <span className={styles.avatarLabel}>Мужской</span>
         </div>
         
@@ -20,16 +22,12 @@ const GenderSelector = ({ selectedGender, onGenderChange }) => {
           className={`${styles.avatarOption} ${selectedGender === 'female' ? styles.selected : ''}`}
           onClick={() => onGenderChange('female')}
         >
-          <img src={womanAvatar} alt="Женский" className={styles.avatar} />
+          <div className={styles.avatarWrapper}>
+            <img src={femaleAvatar} alt="Женский" className={styles.avatar} />
+          </div>
           <span className={styles.avatarLabel}>Женский</span>
         </div>
       </div>
-      
-      {selectedGender === 'other' && (
-        <div className={styles.otherOption}>
-          <span className={styles.otherLabel}>Другое</span>
-        </div>
-      )}
       
       <button 
         type="button"

@@ -116,7 +116,6 @@
   color: var(--color-text-primary);
   transition: border-color 0.2s, box-shadow 0.2s;
   font-family: var(--font-family-body);
-  user-select: text;
 }
 
 .input::placeholder, .textarea::placeholder {

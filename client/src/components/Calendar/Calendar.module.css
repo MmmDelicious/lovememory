@@ -35,29 +35,13 @@
   --fc-today-bg-color: rgba(231, 122, 101, 0.05);
 }
 
-/* Убираем курсор текстового ввода */
-.calendarContainer :global(.fc) * {
-  caret-color: transparent !important;
-  outline: none !important;
-}
-
+/* Убираем outline для календаря */
 .calendarContainer :global(.fc) *:focus {
   outline: none !important;
   box-shadow: none !important;
 }
 
-.calendarContainer :global(.fc-daygrid-day) {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
 .calendarContainer :global(.fc-daygrid-day-number) {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   pointer-events: none;
 }
 
