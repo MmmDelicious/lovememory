@@ -162,7 +162,6 @@
 }
 
 .playerPosition0 .playerCards .card:last-child {
-    transform: rotate(15deg);
     margin-left: -25px;
     z-index: 2;
 }
@@ -711,7 +710,6 @@
 .opponentArea, .playerArea { display: none; } 
 .chipsIcon { font-size: 16px; margin-right: 7px; }
 
-/* Таймер хода */
 .turnTimer {
     position: fixed;
     top: 100px;
@@ -752,7 +750,6 @@
     text-align: center;
 }
 
-/* Адаптивность для таймера */
 @media (max-width: 1024px) {
     .turnTimer {
         top: -50px;
@@ -782,5 +779,3 @@
         font-size: 11px;
     }
 }
-
-/* Удалены стили анимации новой раздачи */

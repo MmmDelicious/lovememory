@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
 import MainLayout from './layouts/MainLayout/MainLayout';
+import GameLayout from './layouts/GameLayout/GameLayout';
 import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
@@ -11,7 +12,6 @@ import PairingPage from './pages/PairingPage/PairingPage';
 import { GamesPage } from './pages/GamesPage/GamesPage';
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
 import GameRoomPage from './pages/GameRoomPage/GameRoomPage';
-import LoveVegasPage from './pages/LoveVegasPage/LoveVegasPage';
 import PokerPage from './pages/PokerPage/PokerPage';
 import ErrorPage from './pages/ErrorPage/ErrorPage';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
@@ -45,14 +45,14 @@ const AppRoutes = () => {
           <Route path="/pairing" element={<PairingPage />} />
           <Route path="/games" element={<GamesPage />} />
           <Route path="/games/:gameType" element={<GameLobbyPage />} />
-          <Route path="/games/room/:roomId" element={<GameRoomPage />} />
-          <Route path="/love-vegas" element={<LoveVegasPage />} />
-          <Route path="/love-vegas/poker" element={<GameLobbyPage gameType="poker" />} />
+          <Route path="/day/:date" element={<DayDetailPage />} />
         </Route>
         
-        <Route path="/day/:date" element={<DayDetailPage />} />
+        <Route element={<GameLayout />}>
+          <Route path="/games/room/:roomId" element={<GameRoomPage />} />
+          <Route path="/games/poker/:roomId" element={<PokerPage />} />
+        </Route>
         
-        <Route path="/love-vegas/poker/:roomId" element={<PokerPage />} />
         <Route path="/error" element={<ErrorPage />} />
         <Route path="/error-test" element={<ErrorTest />} />
         

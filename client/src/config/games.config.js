@@ -22,7 +22,7 @@ export const GAMES_CONFIG = {
   },
   'poker': {
     id: 'poker',
-    name: 'Покер "LoveVegas"',
+    name: 'Покер',
     category: 'Карточные',
     Icon: PiCardsFill,
   }

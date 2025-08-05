@@ -157,10 +157,10 @@ export const MascotProvider = ({ children }) => {
     });
   }, []);
 
-  const sendMessageToAI = useCallback(async (prompt) => {
+  const sendMessageToAI = useCallback(async (prompt, context) => {
     setIsAILoading(true);
     try {
-      const response = await askAI(prompt);
+      const response = await askAI(prompt, context);
       setGlobalMascotMessage(response.text);
     } catch (error) {
       console.error("Failed to get AI response:", error);

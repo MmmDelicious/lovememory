@@ -30,7 +30,7 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
     socket.on('connect_error', (err) => {
       console.error("[SOCKET] Connection error:", err.message);
       alert("Не удалось подключиться к игре. Попробуйте обновить страницу.");
-      navigate('/games');
+      // navigate('/games'); // Убираем автоматический переход
     });
 
     const handleStateUpdate = (newGameState) => {
@@ -58,8 +58,10 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
     }
     
     socket.on('error', (errorMessage) => {
+      console.error('[SOCKET] Error received:', errorMessage);
+      // Показываем ошибку, но не выбрасываем из игры
       alert(`Ошибка: ${errorMessage}`);
-      navigate('/games');
+      // navigate('/games'); // Убираем автоматический переход
     });
 
     return () => {
@@ -75,10 +77,13 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
   }, [roomId, token, navigate, setCoinsCallback]);
 
   const makeMove = (move) => {
+    console.log('[CLIENT] makeMove called with:', move);
     if (socketRef.current && socketRef.current.connected) {
       socketRef.current.emit('make_move', { roomId, move });
+      console.log('[CLIENT] make_move event emitted');
     } else {
       console.error('[SOCKET] Cannot make move, socket not connected.');
+      throw new Error('Нет подключения к серверу');
     }
   };
 

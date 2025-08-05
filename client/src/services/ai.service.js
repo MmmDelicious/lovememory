@@ -1,9 +1,8 @@
 import api from './api';
 
-export const askAI = async (prompt) => {
+export const askAI = async (prompt, context) => {
   try {
-    // Убран лишний /api из пути
-    const response = await api.post('/ai/chat', { prompt });
+    const response = await api.post('/ai/chat', { prompt, context });
     return response.data;
   } catch (error) {
     console.error("Error asking AI:", error);

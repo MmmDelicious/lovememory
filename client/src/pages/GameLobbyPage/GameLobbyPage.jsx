@@ -26,7 +26,7 @@ const GameLobbyPage = ({ gameType: gameTypeProp }) => {
     try {
       const newRoom = await createRoom({ ...formData, gameType });
       setIsModalOpen(false);
-      const path = gameType === 'poker' ? `/love-vegas/poker/${newRoom.id}` : `/games/room/${newRoom.id}`;
+      const path = gameType === 'poker' ? `/games/poker/${newRoom.id}` : `/games/room/${newRoom.id}`;
       navigate(path);
     } catch (err) {
       alert(`Ошибка: ${err.response?.data?.message || 'Не удалось создать комнату.'}`);
@@ -36,7 +36,7 @@ const GameLobbyPage = ({ gameType: gameTypeProp }) => {
   const handleJoinRoom = (roomId) => {
     const room = rooms.find(r => r.id === roomId);
     if (!room) return;
-    const path = gameType === 'poker' ? `/love-vegas/poker/${roomId}` : `/games/room/${roomId}`;
+    const path = gameType === 'poker' ? `/games/poker/${roomId}` : `/games/room/${roomId}`;
     navigate(path);
   };
 

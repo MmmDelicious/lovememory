@@ -1,94 +1,45 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { usePokerGame } from '../../hooks/usePokerGame';
+import { useParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useCurrency } from '../../context/CurrencyContext';
+import { useGameSocket } from '../../hooks/useGameSocket';
 import PokerTable from '../../components/PokerGame/PokerTable';
-import styles from './PokerPage.module.css';
+import LeaveGameButton from '../../components/LeaveGameButton/LeaveGameButton';
 
 const PokerPage = () => {
-    const { roomId } = useParams();
-    const navigate = useNavigate();
-    const { 
-        gameState, 
-        userId, 
-        isObserving, 
-        isConnected,
-        connectionError,
-        handleAction, 
-        handleRebuy, 
-        handleExit 
-    } = usePokerGame(roomId);
+  const { roomId } = useParams();
+  const { token, user } = useAuth();
+  const { setCoins } = useCurrency();
+  const { gameState, makeMove } = useGameSocket(roomId, token, setCoins);
 
+  const handlePokerAction = (action, value = 0) => {
+    makeMove({ action, value });
+  };
+
+  const handlePokerRebuy = () => {
+    makeMove({ action: 'rebuy' });
+  };
+
+  if (!gameState || !user) {
     return (
-        <div className={styles.pokerApp}>
-            <header className={styles.appHeader}>
-                <h1 className={styles.appTitle}>WORLD POKER CLUB</h1>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    {!isConnected && (
-                        <div style={{ 
-                            color: '#ff6b6b', 
-                            fontSize: '0.9rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}>
-                            <div style={{ 
-                                width: '8px', 
-                                height: '8px', 
-                                borderRadius: '50%', 
-                                backgroundColor: '#ff6b6b' 
-                            }}></div>
-                            Отключено
-                        </div>
-                    )}
-                    {isConnected && (
-                        <div style={{ 
-                            color: '#51cf66', 
-                            fontSize: '0.9rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem'
-                        }}>
-                            <div style={{ 
-                                width: '8px', 
-                                height: '8px', 
-                                borderRadius: '50%', 
-                                backgroundColor: '#51cf66' 
-                            }}></div>
-                            Подключено
-                        </div>
-                    )}
-                    <button className={styles.leaveButton} onClick={handleExit}>
-                        LEAVE
-                    </button>
-                </div>
-            </header>
-            <main className={styles.gameBoard}>
-                {connectionError && (
-                    <div style={{
-                        position: 'fixed',
-                        top: '80px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        backgroundColor: '#ff6b6b',
-                        color: 'white',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '4px',
-                        zIndex: 1000,
-                        fontSize: '0.9rem'
-                    }}>
-                        {connectionError}
-                    </div>
-                )}
-                <PokerTable 
-                    gameState={gameState}
-                    onAction={handleAction} 
-                    onRebuy={handleRebuy}
-                    userId={userId}
-                    isObserving={isObserving}
-                />
-            </main>
-        </div>
+      <>
+        <LeaveGameButton gameType="poker" />
+        <div>Загрузка...</div>
+      </>
     );
+  }
+
+  return (
+    <>
+      <LeaveGameButton gameType="poker" />
+      <PokerTable
+        gameState={gameState}
+        onAction={handlePokerAction}
+        onRebuy={handlePokerRebuy}
+        userId={user.id}
+      />
+    </>
+  );
 };
 
 export default PokerPage;

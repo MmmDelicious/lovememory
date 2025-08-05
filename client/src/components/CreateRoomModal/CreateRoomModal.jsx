@@ -17,10 +17,10 @@ const CreateRoomModal = ({ isOpen, onClose, onSubmit, gameType }) => {
     
     const payload = {
       bet,
-      maxPlayers: gameType === 'poker' ? 5 : 2
+      maxPlayers: gameType === 'love-vegas' ? 5 : 2
     };
 
-    if (gameType === 'Покер') {
+    if (gameType === 'love-vegas') {
       const tableInfo = getTableInfo(selectedTable);
       if (bet < tableInfo.minBuyIn || bet > tableInfo.maxBuyIn) {
         setError(`Для этого стола бай-ин должен быть между ${tableInfo.minBuyIn} и ${tableInfo.maxBuyIn}.`);
@@ -47,7 +47,7 @@ const CreateRoomModal = ({ isOpen, onClose, onSubmit, gameType }) => {
   };
 
   const renderGameSpecificFields = () => {
-    if (gameType === 'Покер') {
+    if (gameType === 'love-vegas') {
       const tableInfo = getTableInfo(selectedTable);
       
       return (

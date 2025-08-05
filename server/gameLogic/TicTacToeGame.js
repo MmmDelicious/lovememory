@@ -34,6 +34,14 @@ class TicTacToeGame {
   }
 
   makeMove(playerId, moveIndex) {
+    console.log(`[TIC-TAC-TOE] makeMove called: playerId=${playerId}, moveIndex=${moveIndex}`);
+    console.log(`[TIC-TAC-TOE] Current state: status=${this.status}, currentPlayerId=${this.currentPlayerId}, board=`, this.board);
+    
+    // Проверяем валидность индекса
+    if (moveIndex < 0 || moveIndex >= 9) {
+      throw new Error('Invalid move position');
+    }
+    
     if (this.status !== 'in_progress') {
       throw new Error('Game is already over');
     }
@@ -45,21 +53,26 @@ class TicTacToeGame {
     }
 
     this.board[moveIndex] = this.symbols[playerId];
+    console.log(`[TIC-TAC-TOE] Board after move:`, this.board);
     
     const winnerSymbol = this._checkWinner();
+    console.log(`[TIC-TAC-TOE] Winner symbol:`, winnerSymbol);
 
     if (winnerSymbol) {
       this.status = 'finished';
       if (winnerSymbol === 'draw') {
         this.winner = 'draw';
         this.isDraw = true;
+        console.log(`[TIC-TAC-TOE] Game ended in draw`);
       } else {
         // Находим ID победителя по символу
         this.winner = Object.keys(this.symbols).find(id => this.symbols[id] === winnerSymbol);
+        console.log(`[TIC-TAC-TOE] Game won by:`, this.winner);
       }
     } else {
       // Переключаем ход
       this.currentPlayerId = this.players.find(id => id !== playerId);
+      console.log(`[TIC-TAC-TOE] Next player:`, this.currentPlayerId);
     }
 
     return this.getState();
@@ -74,11 +87,14 @@ class TicTacToeGame {
     for (const combination of winningCombinations) {
       const [a, b, c] = combination;
       if (this.board[a] && this.board[a] === this.board[b] && this.board[a] === this.board[c]) {
+        console.log(`[TIC-TAC-TOE] Winning combination found: [${a}, ${b}, ${c}] with symbol: ${this.board[a]}`);
         return this.board[a]; // Возвращает 'X' или 'O'
       }
     }
     // Если нет победителя и нет пустых клеток - ничья
-    return this.board.includes(null) ? null : 'draw';
+    const hasEmptyCells = this.board.includes(null);
+    console.log(`[TIC-TAC-TOE] No winning combination found. Has empty cells: ${hasEmptyCells}`);
+    return hasEmptyCells ? null : 'draw';
   }
 
   // Очистка ресурсов при удалении игры

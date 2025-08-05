@@ -1,39 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './GamesPage.module.css';
-import { FaChess, FaTicketAlt, FaBrain } from 'react-icons/fa';
-import { PiCardsFill } from "react-icons/pi";
+import { GAMES_CONFIG } from '../../config/games.config';
 
-const GAME_ITEMS = [
-  {
-    id: 'tic-tac-toe',
-    name: 'Крестики-нолики',
-    category: 'Классика',
-    icon: <FaTicketAlt size={48} />,
-    path: '/games/tic-tac-toe',
-  },
-  {
-    id: 'chess',
-    name: 'Шахматы',
-    category: 'Стратегия',
-    icon: <FaChess size={48} />,
-    path: '/games/chess',
-  },
-  {
-    id: 'quiz',
-    name: 'Квиз',
-    category: 'Викторина',
-    icon: <FaBrain size={48} />,
-    path: '/games/quiz',
-  },
-  {
-    id: 'love-vegas',
-    name: 'LoveVegas',
-    category: 'Карточные',
-    icon: <PiCardsFill size={48} />,
-    path: '/love-vegas',
-  }
-];
+const GAME_ITEMS = Object.values(GAMES_CONFIG).map(game => ({
+  id: game.id,
+  name: game.name,
+  category: game.category,
+  icon: <game.Icon size={48} />,
+  path: game.id === 'love-vegas' ? '/love-vegas' : `/games/${game.id}`,
+}));
 
 const GamesPage = () => {
   return (

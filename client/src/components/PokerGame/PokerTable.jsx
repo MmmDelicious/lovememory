@@ -13,7 +13,7 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
   const [prevStage, setPrevStage] = useState(null);
   const [showRebuyModal, setShowRebuyModal] = useState(false);
   const [winnerAnimation, setWinnerAnimation] = useState(null);
-  const [turnTimer, setTurnTimer] = useState(30); // 30 секунд на ход
+  const [turnTimer, setTurnTimer] = useState(30);
   
   const { coins } = useCurrency();
 
@@ -51,12 +51,10 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
     return currentPlayer ? currentPlayer.stack : 0;
   }, [currentPlayer]);
 
-  // Исправленная логика: используем значения с сервера
   const minRaise = minRaiseAmount || 0;
   const maxRaise = maxRaiseAmount || mainPlayerStack;
   const isPlayerTurn = currentPlayerId === userId;
 
-  // Таймер для всех: сбрасывается при изменении gameState
   useEffect(() => {
     setTurnTimer(30);
     if (!currentPlayerId || status !== 'in_progress') return;
@@ -64,7 +62,6 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
     const interval = setInterval(() => {
       setTurnTimer(prev => {
         if (prev <= 1) {
-          // Не делаем автоматический фолд здесь - это должно обрабатываться на сервере
           return 0;
         }
         return prev - 1;
@@ -72,7 +69,7 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
     }, 1000);
     
     return () => clearInterval(interval);
-  }, [gameState]); // Изменено: сбрасываем таймер при любом изменении gameState
+  }, [gameState]);
 
   useEffect(() => {
     if (prevStage !== stage) {
@@ -124,9 +121,7 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
   const isWinningCard = (card) => {
     if (!card || !winningHandCards || winningHandCards.length === 0) return false;
     
-    // Проверяем карту на соответствие выигрышным картам
     return winningHandCards.some(winningCard => {
-      // Сравниваем ранг и масть
       const rankMatch = winningCard.rank === card.rank;
       const suitMatch = winningCard.suit === card.suit;
       
@@ -301,7 +296,6 @@ const PokerTable = ({ gameState, onAction, onRebuy, userId }) => {
           </div>
         </div>
       )}
-      {/* Таймер для всех игроков */}
       {currentPlayerId && status === 'in_progress' && currentTurnPlayer && (
         <div className={styles.turnTimer}>
           <div className={styles.timerBar}>

@@ -98,6 +98,11 @@ function initSocket(server, app) {
                             const stateForPlayer = game.getStateForPlayer(player.id);
                             io.to(player.id).emit('game_update', stateForPlayer);
                         });
+                    } else if (game.gameType === 'quiz') {
+                        // Запускаем таймер для квиза
+                        startQuizTimerUpdates(io, roomId, game);
+                        const initialState = game.getState();
+                        io.to(roomId).emit('game_update', initialState);
                     } else {
                         const initialState = game.getState();
                         io.to(roomId).emit('game_update', initialState);
@@ -191,6 +196,11 @@ function initSocket(server, app) {
                     const stateForPlayer = recoveredGame.getStateForPlayer(player.id);
                     io.to(player.id).emit('game_update', stateForPlayer);
                   });
+                } else if (recoveredGame.gameType === 'quiz') {
+                  // Запускаем таймер для восстановленного квиза
+                  startQuizTimerUpdates(io, roomId, recoveredGame);
+                  const initialState = recoveredGame.getState();
+                  io.to(roomId).emit('game_update', initialState);
                 } else {
                   const initialState = recoveredGame.getState();
                   io.to(roomId).emit('game_update', initialState);
@@ -215,11 +225,16 @@ function initSocket(server, app) {
 
     socket.on('make_move', async (data) => {
       const { roomId, move } = data;
+      console.log(`[SOCKET] make_move received: roomId=${roomId}, move=`, move);
       const game = GameManager.getGame(roomId);
-      if (!game) return;
+      if (!game) {
+        console.log(`[SOCKET] Game not found for roomId: ${roomId}`);
+        return;
+      }
       
       try {
         const gameType = game.gameType;
+        console.log(`[SOCKET] Making move for game type: ${gameType}, player: ${socket.user.id}`);
         game.makeMove(socket.user.id, move);
 
         if (gameType === 'poker') {
@@ -286,7 +301,18 @@ function initSocket(server, app) {
         }
       } catch (error) {
         console.error(`[SERVER] [ERROR] in 'make_move':`, error.message);
-        socket.emit('error', error.message);
+        // Отправляем более дружелюбные сообщения об ошибках
+        let userMessage = error.message;
+        if (error.message === 'Not your turn') {
+          userMessage = 'Сейчас не ваш ход';
+        } else if (error.message === 'Cell is already taken') {
+          userMessage = 'Эта клетка уже занята';
+        } else if (error.message === 'Game is already over') {
+          userMessage = 'Игра уже завершена';
+        } else if (error.message === 'Invalid move position') {
+          userMessage = 'Некорректная позиция хода';
+        }
+        socket.emit('error', userMessage);
       }
     });
 
