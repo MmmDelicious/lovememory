@@ -1,11 +1,11 @@
 import React from 'react';
-import { useMascot } from '../../context/MascotContext';
+import { useAIMascot } from '../../context/AIMascotContext';
 import styles from './AIToggleButton.module.css';
 import mascotIcon from '../../assets/AI.json';
 import Lottie from 'lottie-react';
 
 const AIToggleButton = () => {
-  const { toggleAIMascot } = useMascot();
+  const { toggleAIMascot } = useAIMascot();
 
   return (
     <button 

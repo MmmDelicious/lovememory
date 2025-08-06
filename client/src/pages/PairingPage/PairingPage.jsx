@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './PairingPage.module.css';
 import Button from '../../components/Button/Button';
 import { useAuth } from '../../context/AuthContext';
-import { useMascot } from '../../context/MascotContext';
+import { useEventMascot } from '../../context/EventMascotContext';
 import { usePairing } from '../../hooks/usePairing';
 
 const PairingPage = () => {
@@ -21,22 +21,23 @@ const PairingPage = () => {
   
   const [email, setEmail] = useState('');
   const [localTelegramId, setLocalTelegramId] = useState('');
-  const { showMascot } = useMascot();
+  const { showMascot } = useEventMascot();
+  const mascotTriggerRef = useRef(null);
 
   useEffect(() => {
     setLocalTelegramId(telegramId);
   }, [telegramId]);
 
   useEffect(() => {
-    if (pairing?.status === 'pending' && pairing.user1Id !== user.id) {
+    if (pairing?.status === 'pending' && pairing.user1Id !== user.id && mascotTriggerRef.current) {
       showMascot({
         page: 'pairing',
+        element: mascotTriggerRef.current,
         data: { requesterName: pairing.Requester.first_name },
         buttonText: "Да, принять!",
         onActionClick: () => handleAccept(pairing.id),
-        position: { x: window.innerWidth * 0.75, y: window.innerHeight / 2 },
-        type: 'flyer',
-        side: 'top',
+        type: 'greeter',
+        side: 'right',
       });
     }
   }, [pairing, user, showMascot]);
@@ -113,7 +114,7 @@ const PairingPage = () => {
         );
       } else {
         return (
-          <div className={styles.statusContainer}>
+          <div className={styles.statusContainer} ref={mascotTriggerRef}>
             <h2>Новый запрос!</h2>
             <p>Пользователь <strong>{pairing.Requester.email}</strong> хочет создать с вами пару.</p>
             <div className={styles.actions}>
@@ -153,7 +154,7 @@ const PairingPage = () => {
           <form onSubmit={handleTelegramIdSave} className={styles.form}>
               <label htmlFor="telegramId">Ваш Telegram Chat ID</label>
               <input
-                  id="telegramId" type="text" value={localTelegramId} onChange={(e) => setLocalTelegramId(e.target.value)}
+                  id="telegramId" type="text" value={localTelegramId || ''} onChange={(e) => setLocalTelegramId(e.target.value)}
                   placeholder="123456789" className={styles.input}
               />
               <Button type="primary" submit>Сохранить ID</Button>

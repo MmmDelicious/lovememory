@@ -1,5 +1,5 @@
 import React from 'react';
-import { useMascot } from '../../context/MascotContext';
+import { useAIMascot } from '../../context/AIMascotContext';
 import AIChat from '../AIChat/AIChat';
 import AIToggleButton from '../AIToggleButton/AIToggleButton';
 import FreeRoamMascot from '../FreeRoamMascot/FreeRoamMascot';
@@ -12,8 +12,10 @@ const AIChatInterface = () => {
     isAIVisible, 
     globalMascot, 
     globalMascotAnimation,
-    isAILoading
-  } = useMascot();
+    isAILoading,
+    sendMessageToAI,
+    toggleAIMascot
+  } = useAIMascot();
   const { user } = useAuth();
 
   if (!user) {
@@ -27,6 +29,34 @@ const AIChatInterface = () => {
     zIndex: 10000
   };
 
+  const handleContextMenuAction = (actionId) => {
+    switch (actionId) {
+      case 'chat':
+        toggleChat();
+        break;
+      case 'joke':
+        sendMessageToAI('Расскажи мне смешную шутку или анекдот', 'joke');
+        break;
+      case 'dance':
+        sendMessageToAI('Потанцуй для меня! Покажи свои лучшие движения!', 'dance');
+        break;
+      case 'advice':
+        sendMessageToAI('Дай мне мудрый совет на сегодня', 'advice');
+        break;
+      case 'weather':
+        sendMessageToAI('Расскажи мне о погоде и как лучше провести день', 'weather');
+        break;
+      case 'mood':
+        sendMessageToAI('Подними мне настроение! Расскажи что-нибудь позитивное', 'mood');
+        break;
+      case 'hide':
+        toggleAIMascot();
+        break;
+      default:
+        break;
+    }
+  };
+
   return (
     <>
       {isAIVisible && (
@@ -35,6 +65,7 @@ const AIChatInterface = () => {
           animationData={globalMascotAnimation}
           onClick={toggleChat}
           isAILoading={isAILoading}
+          onContextMenuAction={handleContextMenuAction}
         />
       )}
       <div style={aiInterfaceContainerStyle}>

@@ -1,8 +1,6 @@
 const aiService = require('../services/ai.service');
 
 const handleChat = async (req, res, next) => {
-  console.log('--- AI Controller: Начало обработки запроса ---');
-  console.log('Тело запроса:', JSON.stringify(req.body, null, 2));
   try {
     const { prompt, context } = req.body;
     if (!prompt) {

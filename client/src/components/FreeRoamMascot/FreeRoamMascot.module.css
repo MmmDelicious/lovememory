@@ -5,15 +5,16 @@
   height: 150px;
   transform: translate(-50%, -50%);
   transition: top 1.5s ease-in-out, left 1.5s ease-in-out;
-  pointer-events: all; /* Разрешаем клики по маскоту */
+  pointer-events: all;
   cursor: pointer;
+  user-select: none;
 }
 
 .mascotWrapper {
   width: 100%;
   height: 100%;
   transition: transform 0.3s ease;
-  pointer-events: none; /* Отключаем клики на самой lottie-анимации */
+  pointer-events: none;
 }
 
 .mascotWrapper.flipped {
@@ -35,5 +36,86 @@
   font-size: 14px;
   max-width: 250px;
   text-align: center;
-  pointer-events: none; /* Реплика не должна перехватывать клик */
+  pointer-events: none;
+  animation: bubbleAppear 0.3s ease-out;
+}
+
+@keyframes bubbleAppear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+.rightClickHint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(164, 130, 243, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.mascotContainer:hover .rightClickHint {
+  opacity: 1;
+}
+
+/* Анимация пульсации для привлечения внимания */
+.mascotContainer::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(164, 130, 243, 0.3);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .mascotContainer {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .speechBubble {
+    font-size: 12px;
+    max-width: 200px;
+    padding: 8px 12px;
+  }
+  
+  .rightClickHint {
+    font-size: 10px;
+    padding: 6px 10px;
+  }
 }

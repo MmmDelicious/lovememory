@@ -160,8 +160,16 @@ export const MascotProvider = ({ children }) => {
   const sendMessageToAI = useCallback(async (prompt, context) => {
     setIsAILoading(true);
     try {
-      const response = await askAI(prompt, context);
-      setGlobalMascotMessage(response.text);
+      // Проверяем, есть ли предустановленные ответы для данного контекста
+      if (context && MASCOT_CONFIG.CONTEXT_MENU_ACTIONS[context]) {
+        const responses = MASCOT_CONFIG.CONTEXT_MENU_ACTIONS[context].responses;
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        setGlobalMascotMessage(randomResponse);
+      } else {
+        // Если нет предустановленных ответов, используем AI
+        const response = await askAI(prompt, context);
+        setGlobalMascotMessage(response.text);
+      }
     } catch (error) {
       console.error("Failed to get AI response:", error);
       setGlobalMascotMessage("Что-то пошло не так... Попробуйте еще раз.");

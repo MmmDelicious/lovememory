@@ -1,0 +1,126 @@
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10001;
+}
+
+.contextMenu {
+  position: absolute;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(164, 130, 243, 0.2);
+  min-width: 280px;
+  max-width: 320px;
+  overflow: hidden;
+  animation: menuAppear 0.2s ease-out;
+}
+
+@keyframes menuAppear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.menuHeader {
+  background: linear-gradient(135deg, #a482f3 0%, #8b5cf6 100%);
+  color: white;
+  padding: 16px 20px;
+  text-align: center;
+}
+
+.menuTitle {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.menuItems {
+  padding: 8px 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.menuItem {
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(164, 130, 243, 0.1);
+  position: relative;
+}
+
+.menuItem:last-child {
+  border-bottom: none;
+}
+
+.menuItem:hover {
+  background: linear-gradient(135deg, rgba(164, 130, 243, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  transform: translateX(4px);
+}
+
+.menuItem:active {
+  transform: translateX(4px) scale(0.98);
+}
+
+.itemLabel {
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.itemDescription {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Стили для скроллбара */
+.menuItems::-webkit-scrollbar {
+  width: 4px;
+}
+
+.menuItems::-webkit-scrollbar-track {
+  background: rgba(164, 130, 243, 0.1);
+  border-radius: 2px;
+}
+
+.menuItems::-webkit-scrollbar-thumb {
+  background: rgba(164, 130, 243, 0.3);
+  border-radius: 2px;
+}
+
+.menuItems::-webkit-scrollbar-thumb:hover {
+  background: rgba(164, 130, 243, 0.5);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .contextMenu {
+    min-width: 260px;
+    max-width: 300px;
+  }
+  
+  .menuItem {
+    padding: 14px 20px;
+  }
+  
+  .itemLabel {
+    font-size: 16px;
+  }
+  
+  .itemDescription {
+    font-size: 14px;
+  }
+} 

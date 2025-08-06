@@ -1,0 +1,224 @@
+.radialMenuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    backdrop-filter: blur(0px);
+  }
+  to { 
+    opacity: 1; 
+    backdrop-filter: blur(4px);
+  }
+}
+
+.radialMenuContainer {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: calc(var(--radius) * 2);
+  height: calc(var(--radius) * 2);
+  pointer-events: none;
+}
+
+.centerButton {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 8px 32px rgba(102, 126, 234, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  pointer-events: all;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.centerButton:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 
+    0 12px 40px rgba(102, 126, 234, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.centerIcon {
+  font-size: 32px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.menuItem {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--item-size);
+  height: var(--item-size);
+  transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -1));
+  pointer-events: all;
+  cursor: pointer;
+  animation: slideIn 0.4s ease-out forwards;
+  animation-delay: var(--delay);
+  opacity: 0;
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -0.5)) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -1)) scale(1);
+  }
+}
+
+.menuItemContent {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(164, 130, 243, 0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform: rotate(calc(var(--angle) * -1));
+  position: relative;
+  overflow: hidden;
+}
+
+.menuItemContent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(164, 130, 243, 0.1), rgba(124, 77, 255, 0.1));
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.menuItem:hover .menuItemContent {
+  transform: rotate(calc(var(--angle) * -1)) scale(1.15);
+  box-shadow: 
+    0 8px 30px rgba(164, 130, 243, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-color: rgba(164, 130, 243, 0.6);
+}
+
+.menuItem:hover .menuItemContent::before {
+  opacity: 1;
+}
+
+.menuItemIcon {
+  font-size: 20px;
+  margin-bottom: 2px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s ease;
+}
+
+.menuItem:hover .menuItemIcon {
+  transform: scale(1.2);
+}
+
+.menuItemLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: #4a5568;
+  text-align: center;
+  line-height: 1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.menuItem:hover .menuItemLabel {
+  color: #2d3748;
+}
+
+.decorativeRing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(var(--radius) * 1.8);
+  height: calc(var(--radius) * 1.8);
+  border: 2px solid rgba(164, 130, 243, 0.2);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.decorativeRing2 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(var(--radius) * 1.4);
+  height: calc(var(--radius) * 1.4);
+  border: 1px solid rgba(164, 130, 243, 0.1);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite 0.5s;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .radialMenuContainer {
+    --radius: 100px;
+    --item-size: 50px;
+  }
+  
+  .centerButton {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .centerIcon {
+    font-size: 24px;
+  }
+  
+  .menuItemIcon {
+    font-size: 16px;
+  }
+  
+  .menuItemLabel {
+    font-size: 8px;
+  }
+}

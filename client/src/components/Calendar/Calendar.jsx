@@ -5,22 +5,22 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import Sidebar from '../Sidebar/Sidebar';
 import CalendarFilters from './SearchAndFilter';
-import { useMascot } from '../../context/MascotContext';
+import { useEventMascot } from '../../context/EventMascotContext';
+import { useDevice } from '../../hooks/useDevice';
 import styles from './Calendar.module.css';
 
 const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent }) => {
   const navigate = useNavigate();
+  const { isMobile } = useDevice();
   
-
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [filter, setFilter] = useState('all');
   const [selectedDate, setSelectedDate] = useState(null);
   const [contextMenu, setContextMenu] = useState({ show: false, x: 0, y: 0, event: null });
   const calendarRef = useRef(null);
   const calendarContainerRef = useRef(null);
-  const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useMascot();
+  const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useEventMascot();
 
   const updateMascotTargets = useCallback(() => {
     const calendarApi = calendarRef.current?.getApi();
@@ -72,7 +72,6 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
 
   const handleInteraction = (handler) => (...args) => {
     hideMascot();
-    // Убираем фокус с любого элемента
     if (document.activeElement) {
       document.activeElement.blur();
     }
@@ -210,7 +209,6 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
         newEnd = new Date(newStart.getTime() + duration);
       }
       
-      // Сохраняем даты в UTC формате
       const updateData = {
         event_date: newStart.toISOString(),
       };
@@ -247,7 +245,6 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
 
   const getDateFilters = () => {
     const now = new Date();
-    // Устанавливаем время в начало дня для корректного сравнения
     now.setHours(0, 0, 0, 0);
     
     const startOfWeek = new Date(now);
@@ -270,7 +267,6 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
   const matchesFilter = (event) => {
     const { now, startOfWeek, endOfWeek, startOfMonth, endOfMonth } = getDateFilters();
     const eventDate = new Date(event.start);
-    // Устанавливаем время в начало дня для корректного сравнения
     eventDate.setHours(0, 0, 0, 0);
     
     switch (filter) {
@@ -291,10 +287,7 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
 
   const filteredEvents = events.filter(event => matchesFilter(event));
   
-
-
   const handleCalendarContainerClick = () => {
-    // Убираем фокус при клике на контейнер календаря
     if (document.activeElement) {
       document.activeElement.blur();
     }
@@ -304,7 +297,6 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
     <div className={styles.calendarContainer} ref={calendarContainerRef} onClick={handleCalendarContainerClick}>
       <div className={styles.filtersWrapper}>
         <CalendarFilters onFilterChange={setFilter} activeFilter={filter} />
-
       </div>
       <div className={styles.calendarWrapper}>
         {filteredEvents.length === 0 && events.length === 0 ? (
@@ -351,7 +343,6 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
         )}
       </div>
       
-      {/* Контекстное меню */}
       {contextMenu.show && (
         <div 
           className={styles.contextMenu}

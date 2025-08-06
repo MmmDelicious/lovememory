@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useMascot } from '../../context/MascotContext';
+import { useAIMascot } from '../../context/AIMascotContext';
 import { useAuth } from '../../context/AuthContext';
 import styles from './AIChat.module.css';
 
 const MAX_PROMPT_LENGTH = 500;
 
 const AIChat = () => {
-  const { sendMessageToAI, isAILoading, setGlobalMascotMessage } = useMascot();
+  const { sendMessageToAI, isAILoading, setGlobalMascotMessage } = useAIMascot();
   const { user, partner } = useAuth();
   const [inputValue, setInputValue] = useState('');
 
@@ -19,13 +19,22 @@ const AIChat = () => {
     }
 
     if (trimmedValue.length > MAX_PROMPT_LENGTH) {
-      setGlobalMascotMessage(`Ого! Это слишком длинный вопрос. Попробуйте сформулировать короче.`);
+      setGlobalMascotMessage(`Сэр, это слишком длинное сообщение. Пожалуйста, будьте лаконичнее.`);
       return;
     }
 
     const context = {
-      user: { name: user.name, gender: user.gender },
-      partner: partner ? { name: partner.name, gender: partner.gender } : null
+      user: {
+        name: user.name,
+        gender: user.gender,
+        city: user.city,
+        coins: user.coins,
+      },
+      partner: partner ? {
+        name: partner.name,
+        gender: partner.gender,
+        city: partner.city,
+      } : null
     };
 
     sendMessageToAI(trimmedValue, context);
@@ -39,7 +48,7 @@ const AIChat = () => {
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Спросите что-нибудь..."
+          placeholder="Спросите что-нибудь, сэр..."
           disabled={isAILoading}
           maxLength={MAX_PROMPT_LENGTH + 1}
           autoFocus
