@@ -232,16 +232,33 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
     return icons[eventType] || '📅';
   };
 
-  const renderEventContent = (eventInfo) => (
-    <div className={styles.eventContentWrapper}>
-      <div className={styles.eventTitle}>
-        <span className={styles.eventIcon}>
-          {getEventTypeIcon(eventInfo.event.extendedProps.eventType)}
-        </span>
-        {eventInfo.event.title}
+  const renderEventContent = (eventInfo) => {
+    const raw = eventInfo.event.extendedProps?.rawEvent;
+    let timeLabel = '';
+    if (raw?.event_date) {
+      const start = new Date(raw.event_date);
+      const end = raw.end_date ? new Date(raw.end_date) : null;
+      const startIsMidnight = start.getHours() === 0 && start.getMinutes() === 0;
+      const fmt = (d) => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      if (end) {
+        timeLabel = `${fmt(start)} - ${fmt(end)}`;
+      } else if (!startIsMidnight) {
+        timeLabel = fmt(start);
+      }
+    }
+
+    return (
+      <div className={styles.eventContentWrapper}>
+        <div className={styles.eventTitle}>
+          <span className={styles.eventIcon}>
+            {getEventTypeIcon(eventInfo.event.extendedProps.eventType)}
+          </span>
+          {timeLabel && <span className={styles.eventTime}>{timeLabel}</span>}
+          {eventInfo.event.title}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const getDateFilters = () => {
     const now = new Date();

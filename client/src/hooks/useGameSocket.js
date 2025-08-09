@@ -2,7 +2,12 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+// Resolve socket URL robustly across environments
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL ||
+  import.meta.env.VITE_SERVER_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  'http://localhost:5000';
 
 export const useGameSocket = (roomId, token, setCoinsCallback) => {
   const navigate = useNavigate();
@@ -13,7 +18,10 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
   useEffect(() => {
     if (!token || !roomId) return;
 
-    const socket = io(API_BASE_URL, { auth: { token } });
+    const socket = io(SOCKET_URL, { 
+      auth: { token },
+      transports: ['websocket', 'polling']
+    });
     socketRef.current = socket;
 
     socket.on('connect', () => {
@@ -29,8 +37,14 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
 
     socket.on('connect_error', (err) => {
       console.error("[SOCKET] Connection error:", err.message);
-      alert("Не удалось подключиться к игре. Попробуйте обновить страницу.");
-      // navigate('/games'); // Убираем автоматический переход
+      console.error("[SOCKET] Error details:", err);
+      
+      if (err.message.includes('Invalid namespace')) {
+        console.error("[SOCKET] Invalid namespace error - check server configuration");
+      }
+      
+      // Не показываем alert для каждой ошибки, только логируем
+      console.log("Не удалось подключиться к игре. Попробуйте обновить страницу.");
     });
 
     const handleStateUpdate = (newGameState) => {

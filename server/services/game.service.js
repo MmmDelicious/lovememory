@@ -181,6 +181,7 @@ class GameService {
             }
         }
         
+        // Сессию завершаем, но комнату переводим в ожидание, чтобы можно было продолжить играть позже
         room.status = 'waiting';
         await room.save({ transaction: t });
         
@@ -221,7 +222,9 @@ class GameService {
       await winner.save({ transaction: t });
       await loser.save({ transaction: t });
       
-      await room.destroy({ transaction: t });
+      // Изменяем статус на 'finished' вместо удаления комнаты
+      room.status = 'finished';
+      await room.save({ transaction: t });
 
       await t.commit();
       console.log(`Игра ${roomId} завершена. Победитель ${winner.id} получил ${room.bet} монет.`);

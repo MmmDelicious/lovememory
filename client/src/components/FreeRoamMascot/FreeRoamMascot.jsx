@@ -17,7 +17,7 @@ const FreeRoamMascot = ({ state, animationData, onClick, isAILoading, onContextM
   const handleRightClick = useCallback((e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsRadialMenuOpen(true);
+    setIsRadialMenuOpen(prev => !prev); // Переключаем состояние меню
   }, []);
 
   const handleLeftClick = useCallback((e) => {
@@ -48,42 +48,35 @@ const FreeRoamMascot = ({ state, animationData, onClick, isAILoading, onContextM
   ];
 
   return (
-    <>
-      <div
-        className={styles.mascotContainer}
-        style={{
-          top: `${position.y}%`,
-          left: `${position.x}%`,
-        }}
-        onClick={handleLeftClick}
-        onContextMenu={handleRightClick}
-      >
-        {displayMessage && (
-          <div className={styles.speechBubble}>
-            {displayMessage}
-          </div>
-        )}
-        <div className={wrapperClasses}>
-          <Lottie animationData={animationData} loop={true} />
+    <div
+      className={styles.mascotContainer}
+      style={{
+        top: `${position.y}%`,
+        left: `${position.x}%`,
+      }}
+      onClick={handleLeftClick}
+      onContextMenu={handleRightClick}
+    >
+      {displayMessage && (
+        <div className={styles.speechBubble}>
+          {displayMessage}
         </div>
-        
-        {/* Индикатор правого клика */}
-        <div className={styles.rightClickHint}>
-          Правый клик для меню
-        </div>
+      )}
+      <div className={wrapperClasses}>
+        <Lottie animationData={animationData} loop={true} />
       </div>
 
-      {/* Радиальное меню */}
+      {/* Радиальное меню внутри контейнера маскота */}
       <RadialMenu
         isOpen={isRadialMenuOpen}
         items={radialMenuItems}
         onAction={handleRadialMenuAction}
         onClose={handleRadialMenuClose}
-        centerPosition={position}
+        centerPosition={{ x: 50, y: 50 }} // Относительно контейнера маскота
         radius={140}
         itemSize={65}
       />
-    </>
+    </div>
   );
 };
 

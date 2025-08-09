@@ -5,8 +5,15 @@ class AuthService {
   async register(userData) {
     const { email, password, first_name, gender, age, city } = userData;
 
-    if (!email || !password || !gender || !age || !city) {
-      const error = new Error('Все поля обязательны.');
+    if (!email || !password) {
+      const error = new Error('Email и пароль обязательны.');
+      error.statusCode = 400;
+      throw error;
+    }
+    
+    // For regular registration, all fields are required
+    if (!gender || !age || !city) {
+      const error = new Error('Все поля обязательны для регистрации.');
       error.statusCode = 400;
       throw error;
     }
@@ -23,7 +30,8 @@ class AuthService {
       throw error;
     }
 
-    if (age < 18 || age > 99) {
+    const ageNum = parseInt(age, 10);
+    if (isNaN(ageNum) || ageNum < 18 || ageNum > 99) {
       const error = new Error('Возраст должен быть от 18 до 99 лет.');
       error.statusCode = 400;
       throw error;
@@ -42,16 +50,39 @@ class AuthService {
       throw error;
     }
     
-    await User.create({
+    const user = await User.create({
       email,
       password_hash: password,
       first_name,
       gender,
-      age,
+      age: ageNum,
       city,
     });
 
-    return { message: 'Пользователь успешно зарегистрирован.' };
+    const payload = {
+      userId: user.id,
+      email: user.email,
+    };
+
+    const token = jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        gender: user.gender,
+        age: user.age,
+        city: user.city,
+        coins: user.coins,
+        role: user.role,
+      }
+    };
   }
 
   async login(credentials) {
@@ -92,6 +123,7 @@ class AuthService {
         age: user.age,
         city: user.city,
         coins: user.coins,
+        role: user.role,
       }
     };
   }

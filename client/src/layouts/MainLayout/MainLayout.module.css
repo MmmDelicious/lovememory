@@ -1,11 +1,11 @@
 .layout {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    position: relative;
-  }
-  
-  .mainContent {
-    flex-grow: 1;
-    overflow-y: auto;
-  }
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--color-background);
+}
+
+.mainContent {
+  flex-grow: 1;
+  overflow-y: auto;
+}

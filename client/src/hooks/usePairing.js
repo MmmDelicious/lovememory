@@ -19,8 +19,13 @@ export const usePairing = (user) => {
       setPairing(pairResponse.data);
       setTelegramId(profileResponse.data.telegram_chat_id || '');
     } catch (err) {
-      setError('Не удалось загрузить данные. Попробуйте позже.');
-      console.error(err);
+      // Не показываем ошибку если статус unpaired - это нормально
+      if (err.response?.data?.status !== 'unpaired') {
+        setError('Не удалось загрузить данные. Попробуйте позже.');
+        console.error(err);
+      } else {
+        setPairing({ status: 'unpaired' });
+      }
     } finally {
       setIsLoading(false);
     }

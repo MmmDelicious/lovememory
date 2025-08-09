@@ -17,8 +17,9 @@ const ACTIONS = {
 };
 
 class PokerGame {
-    constructor(playersInfo, blinds = { small: 5, big: 10 }) {
+    constructor(playersInfo, blinds = { small: 5, big: 10 }, options = {}) {
         this.gameType = 'poker';
+        this.onStateChange = typeof options.onStateChange === 'function' ? options.onStateChange : null;
         
         if (!playersInfo || playersInfo.length === 0 || !playersInfo[0].buyInCoins) {
             throw new Error("Player information with buyInCoins is required to start a poker game.");
@@ -147,19 +148,26 @@ class PokerGame {
             case ACTIONS.CALL:
                 this._postBet(player, allowed.callAmount);
                 break;
-            case ACTIONS.RAISE:
+            case ACTIONS.RAISE: {
+                // value — это новая итоговая ставка игрока (total), а не приращение
+                const maxBetBefore = Math.max(...this.players.map(p => p.currentBet));
                 const raiseAmount = value - player.currentBet;
                 this._postBet(player, raiseAmount);
                 this.lastRaiser = player;
-                this.lastRaiseAmount = value; // Сохраняем сумму рейза
+                // Сохраняем размер последнего рейза (delta относительно предыдущего максимума)
+                this.lastRaiseAmount = Math.max(0, value - maxBetBefore);
                 this._resetActionFlags(player.id);
                 break;
-            case ACTIONS.BET:
+            }
+            case ACTIONS.BET: {
+                const maxBetBefore = Math.max(...this.players.map(p => p.currentBet));
                 this._postBet(player, value);
                 this.lastRaiser = player;
-                this.lastRaiseAmount = value; // Сохраняем сумму ставки
+                // Для первой ставки размер "рейза" равен новой ставке минус предыдущий максимум (обычно 0)
+                this.lastRaiseAmount = Math.max(0, player.currentBet - maxBetBefore);
                 this._resetActionFlags(player.id);
                 break;
+            }
         }
 
         player.hasActed = true;
@@ -206,8 +214,13 @@ class PokerGame {
         
         const activePlayers = this.players.filter(p => p.inHand);
         if (activePlayers.every(p => p.hasActed)) {
-            console.log(`[PokerGame] All active players have acted, ending betting round`);
-            return this._endBettingRound();
+            // Если у всех равные ставки и никто не рейзил — завершаем раунд
+            const maxBet = Math.max(...this.players.map(p => p.currentBet));
+            const allMatched = activePlayers.every(p => p.currentBet === maxBet);
+            if (allMatched) {
+                console.log(`[PokerGame] All active players matched bets, ending betting round`);
+                return this._endBettingRound();
+            }
         }
         
         const oldIndex = this.currentPlayerIndex;
@@ -233,16 +246,35 @@ class PokerGame {
     _handleTurnTimeout() {
         const currentPlayer = this.getCurrentPlayer();
         if (currentPlayer && currentPlayer.inHand) {
-            console.log(`[PokerGame] Player ${currentPlayer.name} timed out, auto-folding`);
-            
-            // Автоматический фолд
-            currentPlayer.inHand = false;
-            currentPlayer.hasActed = true;
-            
-            console.log(`[PokerGame] After auto-fold: currentPlayerIndex=${this.currentPlayerIndex}, activePlayers=${this.players.filter(p => p.inHand).length}`);
-            
-            // Продолжаем игру
-            this._advanceTurn();
+            console.log(`[PokerGame] Player ${currentPlayer.name} timed out`);
+
+            // Выбираем безопасное действие по таймауту:
+            // если доступен CHECK — делаем check, иначе — fold
+            const allowed = this._getAllowedActions(currentPlayer);
+            if (allowed.actions.includes('check')) {
+                try {
+                    this.makeMove(currentPlayer.id, { action: 'check' });
+                } catch (e) {
+                    console.warn('[PokerGame] Auto-check failed, falling back to fold:', e.message);
+                    currentPlayer.inHand = false;
+                    currentPlayer.hasActed = true;
+                    this._advanceTurn();
+                }
+            } else {
+                try {
+                    this.makeMove(currentPlayer.id, { action: 'fold' });
+                } catch (e) {
+                    console.warn('[PokerGame] Auto-fold failed:', e.message);
+                    currentPlayer.inHand = false;
+                    currentPlayer.hasActed = true;
+                    this._advanceTurn();
+                }
+            }
+
+            // Уведомляем слушателей об изменении состояния (для рассылки клиентам)
+            if (this.onStateChange) {
+                try { this.onStateChange(this); } catch (e) { console.warn('[PokerGame] onStateChange handler error:', e.message); }
+            }
         }
     }
 
@@ -301,8 +333,9 @@ class PokerGame {
         }
         
         const hands = contenders.map(p => {
-            const cardStrings = p.hand.map(c => c.rank + c.suit.toLowerCase())
-                .concat(this.communityCards.map(c => c.rank + c.suit.toLowerCase()));
+            const toSolver = (c) => `${c.rank}${c.suit.toLowerCase()}`.replace('T', '10');
+            const cardStrings = p.hand.map(toSolver)
+                .concat(this.communityCards.map(toSolver));
             const solvedHand = Hand.solve(cardStrings);
             solvedHand.player = p;
             return solvedHand;
@@ -312,7 +345,10 @@ class PokerGame {
         return winningHands.map(h => ({ 
             player: this.players.find(p => p.id === h.player.id), 
             handName: h.name, 
-            handCards: h.cards.map(c => ({ rank: c.value, suit: c.suit.toUpperCase() })), 
+            handCards: h.cards.map(c => ({ 
+                rank: c.value === '10' ? 'T' : String(c.value).toUpperCase(), 
+                suit: String(c.suit).toUpperCase() 
+            })), 
             pot: this.pot / winningHands.length 
         }));
     }
@@ -496,20 +532,14 @@ class PokerGame {
         
         const callAmount = Math.min(maxBet - player.currentBet, player.stack);
         
-        // Исправленная логика минимального рейза
-        let minRaise;
-        if (this.lastRaiseAmount > 0) {
-            // Если был предыдущий рейз, минимальный рейз = последняя сумма рейза + размер большого блайнда
-            minRaise = this.lastRaiseAmount + this.blinds.big;
-        } else {
-            // Если рейза не было, минимальный рейз = текущая максимальная ставка + размер большого блайнда
-            minRaise = maxBet + this.blinds.big;
-        }
-        
-        // Минимальный рейз должен быть больше текущей ставки игрока
+        // Минимальный total для рейза (новая итоговая ставка игрока)
+        // Если был предыдущий рейз, минимальный размер повышения = размер предыдущего повышения
+        // Итого: minRaiseTotal = maxBet + previousRaiseSize
+        const previousRaiseSize = this.lastRaiseAmount > 0 ? this.lastRaiseAmount : this.blinds.big;
+        let minRaise = maxBet + previousRaiseSize;
+        // Минимальный total должен быть строго больше текущей ставки игрока
         minRaise = Math.max(minRaise, player.currentBet + 1);
-        
-        // Максимальный рейз = стек игрока + его текущая ставка
+        // Максимальный total = стек игрока + его текущая ставка
         const maxRaise = player.stack + player.currentBet;
         
         return { 

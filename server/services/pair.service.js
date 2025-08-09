@@ -3,7 +3,16 @@ const { Op } = require('sequelize');
 
 class PairService {
   async getPairingStatus(userId) {
-    const pair = await Pair.findOne({
+    if (!userId) {
+      const error = new Error('userId is required');
+      error.statusCode = 400;
+      throw error;
+    }
+    
+    console.log('getPairingStatus called with userId:', userId);
+    
+    // Ищем активную пару
+    const activePair = await Pair.findOne({
       where: {
         [Op.or]: [{ user1Id: userId }, { user2Id: userId }],
         status: 'active',
@@ -12,32 +21,70 @@ class PairService {
         {
           model: User,
           as: 'Requester',
-          attributes: ['id', 'first_name', 'gender', 'city'],
+          attributes: ['id', 'first_name', 'gender', 'city', 'email'],
         },
         {
           model: User,
           as: 'Receiver',
-          attributes: ['id', 'first_name', 'gender', 'city'],
+          attributes: ['id', 'first_name', 'gender', 'city', 'email'],
         },
       ],
     });
 
-    if (!pair) {
-      return { status: 'unpaired' };
+    // Если есть активная пара, возвращаем её
+    if (activePair) {
+      const partnerData = activePair.user1Id === userId ? activePair.Receiver : activePair.Requester;
+      
+      return {
+        status: 'active',
+        id: activePair.id,
+        user1Id: activePair.user1Id,
+        user2Id: activePair.user2Id,
+        Requester: activePair.Requester,
+        Receiver: activePair.Receiver,
+        partner: {
+          id: partnerData.id,
+          name: partnerData.first_name,
+          gender: partnerData.gender,
+          city: partnerData.city,
+        },
+      };
     }
 
-    const partnerData = pair.user1Id === userId ? pair.Receiver : pair.Requester;
-    
-    return {
-      status: 'paired',
-      pairId: pair.id,
-      partner: {
-        id: partnerData.id,
-        name: partnerData.first_name,
-        gender: partnerData.gender,
-        city: partnerData.city,
+    // Ищем pending запрос
+    const pendingPair = await Pair.findOne({
+      where: {
+        [Op.or]: [{ user1Id: userId }, { user2Id: userId }],
+        status: 'pending',
       },
-    };
+      include: [
+        {
+          model: User,
+          as: 'Requester',
+          attributes: ['id', 'first_name', 'gender', 'city', 'email'],
+        },
+        {
+          model: User,
+          as: 'Receiver',
+          attributes: ['id', 'first_name', 'gender', 'city', 'email'],
+        },
+      ],
+    });
+
+    // Если есть pending запрос, возвращаем его
+    if (pendingPair) {
+      return {
+        status: 'pending',
+        id: pendingPair.id,
+        user1Id: pendingPair.user1Id,
+        user2Id: pendingPair.user2Id,
+        Requester: pendingPair.Requester,
+        Receiver: pendingPair.Receiver,
+      };
+    }
+
+    // Если ничего не найдено
+    return { status: 'unpaired' };
   }
 
   async sendPairRequest(requesterId, partnerEmail) {

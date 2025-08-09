@@ -60,11 +60,6 @@ export const EventMascotProvider = ({ children }) => {
       mascotType = 'runner';
     }
     
-    if (isAIVisible && !isChatOpen) {
-      handleMascotInterception(config, helperAnimation);
-      return;
-    }
-    
     hideMascot();
     setTimeout(() => {
       const message = config.message || generateMessage(config.page, config.data);
@@ -78,14 +73,32 @@ export const EventMascotProvider = ({ children }) => {
         side: config.side ?? (elementRect.left < window.innerWidth / 2 ? 'right' : 'left'),
       };
       setMascot(finalConfig);
-      if (config.duration) {
-        hideTimerRef.current = setTimeout(() => {
-          if (config.onDismiss) {
-            config.onDismiss();
-          } else {
-            hideMascot();
-          }
-        }, config.duration);
+      
+      // Если AI маскот активен, перехватываем через некоторое время
+      if (isAIVisible && !isChatOpen) {
+        const interceptionDelay = 2000; // 2 секунды на появление
+        setTimeout(() => {
+          handleMascotInterception(config, helperAnimation);
+          // Скрываем оригинальный маскот после перехвата
+          setTimeout(() => {
+            if (config.onDismiss) {
+              config.onDismiss();
+            } else {
+              hideMascot();
+            }
+          }, MASCOT_CONFIG.INTERCEPTION_DELAY);
+        }, interceptionDelay);
+      } else {
+        // Если AI маскот не активен, показываем обычный маскот с его длительностью
+        if (config.duration) {
+          hideTimerRef.current = setTimeout(() => {
+            if (config.onDismiss) {
+              config.onDismiss();
+            } else {
+              hideMascot();
+            }
+          }, config.duration);
+        }
       }
     }, 100);
   }, [isMobile, hideMascot, isAIVisible, isChatOpen, handleMascotInterception]);

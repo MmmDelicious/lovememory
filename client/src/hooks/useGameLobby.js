@@ -3,7 +3,12 @@ import io from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
 import { gameService } from '../services';
 
-const SOCKET_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+// Resolve socket URL robustly across environments
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL ||
+  import.meta.env.VITE_SERVER_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  'http://localhost:5000';
 
 export const useGameLobby = (gameType) => {
   const [rooms, setRooms] = useState([]);
@@ -35,11 +40,17 @@ export const useGameLobby = (gameType) => {
     if (!token) return;
 
     const socket = io(SOCKET_URL, {
-      auth: { token }
+      auth: { token },
+      transports: ['websocket', 'polling']
     });
 
     socket.on('connect', () => {
       console.log('Lobby socket connected successfully.');
+    });
+
+    socket.on('connect_error', (err) => {
+      console.error('Lobby socket connection error:', err.message);
+      console.error('Lobby socket error details:', err);
     });
 
     socket.on('room_list_updated', () => {

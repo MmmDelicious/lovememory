@@ -1,26 +1,25 @@
 .radialMenuOverlay {
-  position: fixed;
+  position: absolute; /* Изменено с fixed на absolute */
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 10000;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(4px);
+  /* Убираем затемнение и замыливание */
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   animation: fadeIn 0.2s ease-out;
+  pointer-events: all; /* Изменено с none на all для обработки кликов */
 }
 
 @keyframes fadeIn {
   from { 
     opacity: 0; 
-    backdrop-filter: blur(0px);
   }
   to { 
     opacity: 1; 
-    backdrop-filter: blur(4px);
   }
 }
 
@@ -32,38 +31,35 @@
   pointer-events: none;
 }
 
+/* Убираем центральную кнопку - маскот уже есть */
 .centerButton {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 
-    0 8px 32px rgba(102, 126, 234, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  pointer-events: all;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 10;
-}
-
-.centerButton:hover {
-  transform: translate(-50%, -50%) scale(1.1);
-  box-shadow: 
-    0 12px 40px rgba(102, 126, 234, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  display: none;
 }
 
 .centerIcon {
-  font-size: 32px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  display: none;
+}
+
+.centerMascot {
+  display: none;
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes mascotFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-3px) scale(1.05);
+  }
 }
 
 .menuItem {
@@ -75,7 +71,7 @@
   transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -1));
   pointer-events: all;
   cursor: pointer;
-  animation: slideIn 0.4s ease-out forwards;
+  animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   animation-delay: var(--delay);
   opacity: 0;
 }
@@ -83,7 +79,7 @@
 @keyframes slideIn {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -0.5)) scale(0.5);
+    transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -0.3)) scale(0.3);
   }
   100% {
     opacity: 1;
@@ -94,20 +90,22 @@
 .menuItemContent {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.9));
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   box-shadow: 
-    0 4px 20px rgba(0, 0, 0, 0.15),
+    0 6px 24px rgba(0, 0, 0, 0.15),
+    0 0 0 2px rgba(164, 130, 243, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   border: 2px solid rgba(164, 130, 243, 0.3);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transform: rotate(calc(var(--angle) * -1));
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .menuItemContent::before {
@@ -123,95 +121,113 @@
   transition: opacity 0.3s ease;
 }
 
+.menuItemContent::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle, rgba(164, 130, 243, 0.1) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 50%;
+}
+
 .menuItem:hover .menuItemContent {
-  transform: rotate(calc(var(--angle) * -1)) scale(1.15);
+  transform: rotate(calc(var(--angle) * -1)) scale(1.2);
   box-shadow: 
-    0 8px 30px rgba(164, 130, 243, 0.4),
+    0 10px 35px rgba(164, 130, 243, 0.4),
+    0 0 0 4px rgba(164, 130, 243, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  border-color: rgba(164, 130, 243, 0.6);
+  border-color: rgba(164, 130, 243, 0.7);
 }
 
 .menuItem:hover .menuItemContent::before {
   opacity: 1;
 }
 
+.menuItem:hover .menuItemContent::after {
+  opacity: 1;
+}
+
 .menuItemIcon {
-  font-size: 20px;
-  margin-bottom: 2px;
+  font-size: 22px;
+  margin-bottom: 3px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-  transition: transform 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 1;
+  position: relative;
 }
 
 .menuItem:hover .menuItemIcon {
-  transform: scale(1.2);
+  transform: scale(1.3) rotate(5deg);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .menuItemLabel {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: #4a5568;
   text-align: center;
-  line-height: 1;
+  line-height: 1.2;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  z-index: 1;
+  position: relative;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
 
 .menuItem:hover .menuItemLabel {
   color: #2d3748;
+  transform: scale(1.1);
 }
 
+/* Убираем декоративные кольца */
 .decorativeRing {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: calc(var(--radius) * 1.8);
-  height: calc(var(--radius) * 1.8);
-  border: 2px solid rgba(164, 130, 243, 0.2);
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
+  display: none;
 }
 
 .decorativeRing2 {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: calc(var(--radius) * 1.4);
-  height: calc(var(--radius) * 1.4);
-  border: 1px solid rgba(164, 130, 243, 0.1);
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite 0.5s;
+  display: none;
 }
 
 @keyframes pulse {
   0%, 100% {
-    opacity: 0.3;
+    opacity: 0.2;
     transform: translate(-50%, -50%) scale(1);
   }
   50% {
-    opacity: 0.6;
-    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(1.08);
   }
 }
 
 /* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
   .radialMenuContainer {
-    --radius: 100px;
+    --radius: 110px;
+    --item-size: 55px;
+  }
+  
+  .menuItemIcon {
+    font-size: 18px;
+  }
+  
+  .menuItemLabel {
+    font-size: 9px;
+  }
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 480px) {
+  .radialMenuContainer {
+    --radius: 90px;
     --item-size: 50px;
-  }
-  
-  .centerButton {
-    width: 60px;
-    height: 60px;
-  }
-  
-  .centerIcon {
-    font-size: 24px;
   }
   
   .menuItemIcon {

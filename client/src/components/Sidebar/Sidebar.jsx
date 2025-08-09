@@ -29,6 +29,7 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete, selectedDate, o
   const [showRecurrenceModal, setShowRecurrenceModal] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
+  const dialogRef = useRef(null);
 
   const EVENT_TYPES = [
     { value: 'plan', label: 'Планы', icon: '📅' },
@@ -66,6 +67,25 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete, selectedDate, o
     }
   }, [eventData]);
 
+  // Body scroll lock while sidebar is open
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = originalOverflow; };
+    }
+  }, [isOpen]);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
+
   const fetchMedia = async (eventId) => {
     try {
       const response = await eventService.getMediaForEvent(eventId);
@@ -86,13 +106,13 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete, selectedDate, o
     const combineDateTime = (date, time) => {
       if (!date) return null;
       if (time) {
-        // Создаем дату в локальном времени и конвертируем в UTC
+        // Интерпретируем как локальное время и сохраняем в ISO (UTC) без ручных сдвигов
         const localDateTime = new Date(`${date}T${time}`);
-        const utcDateTime = new Date(localDateTime.getTime() - localDateTime.getTimezoneOffset() * 60000);
-        return utcDateTime.toISOString();
+        return localDateTime.toISOString();
       } else {
-        // Для событий без времени создаем дату в начале дня UTC
-        return new Date(`${date}T00:00:00.000Z`).toISOString();
+        // Локальная полуночь, затем ISO (UTC)
+        const localStartOfDay = new Date(`${date}T00:00:00`);
+        return localStartOfDay.toISOString();
       }
     };
 
@@ -139,12 +159,19 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete, selectedDate, o
   return (
     <>
       <div className={`${styles.overlay} ${isOpen ? styles.open : ''}`} onClick={onClose}></div>
-      <div className={`${styles.sidebar} ${isOpen ? styles.open : ''}`} onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={dialogRef}
+        className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sidebar-title"
+      >
         <div className={styles.header}>
-            <h2 className={styles.title}>
+            <h2 id="sidebar-title" className={styles.title}>
               {eventData.title || 'Новое событие'}
             </h2>
-            <button className={styles.closeButton} onClick={onClose}>×</button>
+            <button className={styles.closeButton} onClick={onClose} aria-label="Закрыть боковую панель">×</button>
         </div>
         
         <div className={styles.dateInfo}>
@@ -249,7 +276,7 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete, selectedDate, o
                 <div className={styles.mediaGrid}>
                   {media.map(m => (
                     <div key={m.id} className={styles.mediaItem}>
-                      <img src={`${eventService.API_BASE_URL}${m.file_url}`} alt="Воспоминание" />
+                      <img src={`${eventService.FILES_BASE_URL}${m.file_url}`} alt="Воспоминание" />
                     </div>
                   ))}
                   <button type="button" className={styles.addMediaButton} onClick={() => fileInputRef.current.click()}>

@@ -25,7 +25,7 @@ const Player = ({ player, isMainPlayer, showCards, isActive, isWinner, dealingPh
                 </div>
             </div>
 
-            {player.inHand && (
+            {(isMainPlayer || player.inHand) && (
                 <div className={styles.playerCards}>
                     {isMainPlayer ? (
                         (yourHand && yourHand.length > 0) ? yourHand.map((card, index) => (

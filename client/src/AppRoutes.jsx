@@ -8,7 +8,7 @@ import LoginPage from './pages/LoginPage/LoginPage';
 import RegisterPage from './pages/RegisterPage/RegisterPage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
 import DayDetailPage from './pages/DayDetailPage/DayDetailPage';
-import PairingPage from './pages/PairingPage/PairingPage';
+import ProfilePage from './pages/ProfilePage/ProfilePage';
 import { GamesPage } from './pages/GamesPage/GamesPage';
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
 import GameRoomPage from './pages/GameRoomPage/GameRoomPage';
@@ -16,6 +16,8 @@ import PokerPage from './pages/PokerPage/PokerPage';
 import ErrorPage from './pages/ErrorPage/ErrorPage';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import ErrorTest from './components/ErrorTest/ErrorTest';
+import ErrorDemo from './components/ErrorDemo/ErrorDemo';
+import AuthCallbackPage from './pages/AuthCallbackPage/AuthCallbackPage';
 
 const AppRoutes = () => {
   const { user, isLoading } = useAuth();
@@ -30,6 +32,7 @@ const AppRoutes = () => {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/error" element={<ErrorPage />} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
@@ -42,7 +45,7 @@ const AppRoutes = () => {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/pairing" element={<PairingPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/games" element={<GamesPage />} />
           <Route path="/games/:gameType" element={<GameLobbyPage />} />
           <Route path="/day/:date" element={<DayDetailPage />} />
@@ -55,9 +58,11 @@ const AppRoutes = () => {
         
         <Route path="/error" element={<ErrorPage />} />
         <Route path="/error-test" element={<ErrorTest />} />
+        <Route path="/error-demo" element={<ErrorDemo />} />
         
         <Route path="/login" element={<Navigate to="/dashboard" />} />
         <Route path="/register" element={<Navigate to="/dashboard" />} />
+        <Route path="/auth/callback" element={<Navigate to="/dashboard" />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </ErrorBoundary>

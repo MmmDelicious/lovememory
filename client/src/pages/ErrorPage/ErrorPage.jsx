@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import styles from './ErrorPage.module.css';
+import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay';
 
 const ErrorPage = ({ errorCode = 404, errorMessage = 'Страница не найдена' }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [errorInfo, setErrorInfo] = useState({ errorCode, errorMessage });
+  const [errorInfo, setErrorInfo] = useState({ 
+    errorCode, 
+    errorMessage,
+    errorDetails: null 
+  });
   
   useEffect(() => {
     // Получаем параметры ошибки из состояния навигации
     const state = location.state;
-    if (state?.errorCode || state?.errorMessage) {
+    if (state?.errorCode || state?.errorMessage || state?.errorDetails) {
       setErrorInfo({
         errorCode: state.errorCode || errorCode,
-        errorMessage: state.errorMessage || errorMessage
+        errorMessage: state.errorMessage || errorMessage,
+        errorDetails: state.errorDetails || null
       });
       return;
     }
@@ -27,11 +32,16 @@ const ErrorPage = ({ errorCode = 404, errorMessage = 'Страница не на
         const parsedError = JSON.parse(decodeURIComponent(errorParam));
         setErrorInfo({
           errorCode: parsedError.errorCode || errorCode,
-          errorMessage: parsedError.errorMessage || errorMessage
+          errorMessage: parsedError.errorMessage || errorMessage,
+          errorDetails: parsedError.errorDetails || null
         });
       } catch (e) {
         console.error('Failed to parse error from URL:', e);
-        setErrorInfo({ errorCode, errorMessage });
+        setErrorInfo({ 
+          errorCode, 
+          errorMessage,
+          errorDetails: null 
+        });
       }
     }
   }, [location, errorCode, errorMessage]);
@@ -40,27 +50,19 @@ const ErrorPage = ({ errorCode = 404, errorMessage = 'Страница не на
     navigate('/dashboard');
   };
 
+  const handleRetry = () => {
+    // Попытка перезагрузить страницу или повторить действие
+    window.location.reload();
+  };
+
   return (
-    <div className={styles.errorContainer}>
-      <div className={styles.errorContent}>
-        {/* Иконка с инструментами */}
-        <div className={styles.errorIcon}>
-          <div className={styles.toolsIcon}>
-            <div className={styles.wrench}></div>
-            <div className={styles.screwdriver}></div>
-          </div>
-        </div>
-        
-        {/* Текст ошибки */}
-        <h1 className={styles.errorCode}>Ошибка {errorInfo.errorCode}</h1>
-        <p className={styles.errorMessage}>{errorInfo.errorMessage}</p>
-        
-        {/* Кнопка "Перейти домой" */}
-        <button className={styles.homeButton} onClick={handleGoHome}>
-          Перейти домой
-        </button>
-      </div>
-    </div>
+    <ErrorDisplay
+      errorCode={errorInfo.errorCode}
+      errorMessage={errorInfo.errorMessage}
+      errorDetails={errorInfo.errorDetails}
+      onRetry={handleRetry}
+      onGoHome={handleGoHome}
+    />
   );
 };
 

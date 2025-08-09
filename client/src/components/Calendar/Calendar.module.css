@@ -94,6 +94,14 @@
   gap: 3px;
 }
 
+.eventTime {
+  font-weight: 700;
+  color: var(--color-text-primary);
+  background: rgba(0,0,0,0.06);
+  border-radius: 6px;
+  padding: 0 6px;
+}
+
 .eventIcon {
   font-size: 0.7rem;
   flex-shrink: 0;

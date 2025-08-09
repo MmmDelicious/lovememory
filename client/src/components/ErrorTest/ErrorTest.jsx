@@ -1,10 +1,17 @@
 import React from 'react';
-import { useErrorHandler } from '../../hooks/useErrorHandler';
-import api from '../../services/api';
+import { useNavigate } from 'react-router-dom';
+import { 
+  showError, 
+  showNetworkError, 
+  showServerError, 
+  showNotFoundError, 
+  showAuthError, 
+  showPermissionError 
+} from '../../utils/errorHandler';
 import styles from './ErrorTest.module.css';
 
 const ErrorTest = () => {
-  const { handleError } = useErrorHandler();
+  const navigate = useNavigate();
 
   const testJavaScriptError = () => {
     // Имитируем JavaScript ошибку
@@ -16,31 +23,36 @@ const ErrorTest = () => {
     Promise.reject(new Error('Тестовое отклонение промиса'));
   };
 
-  const testAPIError = async () => {
-    try {
-      // Запрос к несуществующему эндпоинту
-      await api.get('/non-existent-endpoint');
-    } catch (error) {
-      handleError(error, 'Тестовая API ошибка');
-    }
+  const testCustomError = () => {
+    showError(418, 'Я чайник', {
+      message: 'Это тестовая ошибка с кастомным кодом',
+      type: 'Test Error',
+      timestamp: new Date().toISOString()
+    });
   };
 
-  const testServerError = async () => {
-    try {
-      // Запрос, который может вызвать ошибку сервера
-      await api.get('/test-server-error');
-    } catch (error) {
-      handleError(error, 'Тестовая ошибка сервера');
-    }
+  const testNetworkError = () => {
+    showNetworkError();
   };
 
-  const testNetworkError = async () => {
-    try {
-      // Запрос к несуществующему серверу
-      await api.get('http://non-existent-server.com/api/test');
-    } catch (error) {
-      handleError(error, 'Тестовая сетевая ошибка');
-    }
+  const testServerError = () => {
+    showServerError({
+      message: 'Тестовая ошибка сервера',
+      type: 'Test Server Error',
+      details: 'Это симуляция ошибки сервера'
+    });
+  };
+
+  const testNotFoundError = () => {
+    showNotFoundError('Тестовый ресурс');
+  };
+
+  const testAuthError = () => {
+    showAuthError();
+  };
+
+  const testPermissionError = () => {
+    showPermissionError();
   };
 
   return (
@@ -53,19 +65,36 @@ const ErrorTest = () => {
         <button onClick={testPromiseRejection} className={styles.testButton}>
           Отклонение промиса
         </button>
-        <button onClick={testAPIError} className={styles.testButton}>
-          API ошибка (404)
+        <button onClick={testCustomError} className={styles.testButton}>
+          Кастомная ошибка (418)
+        </button>
+        <button onClick={testNetworkError} className={styles.testButton}>
+          Ошибка сети
         </button>
         <button onClick={testServerError} className={styles.testButton}>
           Ошибка сервера (500)
         </button>
-        <button onClick={testNetworkError} className={styles.testButton}>
-          Сетевая ошибка
+        <button onClick={testNotFoundError} className={styles.testButton}>
+          Не найдено (404)
+        </button>
+        <button onClick={testAuthError} className={styles.testButton}>
+          Ошибка авторизации (401)
+        </button>
+        <button onClick={testPermissionError} className={styles.testButton}>
+          Ошибка доступа (403)
         </button>
       </div>
       <p className={styles.note}>
         ⚠️ Внимание: Эти кнопки вызывают реальные ошибки для тестирования системы!
       </p>
+      <div className={styles.actions}>
+        <button onClick={() => navigate('/dashboard')} className={styles.backButton}>
+          Вернуться на главную
+        </button>
+        <button onClick={() => navigate('/error-demo')} className={styles.demoButton}>
+          🎯 Демо-страница
+        </button>
+      </div>
     </div>
   );
 };

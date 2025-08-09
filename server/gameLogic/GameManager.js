@@ -8,7 +8,7 @@ class GameManager {
     this.games = new Map();
   }
 
-  createGame(roomId, gameType, players) {
+  createGame(roomId, gameType, players, options = {}) {
     if (this.games.has(roomId)) {
       return this.games.get(roomId);
     }
@@ -36,7 +36,7 @@ class GameManager {
         const blinds = { small: smallBlind, big: bigBlind };
         
         console.log(`[GameManager] Setting blinds: ${blinds.small}/${blinds.big} for buyIn: ${buyInCoins} coins`);
-        gameInstance = new PokerGame(players, blinds);
+        gameInstance = new PokerGame(players, blinds, options);
         console.log('[GameManager] Poker game created successfully');
         break;
       case 'quiz':

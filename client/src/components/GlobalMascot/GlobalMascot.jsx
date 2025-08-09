@@ -21,21 +21,18 @@ const GlobalMascot = () => {
     startDismiss();
   };
 
-  if (interceptedMascot) {
-    return <InterceptedMascot {...interceptedMascot} />;
-  }
-  
-  if (mascot) {
-    return (
-      <LottieMascot
-        {...mascot}
-        onActionClick={handleActionClick}
-        onDismiss={hideMascot}
-      />
-    );
-  }
-
-  return null;
+  return (
+    <>
+      {interceptedMascot && <InterceptedMascot {...interceptedMascot} />}
+      {mascot && (
+        <LottieMascot
+          {...mascot}
+          onActionClick={handleActionClick}
+          onDismiss={hideMascot}
+        />
+      )}
+    </>
+  );
 };
 
 export default GlobalMascot;

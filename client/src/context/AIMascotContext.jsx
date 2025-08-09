@@ -35,13 +35,19 @@ export const AIMascotProvider = ({ children }) => {
 
     const line = MASCOT_CONFIG.INTERCEPTION_LINES[Math.floor(Math.random() * MASCOT_CONFIG.INTERCEPTION_LINES.length)];
 
+    // Сначала двигаем AI маскота к цели
     moveGlobalMascotToPosition(targetPosition);
-    setGlobalMascotMessage(line, MASCOT_CONFIG.INTERCEPTION_MESSAGE_DURATION);
-
+    
+    // Показываем сообщение через небольшую задержку
     setTimeout(() => {
+      setGlobalMascotMessage(line, MASCOT_CONFIG.INTERCEPTION_MESSAGE_DURATION);
+      
+      // Показываем анимацию перехваченного маскота
+      setTimeout(() => {
         setInterceptedMascot({ position: targetPosition, animationData: helperAnimation });
         setTimeout(() => setInterceptedMascot(null), MASCOT_CONFIG.INTERCEPTION_ANIMATION_DURATION); 
-    }, MASCOT_CONFIG.INTERCEPTION_DELAY);
+      }, 500); // Небольшая задержка после сообщения
+    }, 800); // Задержка перед показом сообщения
   }, [moveGlobalMascotToPosition, setGlobalMascotMessage]);
 
   const moveGlobalMascot = useCallback(() => {

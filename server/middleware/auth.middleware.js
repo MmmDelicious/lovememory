@@ -18,9 +18,20 @@ module.exports = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Вот оно, финальное исправление!
-    // Мы создаем объект req.user в формате, который ожидают контроллеры.
-    req.user = { id: decoded.userId, email: decoded.email };
+    // Проверяем, что userId существует
+    if (!decoded.userId) {
+      console.error('JWT token missing userId:', decoded);
+      return res.status(401).json({ message: 'Нет авторизации: невалидный токен - отсутствует userId' });
+    }
+    
+    // Создаем объект req.user в формате, который ожидают контроллеры
+    req.user = { 
+      id: decoded.userId, 
+      email: decoded.email,
+      role: decoded.role || 'user' // Добавляем роль с fallback
+    };
+    
+    console.log('Auth middleware: User authenticated:', { id: req.user.id, email: req.user.email });
     
     next();
   } catch (e) {

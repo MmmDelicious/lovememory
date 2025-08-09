@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import authService from '../services/auth.service';
 import pairService from '../services/pair.service';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -9,11 +10,32 @@ export const AuthProvider = ({ children }) => {
   const [partner, setPartner] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const clearAuthData = () => {
+  const setAuthentication = useCallback((newAuthData) => {
+    if (newAuthData && newAuthData.token && newAuthData.user) {
+      localStorage.setItem('auth', JSON.stringify(newAuthData));
+      api.defaults.headers.common['Authorization'] = `Bearer ${newAuthData.token}`;
+      setAuthData(newAuthData);
+    } else {
+      console.error("Attempted to set invalid auth data", newAuthData);
+    }
+  }, []);
+
+  const updateUser = useCallback((updatedUser) => {
+    if (authData) {
+      const newAuthData = {
+        ...authData,
+        user: updatedUser
+      };
+      setAuthentication(newAuthData);
+    }
+  }, [authData, setAuthentication]);
+
+  const clearAuthData = useCallback(() => {
     localStorage.removeItem('auth');
+    delete api.defaults.headers.common['Authorization'];
     setAuthData(null);
     setPartner(null);
-  };
+  }, []);
 
   const fetchPartner = useCallback(async () => {
     if (!authData?.token) {
@@ -21,70 +43,92 @@ export const AuthProvider = ({ children }) => {
       return;
     }
     try {
-      // ИСПРАВЛЕНО: используем getStatus, как в pair.service.js
-      const pairStatus = await pairService.getStatus(); 
-      if (pairStatus.data && pairStatus.data.partner) {
+      const pairStatus = await pairService.getStatus();
+      if (pairStatus.data && pairStatus.data.status === 'active' && pairStatus.data.partner) {
         setPartner(pairStatus.data.partner);
       } else {
         setPartner(null);
       }
     } catch (error) {
-      // Ошибка "Не удалось получить данные" - нормальна, если пары нет. Не будем засорять консоль.
       if (error.response && error.response.status !== 404) {
-          console.error("Не удалось получить данные о партнере:", error);
+        console.error("Не удалось получить данные о партнере:", error);
       }
       setPartner(null);
     }
   }, [authData?.token]);
 
+  const login = async (email, password) => {
+    const newAuthData = await authService.login(email, password);
+    setAuthentication(newAuthData);
+    return newAuthData;
+  };
 
-  const handleAuthChange = useCallback(() => {
-    const storedAuth = localStorage.getItem('auth');
-    if (storedAuth) {
-      try {
-        const parsedAuth = JSON.parse(storedAuth);
-        if (parsedAuth && parsedAuth.token && parsedAuth.user) {
-          setAuthData(parsedAuth);
+  const register = async (userData) => {
+    const newAuthData = await authService.register(userData);
+    setAuthentication(newAuthData);
+    return newAuthData;
+  };
+
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } finally {
+      clearAuthData();
+    }
+  };
+
+  useEffect(() => {
+    const handleInitialLoad = () => {
+      const storedAuth = localStorage.getItem('auth');
+      if (storedAuth) {
+        try {
+          const parsedAuth = JSON.parse(storedAuth);
+          setAuthentication(parsedAuth);
+        } catch (e) {
+          console.error("Ошибка парсинга данных пользователя из localStorage", e);
+          clearAuthData();
+        }
+      }
+      setIsLoading(false);
+    };
+    handleInitialLoad();
+
+    const handleStorageChange = (event) => {
+      if (event.key === 'auth') {
+        const storedAuth = localStorage.getItem('auth');
+        if (storedAuth) {
+          setAuthentication(JSON.parse(storedAuth));
         } else {
           clearAuthData();
         }
-      } catch (e) {
-        console.error("Ошибка парсинга данных пользователя из localStorage", e);
-        clearAuthData();
       }
-    } else {
-      clearAuthData();
-    }
-  }, []);
+    };
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [clearAuthData, setAuthentication]);
 
   useEffect(() => {
-    handleAuthChange();
-    setIsLoading(false);
-
-    window.addEventListener('storage', handleAuthChange);
-
-    return () => {
-      window.removeEventListener('storage', handleAuthChange);
+    const handleGoogleAuth = (event) => {
+      if (event.origin !== import.meta.env.VITE_SERVER_URL) {
+        return;
+      }
+      if (event.data.type === 'auth-success') {
+        setAuthentication(event.data.payload);
+      } else if (event.data.type === 'auth-error') {
+        console.error('Google auth error:', event.data.payload);
+        // You might want to show an error message to the user here
+      }
     };
-  }, [handleAuthChange]);
+    window.addEventListener('message', handleGoogleAuth);
+    return () => window.removeEventListener('message', handleGoogleAuth);
+  }, [setAuthentication]);
 
   useEffect(() => {
     if (authData?.token) {
       fetchPartner();
     }
   }, [authData, fetchPartner]);
-
-  const login = async (email, password) => {
-    const userData = await authService.login(email, password);
-    localStorage.setItem('auth', JSON.stringify(userData));
-    setAuthData(userData);
-    return userData;
-  };
-
-  const logout = () => {
-    authService.logout();
-    clearAuthData();
-  };
 
   const value = {
     user: authData?.user,
@@ -94,6 +138,8 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     login,
     logout,
+    register,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{!isLoading && children}</AuthContext.Provider>;

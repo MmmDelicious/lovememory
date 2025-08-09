@@ -1,6 +1,8 @@
 import api from './api';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+// Strip trailing /api from API base to form static files base (uploads served at root)
+const FILES_BASE_URL = API_BASE_URL.replace(/\/?api$/, '');
 
 const getEvents = () => {
   return api.get('/events');
@@ -45,6 +47,7 @@ const eventService = {
   uploadFile,
   moveMediaToEvent,
   API_BASE_URL,
+  FILES_BASE_URL,
 };
 
 export default eventService;

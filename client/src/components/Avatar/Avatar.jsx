@@ -6,19 +6,26 @@ const Avatar = ({ src, alt = 'avatar', size = 'medium', variant = 'circle', clas
   const sizeClass = styles[size] || '';
   const variantClass = styles[variant] || '';
 
+  // Убеждаемся, что src всегда является строкой
+  const imageSrc = src || '';
+
   return (
     <div className={`${styles.avatarContainer} ${sizeClass} ${variantClass} ${className}`.trim()}>
         <img
-            src={src}
+            src={imageSrc}
             alt={alt}
             className={styles.avatarImage}
+            onError={(e) => {
+              // Если изображение не загружается, показываем fallback
+              e.target.src = `https://ui-avatars.com/api/?name=${alt}&background=random&size=128`;
+            }}
         />
     </div>
   );
 };
 
 Avatar.propTypes = {
-  src: PropTypes.string.isRequired,
+  src: PropTypes.string,
   alt: PropTypes.string,
   size: PropTypes.oneOf(['small', 'medium', 'large']),
   variant: PropTypes.oneOf(['circle', 'rounded', 'square']),

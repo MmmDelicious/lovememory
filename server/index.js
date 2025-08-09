@@ -2,6 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const passport = require('passport');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
@@ -12,6 +14,7 @@ const { startBot, startCronJobs } = require('./services/telegram.service');
 const { initSocket } = require('./socket');
 const errorHandler = require('./middleware/errorHandler.middleware');
 const apiRouter = require('./routes');
+require('./config/passport');
 
 const app = express();
 const server = http.createServer(app);
@@ -25,6 +28,19 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+  }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {

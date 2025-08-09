@@ -11,6 +11,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  background-color: #f0f0f0;
 }
 
 .small {

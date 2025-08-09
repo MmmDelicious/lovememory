@@ -10,9 +10,11 @@ function initSocket(server, app) {
   const io = new Server(server, {
     cors: {
       origin: process.env.CLIENT_URL || "http://localhost:5173",
-      methods: ["GET", "POST"],
-      credentials: true
-    }
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      credentials: true,
+      allowedHeaders: ["Content-Type", "Authorization"]
+    },
+    transports: ['websocket', 'polling']
   });
 
   app.use((req, res, next) => {
@@ -23,12 +25,17 @@ function initSocket(server, app) {
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) {
+      console.log('[SOCKET] Authentication failed: No token provided');
       return next(new Error('Authentication error: No token provided.'));
     }
+    
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
+        console.log('[SOCKET] Authentication failed: Invalid token', err.message);
         return next(new Error('Authentication error: Invalid token.'));
       }
+      
+      console.log('[SOCKET] Authentication successful for user:', decoded.userId);
       socket.user = { id: decoded.userId, email: decoded.email };
       socket.join(socket.user.id);
       next();
@@ -62,10 +69,19 @@ function initSocket(server, app) {
             console.log(`[SERVER] User ${socket.user.id} successfully joined room ${roomId}`);
             
             const currentSockets = await io.in(roomId).fetchSockets();
-            const playerInfo = currentSockets.map(s => ({ 
-                id: s.user.id, 
-                name: s.user.email.split('@')[0]
-            }));
+            // Подтягиваем профиль, чтобы был общий аватар/пол
+            const userIdsForInfo = currentSockets.map(s => s.user.id);
+            const usersForInfo = await User.findAll({ where: { id: userIdsForInfo }, attributes: ['id', 'email', 'gender', 'avatarUrl', 'first_name'] });
+            const usersForInfoMap = new Map(usersForInfo.map(u => [u.id, u]));
+            const playerInfo = currentSockets.map(s => {
+                const u = usersForInfoMap.get(s.user.id);
+                return {
+                    id: s.user.id,
+                    name: u?.first_name || u?.email?.split('@')[0] || s.user.email.split('@')[0],
+                    gender: u?.gender || 'male',
+                    avatarUrl: u?.avatarUrl || null,
+                };
+            });
             console.log(`[SERVER] Room ${roomId} now has ${currentSockets.length} players:`, playerInfo.map(p => p.name));
 
             io.to(roomId).emit('player_list_update', playerInfo);
@@ -77,20 +93,33 @@ function initSocket(server, app) {
                     const gameType = room.gameType;
                     
                     const userIds = currentSockets.map(s => s.user.id);
-                    const users = await User.findAll({ where: { id: userIds }, attributes: ['id', 'email', 'gender'] });
+                    const users = await User.findAll({ where: { id: userIds }, attributes: ['id', 'email', 'gender', 'avatarUrl', 'first_name'] });
                     const usersMap = new Map(users.map(u => [u.id, u]));
 
                     const playerBuyInInfo = currentSockets.map(s => {
                         const user = usersMap.get(s.user.id);
                         return {
                             id: s.user.id,
-                            name: user ? user.email.split('@')[0] : s.user.email.split('@')[0],
+                            name: user ? (user.first_name || user.email.split('@')[0]) : s.user.email.split('@')[0],
                             gender: user ? user.gender : 'male',
+                            avatarUrl: user ? user.avatarUrl : null,
                             buyInCoins: room.bet
                         };
                     });
                     
-                    const game = GameManager.createGame(roomId, gameType, playerBuyInInfo);
+                    const game = GameManager.createGame(roomId, gameType, playerBuyInInfo, {
+                      onStateChange: (gameInstance) => {
+                        if (gameInstance.gameType === 'poker') {
+                          gameInstance.players.forEach(p => {
+                            const stateForPlayer = gameInstance.getStateForPlayer(p.id);
+                            io.to(p.id).emit('game_update', stateForPlayer);
+                          });
+                        } else {
+                          const newState = gameInstance.getState();
+                          io.to(roomId).emit('game_update', newState);
+                        }
+                      }
+                    });
                     io.to(roomId).emit('game_start', { gameType, players: playerInfo, maxPlayers: room.maxPlayers });
 
                     if (game.gameType === 'poker') {
@@ -173,7 +202,7 @@ function initSocket(server, app) {
               console.log(`[SERVER] Recovering game for room ${roomId} after server restart`);
               
               const socketsInRoom = await io.in(roomId).fetchSockets();
-              if (socketsInRoom.length >= 2) {
+                if (socketsInRoom.length >= 2) {
                 // Восстанавливаем игру
                 const userIds = socketsInRoom.map(s => s.user.id);
                 const users = await User.findAll({ where: { id: userIds }, attributes: ['id', 'email', 'gender'] });
@@ -189,7 +218,19 @@ function initSocket(server, app) {
                   };
                 });
                 
-                const recoveredGame = GameManager.createGame(roomId, room.gameType, playerBuyInInfo);
+                const recoveredGame = GameManager.createGame(roomId, room.gameType, playerBuyInInfo, {
+                  onStateChange: (gameInstance) => {
+                    if (gameInstance.gameType === 'poker') {
+                      gameInstance.players.forEach(p => {
+                        const stateForPlayer = gameInstance.getStateForPlayer(p.id);
+                        io.to(p.id).emit('game_update', stateForPlayer);
+                      });
+                    } else {
+                      const newState = gameInstance.getState();
+                      io.to(roomId).emit('game_update', newState);
+                    }
+                  }
+                });
                 
                 if (recoveredGame.gameType === 'poker') {
                   recoveredGame.players.forEach(player => {
@@ -251,9 +292,12 @@ function initSocket(server, app) {
         }
         
         if (game.status === 'finished') {
-          io.to(roomId).emit('game_end', game.getState());
-          
           if (gameType === 'poker') {
+            // Для покера отправляем персонализированное финальное состояние (с yourHand)
+            game.players.forEach(player => {
+              const finalStateForPlayer = game.getStateForPlayer(player.id);
+              io.to(player.id).emit('game_end', finalStateForPlayer);
+            });
             setTimeout(async () => {
               const currentGame = GameManager.getGame(roomId);
               if (currentGame && currentGame.players.length > 1 && currentGame.players.every(p => p.stack > 0)) {
@@ -282,7 +326,8 @@ function initSocket(server, app) {
                 io.emit('room_list_updated');
               }
             }, 5000);
-          } else if (gameType !== 'quiz') {
+          } else {
+            io.to(roomId).emit('game_end', game.getState());
             const finalState = game.getState();
             if (finalState.winner && finalState.winner !== 'draw') {
               const winnerId = finalState.winner;
@@ -428,7 +473,24 @@ function initSocket(server, app) {
         }
       } else {
         console.log(`[SERVER] Room ${roomId} still has ${remainingSockets.length} players, not deleting`);
-        const playerInfo = remainingSockets.map(s => ({ id: s.user.id, name: s.user.email.split('@')[0] }));
+        const remainingIds = remainingSockets.map(s => s.user.id);
+        try {
+          const remainingUsers = await User.findAll({ where: { id: remainingIds }, attributes: ['id', 'email', 'gender', 'avatarUrl', 'first_name'] });
+          const remap = new Map(remainingUsers.map(u => [u.id, u]));
+          const playerInfo = remainingSockets.map(s => {
+            const u = remap.get(s.user.id);
+            return {
+              id: s.user.id,
+              name: u?.first_name || u?.email?.split('@')[0] || s.user.email.split('@')[0],
+              gender: u?.gender || 'male',
+              avatarUrl: u?.avatarUrl || null,
+            };
+          });
+          io.to(roomId).emit('player_list_update', playerInfo);
+        } catch (e) {
+          const fallback = remainingSockets.map(s => ({ id: s.user.id, name: s.user.email.split('@')[0] }));
+          io.to(roomId).emit('player_list_update', fallback);
+        }
         io.to(roomId).emit('player_list_update', playerInfo);
 
         // Проверяем, нужно ли завершить игру из-за недостатка игроков
@@ -445,6 +507,17 @@ function initSocket(server, app) {
           } else {
               // Для покера - оставляем игру в покое, игрок может вернуться
               console.log(`[SERVER] Poker game with less than 2 players, keeping game active for potential rejoin`);
+              // Переводим комнату в статус ожидания, если в комнате остался 1 игрок
+              try {
+                const room = await GameRoom.findByPk(roomId);
+                if (room) {
+                  room.status = 'waiting';
+                  await room.save();
+                  io.emit('room_list_updated');
+                }
+              } catch (e) {
+                console.warn('[SERVER] Failed to mark room as waiting for poker:', e.message);
+              }
           }
         }
       }

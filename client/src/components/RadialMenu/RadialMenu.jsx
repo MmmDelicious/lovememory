@@ -11,7 +11,7 @@ const RadialMenu = ({
   itemSize = 60
 }) => {
   const menuRef = useRef(null);
-  const animationRef = useRef(null);
+  const overlayRef = useRef(null);
 
   useEffect(() => {
     if (isOpen && menuRef.current) {
@@ -35,19 +35,11 @@ const RadialMenu = ({
           onClose();
         }
       };
-      
-      const handleClickOutside = (e) => {
-        if (menuRef.current && !menuRef.current.contains(e.target)) {
-          onClose();
-        }
-      };
 
       document.addEventListener('keydown', handleEscape);
-      document.addEventListener('click', handleClickOutside);
       
       return () => {
         document.removeEventListener('keydown', handleEscape);
-        document.removeEventListener('click', handleClickOutside);
       };
     }
   }, [isOpen, onClose]);
@@ -62,11 +54,27 @@ const RadialMenu = ({
     onClose();
   };
 
+  const handleOverlayClick = (e) => {
+    // Закрываем меню при клике на overlay
+    if (e.target === overlayRef.current) {
+      onClose();
+    }
+  };
+
+  const handleContainerClick = (e) => {
+    // Предотвращаем закрытие при клике на контейнер меню
+    e.stopPropagation();
+  };
+
   const sliceCount = items.length;
   const sliceAngle = 360 / sliceCount;
 
   return (
-    <div className={styles.radialMenuOverlay} onClick={onClose}>
+    <div 
+      ref={overlayRef}
+      className={styles.radialMenuOverlay} 
+      onClick={handleOverlayClick}
+    >
       <div 
         ref={menuRef}
         className={styles.radialMenuContainer}
@@ -76,16 +84,12 @@ const RadialMenu = ({
           '--radius': `${radius}px`,
           '--item-size': `${itemSize}px`
         }}
+        onClick={handleContainerClick}
       >
-        {/* Центральная кнопка */}
-        <div className={styles.centerButton}>
-          <div className={styles.centerIcon}>🤖</div>
-        </div>
-
         {/* Радиальные элементы */}
         {items.map((item, index) => {
           const itemAngle = sliceAngle * index - 90;
-          const delay = index * 0.05;
+          const delay = index * 0.08;
           
           return (
             <div
@@ -110,10 +114,6 @@ const RadialMenu = ({
             </div>
           );
         })}
-
-        {/* Декоративные элементы */}
-        <div className={styles.decorativeRing}></div>
-        <div className={styles.decorativeRing2}></div>
       </div>
     </div>
   );
