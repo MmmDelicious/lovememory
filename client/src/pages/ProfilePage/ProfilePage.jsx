@@ -1,184 +1,255 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { usePairing } from '../../hooks/usePairing';
-import userService from '../../services/user.service';
+import { useEvents } from '../../hooks/useEvents';
+import { eventService } from '../../services';
 import styles from './ProfilePage.module.css';
 
-import Avatar from '../../components/Avatar/Avatar';
 import Button from '../../components/Button/Button';
-import ProfileStats from '../../components/ProfileStats/ProfileStats';
-import GenderSelector from '../../components/GenderSelector/GenderSelector';
-
-import { FaUser, FaBirthdayCake, FaCity, FaBuilding, FaPaperPlane, FaTimes } from 'react-icons/fa';
-import { MdErrorOutline, MdPersonSearch } from 'react-icons/md';
+import { FaStar, FaStarHalfAlt, FaHeart, FaEnvelope, FaMapMarkerAlt, FaGift, FaUser, FaPlus, FaPencilAlt, FaTrash, FaTelegramPlane, FaThLarge, FaUsers } from 'react-icons/fa';
+import manAvatar from '../../assets/man.png';
+import womanAvatar from '../../assets/woman.png';
+import defaultAvatar from '../../assets/react.svg';
 
 const ProfilePage = () => {
-  const { user, isLoading: isAuthLoading, updateUser } = useAuth();
-  const { pairing, isLoading: isPairingLoading, error, sendRequest, acceptRequest, deletePairing, saveTelegramId, setError } = usePairing(user);
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const { pairing, isLoading: isPairingLoading, sendRequest, deletePairing, saveTelegramId } = usePairing(user);
+  const { events, isLoading: areEventsLoading, deleteEvent } = useEvents(user?.id);
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [profileData, setProfileData] = useState({});
-  const [email, setEmail] = useState('');
-  const [localTelegramId, setLocalTelegramId] = useState('');
+  const [activeTab, setActiveTab] = useState('events');
+  const [partnerEmail, setPartnerEmail] = useState('');
+  const [telegramId, setTelegramId] = useState('');
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [isGalleryLoading, setIsGalleryLoading] = useState(false);
 
-  const initializeProfileData = useCallback(() => {
+  useEffect(() => {
     if (user) {
-      setProfileData({
-        firstName: user.first_name || '',
-        lastName: user.last_name || '',
-        bio: user.bio || '',
-        gender: user.gender || '',
-        age: user.age || '',
-        city: user.city || '',
-        avatar: user.avatarUrl || null,
-      });
-      setLocalTelegramId(user.telegram_chat_id || '');
+      setTelegramId(user.telegram_chat_id || '');
     }
   }, [user]);
 
-  useEffect(() => {
-    initializeProfileData();
-  }, [initializeProfileData]);
-
-  const handleEditToggle = () => {
-    if (isEditing) {
-      initializeProfileData();
-    }
-    setIsEditing(!isEditing);
+  const getAvatar = (targetUser = user) => {
+    if (targetUser?.avatarUrl) return targetUser.avatarUrl;
+    if (targetUser?.gender === 'male') return manAvatar;
+    if (targetUser?.gender === 'female') return womanAvatar;
+    return defaultAvatar;
   };
 
-  const handleProfileSave = async () => {
-    setIsSaving(true);
-    try {
-      const { firstName, lastName, bio, gender, age, city } = profileData;
-      const updateData = { first_name: firstName, last_name: lastName, bio, gender, age: age ? parseInt(age, 10) : null, city };
-      const response = await userService.updateProfile(updateData);
-      if (updateUser) updateUser(response.data);
-      setIsEditing(false);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Ошибка сохранения');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const formData = new FormData();
-    formData.append('avatar', file);
-    try {
-      const response = await userService.uploadAvatar(formData);
-      const newAvatarUrl = response.data.avatarUrl;
-      setProfileData(p => ({ ...p, avatar: newAvatarUrl }));
-      if (updateUser) updateUser({ ...user, avatarUrl: newAvatarUrl });
-    } catch (err) {
-      setError(err.response?.data?.message || 'Ошибка загрузки аватара');
-    }
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' });
   };
   
-  const handleSendRequest = (e) => { e.preventDefault(); sendRequest(email); };
-  const handleTelegramIdSave = (e) => { e.preventDefault(); saveTelegramId(localTelegramId); };
+  const renderEvents = () => {
+    if (areEventsLoading) return <div className={styles.placeholder}>Загрузка событий...</div>;
+    const upcomingEvents = events?.filter(event => new Date(event.start) >= new Date()).sort((a, b) => new Date(a.start) - new Date(b.start));
 
-  const renderPairingContent = () => {
-    if (isPairingLoading) return <div className={styles.card}><div className={styles.loadingSpinner}></div></div>;
+    if (!upcomingEvents || upcomingEvents.length === 0) return <div className={styles.placeholder}>Нет предстоящих дел.</div>;
 
-    if (pairing?.status === 'active') {
-      const partner = pairing.Requester.id === user?.id ? pairing.Receiver : pairing.Requester;
-      return (
-        <div className={styles.card}>
-          <h3>Вы в паре</h3>
-          <div className={styles.partnerInfo}>
-            <Avatar src={partner.avatarUrl} alt={partner.first_name} size="small" />
-            <span>Вы в паре с <strong>{partner.first_name || partner.email}</strong></span>
-          </div>
-          <p>Статистика и общие обсуждения будут доступны скоро.</p>
-          <Button onClick={() => deletePairing(pairing.id)} variant="danger">Разорвать связь</Button>
-        </div>
-      );
-    }
-    
-    // Condensed other states for brevity
     return (
-        <div className={styles.card}>
-          <h3>Создать пару</h3>
-          <p>Отправьте приглашение партнёру, чтобы вести общий календарь.</p>
-          <form onSubmit={handleSendRequest} className={styles.form}>
-            <div className={styles.inputGroup}>
-              <MdPersonSearch className={styles.inputIcon} />
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email партнёра" required className={styles.input} />
+      <div className={styles.dealsList}>
+        {upcomingEvents.map(event => (
+          <div key={event.id} className={styles.dealItem}>
+            <div className={styles.dealIndicator}></div>
+            <div className={styles.dealAvatar}>
+              <span>{new Date(event.start).getDate()}</span>
             </div>
-            <Button type="submit" variant="primary">Отправить</Button>
-          </form>
-        </div>
-      );
+            <div className={styles.dealContent}>
+              <div className={styles.dealTitle}>{event.title}</div>
+              <div className={styles.dealDescription}>{event.extendedProps?.description || 'Описание отсутствует'}</div>
+              <div className={styles.dealMeta}>
+                <span className={styles.dealDate}>{formatDate(event.start)}</span>
+              </div>
+            </div>
+            <div className={styles.dealActions}>
+              <Link to="/calendar" className={styles.iconBtn} aria-label="Edit in calendar"><FaPencilAlt /></Link>
+              <button className={styles.iconBtn} onClick={() => deleteEvent(event.id)} aria-label="Delete event"><FaTrash /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   };
-  
-  if (isAuthLoading) return <div className={styles.loadingContainer}><div className={styles.loadingSpinner}></div></div>;
+
+  const renderGallery = () => {
+    if (isGalleryLoading) return <div className={styles.placeholder}>Загрузка галереи...</div>;
+    if (!galleryItems.length) return <div className={styles.placeholder}>Медиа не найдено.</div>;
+    return (
+      <div className={styles.galleryGrid}>
+        {galleryItems.map((item) => (
+          <div key={item.id} className={styles.galleryItem}>
+            <img
+              className={styles.galleryImage}
+              src={`${eventService.FILES_BASE_URL}${item.file_url}`}
+              alt={item.file_type}
+              loading="lazy"
+            />
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const handleSendRequest = async (e) => {
+    e.preventDefault();
+    try {
+      await sendRequest(partnerEmail);
+      setPartnerEmail('');
+    } catch (err) {
+      console.error('Failed to send pairing request:', err);
+    }
+  };
+
+  const handleTelegramIdSave = async (e) => {
+    e.preventDefault();
+    try {
+      await saveTelegramId(telegramId);
+    } catch (err) {
+      console.error('Failed to save Telegram ID:', err);
+    }
+  };
+
+  const fetchGallery = async () => {
+    if (!events || !events.length) {
+      setGalleryItems([]);
+      return;
+    }
+    setIsGalleryLoading(true);
+    try {
+      // Берем до 20 последних событий для экономии запросов
+      const eventsToLoad = [...events]
+        .sort((a, b) => new Date(b.start) - new Date(a.start))
+        .slice(0, 20);
+      const mediaArrays = await Promise.all(
+        eventsToLoad.map((ev) => eventService.getMediaForEvent(ev.id).then(r => r.data).catch(() => []))
+      );
+      const flat = mediaArrays.flat();
+      setGalleryItems(flat);
+    } catch (err) {
+      console.error('Failed to load gallery:', err);
+      setGalleryItems([]);
+    } finally {
+      setIsGalleryLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'gallery') {
+      fetchGallery();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, events]);
+
+  if (isAuthLoading) return <div className={styles.loadingContainer}>Загрузка...</div>;
+  if (!user) return <div className={styles.errorContainer}>Пользователь не найден.</div>;
+
+  const partner = pairing?.status === 'active' 
+    ? (pairing.Requester.id === user.id ? pairing.Receiver : pairing.Requester)
+    : null;
 
   return (
-    <div className={styles.profileLayout}>
-      <aside className={`${styles.card} ${styles.userCard}`}>
-        <div className={styles.avatarWrapper}>
-          <Avatar src={profileData.avatar} alt={`${profileData.firstName} ${profileData.lastName}`} size="large" />
-          {isEditing && (
-            <>
-              <input type="file" accept="image/*" onChange={handleAvatarChange} id="avatar-upload" style={{ display: 'none' }} />
-              <label htmlFor="avatar-upload" className={styles.avatarEditButton}><FaUser /></label>
-            </>
-          )}
-        </div>
-        {isEditing ? (
-          <div className={styles.editFields}>
-            <input type="text" value={profileData.firstName} onChange={(e) => setProfileData(p => ({ ...p, firstName: e.target.value }))} className={styles.input} placeholder="Имя" />
-            <input type="text" value={profileData.lastName} onChange={(e) => setProfileData(p => ({ ...p, lastName: e.target.value }))} className={styles.input} placeholder="Фамилия" />
-            <GenderSelector selectedGender={profileData.gender} onGenderChange={(g) => setProfileData(p => ({...p, gender: g}))} />
-            <input type="number" value={profileData.age} onChange={(e) => setProfileData(p => ({ ...p, age: e.target.value }))} className={styles.input} placeholder="Возраст" />
-            <input type="text" value={profileData.city} onChange={(e) => setProfileData(p => ({ ...p, city: e.target.value }))} className={styles.input} placeholder="Город" />
-          </div>
-        ) : (
-          <div className={styles.infoFields}>
-            <div className={styles.infoItem}><FaUser /><span>{profileData.gender || 'Не указан'}</span></div>
-            <div className={styles.infoItem}><FaBirthdayCake /><span>{profileData.age || 'Не указан'}</span></div>
-            <div className={styles.infoItem}><FaBuilding /><span>{profileData.city || 'Не указан'}</span></div>
-          </div>
-        )}
-        <div className={styles.profileActions}>
-          {isEditing ? (
-            <>
-              <Button onClick={handleProfileSave} variant="primary" disabled={isSaving}>{isSaving ? '...' : 'Сохранить'}</Button>
-              <Button onClick={handleEditToggle} variant="secondary">Отмена</Button>
-            </>
-          ) : (
-            <Button onClick={handleEditToggle} variant="primary">Редактировать</Button>
-          )}
-        </div>
-      </aside>
-
-      <main className={styles.contentGrid}>
-        <div className={`${styles.card} ${styles.statsCard}`}>
-          <ProfileStats user={user} />
-        </div>
-        {renderPairingContent()}
-        <div className={styles.card}>
-          <h3>Настройки</h3>
-          <p>Получайте уведомления в Telegram о событиях.</p>
-          <form onSubmit={handleTelegramIdSave} className={styles.form}>
-            <div className={styles.inputGroup}>
-              <FaPaperPlane className={styles.inputIcon} />
-              <input type="text" value={localTelegramId} onChange={(e) => setLocalTelegramId(e.target.value)} placeholder="Telegram Chat ID" className={styles.input} />
+    <div className={styles.pageWrapper}>
+        <div className={styles.profileContainer}>
+          <div className={styles.profileDetails}>
+            <div className={styles.profileHeader}>
+              <img src={getAvatar()} alt="User Avatar" className={styles.profileAvatarLarge} />
+              <h1 className={styles.profileNameLarge}>{user.first_name || 'Пользователь'} {user.last_name}</h1>
+              <p className={styles.profileTitle}>{user.bio || 'Участник LoveMemory'}</p>
+              <div className={styles.profileRating}>
+                <div className={styles.stars}>
+                  <FaStar /><FaStar /><FaStar /><FaStar /><FaStarHalfAlt />
+                </div>
+                <div className={styles.engagement}><FaHeart /><span>{user.love_coins || 0}</span></div>
+              </div>
             </div>
-            <Button type="submit" variant="primary">Сохранить ID</Button>
-          </form>
-        </div>
-        {error && 
-          <div className={`${styles.card} ${styles.error}`}>
-            <MdErrorOutline /><p>{error}</p>
-            <button onClick={() => setError('')} className={styles.errorClose}><FaTimes /></button>
+
+            <div className={styles.contactSection}>
+              <h3>Контактная информация</h3>
+              <div className={styles.contactItem}><FaEnvelope /><span>{user.email}</span></div>
+               <div className={styles.contactItem}><FaGift /><span>{user.age ?? 'Возраст не указан'}</span></div>
+              <div className={styles.contactItem}><FaMapMarkerAlt /><span>{user.city || 'Город не указан'}</span></div>
+            </div>
+            
+            <div className={styles.tagsSection}>
+              <h3>Теги (в разработке)</h3>
+              <div className={styles.tagsContainer}>
+                <div className={styles.tag}><span>семья</span></div>
+                <div className={styles.tag}><span>путешествия</span></div>
+                <div className={styles.tag}><span>хобби</span></div>
+              </div>
+            </div>
+
+            {partner && (
+              <div className={styles.ownerSection}>
+                <img src={getAvatar(partner)} alt="Partner" className={styles.ownerAvatar} />
+                <span className={styles.ownerText}>В паре с: {partner.first_name || partner.email}</span>
+              </div>
+            )}
           </div>
-        }
-      </main>
+
+          <div className={styles.activitySection}>
+            <div className={styles.tabs}>
+              <div className={`${styles.tab} ${activeTab === 'events' ? styles.active : ''}`} onClick={() => setActiveTab('events')}>Предстоящие дела</div>
+              <div className={`${styles.tab} ${activeTab === 'gallery' ? styles.active : ''}`} onClick={() => setActiveTab('gallery')}>Галерея</div>
+            </div>
+            <div className={styles.dealsContainer}>
+              <div className={styles.dealsHeader}>
+                <h3>{activeTab === 'events' ? `Задачи (${events?.length || 0})` : 'Галерея'}</h3>
+                <Link to="/calendar" className={styles.addButton}>
+                  <Button variant="outline" size="sm"><FaPlus /> Добавить</Button>
+                </Link>
+              </div>
+              {activeTab === 'events' ? renderEvents() : renderGallery()}
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.widgetsSection}>
+          <div className={`${styles.widget} ${styles.pairWidget}`}>
+            <div className={styles.widgetHeader}>
+              <FaUsers className={styles.widgetIcon} />
+            </div>
+            <div className={styles.widgetContent}>
+              <div className={styles.widgetTitle}>Управление парой</div>
+              <div className={styles.widgetBody}>
+                {isPairingLoading ? <p>Загрузка...</p> : partner ? (
+                  <>
+                    <p>Вы в паре с <strong>{partner.first_name || partner.email}</strong>.</p>
+                    <Button onClick={() => deletePairing(pairing.id)} variant="danger" style={{ width: '100%' }}>Разорвать связь</Button>
+                  </>
+                ) : (
+                  <form onSubmit={handleSendRequest}>
+                    <p>Начните отношения, отправив приглашение.</p>
+                    <input type="email" value={partnerEmail} onChange={(e) => setPartnerEmail(e.target.value)} placeholder="Email партнёра" required className={styles.input} />
+                    <Button type="submit" variant="primary" style={{ width: '100%' }}>Отправить</Button>
+                  </form>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className={`${styles.widget} ${styles.telegramWidget}`}>
+            <div className={styles.widgetHeader}>
+              <FaTelegramPlane className={styles.widgetIcon} />
+            </div>
+            <div className={styles.widgetContent}>
+              <div className={styles.widgetTitle}>Telegram</div>
+               <form className={styles.widgetBody} onSubmit={handleTelegramIdSave}>
+                <p>Подключите уведомления о событиях.</p>
+                <input type="text" value={telegramId} onChange={(e) => setTelegramId(e.target.value)} placeholder="Ваш Chat ID" className={styles.input} />
+                <Button type="submit" variant="primary" style={{ width: '100%' }}>Сохранить</Button>
+              </form>
+            </div>
+          </div>
+
+          <div className={`${styles.widget} ${styles.addWidget}`}>
+            <div className={styles.widgetContent}>
+              <FaThLarge />
+              <div className={styles.widgetTitle}>Добавить виджет</div>
+            </div>
+          </div>
+        </div>
     </div>
   );
 };

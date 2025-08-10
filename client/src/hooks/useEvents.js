@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { eventService } from '../services';
 
-const EVENT_TYPE_COLORS = {
-  memory: '#8B5CF6',
-  plan: '#3B82F6',
-  anniversary: '#EF4444',
-  birthday: '#F59E0B',
-  travel: '#10B981',
-  date: '#EC4899',
-  gift: '#F97316',
-  milestone: '#6366F1'
+// Тёплая палитра под общий дизайн (без холодных синих/зеленых)
+export const EVENT_TYPE_COLORS = {
+  plan: '#D97A6C',        // основной тёплый терракотовый
+  memory: '#C78986',      // тёплый пыльно-розовый
+  anniversary: '#D35D5D', // акцент для годовщин
+  birthday: '#E89A8C',    // мягкий персиково-розовый
+  travel: '#C49A6C',      // тёплый песочный
+  date: '#E06A80',        // розовый для свиданий
+  gift: '#E0B070',        // тёплое золото
+  milestone: '#9C7CA5'    // приглушенный лиловый
 };
 
 const formatTime = (date) => new Date(date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
@@ -17,6 +18,11 @@ const formatTime = (date) => new Date(date).toLocaleTimeString('ru-RU', { hour: 
 const formatEvent = (event, userId) => {
   if (!event) return null;
   
+  // Filter out accidental date-labelled events like "7 июля"
+  const title = (event.title || '').trim();
+  const isDateLikeTitle = /^(\d{1,2})\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)$/i.test(title);
+  if (isDateLikeTitle) return null;
+
   // Улучшенная логика определения событий без времени
   const startDate = new Date(event.event_date);
   const endDate = event.end_date ? new Date(event.end_date) : null;

@@ -1,6 +1,5 @@
 .button {
-  width: 100%;
-  padding: 14px 24px;
+  padding: 12px 18px;
   border: none;
   border-radius: var(--border-radius);
   font-size: 16px;
@@ -57,4 +56,14 @@
 
 .outline:hover {
   background-color: color-mix(in oklab, var(--color-primary) 8%, transparent);
+}
+
+.sm {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: var(--border-radius-md);
+}
+
+.fullWidth {
+  width: 100%;
 }
