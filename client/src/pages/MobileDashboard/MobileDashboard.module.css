@@ -1,0 +1,581 @@
+.mobileDashboard {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    min-height: 100vh;
+    background: var(--color-background);
+  }
+  
+  .mobileCalendar {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-height: 100vh;
+    background: var(--color-background);
+  }
+  
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) 0;
+  }
+  
+  .greeting h1 {
+    font-family: var(--font-family-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-1);
+  }
+  
+  .greeting p {
+    color: var(--color-text-secondary);
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  
+  .headerActions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  
+  .calendarButton {
+    width: 48px;
+    height: 48px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .calendarButton:active {
+    transform: scale(0.95);
+    background: var(--color-primary);
+    color: white;
+  }
+  
+  .avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-md);
+  }
+  
+  /* Calendar Header */
+  .calendarHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-2) 0;
+  }
+  
+  .calendarHeader h1 {
+    font-family: var(--font-family-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+  
+  .backButton,
+  .addButton {
+    width: 44px;
+    height: 44px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .backButton:active,
+  .addButton:active {
+    transform: scale(0.95);
+    background: var(--color-primary);
+    color: white;
+  }
+  
+  /* Month Navigation */
+  .monthNav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-4) 0;
+    background: var(--color-surface);
+    border-radius: var(--border-radius);
+    margin: var(--space-2) 0;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .monthNav button {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: var(--space-3);
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+  }
+  
+  .monthNav button:active {
+    background: var(--color-background);
+    color: var(--color-primary);
+  }
+  
+  .monthNav h2 {
+    font-family: var(--font-family-heading);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+  
+  /* Calendar Grid */
+  .calendarGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--color-border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .weekDay {
+    background: var(--color-secondary);
+    padding: var(--space-2);
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+  
+  .calendarDay {
+    background: var(--color-surface);
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .emptyDay {
+    background: var(--color-background);
+    cursor: default;
+  }
+  
+  .validDay:active {
+    background: var(--color-secondary);
+  }
+  
+  .today {
+    background: var(--color-primary) !important;
+    color: white;
+  }
+  
+  .hasEvent {
+    background: rgba(217, 122, 108, 0.1);
+  }
+  
+  .dayNumber {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+  
+  .today .dayNumber {
+    color: white;
+    font-weight: 700;
+  }
+  
+  .eventDot {
+    width: 6px;
+    height: 6px;
+    background: var(--color-primary);
+    border-radius: 50%;
+    position: absolute;
+    bottom: 4px;
+  }
+  
+  .today .eventDot {
+    background: white;
+  }
+  
+  /* Stats Section */
+  .statsSection h2 {
+    font-family: var(--font-family-heading);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-4);
+  }
+  
+  .statsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+  
+  .statCard {
+    background: var(--color-surface);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+    transition: all 0.3s ease;
+  }
+  
+  .statCard:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .statIcon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .statContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .statValue {
+    font-family: var(--font-family-heading);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1;
+  }
+  
+  .statLabel {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+  }
+  
+  .statTrend {
+    font-size: 0.75rem;
+    color: var(--color-success);
+    font-weight: 600;
+  }
+  
+  /* Quick Actions */
+  .quickActions h2 {
+    font-family: var(--font-family-heading);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-4);
+  }
+  
+  .actionGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-3);
+  }
+  
+  .actionCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-4) var(--space-2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    text-decoration: none;
+    color: var(--color-text-primary);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .actionCard:active {
+    transform: scale(0.95);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+  }
+  
+  .actionIcon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .actionCard span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  /* Upcoming Section */
+  .upcomingSection h2 {
+    font-family: var(--font-family-heading);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+  
+  .sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+  
+  .seeAll {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--color-primary);
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .seeAll:active {
+    transform: scale(0.95);
+  }
+  
+  .eventsList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  
+  .eventCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .eventCard:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+  }
+  
+  .eventDate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 50px;
+  }
+  
+  .eventDay {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-transform: uppercase;
+  }
+  
+  .eventTime {
+    font-size: 0.7rem;
+    color: var(--color-text-secondary);
+  }
+  
+  .eventContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  
+  .eventContent h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+  
+  .eventMeta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  
+  .eventType {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+  }
+  
+  .eventLocation {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+  }
+  
+  .eventArrow {
+    color: var(--color-text-secondary);
+  }
+  
+  /* Calendar Events */
+  .calendarEvents h3 {
+    font-family: var(--font-family-heading);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-4);
+  }
+  
+  .calendarEventCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-4);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--space-3);
+  }
+  
+  .calendarEventCard h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-1);
+  }
+  
+  /* Quote Card */
+  .quoteCard {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-5);
+    color: white;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .quoteCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  
+  .quoteIcon {
+    font-size: 2rem;
+    margin-bottom: var(--space-3);
+  }
+  
+  .quoteCard blockquote {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0 0 var(--space-3);
+    font-style: italic;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .quoteCard cite {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .mobileDashboard,
+    .mobileCalendar {
+      padding: var(--space-3);
+      gap: var(--space-4);
+    }
+    
+    .statsGrid {
+      gap: var(--space-2);
+    }
+    
+    .statCard {
+      padding: var(--space-3);
+    }
+    
+    .actionGrid {
+      gap: var(--space-2);
+    }
+    
+    .actionCard {
+      padding: var(--space-3) var(--space-2);
+    }
+    
+    .actionIcon {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .calendarGrid {
+      gap: 0;
+    }
+    
+    .weekDay,
+    .calendarDay {
+      padding: var(--space-1);
+    }
+  }

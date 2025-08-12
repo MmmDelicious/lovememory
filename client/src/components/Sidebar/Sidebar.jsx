@@ -53,11 +53,15 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete, selectedDate, o
       setIsRecurring(!!rawEvent.is_recurring);
       setRecurrenceRule(rawEvent.recurrence_rule || null);
       
-      setStartDate(formatDate(rawEvent.event_date || eventData.date));
-      setStartTime(formatTime(rawEvent.event_date));
+      // Apply defaults: base 08:00 - 09:00 when creating a new event
+      const baseDateISO = rawEvent.event_date || eventData.event_date || (eventData.date ? `${eventData.date}T08:00:00` : null);
+      const baseEndISO = rawEvent.end_date || (baseDateISO ? new Date(new Date(baseDateISO).getTime() + 60*60*1000).toISOString() : null);
+
+      setStartDate(formatDate(baseDateISO || eventData.date));
+      setStartTime(formatTime(baseDateISO));
       
-      setEndDate(formatDate(rawEvent.end_date));
-      setEndTime(formatTime(rawEvent.end_date));
+      setEndDate(formatDate(baseEndISO));
+      setEndTime(formatTime(baseEndISO));
 
       if (rawEvent.id) {
         fetchMedia(rawEvent.id);
@@ -309,4 +313,4 @@ const Sidebar = ({ isOpen, onClose, eventData, onSave, onDelete, selectedDate, o
   );
 };
 
-export default Sidebar;
+export default Sidebar; 

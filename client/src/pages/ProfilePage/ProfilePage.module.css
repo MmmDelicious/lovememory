@@ -1,492 +1,85 @@
-.pageWrapper {
-  padding: var(--space-6);
-  padding-left: var(--space-8); /* добавили больший отступ слева */
-  max-width: 1800px;
-  margin: 0 auto;
-  height: 100%; /* важно: берем доступную высоту от layout, а не фиксированные 100vh */
+/* --- Mobile First (Default Styles) --- */
+/* Все блоки идут в одной колонке. Просто и эффективно для мобильных. */
+/* Это наш базовый лейаут, как в Шаге 4 вашего гайда. */
+.pageGrid {
   display: flex;
   flex-direction: column;
-  overflow-y: hidden; /* Без общего вертикального скролла */
-  overflow-x: visible; /* ничего не обрезаем слева/справа */
-  min-height: 0; /* позволяет внутренним областям корректно скроллиться */
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-4) 0; /* без нижнего отступа */
+  height: 100%;
+  overflow-y: auto; /* Позволяем всей странице скроллиться */
+  -webkit-overflow-scrolling: touch;
 }
 
-.profileContainer {
-  display: flex;
-  background: var(--color-surface);
-  border-radius: var(--border-radius-xl);
-  box-shadow: var(--shadow-md);
-  /* overflow: hidden;  убрано, чтобы ничего не обрезалось слева/снизу */
-  border: 1px solid var(--color-border);
-  flex: 1;
-  min-height: 0; /* Позволяет внутренним блокам задавать скролл */
-  margin-left: var(--space-2); /* мелкий сдвиг от левого края */
-}
-
-.profileDetails {
-  width: 380px;
-  flex-shrink: 0;
-  padding: var(--space-7);
-  padding-left: calc(var(--space-7) + var(--space-3));
-  border-right: 1px solid var(--color-border);
-  background: var(--color-surface);
-  overflow: visible; /* Ничего не обрезаем слева */
-}
-
-.profileHeader {
+.widgets {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin-bottom: var(--space-6);
-  padding-bottom: var(--space-6);
-  border-bottom: 1px solid var(--color-border);
+  gap: var(--space-5);
 }
 
-.profileAvatarLarge {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: var(--space-4);
-  border: 4px solid var(--color-background);
-  box-shadow: var(--shadow-lg);
-}
-
-.profileNameLarge {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-1);
-}
-
-.profileTitle {
-  font-size: 1rem;
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-4);
-}
-
-.profileRating {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.stars {
-  display: flex;
-  gap: 2px;
-  color: #FFD700;
-}
-
-.engagement {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-primary);
-  font-size: 1rem;
-}
-
-.contactSection,
-.tagsSection {
-  margin-bottom: var(--space-6);
-  padding-left: var(--space-1); /* чуть-чуть отступа, чтобы ни одна тень/контент не прилипал к левой границе */
-}
-
-.contactSection h3,
-.tagsSection h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-4);
-}
-
-.contactItem {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.contactItem:last-child {
-  border-bottom: none;
-}
-
-.contactItem svg {
-  width: 16px;
-  color: var(--color-text-secondary);
-  font-size: 1rem;
-}
-
-.contactItem span {
-  font-size: 0.95rem;
-  color: var(--color-text-primary);
-  flex: 1;
-}
-
-.tagsContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.tag {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
-  font-size: 0.85rem;
-  color: var(--color-text-primary);
-}
-
-.ownerSection {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  background: var(--color-background);
-  border-radius: var(--border-radius-md);
-}
-
-.ownerAvatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.ownerText {
-  font-size: 0.95rem;
-  color: var(--color-text-primary);
-}
-
-.activitySection {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 0;
-  background: var(--color-surface);
-}
-
-.tabs {
-  display: flex;
-  border-bottom: 1px solid var(--color-border);
-  padding: 0 var(--space-2);
-  flex-shrink: 0;
-}
-
-.tab {
-  padding: var(--space-3) var(--space-4);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.tab:hover {
-  color: var(--color-text-primary);
-}
-
-.tab.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-}
-
-.dealsContainer {
-  flex: 1;
-  min-height: 0; /* Критично для корректного скролла внутри */
-  padding: var(--space-6);
-  overflow-y: auto; /* Скроллим только список дел */
-}
-
-.dealsHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-4);
-}
-
-.dealsHeader h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.addButton {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.dealsList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.dealItem {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  background: var(--color-background);
-  border-radius: var(--border-radius-md);
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.dealItem:hover {
-  border-color: var(--color-border);
-  box-shadow: var(--shadow-sm);
-}
-
-.dealIndicator {
-  width: 4px;
-  height: 40px;
-  border-radius: 4px;
-  background-color: var(--color-primary);
-  flex-shrink: 0;
-}
-
-.dealAvatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--color-secondary);
-  color: var(--color-primary);
+.loader {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.dealContent {
-  flex: 1;
-  min-width: 0;
-}
-
-.dealTitle {
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-1);
-}
-
-.dealDescription {
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-2);
-}
-
-.dealMeta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.dealDate {
-  font-size: 0.85rem;
+  height: 100%;
+  font-size: 1.2rem;
   color: var(--color-text-secondary);
 }
 
-.dealActions {
-  display: flex;
-  gap: var(--space-2);
-}
 
-.iconBtn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: var(--border-radius-md);
-  background: transparent;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.iconBtn:hover {
-  background: var(--color-border);
-  color: var(--color-text-primary);
-}
-
-.widgetsSection {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-6);
-  margin-top: var(--space-6);
-  flex-shrink: 0;
-  height: 180px; /* Сделали заметно ниже */
-  overflow: hidden;
-}
-
-.widget {
-  background: var(--color-surface);
-  border-radius: var(--border-radius-xl);
-  border: 1px solid var(--color-border);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.2s ease;
-  min-height: 140px; /* компактнее карточки */
-}
-
-.widget:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-.widgetHeader {
-  padding: var(--space-3);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.widgetIcon {
-  font-size: 1.5rem;
-}
-
-.pairWidget .widgetIcon {
-  color: var(--color-primary);
-}
-.telegramWidget .widgetIcon {
-  color: #0088cc;
-}
-
-.widgetContent {
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  flex-grow: 1;
-}
-
-.widgetTitle {
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--color-text-primary);
-}
-
-.widgetBody {
-  font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.widgetBody button {
-  margin-top: auto;
-}
-
-.input {
-  width: 100%;
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
-  font-size: 1rem;
-  background-color: var(--color-background);
-}
-
-.addWidget {
-  align-items: center;
-  justify-content: center;
-  background: var(--color-background);
-  border: 2px dashed var(--color-border);
-  cursor: pointer;
-}
-
-.addWidget:hover {
-  border-color: var(--color-primary);
-  background: var(--color-surface);
-}
-
-.addWidget .widgetContent {
-  align-items: center;
-  text-align: center;
-}
-.addWidget .widgetContent svg {
-  font-size: 2rem;
-  color: var(--color-text-secondary);
-}
-.addWidget .widgetTitle {
-  color: var(--color-text-secondary);
-}
-
-.placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-8);
-  min-height: 200px;
-  text-align: center;
-  color: var(--color-text-secondary);
-}
-
-@media (max-width: 1200px) {
-  .profileContainer {
-    flex-direction: column;
+/* --- Breakpoint: Планшеты (768px) --- */
+/* Начинаем прогрессивное улучшение с min-width, как рекомендовано. */
+@media (min-width: 768px) {
+  .pageGrid {
+    display: grid;
+    /* Две колонки: левая для профиля, правая для ленты. */
+    grid-template-columns: 320px 1fr; 
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "header  feed"
+      "info    feed"
+      "widgets widgets";
+    gap: var(--space-6);
+    padding: var(--space-6) var(--space-6) 0; /* без нижнего отступа */
+    overflow: hidden; /* Скролл теперь внутри блоков, а не всей страницы */
   }
-  .profileDetails {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--color-border);
+
+  .header { grid-area: header; }
+  .info { grid-area: info; }
+  .feed { grid-area: feed; min-height: 0; } /* min-height важен для скролла внутри */
+  .widgets {
+    grid-area: widgets;
+    flex-direction: row; /* На планшете виджеты идут в ряд */
   }
-  .widgetsSection {
-    height: auto; /* На планшетах позволяем высоте подстроиться */
+  
+  /* Заставляем виджеты делить пространство поровну */
+  .widgets > * {
+    flex: 1; 
   }
 }
 
-@media (max-width: 992px) {
-  .widgetsSection {
-    grid-template-columns: 1fr;
-  }
-}
 
-@media (max-width: 768px) {
-  .pageWrapper {
-    padding: var(--space-4);
+/* --- Breakpoint: Десктопы (1200px) --- */
+/* Радикально перестраиваем лейаут для больших экранов. */
+@media (min-width: 1200px) {
+  .pageGrid {
+    /* Классический трехколоночный дашборд */
+    grid-template-columns: 320px 1fr 320px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "header feed widgets"
+      "info   feed widgets";
   }
-  .profileDetails {
-    padding: var(--space-5);
+
+  .widgets {
+    /* Правая колонка полностью под виджеты */
+    grid-area: widgets;
+    flex-direction: column; /* На десктопе виджеты снова в колонке */
+    gap: var(--space-6);
   }
-  .dealsContainer {
-    padding: var(--space-4);
+  
+  /* Сбрасываем flex-grow с планшетной версии */
+  .widgets > * {
+    flex: initial; 
   }
-}
-
-/* Галерея */
-.galleryGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: var(--space-3);
-}
-
-.galleryItem {
-  position: relative;
-  border-radius: var(--border-radius-md);
-  overflow: hidden;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-}
-
-.galleryImage {
-  display: block;
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
 }

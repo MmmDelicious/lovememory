@@ -1,0 +1,431 @@
+.mobileInsights {
+    padding: var(--space-4) var(--space-4) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  
+  /* Header */
+  .header {
+    text-align: center;
+    padding: var(--space-2) 0;
+  }
+  
+  .header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-2);
+  }
+  
+  .header p {
+    color: var(--color-text-secondary);
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  
+  /* Card Base Styles */
+  .harmonyCard,
+  .activitiesCard,
+  .progressCard,
+  .quoteCard,
+  .recommendationsCard {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .cardHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+  
+  .cardIcon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+  }
+  
+  .cardHeader h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+  
+  .cardHeader p {
+    color: var(--color-text-secondary);
+    margin: var(--space-1) 0 0;
+    font-size: 0.85rem;
+  }
+  
+  /* Harmony Score */
+  .scoreDisplay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+  
+  .scoreCircle {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: conic-gradient(
+      var(--color-primary) 0deg,
+      var(--color-primary) calc(87 * 3.6deg),
+      var(--color-border) calc(87 * 3.6deg)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+  }
+  
+  .scoreCircle::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    background: var(--color-surface);
+    border-radius: 50%;
+  }
+  
+  .scoreNumber {
+    position: relative;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    z-index: 1;
+  }
+  
+  .scoreMax {
+    position: relative;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    z-index: 1;
+  }
+  
+  .scoreTrend {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-success);
+    font-weight: 600;
+    background: rgba(76, 175, 80, 0.1);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+  }
+  
+  .comparisonSection {
+    text-align: center;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+  
+  .rankDisplay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    color: var(--color-primary);
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: var(--space-2);
+  }
+  
+  .comparisonSection p {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    margin: 0;
+  }
+  
+  /* Activities */
+  .activitiesGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+  
+  .activityItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--color-background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+  }
+  
+  .activityIcon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  
+  .activityContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .activityNumber {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1;
+  }
+  
+  .activityLabel {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+  }
+  
+  .activityRank {
+    font-size: 0.75rem;
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+  
+  /* Progress */
+  .progressGrid {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+  
+  .progressItem {
+    text-align: center;
+    padding: var(--space-3);
+    background: var(--color-background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+    flex: 1;
+  }
+  
+  .progressNumber {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-success);
+    margin-bottom: var(--space-1);
+  }
+  
+  .progressLabel {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+  }
+  
+  /* Quote */
+  .quoteContent {
+    text-align: center;
+  }
+  
+  .quote {
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-3);
+    line-height: 1.5;
+    border-left: 4px solid var(--color-primary);
+    padding-left: var(--space-3);
+    text-align: left;
+  }
+  
+  .quoteAuthor {
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: var(--space-4);
+  }
+  
+  .quoteAdvice {
+    background: var(--color-background);
+    border-radius: var(--border-radius);
+    padding: var(--space-3);
+    text-align: left;
+    border: 1px solid var(--color-border);
+    margin-bottom: var(--space-4);
+  }
+  
+  .quoteAdvice h4 {
+    margin: 0 0 var(--space-2);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  
+  .quoteAdvice p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+    font-size: 0.85rem;
+  }
+  
+  .newQuoteButton {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: var(--space-3) var(--space-4);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+  }
+  
+  .newQuoteButton:active {
+    transform: scale(0.95);
+    background: var(--color-primary-hover);
+  }
+  
+  /* Recommendations */
+  .recommendationsList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  
+  .recommendationItem {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--color-background);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+  }
+  
+  .recommendationIcon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  
+  .recommendationContent h4 {
+    margin: 0 0 var(--space-1);
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  
+  .recommendationContent p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  /* Premium Card */
+  .premiumCard {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-5);
+    color: white;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .premiumCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1.5" fill="rgba(255,255,255,0.1)"/></svg>');
+    pointer-events: none;
+  }
+  
+  .premiumIcon {
+    margin-bottom: var(--space-3);
+    position: relative;
+    z-index: 1;
+  }
+  
+  .premiumCard h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0 0 var(--space-3);
+    position: relative;
+    z-index: 1;
+  }
+  
+  .premiumCard p {
+    margin: 0 0 var(--space-4);
+    opacity: 0.9;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .upgradeButton {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--border-radius);
+    padding: var(--space-3) var(--space-6);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .upgradeButton:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .mobileInsights {
+      padding: var(--space-3);
+      gap: var(--space-4);
+    }
+    
+    .harmonyCard,
+    .activitiesCard,
+    .progressCard,
+    .quoteCard,
+    .recommendationsCard,
+    .premiumCard {
+      padding: var(--space-4);
+    }
+    
+    .activitiesGrid {
+      grid-template-columns: 1fr;
+    }
+    
+    .progressGrid {
+      flex-direction: column;
+    }
+    
+    .scoreCircle {
+      width: 80px;
+      height: 80px;
+    }
+    
+    .scoreNumber {
+      font-size: 1.3rem;
+    }
+  }

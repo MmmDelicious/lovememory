@@ -1,90 +1,311 @@
+/* Game Lobby Page - Modern Beautiful Design */
+
 .container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
-  animation: fadeIn 0.5s ease-out;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #B85D4F 100%);
+  overflow: hidden;
+}
+
+.heroBackground {
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+}
+
+.heroPattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  background-size: 60px 60px;
+  animation: float 20s ease-in-out infinite;
 }
 
 .header {
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  justify-content: space-between;
+  padding: var(--space-6) var(--space-6) var(--space-8);
+  z-index: 2;
+}
+
+.backButton {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.headerContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0 var(--space-4);
+}
+
+.gameIconWrapper {
+  position: relative;
+  margin-bottom: var(--space-4);
+}
+
+.gameIcon {
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
+  z-index: 2;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.gameIconGlow {
+  position: absolute;
+  inset: -4px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  border-radius: var(--border-radius-lg);
+  z-index: 1;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.titleSection {
+  margin-bottom: var(--space-5);
 }
 
 .title {
   font-family: var(--font-family-heading);
-  font-size: 2.8rem;
-  color: var(--color-text-primary);
-  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 800;
+  color: white;
+  margin: 0 0 var(--space-2);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-.controls {
-  margin-bottom: 2.5rem;
+.subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.5;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--border-radius);
+  padding: var(--space-3) var(--space-4);
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.statIcon {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.statContent {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.statNumber {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: white;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1;
+}
+
+.statDivider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.createButton {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--border-radius);
+  padding: var(--space-3) var(--space-4);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.createButton:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Controls Section */
+.controlsSection {
+  flex-shrink: 0;
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.searchAndFilter {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .searchWrapper {
   position: relative;
+  flex: 1;
 }
 
 .searchIcon {
   position: absolute;
   top: 50%;
-  left: 1rem;
+  left: var(--space-4);
   transform: translateY(-50%);
   color: var(--color-text-secondary);
 }
 
 .searchInput {
   width: 100%;
-  padding: 0.9rem 1rem 0.9rem 2.75rem;
+  padding: var(--space-4) var(--space-4) var(--space-4) 48px;
   border-radius: var(--border-radius);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-surface);
-  font-size: 1rem;
+  border: 2px solid var(--color-border);
+  background: var(--color-background);
+  font-size: 0.95rem;
   color: var(--color-text-primary);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
+  font-family: var(--font-family-body);
 }
 
 .searchInput:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(231, 122, 101, 0.15);
+  box-shadow: 0 0 0 4px rgba(217, 122, 108, 0.1);
+  background: var(--color-surface);
 }
 
-.filterWrapper {
+.filterControls {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--space-3);
 }
 
-.filterLabel {
+.sortWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-background);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+.sortSelect {
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  font-family: var(--font-family-body);
+}
+
+.betFilter {
+  background: var(--color-background);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+}
+
+.betFilterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.betFilterLabel {
   font-size: 0.9rem;
   color: var(--color-text-secondary);
   font-weight: 500;
-  text-align: center;
 }
 
-.filterSlider {
+.betFilterValue {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.betSlider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
   height: 6px;
   background: var(--color-border);
-  border-radius: 5px;
+  border-radius: 3px;
   outline: none;
-  opacity: 0.9;
-  transition: opacity .2s;
+  transition: all 0.3s ease;
 }
 
-.filterSlider:hover {
-  opacity: 1;
-}
-
-.filterSlider::-webkit-slider-thumb {
+.betSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 20px;
@@ -93,196 +314,456 @@
   cursor: pointer;
   border-radius: 50%;
   border: 3px solid var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
 }
 
-.filterSlider::-moz-range-thumb {
+.betSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-lg);
+}
+
+.betSlider::-moz-range-thumb {
   width: 20px;
   height: 20px;
   background: var(--color-primary);
   cursor: pointer;
   border-radius: 50%;
   border: 3px solid var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
-.createButton {
-  background-color: var(--color-primary);
-  color: #ffffff;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.2s, transform 0.2s;
+/* Rooms Section */
+.roomsSection {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6);
+  -webkit-overflow-scrolling: touch;
 }
 
-.createButton:hover {
-  background-color: var(--color-primary-hover);
-  transform: translateY(-2px);
-}
-
-.desktopButton {
-  display: none; 
-}
-
-.mobileButton {
-  display: block;
-  width: 100%;
-  padding: 0.9rem 1.5rem;
-  border-radius: var(--border-radius);
-  font-size: 1.1rem;
-  margin-top: -1rem;
-  margin-bottom: 2.5rem;
-}
-
-.statusText {
+.loadingState, .errorState, .emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  color: var(--color-text-secondary);
-  font-size: 1rem;
-  padding: 2rem 0;
-  grid-column: 1 / -1;
+  padding: var(--space-10);
+  height: 100%;
+  min-height: 300px;
 }
 
-.error {
+.loadingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--space-4);
+}
+
+.loadingState h3, .errorState h3, .emptyState h3 {
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2);
+  font-size: 1.4rem;
+}
+
+.loadingState p, .errorState p, .emptyState p {
+  color: var(--color-text-secondary);
+  margin: 0;
+  font-size: 1rem;
+}
+
+.errorIcon {
+  font-size: 3rem;
+  margin-bottom: var(--space-4);
+}
+
+.errorText {
   color: var(--color-error);
 }
 
+.emptyIcon {
+  width: 80px;
+  height: 80px;
+  background: var(--color-secondary);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  margin-bottom: var(--space-5);
+}
+
+.emptyCreateButton {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--space-4) var(--space-6);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: all 0.3s ease;
+  margin-top: var(--space-4);
+  font-size: 1rem;
+}
+
+.emptyCreateButton:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Rooms Grid */
 .roomsGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: var(--space-4);
 }
 
 .roomCard {
-  background-color: var(--color-surface);
-  padding: 1.25rem;
-  border-radius: var(--border-radius);
-  border: 1px solid var(--color-border);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   position: relative;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-5);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .roomCard:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--color-primary);
 }
 
 .roomCard.disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  background-color: #f9f9f9;
+  background: var(--color-background);
 }
 
 .roomCard.disabled:hover {
   transform: none;
   box-shadow: none;
-}
-
-.cardContent {
-  margin-bottom: 1.5rem;
-}
-
-.createdBy {
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
-}
-
-.hostName {
-  font-family: var(--font-family-heading);
-  font-size: 2rem;
-  color: var(--color-text-primary);
-  margin: 0.25rem 0 0;
-}
-
-.cardFooter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.95rem;
-}
-
-.betInfo, .idInfo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--color-text-secondary);
-}
-
-.betInfo span, .idInfo span {
-  font-weight: 500;
-}
-
-.coinIcon {
-  width: 20px;
-  height: 20px;
-  background-color: #FFD700;
-  border-radius: 50%;
-  border: 2px solid #E5C100;
-}
-
-.roomId {
-  color: var(--color-text-primary);
-}
-
-.playerCount {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: var(--color-primary);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  min-width: 40px;
-  text-align: center;
-}
-
-.roomCard.disabled .playerCount {
-  background: #6c757d;
-}
-
-.statusBadge {
-  background: #ff6b35;
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  margin-top: 0.5rem;
-  display: inline-block;
+  border-color: var(--color-border);
 }
 
 .roomCard.inProgress {
   border-color: #ff6b35;
-  background-color: #fff8f6;
+  background: linear-gradient(135deg, #fff8f6 0%, #fff5f2 100%);
 }
 
-.roomCard.inProgress:hover {
-  border-color: #ff5722;
-  background-color: #fff5f2;
+.cardGlow {
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, var(--color-primary), transparent, var(--color-primary));
+  border-radius: var(--border-radius-lg);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: -1;
 }
 
+.roomCard:hover .cardGlow {
+  opacity: 0.1;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-4);
+}
+
+.hostSection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.hostAvatar {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.hostAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hostInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.hostLabel {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hostName {
+  font-family: var(--font-family-heading);
+  font-size: 1.2rem;
+  color: var(--color-text-primary);
+  margin: 0;
+  font-weight: 700;
+}
+
+.roomStatus {
+  flex-shrink: 0;
+}
+
+.statusBadge {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusBadge.waitingBadge {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+}
+
+.statusBadge.fullBadge {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+}
+
+.statusBadge {
+  background: linear-gradient(135deg, #ff6b35 0%, #ff5722 100%);
+  color: white;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  background: currentColor;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.cardContent {
+  margin-bottom: var(--space-4);
+}
+
+.roomInfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.infoItem svg {
+  color: var(--color-primary);
+}
+
+.difficulty {
+  font-weight: 600;
+}
+
+.roomId {
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-family: monospace;
+  background: var(--color-background);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-md);
+  display: inline-block;
+}
+
+.joinOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(217, 122, 108, 0.95) 0%, rgba(185, 93, 79, 0.95) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  border-radius: var(--border-radius-lg);
+}
+
+.roomCard:hover .joinOverlay {
+  opacity: 1;
+}
+
+.joinButton {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--border-radius);
+  padding: var(--space-4) var(--space-6);
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+}
+
+.roomCard:hover .joinButton {
+  transform: translateY(0);
+}
+
+/* Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+/* Responsive Design */
 @media (min-width: 768px) {
-  .roomsGrid {
-    grid-template-columns: repeat(2, 1fr);
+  .header {
+    padding: var(--space-8) var(--space-8) var(--space-10);
   }
   
-  .mobileButton {
-    display: none;
+  .controlsSection {
+    padding: var(--space-8);
   }
-
-  .desktopButton {
-    display: block;
-    padding: 0.75rem 1.5rem;
-    border-radius: 50px;
-    font-size: 1rem;
+  
+  .searchAndFilter {
+    align-items: center;
+  }
+  
+  .roomsSection {
+    padding: var(--space-8);
+  }
+  
+  .roomsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: var(--space-6);
   }
 
   .title {
-    font-size: 3rem;
+    font-size: 2.4rem;
+  }
+  
+  .subtitle {
+    font-size: 1.1rem;
+  }
+
+  .statsRow {
+    gap: var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .roomsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: var(--space-4);
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .headerContent {
+    margin: 0;
+  }
+  
+  .title {
+    font-size: 1.8rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .controlsSection {
+    padding: var(--space-4);
+  }
+  
+  .searchAndFilter {
+    flex-direction: column;
+  }
+  
+  .roomsSection {
+    padding: var(--space-4);
+  }
+  
+  .roomCard {
+    padding: var(--space-4);
+  }
+  
+  .hostName {
+    font-size: 1.1rem;
+  }
+
+  .statsRow {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .statDivider {
+    width: 100%;
+    height: 1px;
   }
 }

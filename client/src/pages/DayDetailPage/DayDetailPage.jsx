@@ -16,7 +16,7 @@ const eventTypeDetails = {
   travel: { icon: FaPlane, label: 'Путешествие', color: '#7ed321' },
   date: { icon: FaGlassCheers, label: 'Свидание', color: '#bd10e0' },
   gift: { icon: FaGift, label: 'Подарок', color: '#9013fe' },
-  milestone: { icon: FaStar, label: 'Важный момент', color: '#f8e71c' },
+  deadline: { icon: FaStar, label: 'Дедлайн', color: '#f8e71c' },
   default: { icon: FaCalendarCheck, label: 'Событие', color: '#8b572a' },
 };
 

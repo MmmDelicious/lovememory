@@ -1,0 +1,101 @@
+.mobileNav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-2) 0 calc(var(--space-2) + env(safe-area-inset-bottom, 0));
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: var(--space-2);
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .navTab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-3);
+    border-radius: var(--border-radius);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 60px;
+    position: relative;
+    flex: 1;
+  }
+  
+  .navTab:active {
+    transform: scale(0.95);
+  }
+  
+  .navIconContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--color-background);
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+  }
+  
+  .navIcon {
+    color: var(--color-text-secondary);
+    transition: all 0.3s ease;
+  }
+  
+  .navLabel {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    transition: all 0.3s ease;
+    text-align: center;
+    line-height: 1;
+  }
+  
+  /* Active State */
+  .navTabActive .navIconContainer {
+    background: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .navTabActive .navIcon {
+    color: white;
+  }
+  
+  .navTabActive .navLabel {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+  
+  /* Hover Effects for Desktop */
+  @media (hover: hover) {
+    .navTab:hover .navIconContainer {
+      background: var(--color-secondary);
+      transform: translateY(-1px);
+    }
+    
+    .navTab:hover .navIcon {
+      color: var(--color-primary);
+    }
+  }
+  
+  /* Larger screens - hide mobile nav */
+  @media (min-width: 768px) {
+    .mobileNav {
+      display: none;
+    }
+  }

@@ -1,0 +1,46 @@
+.sidebarContent {
+    flex: 1;
+    padding: var(--space-4);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  
+/* Mobile close button removed in web-focused build */
+  
+  .miniCalendar { margin-bottom: var(--space-6); }
+  .miniHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); }
+  .miniTitle { font-weight: 600; font-size: 14px; color: var(--color-text-primary); }
+  .calendarNav { display: flex; gap: 4px; }
+  .navArrow { width: 24px; height: 24px; border: none; border-radius: 4px; background: transparent; color: var(--color-text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .navArrow:hover { background: var(--color-background); color: var(--color-text-primary); }
+  .miniGrid { background: var(--color-background); border-radius: var(--border-radius-md); padding: var(--space-3); }
+  .miniWeekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: var(--space-2); }
+  .miniWeekdays span { font-size: 10px; color: var(--color-text-secondary); text-align: center; padding: 4px 0; }
+  .miniDates { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .miniDate { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--color-text-primary); cursor: pointer; border-radius: 4px; transition: all 0.2s ease; background: transparent; border: none; }
+  .miniDate:hover { background: var(--color-secondary); }
+  .today { background: var(--color-primary); color: white; }
+  .otherMonth { color: var(--color-text-secondary); opacity: 0.7; }
+  
+  .sidebarSection { margin-bottom: var(--space-6); }
+  .sectionHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); }
+  .sectionHeader h3 { font-size: 14px; font-weight: 600; color: var(--color-text-primary); margin: 0; }
+  
+  .calendarList { display: flex; flex-direction: column; gap: 6px; }
+  .calendarItemBtn { display: flex; align-items: center; gap: var(--space-2); padding: 6px 8px; background: var(--color-background); border: 1px solid var(--color-border); border-radius: 8px; cursor: pointer; width: 100%; text-align: left; }
+  .calendarItemBtn:hover { border-color: var(--color-primary); }
+  .calendarItemBtn.active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+  .calendarItemBtn.active .calendarName { color: #fff; }
+  .calendarColor { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
+  .calendarName { font-size: 13px; color: var(--color-text-primary); flex: 1; }
+  
+  .categoryDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  
+  .templateList { display: flex; flex-direction: column; gap: 6px; }
+  .templateItem { display: flex; align-items: center; gap: var(--space-2); padding: 6px 8px; background: var(--color-background); border: 1px solid var(--color-border); border-radius: 8px; cursor: grab; user-select: none; }
+  .templateItem:active { cursor: grabbing; }
+  .templateName { font-size: 13px; color: var(--color-text-primary); }
+  
+/* Removed mobile media rules */

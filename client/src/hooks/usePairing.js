@@ -8,7 +8,7 @@ export const usePairing = (user) => {
   const [error, setError] = useState('');
 
   const fetchData = useCallback(async () => {
-    if (!user) return;
+    if (!user?.id) return;
     try {
       setIsLoading(true);
       setError('');
@@ -29,7 +29,7 @@ export const usePairing = (user) => {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => {
     fetchData();

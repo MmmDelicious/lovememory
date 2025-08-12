@@ -1,0 +1,161 @@
+.calendarWrapper {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--space-4);
+  background: var(--color-surface);
+}
+  
+  .calendarWrapper :global(.fc) {
+    --fc-border-color: var(--color-border);
+    --fc-today-bg-color: rgba(231, 122, 101, 0.05);
+    flex: 1 1 auto;
+    height: 100%;
+    overflow: hidden; /* contain calendar internals */
+    background: var(--color-surface);
+    border-left: 1px solid var(--color-border);
+    border-right: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .calendarWrapper :global(.fc-col-header) {
+    background: var(--color-background);
+    border-top: 1px solid var(--color-border);
+  }
+  
+  .calendarWrapper :global(.fc-daygrid-day) { background: var(--color-surface); }
+  
+  .calendarWrapper :global(.fc) *:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
+  .calendarWrapper :global(.fc-daygrid-day-number) {
+    pointer-events: none;
+  }
+  
+  .calendarWrapper :global(.fc-daygrid-day-events) {
+    margin: 4px 0 !important; /* единый вертикальный зазор в ячейке дня */
+    padding: 0;
+    display: block;
+  }
+  
+  .calendarWrapper :global(.fc-daygrid-event-harness),
+  .calendarWrapper :global(.fc-daygrid-event-harness-abs) {
+    margin: 4px 6px !important; /* одинаковый отступ у всех событий */
+  }
+
+  /* Делает плашку события на всю ширину ячейки дня */
+  .calendarWrapper :global(.fc-daygrid-event) {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  .calendarWrapper :global(.fc-h-event) { /* anchor внутри */
+    display: block !important;
+    width: 100% !important;
+  }
+  .calendarWrapper :global(.fc-daygrid-event .fc-event-main),
+  .calendarWrapper :global(.fc-daygrid-event .fc-event-main-frame) {
+    width: 100% !important;
+  }
+  
+  .calendarWrapper :global(.fc-event) {
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.2s ease;
+    width: 100%;
+  }
+  
+  .calendarWrapper :global(.fc-event:hover) {
+    transform: translateY(-1px);
+  }
+  
+  .eventContentWrapper {
+    padding: 1px 6px 1px 8px;
+    overflow: hidden;
+    height: 100%;
+    border-radius: 4px;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    border-right: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  
+  .eventTitle {
+    font-family: var(--font-family-body);
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    letter-spacing: 0.1px;
+  }
+  
+  .eventTime {
+    font-weight: 400;
+    font-size: 0.64rem;
+    color: #fff;
+    opacity: 0.85;
+    padding-right: 4px;
+  }
+  
+  .calendarWrapper :global(.fc-daygrid-day-number) {
+    color: var(--color-text-secondary);
+    padding: 8px;
+  }
+  
+  .calendarWrapper :global(.fc-day-today .fc-daygrid-day-number) {
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+  
+  .calendarWrapper :global(.fc-col-header-cell-cushion) {
+    font-family: var(--font-family-body);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+  }
+  
+  .calendarWrapper :global(.fc-daygrid-day-frame) {
+    padding: 2px 6px; /* небольшие боковые поля как в референсе */
+  }
+  
+  .calendarWrapper :global(.fc-daygrid-day-number) {
+    padding: 4px;
+    font-size: 0.85rem;
+  }
+  
+  .calendarWrapper :global(.fc-day-other) {
+    background: transparent;
+  }
+  
+  .calendarWrapper :global(.fc-day-other .fc-daygrid-day-frame) {
+    background: var(--color-background);
+  }
+  
+  .calendarWrapper :global(.fc-day-other .fc-daygrid-day-number) {
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+  }
+  
+  @media (max-width: 992px) {
+    .calendarWrapper {
+      padding: var(--space-2);
+    }
+  
+    .calendarWrapper :global(.fc-daygrid-day-number) {
+      padding: 3px;
+      font-size: 0.75rem;
+    }
+  
+    .eventTitle {
+      font-size: 0.65rem;
+    }
+  }

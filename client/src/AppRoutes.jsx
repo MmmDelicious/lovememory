@@ -9,8 +9,9 @@ import RegisterPage from './pages/RegisterPage/RegisterPage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
 import DayDetailPage from './pages/DayDetailPage/DayDetailPage';
 import ProfilePage from './pages/ProfilePage/ProfilePage';
-import { GamesPage } from './pages/GamesPage/GamesPage';
+import GamesPage from './pages/GamesPage/GamesPage.tsx';
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
+import InsightsPage from './pages/InsightsPage/InsightsPage.tsx';
 import GameRoomPage from './pages/GameRoomPage/GameRoomPage';
 import PokerPage from './pages/PokerPage/PokerPage';
 import ErrorPage from './pages/ErrorPage/ErrorPage';
@@ -45,6 +46,7 @@ const AppRoutes = () => {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/insights" element={<InsightsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/games" element={<GamesPage />} />
           <Route path="/games/:gameType" element={<GameLobbyPage />} />

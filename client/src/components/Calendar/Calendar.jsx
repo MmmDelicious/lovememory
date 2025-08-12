@@ -4,18 +4,18 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
 import Sidebar from '../Sidebar/Sidebar';
-import { FaCalendarAlt, FaThLarge, FaFileAlt, FaUsers, FaFolder, FaCog, FaChevronLeft, FaChevronRight, FaFilter, FaListUl, FaPlus } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaFilter, FaListUl, FaPlus, FaBars } from 'react-icons/fa';
 import { useEventMascot } from '../../context/EventMascotContext';
-import { useDevice } from '../../hooks/useDevice';
 import styles from './Calendar.module.css';
 import CalendarFilters from './SearchAndFilter';
+import CalendarSidebar from './CalendarSidebar';
 import { EVENT_TYPE_COLORS } from '../../hooks/useEvents';
+import { getHueFromHex, darken } from '../../utils/color';
 
 const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent }) => {
   const navigate = useNavigate();
-  const { isMobile } = useDevice();
-  
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobileNavOpen, setMobileNavOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [filter, setFilter] = useState('all');
   const [selectedDate, setSelectedDate] = useState(null);
@@ -29,24 +29,6 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
   const [showFilters, setShowFilters] = useState(false);
   const [showList, setShowList] = useState(false);
   const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useEventMascot();
-
-  // Helper: hex -> hue for palette sorting
-  const getHueFromHex = (hex) => {
-    const clean = hex.replace('#','');
-    const bigint = parseInt(clean.length === 3 ? clean.split('').map(x=>x+x).join('') : clean, 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    const rNorm = r/255, gNorm = g/255, bNorm = b/255;
-    const max = Math.max(rNorm, gNorm, bNorm), min = Math.min(rNorm, gNorm, bNorm);
-    let h = 0; const d = max - min;
-    if (d === 0) h = 0;
-    else if (max === rNorm) h = ((gNorm - bNorm) / d) % 6;
-    else if (max === gNorm) h = (bNorm - rNorm) / d + 2;
-    else h = (rNorm - gNorm) / d + 4;
-    h = Math.round((h * 60 + 360) % 360);
-    return h;
-  };
 
   const TYPE_LABELS = {
     plan: 'План',
@@ -64,12 +46,8 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
       .sort(([, c1], [, c2]) => getHueFromHex(c1) - getHueFromHex(c2));
   }, []);
 
-  
-
   useEffect(() => {
-    // Enable external drag from template list
     if (templateContainerRef.current) {
-      // eslint-disable-next-line no-new
       new Draggable(templateContainerRef.current, {
         itemSelector: `.${styles.templateItem}`,
         eventData: (el) => ({
@@ -116,9 +94,8 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
       return acc;
     }, []);
     registerMascotTargets(targets);
-  }, [events, calendarRef, calendarContainerRef, registerMascotTargets]);
+  }, [events, registerMascotTargets]);
 
-  // Run mascot setup after updateMascotTargets is defined
   useEffect(() => {
     updateMascotTargets();
     startMascotLoop();
@@ -154,12 +131,12 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
 
   const handleContextMenu = (event, clickInfo) => {
     event.preventDefault();
-    setContextMenu({
-      show: true,
-      x: event.clientX,
-      y: event.clientY,
-      event: clickInfo
-    });
+    const { clientX, clientY } = event;
+    const menuWidth = 180;
+    const menuHeight = 110;
+    const x = clientX + menuWidth > window.innerWidth ? window.innerWidth - menuWidth - 5 : clientX;
+    const y = clientY + menuHeight > window.innerHeight ? window.innerHeight - menuHeight - 5 : clientY;
+    setContextMenu({ show: true, x, y, event: clickInfo });
   };
 
   const handleContextMenuClose = () => {
@@ -207,7 +184,12 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
   const handleDateClick = (arg) => {
     setSelectedDate(arg.dateStr);
     const eventOnDay = events.find(e => e.start.split('T')[0] === arg.dateStr);
-    setSelectedEvent(eventOnDay?.extendedProps.rawEvent ? { ...eventOnDay.extendedProps.rawEvent, date: arg.dateStr } : { title: '', description: '', date: arg.dateStr });
+    if (eventOnDay?.extendedProps.rawEvent) {
+      setSelectedEvent({ ...eventOnDay.extendedProps.rawEvent, date: arg.dateStr });
+    } else {
+      const { startISO, endISO } = findFirstFreeOneHourSlot(arg.dateStr);
+      setSelectedEvent({ title: '', description: '', date: arg.dateStr, event_date: startISO, end_date: endISO });
+    }
     setSidebarOpen(true);
   };
   
@@ -220,20 +202,12 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
     });
     setSidebarOpen(true);
   };
-
-  const handleEventRightClick = (clickInfo) => {
-    const event = new MouseEvent('contextmenu', {
-      clientX: clickInfo.jsEvent.clientX,
-      clientY: clickInfo.jsEvent.clientY,
-      bubbles: true
-    });
-    handleContextMenu(event, clickInfo);
-  };
   
   const handleCloseSidebar = () => {
     setSidebarOpen(false);
     setSelectedEvent(null);
     setSelectedDate(null);
+    setMobileNavOpen(false);
   };
 
   const handleViewDay = () => {
@@ -314,17 +288,8 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
     }
 
     const barColor = eventInfo.event.backgroundColor || '#D97A6C';
-    const darken = (hex, amt = 15) => {
-      const c = hex.replace('#','');
-      const num = parseInt(c.length === 3 ? c.split('').map(x=>x+x).join('') : c, 16);
-      let r = (num >> 16) - amt; if (r < 0) r = 0;
-      let g = ((num >> 8) & 0x00FF) - amt; if (g < 0) g = 0;
-      let b = (num & 0x0000FF) - amt; if (b < 0) b = 0;
-      return `#${(r<<16 | g<<8 | b).toString(16).padStart(6,'0')}`;
-    };
     const style = {
       backgroundColor: barColor,
-      borderLeft: `4px solid ${darken(barColor, 25)}`,
       color: '#fff'
     };
 
@@ -341,21 +306,16 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
   const getDateFilters = () => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay() + 1);
     startOfWeek.setHours(0, 0, 0, 0);
-    
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     endOfWeek.setHours(23, 59, 59, 999);
-    
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     startOfMonth.setHours(0, 0, 0, 0);
-    
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
     endOfMonth.setHours(23, 59, 59, 999);
-    
     return { now, startOfWeek, endOfWeek, startOfMonth, endOfMonth };
   };
 
@@ -410,7 +370,8 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
     isoDate.setHours(0, 0, 0, 0);
     const dateStr = isoDate.toISOString().slice(0, 10);
     setSelectedDate(dateStr);
-    setSelectedEvent({ title: '', description: '', date: dateStr });
+    const { startISO, endISO } = findFirstFreeOneHourSlot(dateStr);
+    setSelectedEvent({ title: '', description: '', date: dateStr, event_date: startISO, end_date: endISO });
     setSidebarOpen(true);
   };
 
@@ -421,10 +382,42 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
     } catch { return ''; }
   }, [currentDate, currentTitle]);
 
+  const findFirstFreeOneHourSlot = (dateStr) => {
+    const TARGET_START_HOUR = 8; // базовое время 08:00
+    const eventsOnDay = events
+      .filter(e => e.start.split('T')[0] === dateStr)
+      .map(e => ({
+        start: new Date(e.extendedProps?.rawEvent?.event_date || e.start),
+        end: e.extendedProps?.rawEvent?.end_date ? new Date(e.extendedProps.rawEvent.end_date) : null,
+      }))
+      .sort((a,b) => a.start - b.start);
+
+    let slotStart = new Date(`${dateStr}T${String(TARGET_START_HOUR).padStart(2,'0')}:00:00`);
+    let slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
+
+    const overlaps = (aStart, aEnd, bStart, bEnd) => {
+      const endA = aEnd || new Date(aStart.getTime() + 60*60*1000);
+      const endB = bEnd || new Date(bStart.getTime() + 60*60*1000);
+      return aStart < endB && bStart < endA;
+    };
+
+    for (const ev of eventsOnDay) {
+      if (overlaps(slotStart, slotEnd, ev.start, ev.end)) {
+        // сдвигаем в конец занятого интервала на ближайший целый час
+        const nextStart = ev.end ? new Date(ev.end) : new Date(ev.start.getTime() + 60*60*1000);
+        nextStart.setMinutes(0,0,0);
+        slotStart = nextStart;
+        slotEnd = new Date(slotStart.getTime() + 60*60*1000);
+      }
+    }
+
+    return { startISO: slotStart.toISOString(), endISO: slotEnd.toISOString() };
+  };
+
   const getMiniCalendarDays = useCallback((baseDate) => {
     const result = [];
     const firstOfMonth = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
-    const startDay = (firstOfMonth.getDay() + 6) % 7; // 0..6, Monday-first
+    const startDay = (firstOfMonth.getDay() + 6) % 7;
     const gridStart = new Date(firstOfMonth);
     gridStart.setDate(firstOfMonth.getDate() - startDay);
     for (let i = 0; i < 42; i++) {
@@ -437,21 +430,15 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
 
   const miniDays = useMemo(() => getMiniCalendarDays(currentDate), [getMiniCalendarDays, currentDate]);
 
-  // Receiving external dropped template
   const handleEventReceive = (info) => {
     try {
       const type = info.event.extendedProps?.eventType || 'plan';
       const dateStr = info.event.startStr.split('T')[0];
       setSelectedDate(dateStr);
-      setSelectedEvent({
-        title: info.event.title || '',
-        description: '',
-        date: dateStr,
-        event_type: type,
-      });
+      const { startISO, endISO } = findFirstFreeOneHourSlot(dateStr);
+      setSelectedEvent({ title: info.event.title || '', description: '', date: dateStr, event_type: type, event_date: startISO, end_date: endISO });
       setSidebarOpen(true);
     } finally {
-      // Удаляем временное событие календаря, чтобы не было дубля
       info.event.remove();
     }
   };
@@ -459,90 +446,27 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
   return (
     <div className={styles.plannerLayout} ref={calendarContainerRef} onClick={handleCalendarContainerClick}>
       <aside className={styles.sidebar}>
-        <div className={styles.sidebarContent}>
-          <div className={styles.miniCalendar}>
-            <div className={styles.miniHeader}>
-              <span className={styles.miniTitle}>{monthLabel}</span>
-              <div className={styles.calendarNav}>
-                <button className={styles.navArrow} aria-label="Предыдущий" onClick={goPrev}><FaChevronLeft /></button>
-                <button className={styles.navArrow} aria-label="Следующий" onClick={goNext}><FaChevronRight /></button>
-              </div>
-            </div>
-            <div className={styles.miniGrid}>
-              <div className={styles.miniWeekdays}>
-                {['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d => (
-                  <span key={d}>{d}</span>
-                ))}
-              </div>
-              <div className={styles.miniDates}>
-                {miniDays.map(d => {
-                  const isToday = new Date().toDateString() === d.toDateString();
-                  const isOtherMonth = d.getMonth() !== currentDate.getMonth();
-                  return (
-                    <button
-                      key={d.toISOString()}
-                      className={`${styles.miniDate} ${isOtherMonth ? styles.otherMonth : ''} ${isToday ? styles.today : ''}`}
-                      onClick={() => gotoDate(d)}
-                    >
-                      {d.getDate()}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* External templates for drag & drop */}
-          <div className={styles.sidebarSection}>
-            <div className={styles.sectionHeader}><h3>Шаблоны событий</h3></div>
-            <div className={styles.templateList} ref={templateContainerRef}>
-              {sortedTypeEntries.map(([type, color]) => (
-                <div
-                  key={type}
-                  className={styles.templateItem}
-                  draggable
-                  data-type={type}
-                  data-title={TYPE_LABELS[type] || 'Событие'}
-                  data-color={color}
-                  data-duration={type === 'date' ? '120' : ''}
-                  title="Перетащите на календарь"
-                >
-                  <span className={styles.categoryDot} style={{ backgroundColor: color }} />
-                  <span className={styles.templateName}>{TYPE_LABELS[type] || type}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.sidebarSection}>
-            <div className={styles.sectionHeader}><h3>Мои календари</h3></div>
-            <div className={styles.calendarList}>
-              <button
-                className={`${styles.calendarItemBtn} ${filter === 'mine' ? styles.active : ''}`}
-                onClick={() => setFilter(filter === 'mine' ? 'all' : 'mine')}
-              >
-                <span className={styles.calendarColor} style={{ backgroundColor: '#D97A6C' }}></span>
-                <span className={styles.calendarName}>Мои</span>
-              </button>
-              <button
-                className={`${styles.calendarItemBtn} ${filter === 'shared' ? styles.active : ''}`}
-                onClick={() => setFilter(filter === 'shared' ? 'all' : 'shared')}
-              >
-                <span className={styles.calendarColor} style={{ backgroundColor: '#EADFD8' }}></span>
-                <span className={styles.calendarName}>Общие</span>
-              </button>
-            </div>
-          </div>
-
-         
-        </div>
+        <CalendarSidebar
+          onClose={() => setMobileNavOpen(false)}
+          monthLabel={monthLabel}
+          goPrev={goPrev}
+          goNext={goNext}
+          miniDays={miniDays}
+          currentDate={currentDate}
+          gotoDate={gotoDate}
+          templateContainerRef={templateContainerRef}
+          sortedTypeEntries={sortedTypeEntries}
+          TYPE_LABELS={TYPE_LABELS}
+          filter={filter}
+          setFilter={setFilter}
+        />
       </aside>
 
       <main className={styles.mainContent}>
         <div className={styles.calendarHeaderMain}>
           <div className={styles.calendarTitle}>
             <h1>{monthLabel}</h1>
-            <div className={styles.calendarNav}>
+            <div className={`${styles.calendarNav} ${styles.mainNav}`}>
               <button className={styles.navArrow} aria-label="Предыдущий" onClick={goPrev}><FaChevronLeft /></button>
               <button className={styles.navArrow} aria-label="Следующий" onClick={goNext}><FaChevronRight /></button>
             </div>
@@ -591,55 +515,48 @@ const Calendar = ({ events, userId, onCreateEvent, onUpdateEvent, onDeleteEvent 
         )}
 
         <div className={styles.calendarWrapper}>
-          {filteredEvents.length === 0 && events.length === 0 ? (
-            <div style={{ 
-              display: 'flex', alignItems: 'center', justifyContent: 'center', height: '400px',
-              fontSize: '16px', color: '#666' }}>
-              Нет событий для отображения
-            </div>
-          ) : (
-            <FullCalendar
-              ref={calendarRef}
-              key={isMobile ? 'mobile' : 'desktop'}
-              plugins={[dayGridPlugin, interactionPlugin]}
-              initialView={isMobile ? 'dayGridWeek' : 'dayGridMonth'}
-              weekends={true}
-              events={filteredEvents}
-              locale="ru"
-              firstDay={1}
-              timeZone="local"
-              showNonCurrentDates={true}
-              fixedWeekCount={false}
-              headerToolbar={false}
-              buttonText={{ today: 'сегодня', month: 'месяц', week: 'неделя', day: 'день', list: 'список' }}
-              height="100%"
-              editable={true}
-              droppable={true}
-              expandRows={true}
-              dayMaxEventRows={3}
-              dayMaxEvents={true}
-              
-              eventReceive={handleInteraction(handleEventReceive)}
-              eventDrop={handleInteraction(handleEventDrop)}
-              dateClick={handleInteraction(handleDateClick)}
-              eventClick={handleInteraction(handleEventClick)}
-              eventContent={renderEventContent}
-              eventClassNames={(arg) => [arg.event.extendedProps.isOwner ? styles.eventMine : styles.eventPartner]}
-              eventDidMount={(info) => {
-                info.el.addEventListener('contextmenu', (e) => {
-                  e.preventDefault();
-                  handleContextMenu(e, { event: info.event, jsEvent: e });
-                });
-              }}
-            />
-          )}
+          <FullCalendar
+            ref={calendarRef}
+            key={currentView} 
+            plugins={[dayGridPlugin, interactionPlugin]}
+            initialView={'dayGridMonth'}
+            weekends={true}
+            events={filteredEvents}
+            locale="ru"
+            firstDay={1}
+            timeZone="local"
+            showNonCurrentDates={true}
+            fixedWeekCount={false}
+            headerToolbar={false}
+            buttonText={{ today: 'сегодня', month: 'месяц', week: 'неделя', day: 'день', list: 'список' }}
+            height="100%"
+            eventDisplay="block"
+            editable={true}
+            droppable={true}
+            expandRows={true}
+            dayMaxEventRows={3}
+            dayMaxEvents={true}
+            
+            eventReceive={handleInteraction(handleEventReceive)}
+            eventDrop={handleInteraction(handleEventDrop)}
+            dateClick={handleInteraction(handleDateClick)}
+            eventClick={handleInteraction(handleEventClick)}
+            eventContent={renderEventContent}
+            eventClassNames={(arg) => [arg.event.extendedProps.isOwner ? styles.eventMine : styles.eventPartner]}
+            eventDidMount={(info) => {
+              info.el.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                handleContextMenu(e, { event: info.event, jsEvent: e });
+              });
+            }}
+          />
         </div>
       </main>
 
       {contextMenu.show && (
         <div 
           className={styles.contextMenu}
-          style={{ position: 'fixed', top: contextMenu.y, left: contextMenu.x, zIndex: 1000 }}
+          style={{ position: 'fixed', top: contextMenu.y, left: contextMenu.x, zIndex: 1100 }}
         >
           <div className={styles.contextMenuItem} onClick={() => handleContextMenuAction('edit')}>✏️ Редактировать</div>
           <div className={styles.contextMenuItem} onClick={() => handleContextMenuAction('view')}>👁️ Посмотреть день</div>

@@ -10,7 +10,7 @@ export const EVENT_TYPE_COLORS = {
   travel: '#C49A6C',      // тёплый песочный
   date: '#E06A80',        // розовый для свиданий
   gift: '#E0B070',        // тёплое золото
-  milestone: '#9C7CA5'    // приглушенный лиловый
+  deadline: '#9C7CA5'    // приглушенный лиловый
 };
 
 const formatTime = (date) => new Date(date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
