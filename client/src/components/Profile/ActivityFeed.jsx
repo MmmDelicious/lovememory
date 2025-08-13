@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { Link } from 'react-router-dom';
 import Button from '../Button/Button';
 import styles from './ActivityFeed.module.css';
@@ -6,6 +7,7 @@ import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { eventService } from '../../services';
 
 const ActivityFeed = ({ events, areEventsLoading, deleteEvent }) => {
+  const isCompact = useMediaQuery({ maxWidth: 480 });
   const [activeTab, setActiveTab] = useState('events');
   const [galleryItems, setGalleryItems] = useState([]);
   const [isGalleryLoading, setIsGalleryLoading] = useState(false);
@@ -83,7 +85,7 @@ const ActivityFeed = ({ events, areEventsLoading, deleteEvent }) => {
   };
 
   return (
-    <div className={styles.feedWrapper}>
+    <div className={`${styles.feedWrapper} ${isCompact ? styles.compact : ''}`}>
       <div className={styles.tabs}>
         <div className={`${styles.tab} ${activeTab === 'events' ? styles.active : ''}`} onClick={() => setActiveTab('events')}>Предстоящие дела</div>
         <div className={`${styles.tab} ${activeTab === 'gallery' ? styles.active : ''}`} onClick={() => setActiveTab('gallery')}>Галерея</div>

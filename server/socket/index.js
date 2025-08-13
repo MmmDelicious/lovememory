@@ -491,7 +491,6 @@ function initSocket(server, app) {
           const fallback = remainingSockets.map(s => ({ id: s.user.id, name: s.user.email.split('@')[0] }));
           io.to(roomId).emit('player_list_update', fallback);
         }
-        io.to(roomId).emit('player_list_update', playerInfo);
 
         // Проверяем, нужно ли завершить игру из-за недостатка игроков
         const currentGame = GameManager.getGame(roomId);

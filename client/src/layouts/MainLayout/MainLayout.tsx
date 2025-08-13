@@ -1,8 +1,8 @@
 import React from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
-import MobileLayout from '../../components/MobileLayout/MobileLayout';
+import MobileLayout from '../../layouts/MobileLayout/MobileLayout';
 import DashboardPage from '../../pages/DashboardPage/DashboardPage';
-import MobileDashboard from '../../pages/DashboardPage/MobileDashboard';
+import MobileDashboard from '../../pages/MobileDashboard/MobileDashboard';
 import GamesPage from '../../pages/GamesPage/GamesPage';
 import MobileGames from '../../pages/GamesPage/MobileGames';
 import InsightsPage from '../../pages/InsightsPage/InsightsPage';

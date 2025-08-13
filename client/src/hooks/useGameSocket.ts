@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
+import type { GameState, GameMove, UseGameSocketReturn } from '../../types/game.types';
 
 // Resolve socket URL robustly across environments
 const SOCKET_URL =
@@ -9,11 +10,15 @@ const SOCKET_URL =
   import.meta.env.VITE_API_BASE_URL ||
   'http://localhost:5000';
 
-export const useGameSocket = (roomId, token, setCoinsCallback) => {
+export const useGameSocket = (
+  roomId: string, 
+  token: string, 
+  setCoinsCallback?: (coins: number) => void
+): UseGameSocketReturn => {
   const navigate = useNavigate();
-  const socketRef = useRef(null);
-  const [gameState, setGameState] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
+  const socketRef = useRef<Socket | null>(null);
+  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
 
   useEffect(() => {
     if (!token || !roomId) return;
@@ -35,7 +40,7 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
       setIsConnected(false);
     });
 
-    socket.on('connect_error', (err) => {
+    socket.on('connect_error', (err: Error) => {
       console.error("[SOCKET] Connection error:", err.message);
       console.error("[SOCKET] Error details:", err);
       
@@ -47,18 +52,25 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
       console.log("Не удалось подключиться к игре. Попробуйте обновить страницу.");
     });
 
-    const handleStateUpdate = (newGameState) => {
+    const handleStateUpdate = (newGameState: GameState) => {
       console.log('[CLIENT] Received game state update:', newGameState);
       setGameState(newGameState);
     };
 
-    const handlePlayerListUpdate = (players) => {
+    const handlePlayerListUpdate = (players: any[]) => {
       console.log('[CLIENT] Received player list update:', players);
       setGameState(prevState => {
         if (!prevState) {
-          return { players, status: 'waiting' };
+          return { 
+            players: players.map(p => p.id), 
+            status: 'waiting',
+            gameType: 'unknown',
+            currentPlayerId: null,
+            winner: null,
+            isDraw: false
+          } as GameState;
         }
-        return { ...prevState, players };
+        return { ...prevState, players: players.map(p => p.id) };
       });
     };
 
@@ -66,16 +78,16 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
     socket.on('game_start', handleStateUpdate);
     socket.on('game_update', handleStateUpdate);
     socket.on('game_end', handleStateUpdate);
+    socket.on('new_hand_started', handleStateUpdate);
     
     if (setCoinsCallback) {
       socket.on('update_coins', setCoinsCallback);
     }
     
-    socket.on('error', (errorMessage) => {
+    socket.on('error', (errorMessage: string) => {
       console.error('[SOCKET] Error received:', errorMessage);
       // Показываем ошибку, но не выбрасываем из игры
       alert(`Ошибка: ${errorMessage}`);
-      // navigate('/games'); // Убираем автоматический переход
     });
 
     return () => {
@@ -84,13 +96,14 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
       socket.off('game_start');
       socket.off('game_update');
       socket.off('game_end');
+      socket.off('new_hand_started');
       socket.off('update_coins');
       socket.off('error');
       socket.disconnect();
     };
   }, [roomId, token, navigate, setCoinsCallback]);
 
-  const makeMove = (move) => {
+  const makeMove = useCallback((move: GameMove) => {
     console.log('[CLIENT] makeMove called with:', move);
     if (socketRef.current && socketRef.current.connected) {
       socketRef.current.emit('make_move', { roomId, move });
@@ -99,7 +112,7 @@ export const useGameSocket = (roomId, token, setCoinsCallback) => {
       console.error('[SOCKET] Cannot make move, socket not connected.');
       throw new Error('Нет подключения к серверу');
     }
-  };
+  }, [roomId]);
 
   return { gameState, isConnected, makeMove };
 };

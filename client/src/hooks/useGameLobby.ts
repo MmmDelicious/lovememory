@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import io from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
-import { gameService } from '../services';
+import gameService from '../services/game.service';
+import type { GameRoom, UseGameLobbyReturn } from '../../types/game.types';
 
 // Resolve socket URL robustly across environments
 const SOCKET_URL =
@@ -10,10 +11,10 @@ const SOCKET_URL =
   import.meta.env.VITE_API_BASE_URL ||
   'http://localhost:5000';
 
-export const useGameLobby = (gameType) => {
-  const [rooms, setRooms] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+export const useGameLobby = (gameType: string): UseGameLobbyReturn => {
+  const [rooms, setRooms] = useState<GameRoom[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const { token } = useAuth();
 
   const fetchRooms = useCallback(async () => {
@@ -39,7 +40,7 @@ export const useGameLobby = (gameType) => {
   useEffect(() => {
     if (!token) return;
 
-    const socket = io(SOCKET_URL, {
+    const socket: Socket = io(SOCKET_URL, {
       auth: { token },
       transports: ['websocket', 'polling']
     });
@@ -48,7 +49,7 @@ export const useGameLobby = (gameType) => {
       console.log('Lobby socket connected successfully.');
     });
 
-    socket.on('connect_error', (err) => {
+    socket.on('connect_error', (err: Error) => {
       console.error('Lobby socket connection error:', err.message);
       console.error('Lobby socket error details:', err);
     });
@@ -69,7 +70,7 @@ export const useGameLobby = (gameType) => {
     };
   }, [token, fetchRooms]);
 
-  const createRoom = async (formData) => {
+  const createRoom = async (formData: any): Promise<GameRoom> => {
     const newRoom = await gameService.createRoom(formData);
     fetchRooms();
     return newRoom;

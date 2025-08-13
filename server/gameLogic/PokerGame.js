@@ -253,7 +253,10 @@ class PokerGame {
             const allowed = this._getAllowedActions(currentPlayer);
             if (allowed.actions.includes('check')) {
                 try {
-                    this.makeMove(currentPlayer.id, { action: 'check' });
+                    // Вместо рекурсивного вызова makeMove, выполняем действие напрямую
+                    currentPlayer.hasActed = true;
+                    this.lastAction = 'check';
+                    this._advanceTurn();
                 } catch (e) {
                     console.warn('[PokerGame] Auto-check failed, falling back to fold:', e.message);
                     currentPlayer.inHand = false;
@@ -262,7 +265,11 @@ class PokerGame {
                 }
             } else {
                 try {
-                    this.makeMove(currentPlayer.id, { action: 'fold' });
+                    // Вместо рекурсивного вызова makeMove, выполняем действие напрямую
+                    currentPlayer.inHand = false;
+                    currentPlayer.hasActed = true;
+                    this.lastAction = 'fold';
+                    this._advanceTurn();
                 } catch (e) {
                     console.warn('[PokerGame] Auto-fold failed:', e.message);
                     currentPlayer.inHand = false;
@@ -389,7 +396,8 @@ class PokerGame {
     }
 
     _createSidePots() {
-        if (this.sidePots.length > 0) return; // Уже созданы
+        // Очищаем старые side pots перед созданием новых
+        this.sidePots = [];
 
         const activePlayers = this.players.filter(p => p.inHand);
         if (activePlayers.length <= 1) return;
@@ -398,34 +406,28 @@ class PokerGame {
         const allInPlayers = activePlayers.filter(p => p.isAllIn);
         if (allInPlayers.length === 0) return;
 
-        // Сортируем игроков по размеру их ставок
-        const sortedPlayers = [...activePlayers].sort((a, b) => a.currentBet - b.currentBet);
-        
-        let remainingPot = 0;
-        let lastBet = 0;
+        // Получаем уникальные уровни ставок и сортируем их
+        const betLevels = [...new Set(activePlayers.map(p => p.currentBet))].sort((a, b) => a - b);
 
-        sortedPlayers.forEach(player => {
-            const currentBet = player.currentBet;
-            if (currentBet > lastBet) {
-                // Создаем side pot для ставок от lastBet до currentBet
-                const sidePotAmount = (currentBet - lastBet) * sortedPlayers.filter(p => p.currentBet >= currentBet).length;
-                
-                if (sidePotAmount > 0) {
-                    this.sidePots.push({
-                        amount: sidePotAmount,
-                        eligiblePlayers: sortedPlayers.filter(p => p.currentBet >= currentBet).map(p => p.id)
-                    });
-                }
-                
-                lastBet = currentBet;
+        // Создаем side pots для каждого уровня ставок
+        for (let i = 0; i < betLevels.length; i++) {
+            const currentLevel = betLevels[i];
+            const prevLevel = i > 0 ? betLevels[i - 1] : 0;
+            const levelDiff = currentLevel - prevLevel;
+
+            if (levelDiff > 0) {
+                // Игроки, которые могут претендовать на этот side pot
+                const eligiblePlayers = activePlayers.filter(p => p.currentBet >= currentLevel);
+                const sidePotAmount = levelDiff * eligiblePlayers.length;
+
+                this.sidePots.push({
+                    amount: sidePotAmount,
+                    eligiblePlayers: eligiblePlayers.map(p => p.id)
+                });
             }
-        });
-
-        // Основной пот для оставшихся ставок
-        remainingPot = this.players.reduce((total, p) => total + p.currentBet, 0);
-        if (remainingPot > 0) {
-            this.pot = remainingPot;
         }
+
+        console.log(`[PokerGame] Created ${this.sidePots.length} side pots:`, this.sidePots);
     }
     
     _postBlindsAndStartBetting() {
@@ -616,6 +618,15 @@ class PokerGame {
     getValidActions() { const p = this.getCurrentPlayer(); return p ? (this._getAllowedActions(p).actions || []) : []; }
     cleanup() { 
         this._clearTurnTimeout(); // Очищаем таймаут при завершении игры
+
+        // Очищаем все ссылки для предотвращения утечек памяти
+        this.players = null;
+        this.deck = null;
+        this.communityCards = null;
+        this.sidePots = null;
+        this.winnersInfo = null;
+        this.onStateChange = null;
+
         console.log(`[POKER] Game cleanup completed`); 
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import MobileNavigation from '../MobileNavigation/MobileNavigation';
+import MobileNavigation from '../../components/MobileNavigation/MobileNavigation';
 import styles from './MobileLayout.module.css';
 
 interface MobileLayoutProps {

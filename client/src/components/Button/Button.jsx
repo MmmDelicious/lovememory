@@ -3,9 +3,9 @@ import styles from './Button.module.css';
 
 const Button = ({
   children,
-  onClick,
+  onClick = undefined,
   type = 'primary',
-  variant,
+  variant = undefined,
   submit = false,
   disabled = false,
   size = 'md', // 'sm' | 'md'

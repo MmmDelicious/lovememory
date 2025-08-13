@@ -14,11 +14,12 @@ import {
 } from 'lucide-react';
 import styles from './MainLayout.module.css';
 import { useAuth } from '../../context/AuthContext';
+import Button from '../../components/Button/Button';
 
 const MainLayout = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const coins = user?.coins ?? 0;
 
   const navigationItems = [
@@ -96,6 +97,11 @@ const MainLayout = () => {
               )}
             </Link>
 
+            {/* Desktop Logout Button */}
+            <div className={styles.desktopOnly}>
+              <Button type="secondary" size="sm" onClick={logout}>Выйти</Button>
+            </div>
+
             {/* Mobile Menu Button */}
             <button
               className={styles.mobileMenuButton}
@@ -130,6 +136,15 @@ const MainLayout = () => {
             <Settings size={20} />
             <span>Настройки</span>
           </Link>
+
+          <button
+            type="button"
+            className={styles.mobileNavItem}
+            onClick={() => { setIsMobileMenuOpen(false); logout(); }}
+          >
+            <X size={20} />
+            <span>Выйти</span>
+          </button>
         </nav>
       </header>
 

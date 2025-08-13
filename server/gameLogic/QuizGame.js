@@ -16,6 +16,7 @@ class QuizGame {
     this.winner = null;
     this.isDraw = false;
     this.serverTimer = null; // Серверный таймер
+    this.isCleanedUp = false; // Флаг для предотвращения повторной очистки
     
     // Запускаем серверный таймер для первого вопроса
     this.startQuestionTimer();
@@ -130,15 +131,25 @@ class QuizGame {
 
   // Запуск серверного таймера для вопроса
   startQuestionTimer() {
+    if (this.isCleanedUp) {
+      console.log(`[QUIZ] Cannot start timer - game is cleaned up`);
+      return;
+    }
+
     console.log(`[QUIZ] Starting server timer for question ${this.currentQuestionIndex + 1}`);
-    
+
     // Очищаем предыдущий таймер
     if (this.serverTimer) {
       clearTimeout(this.serverTimer);
+      this.serverTimer = null;
     }
-    
+
     // Устанавливаем таймер на время вопроса
     this.serverTimer = setTimeout(() => {
+      if (this.isCleanedUp) {
+        console.log(`[QUIZ] Timer callback ignored - game is cleaned up`);
+        return;
+      }
       console.log(`[QUIZ] Server timer expired for question ${this.currentQuestionIndex + 1}`);
       this.forceNextQuestion();
     }, this.questionTimeLimit);
@@ -301,10 +312,24 @@ class QuizGame {
 
   // Очистка ресурсов при удалении игры
   cleanup() {
+    if (this.isCleanedUp) {
+      console.log(`[QUIZ] Game already cleaned up`);
+      return;
+    }
+
+    this.isCleanedUp = true;
+
     if (this.serverTimer) {
       clearTimeout(this.serverTimer);
       this.serverTimer = null;
     }
+
+    // Очищаем все ссылки для предотвращения утечек памяти
+    this.players = null;
+    this.scores = null;
+    this.playerAnswers = null;
+    this.questions = null;
+
     console.log(`[QUIZ] Game cleanup completed`);
   }
 }

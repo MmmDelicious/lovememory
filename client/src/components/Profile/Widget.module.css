@@ -7,7 +7,7 @@
     flex-direction: column;
     box-shadow: var(--shadow-sm);
     transition: all 0.2s ease;
-    padding: var(--space-5);
+    padding: var(--space-4);
     gap: var(--space-4);
   }
   .widget:hover {
@@ -30,13 +30,13 @@
   
   .widgetTitle {
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: var(--color-text-primary);
     margin: 0;
   }
   
   .widgetBody {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--color-text-secondary);
     flex-grow: 1;
     display: flex;
