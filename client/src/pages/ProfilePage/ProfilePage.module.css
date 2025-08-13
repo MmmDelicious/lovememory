@@ -64,7 +64,7 @@
 @media (min-width: 1200px) {
   .pageGrid {
     /* Классический трехколоночный дашборд */
-    grid-template-columns: 320px 1fr 320px;
+      grid-template-columns: 320px minmax(720px, 1fr) 320px;
     grid-template-rows: auto 1fr;
     grid-template-areas:
       "header feed widgets"

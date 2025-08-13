@@ -214,7 +214,12 @@ class GameService {
         return;
       }
       
-      winner.coins += room.bet;
+      // Улучшенная экономическая модель
+      const baseReward = room.bet;
+      const winnerBonus = Math.floor(baseReward * 0.1); // 10% бонус победителю
+      const totalWinnerReward = baseReward + winnerBonus;
+      
+      winner.coins += totalWinnerReward;
       loser.coins -= room.bet;
       
       if (loser.coins < 0) loser.coins = 0;
@@ -227,13 +232,36 @@ class GameService {
       await room.save({ transaction: t });
 
       await t.commit();
-      console.log(`Игра ${roomId} завершена. Победитель ${winner.id} получил ${room.bet} монет.`);
+      console.log(`Игра ${roomId} завершена. Победитель ${winner.id} получил ${totalWinnerReward} монет (${baseReward} + ${winnerBonus} бонус).`);
       return { winner, loser };
 
     } catch (error) {
       await t.rollback();
       console.error(`!!! Ошибка в finalizeGame для комнаты ${roomId}:`, error);
       return null;
+    }
+  }
+  
+  /**
+   * Очистка завершенных игр (запускается периодически)
+   */
+  async cleanupFinishedGames() {
+    try {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const deletedCount = await GameRoom.destroy({
+        where: {
+          status: 'finished',
+          updatedAt: {
+            [require('sequelize').Op.lt]: oneDayAgo
+          }
+        }
+      });
+      
+      if (deletedCount > 0) {
+        console.log(`[CLEANUP] Deleted ${deletedCount} finished games older than 24 hours`);
+      }
+    } catch (error) {
+      console.error('[CLEANUP] Error cleaning up finished games:', error);
     }
   }
 }

@@ -130,6 +130,10 @@
   gap: var(--space-4);
 }
 
+.desktopOnly {
+  display: block;
+}
+
 .coinsDisplay {
   display: flex;
   align-items: center;
@@ -354,6 +358,10 @@
   }
 
   .desktopNav {
+    display: none;
+  }
+
+  .desktopOnly {
     display: none;
   }
 
