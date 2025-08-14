@@ -5,6 +5,7 @@ export default function GamesLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="chess" />
       <Stack.Screen name="quiz" />
+      <Stack.Screen name="room/[id]" />
     </Stack>
   );
 }

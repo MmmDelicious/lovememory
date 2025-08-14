@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -157,6 +157,21 @@ function UpgradeCard() {
 export default function InsightsScreen() {
   const [timeFrame] = useState('week');
   const [userTier] = useState('free'); // 'free' | 'pro'
+  const [stats, setStats] = useState<{ wins: number; gamesPlayed: number; winRate: number; coinsEarned?: number }>({ wins: 0, gamesPlayed: 0, winRate: 0 });
+  useEffect(() => {
+    (async () => {
+      try {
+        const m = await require('../services/user.service').getProfileStats();
+        const res = await m;
+        setStats({
+          wins: res.data?.wins ?? 0,
+          gamesPlayed: res.data?.gamesPlayed ?? 0,
+          winRate: Math.round((res.data?.winRate ?? 0) * 100),
+          coinsEarned: res.data?.coinsEarned ?? undefined,
+        });
+      } catch {}
+    })();
+  }, []);
   
   const isPro = userTier === 'pro';
 
@@ -164,28 +179,28 @@ export default function InsightsScreen() {
     {
       icon: <Trophy size={20} color="#D97A6C" strokeWidth={2} />,
       title: 'Общие победы',
-      value: '24',
+      value: String(stats.wins),
       change: '+12%',
       isPositive: true,
     },
     {
       icon: <Target size={20} color="#D97A6C" strokeWidth={2} />,
       title: 'Винрейт',
-      value: '68%',
+      value: `${stats.winRate}%`,
       change: '+5%',
       isPositive: true,
     },
     {
       icon: <Clock size={20} color="#D97A6C" strokeWidth={2} />,
-      title: 'Время в игре',
-      value: '12ч',
+      title: 'Игр сыграно',
+      value: String(stats.gamesPlayed),
       change: '-2ч',
       isPositive: false,
     },
     {
       icon: <Zap size={20} color="#D97A6C" strokeWidth={2} />,
       title: 'Заработано',
-      value: '2.1k',
+      value: stats.coinsEarned ? String(stats.coinsEarned) : '—',
       change: '+18%',
       isPositive: true,
     },

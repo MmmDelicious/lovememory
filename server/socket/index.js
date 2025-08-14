@@ -7,9 +7,25 @@ const GameManager = require('../gameLogic/GameManager');
 const quizUpdateIntervals = new Map();
 
 function initSocket(server, app) {
+  const defaultOrigin = process.env.CLIENT_URL || "http://localhost:5173";
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  if (!allowedOrigins.includes(defaultOrigin)) {
+    allowedOrigins.push(defaultOrigin);
+  }
+
   const io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        if (process.env.NODE_ENV !== 'production' && /^(http:\/\/|https:\/\/)localhost:\d+/.test(origin)) {
+          return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+      },
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       credentials: true,
       allowedHeaders: ["Content-Type", "Authorization"]
@@ -109,7 +125,7 @@ function initSocket(server, app) {
                     
                     const game = GameManager.createGame(roomId, gameType, playerBuyInInfo, {
                       onStateChange: (gameInstance) => {
-                        if (gameInstance.gameType === 'poker') {
+                        if (gameInstance.gameType === 'poker' || gameInstance.gameType === 'wordle') {
                           gameInstance.players.forEach(p => {
                             const stateForPlayer = gameInstance.getStateForPlayer(p.id);
                             io.to(p.id).emit('game_update', stateForPlayer);
@@ -122,7 +138,7 @@ function initSocket(server, app) {
                     });
                     io.to(roomId).emit('game_start', { gameType, players: playerInfo, maxPlayers: room.maxPlayers });
 
-                    if (game.gameType === 'poker') {
+                    if (game.gameType === 'poker' || game.gameType === 'wordle') {
                         game.players.forEach(player => {
                             const stateForPlayer = game.getStateForPlayer(player.id);
                             io.to(player.id).emit('game_update', stateForPlayer);
@@ -175,8 +191,8 @@ function initSocket(server, app) {
 
     socket.on('get_game_state', async (roomId) => {
       const game = GameManager.getGame(roomId);
-      if (game) {
-        if (game.gameType === 'poker') {
+        if (game) {
+        if (game.gameType === 'poker' || game.gameType === 'wordle') {
           const stateForPlayer = game.getStateForPlayer(socket.user.id);
           socket.emit('game_update', stateForPlayer);
         } else {
@@ -276,9 +292,16 @@ function initSocket(server, app) {
       try {
         const gameType = game.gameType;
         console.log(`[SOCKET] Making move for game type: ${gameType}, player: ${socket.user.id}`);
-        game.makeMove(socket.user.id, move);
+        
+        const moveResult = game.makeMove(socket.user.id, move);
 
-        if (gameType === 'poker') {
+        // Отправляем результат хода игроку
+        if (moveResult && moveResult.error) {
+          socket.emit('move_error', { error: moveResult.error });
+          return;
+        }
+
+        if (gameType === 'poker' || gameType === 'wordle') {
           game.players.forEach(player => {
               const stateForPlayer = game.getStateForPlayer(player.id);
               io.to(player.id).emit('game_update', stateForPlayer);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import {
   Check
 } from 'lucide-react-native';
 import Animated, { FadeInDown, FadeInUp, BounceIn } from 'react-native-reanimated';
+import { getEvents as apiGetEvents, createEvent as apiCreateEvent } from '../services/event.service';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -258,56 +259,118 @@ function AddEventModal({ visible, onClose, onSave }: AddEventModalProps) {
   );
 }
 
+type UiEvent = {
+  id: string;
+  title: string;
+  date: string; // '15 янв'
+  time: string; // '19:00'
+  type: 'date' | 'memory' | 'game' | 'other';
+  description?: string;
+  location?: string;
+  day: number; // numeric day for filtering
+};
+
 export default function PlannerScreen() {
-  const [selectedDate, setSelectedDate] = useState(new Date().getDate());
+  const now = new Date();
+  const [selectedDate, setSelectedDate] = useState(now.getDate());
   const [showAddModal, setShowAddModal] = useState(false);
-  const [events, setEvents] = useState([
-    {
-      id: '1',
-      title: 'Романтический ужин',
-      date: '15 янв',
-      time: '19:00',
-      type: 'date' as const,
-      description: 'Ужин в новом ресторане',
-      location: 'Ресторан "Терраса"',
-    },
-    {
-      id: '2',
-      title: 'Игра в покер',
-      date: '16 янв',
-      time: '20:30',
-      type: 'game' as const,
-      description: 'Турнир с друзьями',
-    },
-    {
-      id: '3',
-      title: 'Первое свидание',
-      date: '18 янв',
-      time: '14:00',
-      type: 'memory' as const,
-      description: 'Годовщина нашего знакомства',
-      location: 'Парк Горького',
-    },
-  ]);
+  const [events, setEvents] = useState<UiEvent[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const currentMonth = 'Январь 2025';
-  const daysInMonth = 31;
-  const today = new Date().getDate();
+  const monthsShort = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+  const monthsFull = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 
-  const handleAddEvent = (newEvent: any) => {
-    const event = {
-      ...newEvent,
-      id: Date.now().toString(),
-      date: `${selectedDate} янв`,
-      time: '12:00',
-    };
-    setEvents([...events, event]);
+  const currentMonth = `${monthsFull[now.getMonth()]} ${now.getFullYear()}`;
+  const daysInMonth = useMemo(() => {
+    return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  }, [now]);
+  const today = now.getDate();
+
+  const formatDate = (d: Date) => {
+    const dd = d.getDate();
+    const mm = monthsShort[d.getMonth()];
+    const hh = `${d.getHours()}`.padStart(2, '0');
+    const min = `${d.getMinutes()}`.padStart(2, '0');
+    return { dateStr: `${dd} ${mm}`, timeStr: `${hh}:${min}`, day: dd };
+  };
+
+  const mapServerTypeToUi = (t?: string): UiEvent['type'] => {
+    switch (t) {
+      case 'date':
+        return 'date';
+      case 'memory':
+      case 'anniversary':
+      case 'milestone':
+        return 'memory';
+      default:
+        return 'other';
+    }
+  };
+
+  const mapUiTypeToServer = (t: UiEvent['type']): string => {
+    switch (t) {
+      case 'date':
+        return 'date';
+      case 'memory':
+        return 'memory';
+      case 'game':
+        return 'plan';
+      default:
+        return 'plan';
+    }
+  };
+
+  const loadEvents = async () => {
+    setLoading(true);
+    try {
+      const res = await apiGetEvents();
+      const list = (res.data as any[]).map((e) => {
+        const dt = new Date(e.event_date);
+        const { dateStr, timeStr, day } = formatDate(dt);
+        const ui: UiEvent = {
+          id: e.id,
+          title: e.title,
+          description: e.description ?? undefined,
+          type: mapServerTypeToUi(e.event_type),
+          date: dateStr,
+          time: timeStr,
+          day,
+        };
+        return ui;
+      });
+      setEvents(list);
+    } catch (e) {
+      console.log('Failed to load events', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  const handleAddEvent = async (newEvent: any) => {
+    try {
+      const baseDate = new Date(now.getFullYear(), now.getMonth(), selectedDate, 12, 0, 0);
+      const payload = {
+        title: newEvent.title,
+        description: newEvent.description,
+        event_date: baseDate.toISOString(),
+        event_type: mapUiTypeToServer(newEvent.type as UiEvent['type']),
+        isShared: false,
+      };
+      await apiCreateEvent(payload);
+      await loadEvents();
+    } catch (e) {
+      console.log('Failed to create event', e);
+    }
   };
 
   const renderCalendar = () => {
     const days = [];
     for (let i = 1; i <= daysInMonth; i++) {
-      const hasEvents = events.some(event => event.date.includes(i.toString()));
+      const hasEvents = events.some(event => event.day === i);
       days.push(
         <CalendarDay
           key={i}
@@ -322,9 +385,7 @@ export default function PlannerScreen() {
     return days;
   };
 
-  const todayEvents = events.filter(event => 
-    event.date.includes(selectedDate.toString())
-  );
+  const todayEvents = events.filter(event => event.day === selectedDate);
 
   return (
     <View style={styles.container}>
@@ -375,7 +436,17 @@ export default function PlannerScreen() {
             События на {selectedDate} января
           </Text>
           
-          {todayEvents.length > 0 ? (
+            {loading ? (
+            <Animated.View entering={FadeInUp.delay(400)} style={styles.noEventsCard}>
+              <LinearGradient
+                colors={['#FFFFFF', '#FFF8F6']}
+                style={styles.noEventsGradient}
+              >
+                <View />
+                <Text style={styles.noEventsTitle}>Загрузка событий...</Text>
+              </LinearGradient>
+            </Animated.View>
+          ) : todayEvents.length > 0 ? (
             todayEvents.map((event, index) => (
               <EventCard
                 key={event.id}

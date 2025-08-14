@@ -10,6 +10,7 @@ import DashboardPage from './pages/DashboardPage/DashboardPage';
 import DayDetailPage from './pages/DayDetailPage/DayDetailPage';
 import ProfilePage from './pages/ProfilePage/ProfilePage';
 import GamesPage from './pages/GamesPage/GamesPage.tsx';
+import WordlePage from './pages/WordlePage/WordlePage.tsx';
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
 import InsightsPage from './pages/InsightsPage/InsightsPage.tsx';
 import GameRoomPage from './pages/GameRoomPage/GameRoomPage';
@@ -56,6 +57,7 @@ const AppRoutes = () => {
         <Route element={<GameLayout />}>
           <Route path="/games/room/:roomId" element={<GameRoomPage />} />
           <Route path="/games/poker/:roomId" element={<PokerPage />} />
+          <Route path="/games/wordle" element={<WordlePage />} />
         </Route>
         
         <Route path="/error" element={<ErrorPage />} />

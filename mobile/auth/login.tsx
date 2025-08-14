@@ -13,20 +13,27 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Mail, Lock, Eye, EyeOff, Heart, ArrowRight } from 'lucide-react-native';
 import Animated, { FadeInDown, FadeInUp, BounceIn } from 'react-native-reanimated';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginScreen() {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
+    if (!email || !password) return;
     setIsLoading(true);
-    // TODO: Implement login logic
-    setTimeout(() => {
+    try {
+      await login(email, password);
+      router.replace('/(tabs)');
+    } catch (e) {
+      console.log('Login error', e);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const handleGoogleLogin = async () => {

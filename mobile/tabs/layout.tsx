@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Heart, Chrome as Home, User, Trophy, TowerControl as GameController2, Calendar } from 'lucide-react-native';
 import { Platform, StyleSheet } from 'react-native';
+import MascotOverlay from '../components/MascotOverlay';
 
 const TAB_ICON_SIZE = 24;
 const TAB_COLORS = {
@@ -11,7 +12,8 @@ const TAB_COLORS = {
 
 export default function TabLayout() {
   return (
-    <Tabs
+    <>
+      <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
@@ -65,7 +67,18 @@ export default function TabLayout() {
           ),
         }}
       />
-    </Tabs>
+      <Tabs.Screen
+        name="partner"
+        options={{
+          title: 'Пара',
+          tabBarIcon: ({ size, color }) => (
+            <Heart size={TAB_ICON_SIZE} color={color} strokeWidth={1.8} />
+          ),
+        }}
+      />
+      </Tabs>
+      <MascotOverlay />
+    </>
   );
 }
 

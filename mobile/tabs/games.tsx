@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   Dimensions,
   StatusBar,
   Platform,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { 
@@ -33,6 +35,9 @@ import Animated, {
   runOnJS
 } from 'react-native-reanimated';
 import { router } from 'expo-router';
+import { getRooms, createRoom, type Room } from '../services/game.service';
+import { getSocket } from '../services/socket';
+import type { Socket } from 'socket.io-client';
 import * as Haptics from 'expo-haptics';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -229,8 +234,54 @@ function RoomCard({ id, gameType, bet, players, maxPlayers, onJoin }: RoomCardPr
   );
 }
 
+type GameType = 'poker' | 'quiz' | 'chess' | 'wordle';
+
 export default function GamesScreen() {
   const [activeTab, setActiveTab] = useState('games');
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loadingRooms, setLoadingRooms] = useState(false);
+  const [gameType, setGameType] = useState<GameType>('poker');
+  const [showCreate, setShowCreate] = useState(false);
+  const [bet, setBet] = useState('50');
+  const [tableType, setTableType] = useState<'standard' | 'premium' | 'elite'>('standard');
+  const socketRef = useRef<Socket | null>(null);
+
+  const loadRooms = async () => {
+    setLoadingRooms(true);
+    try {
+      const data = await getRooms({ gameType });
+      setRooms(data);
+    } catch (e) {
+      console.log('Failed to load rooms', e);
+    } finally {
+      setLoadingRooms(false);
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    loadRooms();
+    (async () => {
+      try {
+        const socket = await getSocket();
+        if (!isMounted) return;
+        socketRef.current = socket;
+        const handler = () => loadRooms();
+        socket.on('room_list_updated', handler);
+        // store handler for cleanup on dependency change/unmount
+        (socketRef as any).currentHandler = handler;
+      } catch {}
+    })();
+    return () => {
+      isMounted = false;
+      const socket = socketRef.current;
+      const handler = (socketRef as any).currentHandler;
+      if (socket && handler) {
+        try { socket.off('room_list_updated', handler); } catch {}
+      }
+      (socketRef as any).currentHandler = null;
+    };
+  }, [gameType]);
 
   const games = [
     {
@@ -241,8 +292,8 @@ export default function GamesScreen() {
       minBet: 50,
       maxBet: 500,
       isPopular: true,
-      route: null,
-      isAvailable: false,
+      route: '/(tabs)/games',
+      isAvailable: true,
     },
     {
       title: 'Викторина',
@@ -251,7 +302,7 @@ export default function GamesScreen() {
       players: 12,
       minBet: 20,
       maxBet: 200,
-      route: '/(games)/quiz',
+      route: null,
       isAvailable: true,
     },
     {
@@ -261,7 +312,17 @@ export default function GamesScreen() {
       players: 4,
       minBet: 30,
       maxBet: 300,
-      route: '/(games)/chess',
+      route: null,
+      isAvailable: true,
+    },
+    {
+      title: 'Wordle',
+      description: 'Словарная дуэль на время',
+      icon: <Crown size={24} color="#D97A6C" strokeWidth={2} />,
+      players: 8,
+      minBet: 10,
+      maxBet: 100,
+      route: null,
       isAvailable: true,
     },
     {
@@ -276,11 +337,21 @@ export default function GamesScreen() {
     },
   ];
 
-  const rooms = [
-    { id: 'A1B2', gameType: 'Покер', bet: 100, players: 1, maxPlayers: 2 },
-    { id: 'C3D4', gameType: 'Викторина', bet: 50, players: 2, maxPlayers: 4 },
-    { id: 'E5F6', gameType: 'Шахматы', bet: 75, players: 2, maxPlayers: 2 },
-  ];
+  const handleCreateRoom = async () => {
+    try {
+      const payload: any = { gameType, bet: Number(bet) || 50, maxPlayers: gameType === 'poker' ? 8 : 2 };
+      if (gameType === 'poker') payload.tableType = tableType;
+      const room = await createRoom(payload);
+      await loadRooms();
+      setShowCreate(false);
+      // сразу в созданную комнату
+      if (room?.id) {
+        router.push({ pathname: '/(games)/room/[id]', params: { id: String(room.id) } } as any);
+      }
+    } catch (e) {
+      console.log('Failed to create room', e);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -312,20 +383,34 @@ export default function GamesScreen() {
         </TouchableOpacity>
       </Animated.View>
 
+      {/* Game type filter */}
+      <Animated.View entering={FadeInDown.delay(220)} style={[styles.tabContainer, { marginTop: -8 }] }>
+        {(['poker','quiz','chess','wordle'] as GameType[]).map((gt) => (
+          <TouchableOpacity key={gt} style={[styles.tab, gameType === gt && styles.activeTab]} onPress={() => setGameType(gt)}>
+            <Text style={[styles.tabText, gameType === gt && styles.activeTabText]}>
+              {gt === 'poker' ? 'Покер' : gt === 'quiz' ? 'Викторина' : gt === 'chess' ? 'Шахматы' : 'Wordle'}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </Animated.View>
+
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {activeTab === 'games' ? (
           <View style={styles.gamesGrid}>
-            {games.map((game, index) => (
+                {games.map((game, index) => (
               <GameCard
                 key={game.title}
                 {...game}
                 onPress={() => {
-                  if (game.route && game.isAvailable) {
-                    router.push(game.route as any);
-                  }
+                  if (!game.isAvailable) return;
+                  // Для всех доступных игр используем список комнат
+                  if (game.title === 'Покер') setGameType('poker');
+                  if (game.title === 'Викторина') setGameType('quiz');
+                  if (game.title === 'Шахматы') setGameType('chess');
+                  setActiveTab('rooms');
                 }}
                 delay={300 + index * 100}
                 isAvailable={game.isAvailable}
@@ -333,18 +418,37 @@ export default function GamesScreen() {
             ))}
           </View>
         ) : (
-          <Animated.View entering={FadeInUp.delay(300)} style={styles.roomsList}>
+           <Animated.View entering={FadeInUp.delay(300)} style={styles.roomsList}>
             <Text style={styles.roomsTitle}>Доступные комнаты</Text>
-            {rooms.map((room, index) => (
-              <RoomCard
-                key={room.id}
-                {...room}
-                onJoin={() => console.log(`Join room ${room.id}`)}
-              />
-            ))}
+            {loadingRooms ? (
+              <Text style={{ color: '#8C7F7D' }}>Загрузка...</Text>
+            ) : rooms.length === 0 ? (
+              <Text style={{ color: '#8C7F7D' }}>Комнаты отсутствуют</Text>
+            ) : (
+              rooms.map((room) => (
+                <RoomCard
+                  key={String(room.id)}
+                  id={String(room.id)}
+                  gameType={room.gameType}
+                  bet={room.bet}
+                  players={(room as any).playerCount ?? (Array.isArray((room as any).players) ? (room as any).players.length : (room as any).players || 0)}
+                  maxPlayers={room.maxPlayers}
+                  onJoin={() => router.push({ pathname: '/(games)/room/[id]', params: { id: String(room.id) } } as any)}
+                />
+              ))
+            )}
+            {/* Quick create buttons for faster testing */}
+            <View style={[styles.row, { marginTop: 12 }]}> 
+              <TouchableOpacity style={[styles.segmentBtn, styles.segmentBtnActive]} onPress={() => { setGameType('poker'); setBet('50'); setTableType('standard'); setShowCreate(true); }}>
+                <Text style={[styles.segmentText, styles.segmentTextActive]}>Быстро: Покер 50</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.segmentBtn, styles.segmentBtnActive, { marginLeft: 8 }]} onPress={() => { setGameType('quiz'); setShowCreate(true); }}>
+                <Text style={[styles.segmentText, styles.segmentTextActive]}>Быстро: Викторина</Text>
+              </TouchableOpacity>
+            </View>
             
             <View style={styles.createRoomContainer}>
-              <TouchableOpacity style={styles.createRoomButton}>
+              <TouchableOpacity style={styles.createRoomButton} onPress={() => setShowCreate(true)}>
                 <LinearGradient
                   colors={['#D97A6C', '#E89F93']}
                   style={styles.createRoomGradient}
@@ -356,6 +460,51 @@ export default function GamesScreen() {
           </Animated.View>
         )}
       </ScrollView>
+
+      {/* Create Room Modal */}
+      <Modal visible={showCreate} transparent animationType="slide" onRequestClose={() => setShowCreate(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <LinearGradient colors={['#FFFFFF', '#FFF8F6']} style={{ padding: 16, borderRadius: 16 }}>
+              <Text style={styles.roomsTitle}>Новая комната</Text>
+              <Text style={styles.modalLabel}>Игра</Text>
+              <View style={styles.row}>
+                {(['poker','quiz','chess','wordle'] as GameType[]).map((gt) => (
+                  <TouchableOpacity key={gt} style={[styles.segmentBtn, gameType === gt && styles.segmentBtnActive]} onPress={() => setGameType(gt)}>
+                    <Text style={[styles.segmentText, gameType === gt && styles.segmentTextActive]}>
+                          {gt === 'poker' ? 'Покер' : gt === 'quiz' ? 'Викторина' : gt === 'chess' ? 'Шахматы' : 'Wordle'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {gameType === 'poker' && (
+                <>
+                  <Text style={styles.modalLabel}>Ставка</Text>
+                  <TextInput style={styles.input} keyboardType="number-pad" value={bet} onChangeText={setBet} placeholder="50" placeholderTextColor="#B8A8A4" />
+                  <Text style={styles.modalLabel}>Стол</Text>
+                  <View style={styles.row}>
+                    {(['standard','premium','elite'] as const).map(tt => (
+                      <TouchableOpacity key={tt} style={[styles.segmentBtn, tableType === tt && styles.segmentBtnActive]} onPress={() => setTableType(tt)}>
+                        <Text style={[styles.segmentText, tableType === tt && styles.segmentTextActive]}>
+                          {tt === 'standard' ? '5/10' : tt === 'premium' ? '25/50' : '100/200'}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </>
+              )}
+              <View style={[styles.row, { justifyContent: 'flex-end', marginTop: 12 }]}>
+                <TouchableOpacity style={[styles.segmentBtn]} onPress={() => setShowCreate(false)}>
+                  <Text style={styles.segmentText}>Отмена</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.segmentBtn, styles.segmentBtnActive, { marginLeft: 8 }]} onPress={handleCreateRoom}>
+                  <Text style={[styles.segmentText, styles.segmentTextActive]}>Создать</Text>
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -628,4 +777,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
   },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 20 },
+  modalCard: { borderRadius: 16, overflow: 'hidden' },
+  input: { backgroundColor: '#FFF8F6', borderWidth: 1, borderColor: '#F2E9E8', borderRadius: 12, paddingHorizontal: 12, height: 44, color: '#4A3F3D' },
+  modalLabel: { fontSize: 12, color: '#4A3F3D', fontWeight: '600', marginTop: 8, marginBottom: 6 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  segmentBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: '#F2E9E8', backgroundColor: '#FFFFFF' },
+  segmentBtnActive: { borderColor: '#D97A6C', backgroundColor: '#EADFD8' },
+  segmentText: { color: '#8C7F7D', fontWeight: '600' },
+  segmentTextActive: { color: '#D97A6C' },
 });

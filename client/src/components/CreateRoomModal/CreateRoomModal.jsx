@@ -425,7 +425,7 @@ const CreateRoomModal = ({ isOpen, onClose, onSubmit, gameType }) => {
       <div className={styles.content}>
         <div className={styles.gameInfo}>
           <div className={styles.gameIcon}>
-            {gameConfig?.Icon && <gameConfig.Icon size={32} />}
+            {gameConfig?.icon && gameConfig.icon}
           </div>
           <div className={styles.gameDetails}>
             <h3 className={styles.gameName}>{gameConfig?.name}</h3>

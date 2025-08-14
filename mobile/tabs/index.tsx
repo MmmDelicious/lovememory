@@ -22,6 +22,10 @@ import Animated, {
   runOnJS
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { useAuth } from '../context/AuthContext';
+import { getSocket } from '../services/socket';
+import { router } from 'expo-router';
+import { getProfileStats } from '../services/user.service';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -96,8 +100,42 @@ function QuickAction({ icon, title, onPress, delay }: QuickActionProps) {
 }
 
 export default function DashboardScreen() {
-  const [coins, setCoins] = useState(1250);
-  const [userName] = useState('Алексей');
+  const { user, setUser } = useAuth();
+  const [coins, setCoins] = useState<number>(user?.coins ?? 0);
+  const userName = user?.first_name || (user?.email ? user.email.split('@')[0] : 'Гость');
+  const [stats, setStats] = useState<{ gamesPlayed: number; wins: number; winRate: number }>(
+    { gamesPlayed: 0, wins: 0, winRate: 0 }
+  );
+
+  useEffect(() => {
+    setCoins(user?.coins ?? 0);
+  }, [user?.coins]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const socket = await getSocket();
+        const handler = (newCoins: number) => {
+          setCoins(newCoins);
+          if (user) setUser({ ...user, coins: newCoins });
+        };
+        socket.on('update_coins', handler);
+      } catch {}
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getProfileStats();
+        setStats({
+          gamesPlayed: res.data?.gamesPlayed ?? 0,
+          wins: res.data?.wins ?? 0,
+          winRate: Math.round((res.data?.winRate ?? 0) * 100),
+        });
+      } catch {}
+    })();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -138,21 +176,21 @@ export default function DashboardScreen() {
             <StatCard
               icon={<Trophy size={20} color="#D97A6C" strokeWidth={2} />}
               title="Побед"
-              value="24"
-              subtitle="за неделю"
+              value={String(stats.wins)}
+              subtitle="за все время"
               delay={200}
             />
             <StatCard
               icon={<Users size={20} color="#D97A6C" strokeWidth={2} />}
               title="Игр"
-              value="38"
+              value={String(stats.gamesPlayed)}
               subtitle="всего"
               delay={250}
             />
             <StatCard
               icon={<TrendingUp size={20} color="#D97A6C" strokeWidth={2} />}
               title="Рейтинг"
-              value="85%"
+              value={`${stats.winRate}%`}
               subtitle="винрейт"
               delay={300}
             />
@@ -173,13 +211,13 @@ export default function DashboardScreen() {
             <QuickAction
               icon={<GameController2 size={24} color="#FFFFFF" strokeWidth={2} />}
               title="Играть"
-              onPress={() => console.log('Navigate to games')}
+              onPress={() => router.push('/(tabs)/games')}
               delay={400}
             />
             <QuickAction
               icon={<Calendar size={24} color="#FFFFFF" strokeWidth={2} />}
               title="События"
-              onPress={() => console.log('Navigate to events')}
+              onPress={() => router.push('/(tabs)/planner')}
               delay={450}
             />
             <QuickAction

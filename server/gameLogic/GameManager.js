@@ -2,6 +2,7 @@ const TicTacToeGame = require('./TicTacToeGame');
 const ChessGame = require('./ChessGame');
 const PokerGame = require('./PokerGame');
 const QuizGame = require('./QuizGame');
+const WordleGame = require('./WordleGame');
 
 class GameManager {
   constructor() {
@@ -43,6 +44,10 @@ class GameManager {
         // Для квиза нужны только ID игроков
         const quizPlayers = players.map(player => player.id || player);
         gameInstance = new QuizGame(quizPlayers);
+        break;
+      case 'wordle':
+        const wordlePlayers = players.map(player => player.id || player);
+        gameInstance = new WordleGame(wordlePlayers, options);
         break;
       default:
         throw new Error(`Unsupported game type: ${gameType}`);

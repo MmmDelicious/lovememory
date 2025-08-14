@@ -13,9 +13,11 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Mail, Lock, Eye, EyeOff, Heart, ArrowRight, User } from 'lucide-react-native';
 import Animated, { FadeInDown, FadeInUp, BounceIn } from 'react-native-reanimated';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
+import { useAuth } from '../context/AuthContext';
 
 export default function RegisterScreen() {
+  const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,11 +27,16 @@ export default function RegisterScreen() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
+    if (!email || !password || password !== confirmPassword) return;
     setIsLoading(true);
-    // TODO: Implement register logic
-    setTimeout(() => {
+    try {
+      await register(email, password, name);
+      router.replace('/(tabs)');
+    } catch (e) {
+      console.log('Register error', e);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const handleGoogleRegister = async () => {

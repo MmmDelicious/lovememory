@@ -21,9 +21,29 @@ const server = http.createServer(app);
 
 const io = initSocket(server, app);
 
+// Build CORS allow-list. Supports comma-separated ALLOWED_ORIGINS.
+const defaultOrigin = process.env.CLIENT_URL || "http://localhost:5173";
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+if (!allowedOrigins.includes(defaultOrigin)) {
+  allowedOrigins.push(defaultOrigin);
+}
+
 app.use(cors({
   credentials: true,
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  origin: (origin, callback) => {
+    // Allow non-browser or same-origin requests
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // In development, allow localhost origins automatically
+    if (process.env.NODE_ENV !== 'production' && /^(http:\/\/|https:\/\/)localhost:\d+/.test(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express.json());
 app.use(cookieParser());

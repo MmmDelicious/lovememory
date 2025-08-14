@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,15 @@ import {
   Dimensions,
   StatusBar,
   Image,
+  TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, Settings, Trophy, Coins, Calendar, Heart, LogOut, CreditCard as Edit, Camera, Star, TowerControl as GameController2, Award } from 'lucide-react-native';
 import Animated, { FadeInDown, FadeInUp, BounceIn } from 'react-native-reanimated';
+import * as ImagePicker from 'expo-image-picker';
+import { uploadAvatarFile } from '../services/user.service';
+import { useAuth } from '../context/AuthContext';
+import { getProfile as apiGetProfile, getProfileStats as apiGetProfileStats } from '../services/user.service';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -97,43 +102,52 @@ function Badge({ icon, title, isEarned }: BadgeProps) {
 }
 
 export default function ProfileScreen() {
-  const [user] = useState({
-    name: 'Алексей Петров',
-    email: 'alexey@example.com',
-    joinDate: '15 января 2024',
-    avatar: null,
-    level: 12,
-    coins: 2450,
-    gamesPlayed: 156,
-    winRate: 68,
-  });
+  const { user: authUser, setUser: setAuthUser, logout } = useAuth();
+  const [profile, setProfile] = useState<any>(authUser);
+  const [stats, setStats] = useState<any[]>([]);
+  const [edit, setEdit] = useState<{ first_name?: string; gender?: string; city?: string }>({});
+  const [saving, setSaving] = useState(false);
 
-  const stats = [
-    {
-      icon: <GameController2 size={20} color="#D97A6C" strokeWidth={2} />,
-      title: 'Игр сыграно',
-      value: '156',
-      subtitle: 'за все время',
-    },
-    {
-      icon: <Trophy size={20} color="#D97A6C" strokeWidth={2} />,
-      title: 'Побед',
-      value: '106',
-      subtitle: '68% винрейт',
-    },
-    {
-      icon: <Star size={20} color="#D97A6C" strokeWidth={2} />,
-      title: 'Уровень',
-      value: '12',
-      subtitle: '1,250 опыта',
-    },
-    {
-      icon: <Coins size={20} color="#D97A6C" strokeWidth={2} />,
-      title: 'Монет',
-      value: '2,450',
-      subtitle: 'текущий баланс',
-    },
-  ];
+  useEffect(() => {
+    (async () => {
+      try {
+        const [p, s] = await Promise.all([apiGetProfile(), apiGetProfileStats()]);
+        setProfile(p.data);
+        setEdit({ first_name: p.data?.first_name || '', gender: p.data?.gender || 'other', city: p.data?.city || '' });
+        setAuthUser(p.data);
+        const statItems = [
+          {
+            icon: <GameController2 size={20} color="#D97A6C" strokeWidth={2} />,
+            title: 'Игр сыграно',
+            value: String(s.data?.gamesPlayed ?? 0),
+            subtitle: 'за все время',
+          },
+          {
+            icon: <Trophy size={20} color="#D97A6C" strokeWidth={2} />,
+            title: 'Побед',
+            value: String(s.data?.wins ?? 0),
+            subtitle: `${Math.round((s.data?.winRate ?? 0) * 100)}% винрейт`,
+          },
+          {
+            icon: <Star size={20} color="#D97A6C" strokeWidth={2} />,
+            title: 'Уровень',
+            value: String(s.data?.level ?? 1),
+            subtitle: `${s.data?.xp ?? 0} опыта`,
+          },
+          {
+            icon: <Coins size={20} color="#D97A6C" strokeWidth={2} />,
+            title: 'Монет',
+            value: String(p.data?.coins ?? 0),
+            subtitle: 'текущий баланс',
+          },
+        ];
+        setStats(statItems);
+      } catch (e) {
+        // fallback
+        setStats([]);
+      }
+    })();
+  }, []);
 
   const badges = [
     {
@@ -174,20 +188,35 @@ export default function ProfileScreen() {
           >
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
-                {user.avatar ? (
-                  <Image source={{ uri: user.avatar }} style={styles.avatarImage} />
+                {profile?.avatarUrl ? (
+                  <Image source={{ uri: profile.avatarUrl }} style={styles.avatarImage} />
                 ) : (
                   <User size={40} color="#FFFFFF" strokeWidth={2} />
                 )}
               </View>
-              <TouchableOpacity style={styles.cameraButton}>
+              <TouchableOpacity
+                style={styles.cameraButton}
+                onPress={async () => {
+                  const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
+                  if (!res.canceled && res.assets?.[0]?.uri) {
+                    try {
+                      await uploadAvatarFile(res.assets[0].uri);
+                      const p = await apiGetProfile();
+                      setProfile(p.data);
+                      setAuthUser(p.data);
+                    } catch (e) {
+                      console.log('Failed to upload avatar', e);
+                    }
+                  }
+                }}
+              >
                 <Camera size={16} color="#FFFFFF" strokeWidth={2} />
               </TouchableOpacity>
             </View>
             
-            <Text style={styles.userName}>{user.name}</Text>
-            <Text style={styles.userEmail}>{user.email}</Text>
-            <Text style={styles.joinDate}>Участник с {user.joinDate}</Text>
+            <Text style={styles.userName}>{profile?.first_name || (profile?.email ? profile.email.split('@')[0] : '')}</Text>
+            <Text style={styles.userEmail}>{profile?.email}</Text>
+            <Text style={styles.joinDate}>Монет: {profile?.coins ?? 0}</Text>
             
             <TouchableOpacity style={styles.editButton}>
               <Edit size={16} color="#D97A6C" strokeWidth={2} />
@@ -220,6 +249,66 @@ export default function ProfileScreen() {
                 {...badge}
               />
             ))}
+          </View>
+        </Animated.View>
+
+        {/* Edit Profile */}
+        <Animated.View entering={FadeInUp.delay(450)} style={styles.statsContainer}>
+          <Text style={styles.sectionTitle}>Личные данные</Text>
+          <View style={styles.menuCard}>
+            <LinearGradient colors={['#FFFFFF', '#FFF8F6']} style={styles.menuGradient}>
+              <View style={{ padding: 16 }}>
+                <Text style={styles.inputLabel}>Имя</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Ваше имя"
+                  placeholderTextColor="#B8A8A4"
+                  value={edit.first_name}
+                  onChangeText={(t) => setEdit((e) => ({ ...e, first_name: t }))}
+                />
+                <Text style={[styles.inputLabel, { marginTop: 12 }]}>Город</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Город"
+                  placeholderTextColor="#B8A8A4"
+                  value={edit.city}
+                  onChangeText={(t) => setEdit((e) => ({ ...e, city: t }))}
+                />
+                <Text style={[styles.inputLabel, { marginTop: 12 }]}>Пол</Text>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  {['male', 'female', 'other'].map((g) => (
+                    <TouchableOpacity
+                      key={g}
+                      style={[styles.genderBtn, edit.gender === g && styles.genderBtnActive]}
+                      onPress={() => setEdit((e) => ({ ...e, gender: g }))}
+                    >
+                      <Text style={[styles.genderText, edit.gender === g && styles.genderTextActive]}>
+                        {g === 'male' ? 'М' : g === 'female' ? 'Ж' : 'Др.'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <TouchableOpacity
+                  style={[styles.primaryBtn, { marginTop: 16 }]}
+                  disabled={saving}
+                  onPress={async () => {
+                    setSaving(true);
+                    try {
+                      const res = await require('../services/user.service').updateProfile(edit);
+                      const p = await apiGetProfile();
+                      setProfile(p.data);
+                      setAuthUser(p.data);
+                    } catch (e) {
+                      console.log('Failed to update profile', e);
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                >
+                  <Text style={styles.btnText}>{saving ? 'Сохранение...' : 'Сохранить'}</Text>
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
           </View>
         </Animated.View>
 
@@ -270,7 +359,7 @@ export default function ProfileScreen() {
               <MenuItem
                 icon={<LogOut size={20} color="#D35D5D" strokeWidth={2} />}
                 title="Выход"
-                onPress={() => console.log('Logout')}
+                onPress={logout}
                 showArrow={false}
               />
             </LinearGradient>
@@ -382,6 +471,44 @@ const styles = StyleSheet.create({
     color: '#D97A6C',
     marginLeft: 6,
   },
+  inputLabel: {
+    fontSize: 12,
+    fontFamily: 'System',
+    fontWeight: '600',
+    color: '#4A3F3D',
+    marginBottom: 6,
+  },
+  textInput: {
+    backgroundColor: '#FFF8F6',
+    borderWidth: 1,
+    borderColor: '#F2E9E8',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 44,
+    color: '#4A3F3D',
+  },
+  genderBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#F2E9E8',
+    backgroundColor: '#FFFFFF',
+  },
+  genderBtnActive: {
+    borderColor: '#D97A6C',
+    backgroundColor: '#EADFD8',
+  },
+  genderText: { color: '#8C7F7D', fontWeight: '600' },
+  genderTextActive: { color: '#D97A6C' },
+  primaryBtn: {
+    backgroundColor: '#D97A6C',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    alignSelf: 'flex-start',
+  },
+  btnText: { color: '#fff', fontWeight: '700' },
   statsContainer: {
     paddingHorizontal: 20,
     marginBottom: 32,
