@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Users, Coins, Trophy, Clock, Shield, Target, Crown, Brain, Sparkles, Zap } from 'lucide-react';
+import { GAMES_CONFIG } from '../../config/games.config';
 import styles from './CreateRoomModal.module.css';
 
 interface CreateRoomModalProps {
@@ -28,20 +29,29 @@ interface GameSettings {
   }[];
 }
 
-const GAME_SETTINGS: Record<string, GameSettings> = {
-  'tic-tac-toe': {
-    name: 'Крестики-нолики',
-    icon: <Target size={20} />,
-    maxPlayersOptions: [2],
-    defaultMaxPlayers: 2,
-    hasDifficulty: false,
-    hasTimeLimit: true,
-    hasPrivateRooms: false,
-    minBet: 10,
-    maxBet: 500,
-    defaultBet: 25,
-    description: 'Быстрая игра на логику',
-    specialSettings: [
+
+
+// Преобразование конфигурации игры в настройки модала
+const getGameSettings = (gameType: string): GameSettings => {
+  const game = GAMES_CONFIG[gameType];
+  if (!game) {
+    // Fallback на tic-tac-toe если игра не найдена
+    return getGameSettings('tic-tac-toe');
+  }
+
+  return {
+    name: game.name,
+    icon: <game.Icon size={20} />,
+    maxPlayersOptions: gameType === 'poker' ? [2, 3, 4, 5, 6] : gameType === 'memory' ? [2, 3, 4] : [2],
+    defaultMaxPlayers: gameType === 'poker' ? 4 : 2,
+    hasDifficulty: ['chess', 'memory'].includes(gameType),
+    hasTimeLimit: ['tic-tac-toe', 'chess', 'quiz'].includes(gameType),
+    hasPrivateRooms: ['chess', 'poker'].includes(gameType),
+    minBet: game.minBet || 10,
+    maxBet: game.maxBet || 1000,
+    defaultBet: game.defaultBet || 50,
+    description: game.description || '',
+    specialSettings: gameType === 'tic-tac-toe' ? [
       {
         label: 'Лимит времени на ход',
         options: [
@@ -52,21 +62,7 @@ const GAME_SETTINGS: Record<string, GameSettings> = {
         ],
         default: '60'
       }
-    ]
-  },
-  'chess': {
-    name: 'Шахматы',
-    icon: <Crown size={20} />,
-    maxPlayersOptions: [2],
-    defaultMaxPlayers: 2,
-    hasDifficulty: true,
-    hasTimeLimit: true,
-    hasPrivateRooms: true,
-    minBet: 50,
-    maxBet: 2000,
-    defaultBet: 100,
-    description: 'Стратегическая битва умов',
-    specialSettings: [
+    ] : gameType === 'chess' ? [
       {
         label: 'Контроль времени',
         options: [
@@ -77,99 +73,8 @@ const GAME_SETTINGS: Record<string, GameSettings> = {
         ],
         default: 'rapid'
       }
-    ]
-  },
-  'quiz': {
-    name: 'Квиз',
-    icon: <Brain size={20} />,
-    maxPlayersOptions: [2, 3, 4],
-    defaultMaxPlayers: 2,
-    hasDifficulty: true,
-    hasTimeLimit: true,
-    hasPrivateRooms: true,
-    minBet: 20,
-    maxBet: 1000,
-    defaultBet: 50,
-    description: 'Проверьте свои знания',
-    specialSettings: [
-      {
-        label: 'Категория вопросов',
-        options: [
-          { value: 'general', label: 'Общие знания' },
-          { value: 'science', label: 'Наука' },
-          { value: 'history', label: 'История' },
-          { value: 'sports', label: 'Спорт' },
-          { value: 'entertainment', label: 'Развлечения' }
-        ],
-        default: 'general'
-      },
-      {
-        label: 'Количество вопросов',
-        options: [
-          { value: '10', label: '10 вопросов' },
-          { value: '15', label: '15 вопросов' },
-          { value: '20', label: '20 вопросов' }
-        ],
-        default: '15'
-      }
-    ]
-  },
-  'poker': {
-    name: 'Покер',
-    icon: <Sparkles size={20} />,
-    maxPlayersOptions: [2, 3, 4, 5, 6],
-    defaultMaxPlayers: 4,
-    hasDifficulty: false,
-    hasTimeLimit: false,
-    hasPrivateRooms: true,
-    minBet: 100,
-    maxBet: 5000,
-    defaultBet: 200,
-    description: 'Карточная игра на мастерство',
-    specialSettings: [
-      {
-        label: 'Тип покера',
-        options: [
-          { value: 'texas', label: 'Техасский Холдем' },
-          { value: 'omaha', label: 'Омаха' },
-          { value: 'stud', label: 'Стад покер' }
-        ],
-        default: 'texas'
-      },
-      {
-        label: 'Структура блайндов',
-        options: [
-          { value: 'fixed', label: 'Фиксированные' },
-          { value: 'increasing', label: 'Растущие' }
-        ],
-        default: 'fixed'
-      }
-    ]
-  },
-  'memory': {
-    name: 'Мемори',
-    icon: <Zap size={20} />,
-    maxPlayersOptions: [2, 3, 4],
-    defaultMaxPlayers: 2,
-    hasDifficulty: true,
-    hasTimeLimit: true,
-    hasPrivateRooms: false,
-    minBet: 15,
-    maxBet: 300,
-    defaultBet: 30,
-    description: 'Тренируйте память',
-    specialSettings: [
-      {
-        label: 'Размер поля',
-        options: [
-          { value: '4x4', label: '4×4 (16 карт)' },
-          { value: '6x6', label: '6×6 (36 карт)' },
-          { value: '8x8', label: '8×8 (64 карты)' }
-        ],
-        default: '4x4'
-      }
-    ]
-  }
+    ] : undefined
+  };
 };
 
 const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
@@ -178,7 +83,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
   onSubmit,
   gameType
 }) => {
-  const gameSettings = GAME_SETTINGS[gameType] || GAME_SETTINGS['tic-tac-toe'];
+  const gameSettings = getGameSettings(gameType);
   
   const [formData, setFormData] = useState({
     bet: gameSettings.defaultBet,

@@ -88,8 +88,13 @@ const GameRoomPage = () => {
                   makeMove={makeMove} 
                   handleReturnToLobby={handleReturnToLobby} 
                />;
+      case 'memory':
+        return <div className={styles.boardPlaceholder}>Игра Мемори в разработке...</div>;
+      case 'poker':
+        // Покер имеет отдельную страницу PokerPage
+        return <div className={styles.boardPlaceholder}>Покер должен быть на отдельной странице.</div>;
       default:
-        return <div className={styles.boardPlaceholder}>Неизвестный тип игры.</div>;
+        return <div className={styles.boardPlaceholder}>Неизвестный тип игры: {gameState.gameType}</div>;
     }
   };
   

@@ -144,6 +144,12 @@ export interface Player {
     name: string;
     category: string;
     Icon: React.ComponentType<any>;
+    description?: string;
+    difficulty?: 'easy' | 'medium' | 'hard';
+    players?: string;
+    minBet?: number;
+    maxBet?: number;
+    defaultBet?: number;
   }
   
   // Пропсы для игровых компонентов

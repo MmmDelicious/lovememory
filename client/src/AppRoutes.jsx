@@ -9,7 +9,7 @@ import RegisterPage from './pages/RegisterPage/RegisterPage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
 import DayDetailPage from './pages/DayDetailPage/DayDetailPage';
 import ProfilePage from './pages/ProfilePage/ProfilePage';
-import GamesPage from './pages/GamesPage/GamesPage.tsx';
+import GamesPage from './pages/GamesPage/GamesPage';
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
 import InsightsPage from './pages/InsightsPage/InsightsPage.tsx';
 import GameRoomPage from './pages/GameRoomPage/GameRoomPage';

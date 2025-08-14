@@ -7,13 +7,10 @@ import {
   Users, 
   Star, 
   Sparkles, 
-  Crown,
-  Target,
-  Brain,
-  Zap,
   ChevronRight,
   Play
 } from 'lucide-react';
+import { GAMES_CONFIG } from '../../config/games.config';
 import styles from './GamesPage.module.css';
 
 interface Game {
@@ -32,96 +29,70 @@ interface Game {
   featured?: boolean;
 }
 
-const GAMES: Game[] = [
-  {
-    id: 'tic-tac-toe',
-    name: 'Крестики-нолики',
-    category: 'Классика',
-    description: 'Классическая игра для двоих',
+// Дополнительные данные для отображения
+const GAME_EXTRAS: Record<string, { 
+  longDescription: string; 
+  gradient: string; 
+  image: string; 
+  duration: string; 
+  featured?: boolean;
+}> = {
+  'tic-tac-toe': {
     longDescription: 'Простая и увлекательная игра, которая никогда не выходит из моды. Проверьте свою стратегию!',
-    icon: <Target size={24} />,
-    path: '/games/tic-tac-toe',
     gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     image: 'https://images.pexels.com/photos/278918/pexels-photo-278918.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop',
-    difficulty: 'easy',
-    players: '2',
     duration: '5 мин',
     featured: true
   },
-  {
-    id: 'chess',
-    name: 'Шахматы',
-    category: 'Стратегия',
-    description: 'Стратегическая битва умов',
+  'chess': {
     longDescription: 'Королевская игра, которая развивает логическое мышление и стратегические навыки.',
-    icon: <Crown size={24} />,
-    path: '/games/chess',
     gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
     image: 'https://images.pexels.com/photos/260024/pexels-photo-260024.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop',
-    difficulty: 'hard',
-    players: '2',
     duration: '30 мин'
   },
-  {
-    id: 'quiz',
-    name: 'Квиз',
-    category: 'Викторина',
-    description: 'Проверьте свои знания вместе',
-    longDescription: 'Увлекательные вопросы на разные темы. Узнайте, кто из вас эрудит!',
-    icon: <Brain size={24} />,
-    path: '/games/quiz',
+  'quiz': {
+    longDescription: 'Интеллектуальная игра с различными вопросами. Покажите свою эрудицию!',
     gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
     image: 'https://images.pexels.com/photos/5428836/pexels-photo-5428836.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop',
-    difficulty: 'medium',
-    players: '2-4',
-    duration: '15 мин',
+    duration: '10 мин',
     featured: true
   },
-  {
-    id: 'poker',
-    name: 'Покер',
-    category: 'Карточные',
-    description: 'Карточная игра на удачу и мастерство',
-    longDescription: 'Классический покер с элементами блефа и стратегии. Почувствуйте себя в казино!',
-    icon: <Sparkles size={24} />,
-    path: '/games/poker',
+  'poker': {
+    longDescription: 'Классический техасский холдем. Блефуйте, считайте карты, выигрывайте!',
     gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    image: 'https://images.pexels.com/photos/1871508/pexels-photo-1871508.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop',
-    difficulty: 'hard',
-    players: '2-6',
+    image: 'https://images.pexels.com/photos/262333/pexels-photo-262333.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop',
     duration: '45 мин'
   },
-  {
-    id: 'memory',
-    name: 'Мемори',
-    category: 'Память',
-    description: 'Тренируйте память вместе',
-    longDescription: 'Найдите все пары карточек и покажите свою феноменальную память!',
-    icon: <Zap size={24} />,
-    path: '/games/memory',
+  'memory': {
+    longDescription: 'Переворачивайте карточки и запоминайте их расположение. Развивайте память!',
     gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-    image: 'https://images.pexels.com/photos/1040157/pexels-photo-1040157.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop',
-    difficulty: 'easy',
-    players: '2',
-    duration: '10 мин'
-  },
-  {
-    id: 'trivia',
-    name: 'Тривия',
-    category: 'Знания',
-    description: 'Интеллектуальная битва',
-    longDescription: 'Сложные вопросы для настоящих знатоков. Проверьте свою эрудицию!',
-    icon: <Trophy size={24} />,
-    path: '/games/trivia',
-    gradient: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-    image: 'https://images.pexels.com/photos/207662/pexels-photo-207662.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop',
-    difficulty: 'medium',
-    players: '2-4',
-    duration: '20 мин'
+    image: 'https://images.pexels.com/photos/193004/pexels-photo-193004.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop',
+    duration: '15 мин',
+    featured: true
   }
-];
+};
 
-const CATEGORIES = ['Все', 'Классика', 'Стратегия', 'Викторина', 'Карточные', 'Память', 'Знания'];
+// Создаем массив игр из конфигурации
+const GAMES: Game[] = Object.values(GAMES_CONFIG).map(game => {
+  const extras = GAME_EXTRAS[game.id] || {};
+  return {
+    id: game.id,
+    name: game.name,
+    category: game.category,
+    description: game.description || 'Увлекательная игра для всей семьи',
+    longDescription: extras.longDescription || game.description || '',
+    icon: <game.Icon size={24} />,
+    path: `/games/${game.id}`,
+    gradient: extras.gradient || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    image: extras.image || 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&fit=crop',
+    difficulty: game.difficulty || 'medium',
+    players: game.players || '2 игрока',
+    duration: extras.duration || '15 мин',
+    featured: extras.featured
+  };
+});
+
+const CATEGORIES = ['Все', 'Классика', 'Стратегия', 'Викторина', 'Карточные', 'Память', 'Слова'];
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
