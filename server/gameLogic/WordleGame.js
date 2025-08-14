@@ -1,130 +1,201 @@
-const RUSSIAN_WORDS = ['СЛОВО','ВРЕМЯ','ИГРА','ДОМА','ВОДА','РУКА','НОГА','ГЛАЗ','ДЕНЬ','НОЧЬ','ЗАМОК','КЛЮЧИ','ОКЕАН','ПАРТА', 'СОНЦЕ', 'ЗЕМЛЯ', 'КНИГА', 'ПОЛКА'];
+const { getRandomWord, getDictionary } = require('./wordle/dictionaries');
+const { evaluateGuess } = require('./wordle/utils');
 
 class WordleGame {
-  constructor(playerIds, options = {}) {
-    this.gameType = 'wordle';
-    this.players = playerIds.map(id => ({
-      id,
-      score: 0,
-      targetWord: this.getRandomWord(),
-      guesses: [],
-      currentGuess: '',
-      attempts: 1,
-      guessedLetters: {},
-    }));
-    this.status = 'in_progress';
-    this.gameDuration = options.duration || 180;
-    this.timeLeft = this.gameDuration;
-    this.onStateChange = options.onStateChange || (() => {});
-    
-    this.start();
+  constructor(roomId, settings = {}) {
+    this.roomId = roomId;
+    this.players = [];
+    this.status = 'waiting'; // waiting, in_progress, finished
+    this.language = settings.language || 'russian';
+    this.maxAttempts = 6;
+    this.targetWord = '';
+    this.playerGuesses = {}; // playerId -> array of guesses
+    this.playerResults = {}; // playerId -> array of results
+    this.scores = {}; // playerId -> score
+    this.gameStartTime = null;
+    this.currentRound = 1;
+    this.maxRounds = settings.rounds || 3;
+    this.winner = null;
   }
 
-  getRandomWord() {
-    return RUSSIAN_WORDS[Math.floor(Math.random() * RUSSIAN_WORDS.length)];
-  }
-
-  start() {
-    this.timer = setInterval(() => {
-      this.timeLeft--;
-      if (this.timeLeft <= 0) {
-        this.endGame();
-      }
-      this.onStateChange(this);
-    }, 1000);
-  }
-
-  endGame() {
-    clearInterval(this.timer);
-    this.status = 'finished';
-    const player1 = this.players[0];
-    const player2 = this.players[1];
-
-    if (player1.score > player2.score) {
-      this.winner = player1.id;
-    } else if (player2.score > player1.score) {
-      this.winner = player2.id;
-    } else {
-      this.winner = 'draw';
+  addPlayer(playerId, playerName) {
+    if (this.players.length >= 2) {
+      throw new Error('Room is full');
     }
-    this.onStateChange(this);
+
+    const player = {
+      id: playerId,
+      name: playerName,
+      ready: false
+    };
+
+    this.players.push(player);
+    this.playerGuesses[playerId] = [];
+    this.playerResults[playerId] = [];
+    this.scores[playerId] = 0;
+
+    return this.getGameState();
+  }
+
+  removePlayer(playerId) {
+    this.players = this.players.filter(p => p.id !== playerId);
+    delete this.playerGuesses[playerId];
+    delete this.playerResults[playerId];
+    delete this.scores[playerId];
+
+    if (this.players.length === 0) {
+      this.status = 'finished';
+    }
+
+    return this.getGameState();
+  }
+
+  startGame() {
+    if (this.players.length < 2) {
+      throw new Error('Need at least 2 players');
+    }
+
+    this.status = 'in_progress';
+    this.gameStartTime = Date.now();
+    this.generateNewWord();
+    
+    return this.getGameState();
+  }
+
+  generateNewWord() {
+    this.targetWord = getRandomWord(this.language).toUpperCase();
+    
+    // Очищаем попытки для нового раунда
+    for (const playerId of this.players.map(p => p.id)) {
+      this.playerGuesses[playerId] = [];
+      this.playerResults[playerId] = [];
+    }
   }
 
   makeMove(playerId, move) {
+    return this.makeGuess(playerId, move);
+  }
+
+  makeGuess(playerId, guess) {
     if (this.status !== 'in_progress') {
-      return { error: 'Игра уже окончена' };
+      throw new Error('Game is not in progress');
     }
+
+    if (!this.players.find(p => p.id === playerId)) {
+      throw new Error('Player not in game');
+    }
+
+    const normalizedGuess = guess.toUpperCase();
+    const dictionary = getDictionary(this.language);
     
-    const player = this.players.find(p => p.id === playerId);
-    if (!player) return { error: 'Игрок не найден' };
-
-    const { guess } = move;
-    if (guess.length !== 5) return { error: 'Слово должно состоять из 5 букв' };
-    if (!RUSSIAN_WORDS.includes(guess.toUpperCase())) return { error: 'Такого слова нет в словаре' };
-
-    player.guesses.push(guess);
-
-    const newGuessed = { ...player.guessedLetters };
-    for (let i = 0; i < guess.length; i++) {
-        const letter = guess[i];
-        if (player.targetWord[i] === letter) newGuessed[letter] = 'correct';
-        else if (player.targetWord.includes(letter) && newGuessed[letter] !== 'correct') newGuessed[letter] = 'present';
-        else if (!player.targetWord.includes(letter)) newGuessed[letter] = 'absent';
+    // Проверяем, что слово есть в словаре
+    if (!dictionary.includes(normalizedGuess.toLowerCase())) {
+      throw new Error('Word not in dictionary');
     }
-    player.guessedLetters = newGuessed;
 
-    if (guess === player.targetWord) {
-      player.score++;
-      this.resetPlayerBoard(player);
-    } else if (player.guesses.length >= 6) {
-      this.resetPlayerBoard(player);
+    // Проверяем длину слова
+    if (normalizedGuess.length !== this.targetWord.length) {
+      throw new Error('Wrong word length');
+    }
+
+    // Добавляем попытку
+    this.playerGuesses[playerId].push(normalizedGuess);
+    
+    // Оцениваем попытку
+    const result = evaluateGuess(normalizedGuess, this.targetWord);
+    this.playerResults[playerId].push(result);
+
+    // Проверяем, угадал ли игрок
+    const isCorrect = result.every(r => r === 'correct');
+    
+    if (isCorrect) {
+      // Игрок угадал слово
+      const attempts = this.playerGuesses[playerId].length;
+      const points = Math.max(0, 7 - attempts); // Больше очков за меньше попыток
+      this.scores[playerId] += points;
+      
+      this.nextRound();
+    } else if (this.playerGuesses[playerId].length >= this.maxAttempts) {
+      // Игрок исчерпал попытки
+      this.checkRoundEnd();
+    }
+
+    return this.getGameState();
+  }
+
+  checkRoundEnd() {
+    // Проверяем, закончили ли все игроки раунд
+    const allPlayersFinished = this.players.every(player => {
+      const guesses = this.playerGuesses[player.id];
+      const lastResult = this.playerResults[player.id][this.playerResults[player.id].length - 1];
+      
+      return guesses.length >= this.maxAttempts || 
+             (lastResult && lastResult.every(r => r === 'correct'));
+    });
+
+    if (allPlayersFinished) {
+      this.nextRound();
+    }
+  }
+
+  nextRound() {
+    if (this.currentRound >= this.maxRounds) {
+      this.endGame();
     } else {
-      player.attempts++;
+      this.currentRound++;
+      this.generateNewWord();
     }
-
-    this.onStateChange(this);
-    return { success: true };
   }
 
-  resetPlayerBoard(player) {
-    player.targetWord = this.getRandomWord();
-    player.guesses = [];
-    player.attempts = 1;
-    player.guessedLetters = {};
+  endGame() {
+    this.status = 'finished';
+    
+    // Определяем победителя
+    const maxScore = Math.max(...Object.values(this.scores));
+    const winners = this.players.filter(p => this.scores[p.id] === maxScore);
+    
+    if (winners.length === 1) {
+      this.winner = winners[0].id;
+    } else {
+      this.winner = 'draw';
+    }
   }
-  
+
   getState() {
+    return this.getGameState();
+  }
+
+  getGameState() {
     return {
-      gameType: this.gameType,
+      roomId: this.roomId,
+      gameType: 'wordle',
       status: this.status,
-      timeLeft: this.timeLeft,
+      players: this.players.map(p => p.id),
+      language: this.language,
+      currentRound: this.currentRound,
+      maxRounds: this.maxRounds,
+      maxAttempts: this.maxAttempts,
+      scores: this.scores,
       winner: this.winner,
-      playerScores: this.players.map(p => ({ id: p.id, score: p.score })),
+      targetWordLength: this.targetWord ? this.targetWord.length : 5,
+      // Личные данные игрока добавляются в GameManager
     };
   }
 
   getStateForPlayer(playerId) {
-    const player = this.players.find(p => p.id === playerId);
-    const opponent = this.players.find(p => p.id !== playerId);
-
-    if (!player) return null;
-
-    return {
-      ...this.getState(),
-      playerState: {
-        guesses: player.guesses,
-        attempts: player.attempts,
-        guessedLetters: player.guessedLetters,
-        score: player.score,
-      },
-      opponentState: {
-        score: opponent.score,
-      }
-    };
+    return this.getPlayerGameState(playerId);
   }
 
-  cleanup() {
-    clearInterval(this.timer);
+  getPlayerGameState(playerId) {
+    const baseState = this.getGameState();
+    
+    return {
+      ...baseState,
+      playerGuesses: this.playerGuesses[playerId] || [],
+      playerResults: this.playerResults[playerId] || [],
+      // В финальном состоянии показываем правильное слово
+      targetWord: this.status === 'finished' ? this.targetWord : undefined
+    };
   }
 }
 

@@ -7,7 +7,7 @@ import { useGameSocket } from '../../hooks/useGameSocket';
 
 import QuizGame from '../../components/QuizGame/QuizGame';
 import ChessGame from '../../components/ChessGame/ChessGame';
-import WordleGameComponent from '../../components/WordleGame/WordleGameComponent';
+import WordleGame from '../../components/WordleGame/WordleGame';
 import styles from './GameRoomPage.module.css';
 import victoryAnimation from '../../assets/victory.json';
 import defeatAnimation from '../../assets/defeat.json';
@@ -32,10 +32,6 @@ const GameRoomPage = () => {
 
     if (gameState.gameType === 'quiz') {
       return "Время для квиза!";
-    }
-    
-    if (gameState.gameType === 'wordle') {
-      return `Осталось времени: ${Math.floor(gameState.timeLeft / 60)}:${(gameState.timeLeft % 60).toString().padStart(2, '0')}`;
     }
 
     if (gameState.gameType === 'chess') {
@@ -94,10 +90,11 @@ const GameRoomPage = () => {
                   handleReturnToLobby={handleReturnToLobby} 
                />;
       case 'wordle':
-        return <WordleGameComponent
-                  gameState={gameState}
-                  user={user}
-                  makeMove={makeMove}
+        return <WordleGame 
+                  gameState={gameState} 
+                  user={user} 
+                  makeMove={makeMove} 
+                  handleReturnToLobby={handleReturnToLobby} 
                />;
       default:
         return <div className={styles.boardPlaceholder}>Неизвестный тип игры.</div>;

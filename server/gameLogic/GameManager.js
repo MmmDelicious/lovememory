@@ -46,8 +46,17 @@ class GameManager {
         gameInstance = new QuizGame(quizPlayers);
         break;
       case 'wordle':
-        const wordlePlayers = players.map(player => player.id || player);
-        gameInstance = new WordleGame(wordlePlayers, options);
+        gameInstance = new WordleGame(roomId, options);
+        // Добавляем игроков после создания
+        for (const player of players) {
+          const playerId = player.id || player;
+          const playerName = player.name || player.email || playerId;
+          gameInstance.addPlayer(playerId, playerName);
+        }
+        // Запускаем игру, если достаточно игроков
+        if (players.length >= 2) {
+          gameInstance.startGame();
+        }
         break;
       default:
         throw new Error(`Unsupported game type: ${gameType}`);

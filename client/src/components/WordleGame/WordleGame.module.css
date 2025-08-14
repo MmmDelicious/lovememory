@@ -1,0 +1,323 @@
+.wordleContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+}
+
+.gameInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.round {
+  font-weight: bold;
+  color: #2d3748;
+}
+
+.language {
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.scores {
+  display: flex;
+  gap: 15px;
+}
+
+.playerScore {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 14px;
+}
+
+.playerScore span:first-child {
+  color: #4a5568;
+  margin-bottom: 2px;
+}
+
+.playerScore span:last-child {
+  font-weight: bold;
+  color: #2d3748;
+}
+
+.gameBoard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.guessGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.guessRow {
+  display: flex;
+  gap: 5px;
+}
+
+.letterCell {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.letterCell.current {
+  border-color: #4f46e5;
+  background-color: #f8fafc;
+}
+
+.letterCell.correct {
+  background-color: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.letterCell.present {
+  background-color: #f59e0b;
+  color: white;
+  border-color: #f59e0b;
+}
+
+.letterCell.absent {
+  background-color: #6b7280;
+  color: white;
+  border-color: #6b7280;
+}
+
+.error {
+  color: #ef4444;
+  font-weight: bold;
+  text-align: center;
+  margin: 10px 0;
+  padding: 10px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.keyboardRow {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.key {
+  min-width: 40px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.key:hover:not(:disabled) {
+  background-color: #d1d5db;
+  transform: translateY(-1px);
+}
+
+.key:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.key.specialKey {
+  min-width: 60px;
+  font-size: 12px;
+  padding: 0 8px;
+}
+
+.key.correct {
+  background-color: #10b981;
+  color: white;
+}
+
+.key.present {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.key.absent {
+  background-color: #6b7280;
+  color: white;
+}
+
+.key.unused {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+/* Завершение игры */
+.gameEndContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  padding: 20px;
+}
+
+.brandTitle {
+  font-size: 18px;
+  color: #6b7280;
+  margin-bottom: 10px;
+  font-weight: 400;
+}
+
+.gameTitle {
+  font-size: 32px;
+  margin-bottom: 30px;
+  color: #1f2937;
+  font-weight: bold;
+}
+
+.results {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 30px;
+  border-radius: 16px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  min-width: 300px;
+}
+
+.resultText {
+  font-size: 24px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.targetWord {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #4a5568;
+}
+
+.finalScores {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.finalPlayerScore {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+}
+
+.playerName {
+  font-weight: 500;
+  color: #374151;
+}
+
+.scoreValue {
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.returnButton {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+}
+
+.returnButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+}
+
+.boardPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  font-size: 18px;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .wordleContainer {
+    padding: 10px;
+  }
+
+  .gameInfo {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .scores {
+    justify-content: center;
+  }
+
+  .letterCell {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .key {
+    min-width: 32px;
+    height: 38px;
+    font-size: 12px;
+  }
+
+  .key.specialKey {
+    min-width: 50px;
+    font-size: 10px;
+  }
+}

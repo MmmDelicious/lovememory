@@ -169,6 +169,38 @@ const GAME_SETTINGS: Record<string, GameSettings> = {
         default: '4x4'
       }
     ]
+  },
+  'wordle': {
+    name: 'Wordle',
+    icon: <Target size={20} />,
+    maxPlayersOptions: [2],
+    defaultMaxPlayers: 2,
+    hasDifficulty: false,
+    hasTimeLimit: false,
+    hasPrivateRooms: false,
+    minBet: 20,
+    maxBet: 200,
+    defaultBet: 50,
+    description: 'Угадайте слово за 6 попыток',
+    specialSettings: [
+      {
+        label: 'Язык словаря',
+        options: [
+          { value: 'russian', label: '🇷🇺 Русский' },
+          { value: 'english', label: '🇺🇸 English' }
+        ],
+        default: 'russian'
+      },
+      {
+        label: 'Количество раундов',
+        options: [
+          { value: '1', label: '1 раунд' },
+          { value: '3', label: '3 раунда' },
+          { value: '5', label: '5 раундов' }
+        ],
+        default: '3'
+      }
+    ]
   }
 };
 

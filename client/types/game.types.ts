@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * @fileoverview TypeScript типы для игровой системы клиента
  */
@@ -7,7 +5,7 @@ import React from 'react';
 // Базовые типы игрока
 export interface Player {
     id: string;
-    name:string;
+    name: string;
     gender: 'male' | 'female' | 'other';
     avatarUrl?: string;
   }
@@ -145,16 +143,7 @@ export interface Player {
     id: string;
     name: string;
     category: string;
-    description: string;
-    longDescription: string;
-    icon: React.ReactNode | string;
-    path: string;
-    gradient: string;
-    image: string;
-    difficulty: 'easy' | 'medium' | 'hard';
-    players: string;
-    duration: string;
-    featured?: boolean;
+    Icon: React.ComponentType<any>;
   }
   
   // Пропсы для игровых компонентов
