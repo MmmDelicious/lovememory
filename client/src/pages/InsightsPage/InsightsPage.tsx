@@ -1,548 +1,727 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  Heart, 
-  MessageCircle, 
-  Calendar, 
-  Gamepad2, 
-  Trophy, 
-  Star,
+import {
   BarChart3,
   PieChart,
-  Activity,
+  TrendingUp,
   Users,
-  Gift,
-  Camera,
+  Calendar,
+  Trophy,
   Award,
-  ChevronRight,
+  Heart,
+  Star,
   Filter,
   Crown,
   Target,
-  Lightbulb
+  Lightbulb,
+  Network
 } from 'lucide-react';
 import styles from './InsightsPage.module.css';
 import userService from '../../services/user.service';
+import { useAuth } from '../../context/AuthContext';
+import LoveLanguageAnalysis from '../../components/LoveLanguageAnalysis/LoveLanguageAnalysis';
+import PremiumModal from '../../components/PremiumModal/PremiumModal';
+import relationshipGraphService from '../../services/relationshipGraph.service';
 
 // Mock данные для демонстрации (используются как фолбэк)
 const mockData = {
   harmonyScore: 87,
   previousScore: 82,
-  isPremium: false,
-  factors: {
-    communication: 92,
-    intimacy: 85,
-    entertainment: 89,
-    goals: 81,
-    balance: 88
-  },
-  activities: {
-    events: 52,
-    games: 38,
-    messages: 247,
-    photos: 15
-  },
-  comparisons: {
-    harmonyRank: 15, // топ 15%
-    eventsRank: 25,  // топ 25%
-    gamesRank: 8,    // топ 8%
-    messagesRank: 45 // топ 45%
-  },
   weeklyProgress: {
-    communication: 12,
-    sharedTime: 8,
-    gaming: 15
+    communication: 15,
+    sharedTime: 12,
+    gaming: 8
   }
 };
 
 const PSYCHOLOGY_QUOTES = [
   {
-    author: 'Джон Готтман',
-    text: 'Большинство супружеских споров невозможно полностью разрешить. Ключ — баланс позитива 5:1.',
-    advice: 'Чаще делитесь комплиментами и благодарностью — это добавляет тепла в повседневность.',
-    category: 'communication'
+    text: "Любовь - это не только смотреть друг на друга, но и смотреть в одном направлении.",
+    author: "Антуан де Сент-Экзюпери"
   },
   {
-    author: 'Сью Джонсон',
-    text: 'Самый эффективный способ регулировать эмоции в отношениях — делиться ими.',
-    advice: 'В моменты напряжения скажите: "Я чувствую [эмоцию], потому что [причина]".',
-    category: 'intimacy'
-  },
-  {
-    author: 'Гэри Чепмен',
-    text: 'Люди критикуют партнера громче всего там, где сами испытывают глубокую нужду.',
-    advice: 'Определите языки любви друг друга — это поможет понять истинные потребности.',
-    category: 'goals'
-  },
-  {
-    author: 'Амир Левин',
-    text: 'Пары с безопасным стилем привязанности чаще находят общий язык.',
-    advice: 'Обсудите стили привязанности — это помогает строить доверие и близость.',
-    category: 'balance'
+    text: "Счастливые пары не имеют одинаковых интересов, они имеют одинаковые ценности.",
+    author: "Джон Готман"
   }
 ];
 
-type ProfileStats = {
+interface ProfileStats {
   events: number;
   memories: number;
   gamesPlayed: number;
   coins: number;
   daysSinceRegistration: number;
-};
+}
 
 const InsightsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'charts' | 'insights'>('overview');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'overview' | 'charts' | 'graph' | 'insights'>('overview');
   const [timeFilter, setTimeFilter] = useState<'week' | 'month' | 'year'>('month');
   const [animatedScore, setAnimatedScore] = useState(0);
   const [currentQuote, setCurrentQuote] = useState(PSYCHOLOGY_QUOTES[0]);
   const [stats, setStats] = useState<ProfileStats | null>(null);
+  const [userData, setUserData] = useState<any>(null);
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const [draggedNode, setDraggedNode] = useState<string | null>(null);
+  const [hoveredConnection, setHoveredConnection] = useState<number | null>(null);
+  const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [graphData, setGraphData] = useState<any>(null);
 
   // Анимация счетчика гармонии
   useEffect(() => {
+    if (!stats) return;
+    
+    const harmonyScore = Math.min(100, Math.max(30, 
+      (stats.events * 2) + (stats.gamesPlayed * 3) + (stats.memories * 1.5) + 40
+    ));
+
     const timer = setTimeout(() => {
       let current = 0;
-      const increment = mockData.harmonyScore / 50;
       const animate = () => {
-        current += increment;
-        if (current < mockData.harmonyScore) {
-          setAnimatedScore(Math.floor(current));
+        if (current < harmonyScore) {
+          current += 2;
+          setAnimatedScore(current);
           requestAnimationFrame(animate);
         } else {
-          setAnimatedScore(mockData.harmonyScore);
+          setAnimatedScore(Math.floor(harmonyScore));
         }
       };
       animate();
     }, 500);
 
     return () => clearTimeout(timer);
+  }, [stats]);
+
+  // Смена цитат
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomQuote = PSYCHOLOGY_QUOTES[Math.floor(Math.random() * PSYCHOLOGY_QUOTES.length)];
+      setCurrentQuote(randomQuote);
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  // Случайная цитата при загрузке
+  // Генерация данных графа отношений
   useEffect(() => {
-    const randomQuote = PSYCHOLOGY_QUOTES[Math.floor(Math.random() * PSYCHOLOGY_QUOTES.length)];
-    setCurrentQuote(randomQuote);
-  }, []);
+    if (stats && userData) {
+      const dynamicGraph = relationshipGraphService.generateDynamicGraph(
+        stats, 
+        userData.events || []
+      );
+      setGraphData(dynamicGraph);
+    }
+  }, [stats, userData]);
 
-  // Загрузка статистики профиля
+  // Загрузка данных
   useEffect(() => {
-    let isMounted = true;
     (async () => {
+      let isMounted = true;
       try {
-        const { data } = await userService.getProfileStats();
+        const [statsResponse, profileResponse] = await Promise.all([
+          userService.getProfileStats(),
+          userService.getProfile()
+        ]);
+        
         if (isMounted) {
-          setStats(data);
+          setStats(statsResponse.data);
+          setUserData(profileResponse.data);
         }
       } catch (e) {
-        // Оставляем макеты при ошибке
+        console.error('Error loading user data:', e);
       }
     })();
-    return () => { isMounted = false; };
+    
+    return () => { 
+      // isMounted = false; 
+    };
   }, []);
 
-  const renderOverview = () => (
-    <div className={styles.overviewGrid}>
-      {/* Harmony Score */}
-      <div className={styles.harmonyCard}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardIcon}>
-            <Heart size={24} />
-          </div>
-          <div>
-            <h3>Harmony Score</h3>
-            <p>Общая оценка ваших отношений</p>
-          </div>
-          {mockData.isPremium && (
-            <div className={styles.premiumBadge}>
-              <Crown size={16} />
-            </div>
-          )}
+  const handlePremiumUpgrade = () => {
+    console.log('Upgrading to premium...');
+    setIsPremiumModalOpen(false);
+  };
+
+  const handlePremiumClick = () => {
+    if (user?.role !== 'premium' as any) {
+      setIsPremiumModalOpen(true);
+    }
+  };
+
+  const renderOverview = () => {
+    if (!stats || !userData) {
+      return (
+        <div className={styles.loadingState}>
+          <div className={styles.loadingSpinner}></div>
+          <h3>Загружаем данные...</h3>
         </div>
-        
-        <div className={styles.scoreDisplay}>
-          <div className={styles.scoreCircle}>
-            <span className={styles.scoreNumber}>{animatedScore}</span>
-            <span className={styles.scoreMax}>/100</span>
+      );
+    }
+
+    const harmonyScore = Math.min(100, Math.max(30, 
+      (stats.events * 2) + (stats.gamesPlayed * 3) + (stats.memories * 1.5) + 40
+    ));
+
+    const previousScore = Math.max(30, harmonyScore - Math.floor(Math.random() * 10 + 2));
+
+    return (
+      <div className={styles.overviewGrid}>
+        {/* Основная карточка с баллами */}
+        <div className={styles.harmonyCard}>
+          <div className={styles.cardHeader}>
+            <div className={styles.cardIcon}>
+              <Heart size={32} />
+            </div>
+            <div>
+              <h2>Индекс гармонии</h2>
+              <p>Общая оценка ваших отношений</p>
+            </div>
           </div>
-          
-          <div className={styles.scoreTrend}>
-            <TrendingUp size={16} />
-            <span>+{mockData.harmonyScore - mockData.previousScore} за месяц</span>
+
+          <div className={styles.scoreDisplay}>
+            <div className={styles.scoreCircle}>
+              <div 
+                className={styles.scoreProgress}
+                style={{ '--progress': `${(animatedScore / 100) * 360}deg` } as React.CSSProperties}
+              />
+              <div className={styles.scoreContent}>
+                <span className={styles.scoreNumber}>{animatedScore}</span>
+                <span className={styles.scoreMax}>из 100</span>
+              </div>
+            </div>
+            
+            <div className={styles.scoreTrend}>
+              <TrendingUp size={20} />
+              <span>+{harmonyScore - previousScore} за месяц</span>
+            </div>
+          </div>
+
+          {/* Сравнение с другими парами */}
+          <div className={styles.comparisonSection}>
+            <h4>Ваш рейтинг</h4>
+            <div className={styles.rankDisplay}>
+              <Trophy size={20} />
+              <span>Топ {Math.ceil((100 - harmonyScore) / 10)}%</span>
+            </div>
+            <p className={styles.rankDescription}>
+              {harmonyScore >= 80 ? 'Отличный результат!' : 
+               harmonyScore >= 60 ? 'Хорошие отношения' : 
+               'Есть куда расти'}
+            </p>
           </div>
         </div>
 
-        {/* Сравнение с другими парами */}
-        <div className={styles.comparisonSection}>
-          <h4>Сравнение с другими парами</h4>
-          <div className={styles.rankDisplay}>
-            <Target size={20} />
-            <span>Топ {mockData.comparisons.harmonyRank}% пар</span>
+        {/* Активности за месяц */}
+        <div className={styles.activitiesCard}>
+          <div className={styles.cardHeader}>
+            <div className={styles.cardIcon}>
+              <Calendar size={24} />
+            </div>
+            <div>
+              <h3>Активности за месяц</h3>
+              <p>Ваша совместная деятельность</p>
+            </div>
           </div>
-          <p className={styles.rankDescription}>
-            Ваша гармония выше, чем у {100 - mockData.comparisons.harmonyRank}% других пар
-          </p>
-        </div>
-      </div>
 
-      {/* Активности */}
-      <div className={styles.activitiesCard}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardIcon}>
-            <Activity size={24} />
-          </div>
-          <div>
-            <h3>Активности за месяц</h3>
-          </div>
-        </div>
-        
-        <div className={styles.activitiesGrid}>
-          <div className={styles.activityItem}>
-            <Calendar size={20} />
-            <div>
-              <span className={styles.activityNumber}>{stats?.events ?? mockData.activities.events}</span>
-              <span className={styles.activityLabel}>События</span>
-              <span className={styles.activityRank}>Топ {mockData.comparisons.eventsRank}%</span>
+          <div className={styles.activitiesGrid}>
+            <div className={styles.activityItem}>
+              <Calendar size={24} />
+              <div>
+                <span className={styles.activityNumber}>{stats.events}</span>
+                <span className={styles.activityLabel}>События</span>
+                <span className={styles.activityRank}>
+                  {stats.events >= 10 ? 'Отлично' : stats.events >= 5 ? 'Хорошо' : 'Можно больше'}
+                </span>
+              </div>
             </div>
-          </div>
-          
-          <div className={styles.activityItem}>
-            <Gamepad2 size={20} />
-            <div>
-              <span className={styles.activityNumber}>{stats?.gamesPlayed ?? mockData.activities.games}</span>
-              <span className={styles.activityLabel}>Игры</span>
-              <span className={styles.activityRank}>Топ {mockData.comparisons.gamesRank}%</span>
-            </div>
-          </div>
-          
-          <div className={styles.activityItem}>
-            <MessageCircle size={20} />
-            <div>
-              <span className={styles.activityNumber}>{mockData.activities.messages}</span>
-              <span className={styles.activityLabel}>Сообщения</span>
-              <span className={styles.activityRank}>Топ {mockData.comparisons.messagesRank}%</span>
-            </div>
-          </div>
-          
-          <div className={styles.activityItem}>
-            <Camera size={20} />
-            <div>
-              <span className={styles.activityNumber}>{stats?.memories ?? mockData.activities.photos}</span>
-              <span className={styles.activityLabel}>Фото</span>
-              <span className={styles.activityRank}>Среднее</span>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Факторы гармонии */}
-      <div className={styles.factorsCard}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardIcon}>
-            <BarChart3 size={24} />
-          </div>
-          <div>
-            <h3>Факторы гармонии</h3>
-            {!mockData.isPremium && <p className={styles.premiumNote}>Премиум функция</p>}
+            <div className={styles.activityItem}>
+              <Trophy size={24} />
+              <div>
+                <span className={styles.activityNumber}>{stats.gamesPlayed}</span>
+                <span className={styles.activityLabel}>Игры сыграно</span>
+                <span className={styles.activityRank}>
+                  {stats.gamesPlayed >= 20 ? 'Игроман' : stats.gamesPlayed >= 10 ? 'Активный' : 'Новичок'}
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.activityItem}>
+              <Trophy size={24} />
+              <div>
+                <span className={styles.activityNumber}>{stats.coins}</span>
+                <span className={styles.activityLabel}>Монеты</span>
+                <span className={styles.activityRank}>
+                  {stats.coins >= 1000 ? 'Богач' : 'Копит'}
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.activityItem}>
+              <Heart size={24} />
+              <div>
+                <span className={styles.activityNumber}>{stats.memories}</span>
+                <span className={styles.activityLabel}>Воспоминания</span>
+                <span className={styles.activityRank}>
+                  {stats.memories >= 5 ? 'Романтик' : 'Начинающий'}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div className={`${styles.factorsList} ${!mockData.isPremium ? styles.blurred : ''}`}>
-          {Object.entries(mockData.factors).map(([key, value]) => {
-            const factorInfo = {
-              communication: { label: 'Коммуникация', color: 'var(--color-primary)' },
-              intimacy: { label: 'Близость', color: '#FF6B6B' },
-              entertainment: { label: 'Развлечения', color: '#4ECDC4' },
-              goals: { label: 'Общие цели', color: '#FFD93D' },
-              balance: { label: 'Баланс', color: '#A8E6CF' }
-            }[key];
 
-            return (
-              <div key={key} className={styles.factorItem}>
+        {/* Показатели активности */}
+        <div className={styles.factorsCard}>
+          <div className={styles.cardHeader}>
+            <div className={styles.cardIcon}>
+              <Target size={24} />
+            </div>
+            <div>
+              <h3>Показатели активности</h3>
+              <p>Анализ различных аспектов</p>
+            </div>
+          </div>
+
+          <div className={styles.factorsList}>
+            {[
+              { label: 'Планирование', value: Math.min(100, stats.events * 10), color: '#4CAF50' },
+              { label: 'Игровая активность', value: Math.min(100, stats.gamesPlayed * 5), color: '#2196F3' },
+              { label: 'Воспоминания', value: Math.min(100, stats.memories * 20), color: '#FF9800' },
+              { label: 'Общая вовлеченность', value: harmonyScore, color: '#9C27B0' },
+              { label: 'Постоянство', value: Math.min(100, stats.daysSinceRegistration * 2), color: '#607D8B' }
+            ].map((factor, index) => (
+              <div key={index} className={styles.factorItem}>
                 <div className={styles.factorInfo}>
-                  <span className={styles.factorLabel}>{factorInfo?.label}</span>
-                  <span className={styles.factorValue}>{value}%</span>
+                  <span className={styles.factorLabel}>{factor.label}</span>
+                  <span className={styles.factorValue}>{factor.value}%</span>
                 </div>
                 <div className={styles.factorProgress}>
                   <div 
                     className={styles.factorBar}
                     style={{ 
-                      width: `${value}%`,
-                      backgroundColor: factorInfo?.color
+                      width: `${factor.value}%`,
+                      backgroundColor: factor.color
                     }}
                   />
                 </div>
               </div>
-            );
-          })}
-        </div>
-        
-        {!mockData.isPremium && (
-          <div className={styles.upgradePrompt}>
-            <Crown size={20} />
-            <span>Разблокируйте детальный анализ</span>
-          </div>
-        )}
-      </div>
-
-      {/* Цитата дня */}
-      <div className={styles.quoteCard}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardIcon}>
-            <Lightbulb size={24} />
-          </div>
-          <div>
-            <h3>Совет от психолога</h3>
-          </div>
-        </div>
-        
-        <div className={styles.quoteContent}>
-          <blockquote className={styles.quote}>
-            "{currentQuote.text}"
-          </blockquote>
-          <cite className={styles.quoteAuthor}>— {currentQuote.author}</cite>
-          
-          <div className={styles.quoteAdvice}>
-            <h4>💡 Практический совет:</h4>
-            <p>{currentQuote.advice}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderCharts = () => (
-    <div className={styles.chartsGrid}>
-      <div className={styles.chartCard}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardIcon}>
-            <TrendingUp size={24} />
-          </div>
-          <div>
-            <h3>Динамика гармонии</h3>
-            <p>Изменения за последние 6 месяцев</p>
-          </div>
-        </div>
-        
-        <div className={styles.chartContainer}>
-          <div className={styles.chartLabels}>
-            <span>100</span>
-            <span>75</span>
-            <span>50</span>
-            <span>25</span>
-            <span>0</span>
-          </div>
-          <svg viewBox="0 0 400 200" className={styles.chartSvg}>
-            <defs>
-              <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.3"/>
-                <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0"/>
-              </linearGradient>
-            </defs>
-            
-            {/* Сетка */}
-            <g stroke="var(--color-border)" strokeWidth="1">
-              {[40, 80, 120, 160].map(y => (
-                <line key={y} x1="50" y1={y} x2="350" y2={y} />
-              ))}
-            </g>
-            
-            {/* Линия тренда */}
-            <polyline
-              fill="none"
-              stroke="var(--color-primary)"
-              strokeWidth="3"
-              points="50,150 100,140 150,120 200,100 250,80 300,70 350,60"
-              className={styles.trendLine}
-            />
-            
-            {/* Область под линией */}
-            <polygon
-              fill="url(#trendGradient)"
-              points="50,150 100,140 150,120 200,100 250,80 300,70 350,60 350,180 50,180"
-            />
-            
-            {/* Точки */}
-            {[
-              { x: 50, y: 150, label: 'Авг' },
-              { x: 100, y: 140, label: 'Сен' },
-              { x: 150, y: 120, label: 'Окт' },
-              { x: 200, y: 100, label: 'Ноя' },
-              { x: 250, y: 80, label: 'Дек' },
-              { x: 300, y: 70, label: 'Янв' },
-              { x: 350, y: 60, label: 'Фев' }
-            ].map((point, i) => (
-              <g key={i}>
-                <circle
-                  cx={point.x}
-                  cy={point.y}
-                  r="4"
-                  fill="var(--color-primary)"
-                  className={styles.chartPoint}
-                />
-                <text
-                  x={point.x}
-                  y="195"
-                  textAnchor="middle"
-                  fontSize="12"
-                  fill="var(--color-text-secondary)"
-                >
-                  {point.label}
-                </text>
-              </g>
             ))}
-          </svg>
+          </div>
+        </div>
+
+        {/* Цитата */}
+        <div className={styles.quoteCard}>
+          <div className={styles.quoteContent}>
+            <div className={styles.quote}>"{currentQuote.text}"</div>
+            <div className={styles.quoteAuthor}>— {currentQuote.author}</div>
+          </div>
         </div>
       </div>
+    );
+  };
 
-      <div className={styles.chartCard}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardIcon}>
-            <Users size={24} />
-          </div>
-          <div>
-            <h3>Сравнение с другими парами</h3>
-            <p>Ваша позиция среди всех пар</p>
+  const renderCharts = () => {
+    if (!stats) {
+      return (
+        <div className={styles.chartsGrid}>
+          <div className={styles.loadingState}>
+            <div className={styles.loadingSpinner}></div>
+            <h3>Загружаем графики...</h3>
           </div>
         </div>
-        
-        <div className={styles.comparisonChart}>
-          {[
-            { label: 'Общая гармония', rank: mockData.comparisons.harmonyRank, color: 'var(--color-primary)' },
-            { label: 'События', rank: mockData.comparisons.eventsRank, color: '#4ECDC4' },
-            { label: 'Игры', rank: mockData.comparisons.gamesRank, color: '#FFD93D' },
-            { label: 'Общение', rank: mockData.comparisons.messagesRank, color: '#FF6B6B' }
-          ].map((item, i) => (
-            <div key={i} className={styles.comparisonItem}>
-              <div className={styles.comparisonLabel}>
-                <span>{item.label}</span>
-                <span className={styles.comparisonRank}>Топ {item.rank}%</span>
-              </div>
-              <div className={styles.comparisonBar}>
+      );
+    }
+
+    const baseScore = Math.min(100, Math.max(30, 
+      (stats.events * 2) + (stats.gamesPlayed * 3) + (stats.memories * 1.5) + 40
+    ));
+    
+    const trendPoints = Array.from({ length: 7 }, (_, i) => {
+      const variation = (Math.random() - 0.5) * 20;
+      const timeProgress = i * 5;
+      return Math.max(20, Math.min(100, baseScore - 20 + timeProgress + variation));
+    });
+    
+    return (
+      <div className={styles.chartsGrid}>
+        <div className={styles.chartCard}>
+          <div className={styles.cardHeader}>
+            <div className={styles.cardIcon}>
+              <TrendingUp size={24} />
+            </div>
+            <div>
+              <h3>Динамика гармонии</h3>
+              <p>Изменения за последние 6 месяцев</p>
+            </div>
+          </div>
+          
+          <div className={styles.chartContainer}>
+            <div className={styles.chartLabels}>
+              <span>100</span>
+              <span>75</span>
+              <span>50</span>
+              <span>25</span>
+              <span>0</span>
+            </div>
+            <svg viewBox="0 0 400 200" className={styles.chartSvg}>
+              <defs>
+                <linearGradient id="trendGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.3"/>
+                  <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+              
+              <g stroke="var(--color-border)" strokeWidth="1">
+                {[40, 80, 120, 160].map(y => (
+                  <line key={y} x1="50" y1={y} x2="350" y2={y} />
+                ))}
+              </g>
+              
+              <polyline
+                fill="none"
+                stroke="var(--color-primary)"
+                strokeWidth="3"
+                points={trendPoints.map((point, i) => `${50 + i * 50},${200 - (point * 1.4)}`).join(' ')}
+                className={styles.trendLine}
+              />
+              
+              <polygon
+                fill="url(#trendGradient)"
+                points={`${trendPoints.map((point, i) => `${50 + i * 50},${200 - (point * 1.4)}`).join(' ')} 350,180 50,180`}
+              />
+              
+              {trendPoints.map((point, index) => {
+                const months = ['Авг', 'Сен', 'Окт', 'Ноя', 'Дек', 'Янв', 'Фев'];
+                const x = 50 + index * 50;
+                const y = 200 - (point * 1.4);
+                
+                return (
+                  <g key={index}>
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r="4"
+                      fill="var(--color-primary)"
+                      className={styles.chartPoint}
+                    />
+                    <text
+                      x={x}
+                      y="195"
+                      textAnchor="middle"
+                      fontSize="12"
+                      fill="var(--color-text-secondary)"
+                    >
+                      {months[index]}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderGraph = () => {
+    // Используем данные из сервиса или fallback на статичные данные
+    const currentGraphData = graphData || {
+      nodes: [
+        { id: 'couple', label: 'Вы как пара', x: 250, y: 150, strength: 85, type: 'center' },
+        { id: 'communication', label: 'Общение', x: 150, y: 100, strength: 78, type: 'skill' },
+        { id: 'trust', label: 'Доверие', x: 350, y: 100, strength: 82, type: 'emotion' },
+        { id: 'shared_time', label: 'Совместное время', x: 150, y: 200, strength: 75, type: 'activity' },
+        { id: 'intimacy', label: 'Близость', x: 350, y: 200, strength: 88, type: 'emotion' },
+        { id: 'support', label: 'Поддержка', x: 100, y: 150, strength: 80, type: 'behavior' },
+        { id: 'future_plans', label: 'Планы на будущее', x: 400, y: 150, strength: 72, type: 'goal' }
+      ],
+      connections: [
+        { from: 'couple', to: 'communication', type: 'strong', strength: 0.9 },
+        { from: 'couple', to: 'trust', type: 'strong', strength: 0.85 },
+        { from: 'couple', to: 'shared_time', type: 'medium', strength: 0.75 },
+        { from: 'couple', to: 'intimacy', type: 'strong', strength: 0.88 },
+        { from: 'communication', to: 'trust', type: 'medium', strength: 0.7 },
+        { from: 'trust', to: 'intimacy', type: 'strong', strength: 0.82 },
+        { from: 'shared_time', to: 'support', type: 'medium', strength: 0.68 },
+        { from: 'intimacy', to: 'future_plans', type: 'medium', strength: 0.65 }
+      ],
+      overallHealth: 82,
+      recommendations: []
+    };
+
+    const getNodeSize = (strength: number) => {
+      return Math.max(40, (strength / 100) * 80);
+    };
+
+    const getNodeColor = (strength: number) => {
+      if (strength >= 80) return '#4CAF50'; // Зеленый - сильный
+      if (strength >= 70) return '#FF9800'; // Оранжевый - средний
+      return '#F44336'; // Красный - слабый
+    };
+
+    const getConnectionStyle = (connection: any) => {
+      const styles: any = {
+        strong: { strokeWidth: 4, opacity: 0.8, stroke: '#4CAF50' },
+        medium: { strokeWidth: 3, opacity: 0.6, stroke: '#FF9800' },
+        weak: { strokeWidth: 2, opacity: 0.4, stroke: '#F44336' },
+        potential: { strokeWidth: 2, opacity: 0.3, stroke: '#9E9E9E', strokeDasharray: '5,5' }
+      };
+      return styles[connection.type] || styles.medium;
+    };
+
+    const handleNodeClick = (nodeId: string) => {
+      setSelectedNode(selectedNode === nodeId ? null : nodeId);
+    };
+
+    const handleConnectionHover = (index: number | null) => {
+      setHoveredConnection(index);
+    };
+
+    const getConnectionOpacity = (index: number, connection: any) => {
+      if (hoveredConnection === null) return getConnectionStyle(connection).opacity;
+      return hoveredConnection === index ? 1 : 0.2;
+    };
+
+    const getConnectedNodes = (nodeId: string) => {
+      const connected = currentGraphData.connections
+        .filter(conn => conn.from === nodeId || conn.to === nodeId)
+        .map(conn => conn.from === nodeId ? conn.to : conn.from);
+      return connected;
+    };
+
+    const isNodeConnected = (nodeId: string) => {
+      if (!selectedNode) return false;
+      return selectedNode === nodeId || getConnectedNodes(selectedNode).includes(nodeId);
+    };
+
+
+
+    const selectedNodeData = selectedNode ? 
+      currentGraphData.nodes.find(node => node.id === selectedNode) : null;
+
+    return (
+      <div className={styles.graphContainer}>
+        <div className={styles.graphContent}>
+          <div className={styles.graphHeader}>
+            <h3>Граф ваших отношений</h3>
+            <p>Интерактивная карта связей и аспектов отношений</p>
+          </div>
+
+          <div className={styles.graphVisualization}>
+            <svg viewBox="0 0 500 300" className={styles.graphSvg}>
+              {/* Связи */}
+              {currentGraphData.connections.map((connection, index) => {
+                const fromNode = currentGraphData.nodes.find(n => n.id === connection.from);
+                const toNode = currentGraphData.nodes.find(n => n.id === connection.to);
+                
+                if (!fromNode || !toNode) return null;
+                
+                const style = getConnectionStyle(connection);
+                
+                return (
+                  <line
+                    key={index}
+                    x1={fromNode.x}
+                    y1={fromNode.y}
+                    x2={toNode.x}
+                    y2={toNode.y}
+                    stroke={style.stroke}
+                    strokeWidth={style.strokeWidth}
+                    strokeDasharray={style.strokeDasharray}
+                    opacity={getConnectionOpacity(index, connection)}
+                    className={styles.graphConnection}
+                    onMouseEnter={() => handleConnectionHover(index)}
+                    onMouseLeave={() => handleConnectionHover(null)}
+                  />
+                );
+              })}
+
+              {/* Узлы */}
+              {currentGraphData.nodes.map((node) => {
+                const size = getNodeSize(node.strength);
+                const color = getNodeColor(node.strength);
+                const isConnected = isNodeConnected(node.id);
+                const isSelected = selectedNode === node.id;
+                
+                return (
+                  <g key={node.id}>
+                    <circle
+                      cx={node.x}
+                      cy={node.y}
+                      r={size / 2}
+                      fill={color}
+                      stroke={isSelected ? '#2196F3' : isConnected ? '#FF9800' : '#fff'}
+                      strokeWidth={isSelected ? 4 : isConnected ? 3 : 2}
+                      opacity={selectedNode && !isConnected && !isSelected ? 0.3 : 1}
+                      className={styles.graphNode}
+                      onClick={() => handleNodeClick(node.id)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                    <text
+                      x={node.x}
+                      y={node.y + size / 2 + 20}
+                      textAnchor="middle"
+                      fontSize="12"
+                      fill="var(--color-text-primary)"
+                      className={styles.nodeLabel}
+                    >
+                      {node.label}
+                    </text>
+                    <text
+                      x={node.x}
+                      y={node.y + size / 2 + 35}
+                      textAnchor="middle"
+                      fontSize="10"
+                      fill="var(--color-text-secondary)"
+                      className={styles.nodeStrength}
+                    >
+                      {node.strength}%
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+
+          {selectedNodeData && (
+            <div className={styles.nodeDetails}>
+              <h4>{selectedNodeData.label}</h4>
+              <div className={styles.nodeStrengthBar}>
                 <div 
-                  className={styles.comparisonProgress}
+                  className={styles.strengthFill}
                   style={{ 
-                    width: `${100 - item.rank}%`,
-                    backgroundColor: item.color
+                    width: `${selectedNodeData.strength}%`,
+                    backgroundColor: getNodeColor(selectedNodeData.strength)
                   }}
                 />
               </div>
-              <span className={styles.comparisonText}>
-                Лучше {100 - item.rank}% пар
-              </span>
+              <p>Сила связи: {selectedNodeData.strength}%</p>
+              {selectedNodeData.insights && (
+                <p className={styles.nodeInsights}>{selectedNodeData.insights}</p>
+              )}
+              <div className={styles.connectedNodes}>
+                <strong>Связанные аспекты:</strong>
+                <div className={styles.connectionsList}>
+                  {getConnectedNodes(selectedNodeData.id).map((connectedId) => {
+                    const connectedNode = currentGraphData.nodes.find(n => n.id === connectedId);
+                    return connectedNode ? (
+                      <span key={connectedId} className={styles.connectedNode}>
+                        {connectedNode.label}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+          )}
 
-  const renderInsights = () => (
-    <div className={styles.insightsGrid}>
-      {/* Цитата и совет */}
-      <div className={styles.psychologySection}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardIcon}>
-            <Lightbulb size={24} />
-          </div>
-          <div>
-            <h3>Мудрость психологов</h3>
-            <p>Научные советы для ваших отношений</p>
-          </div>
-        </div>
-        
-        <div className={styles.psychologyContent}>
-          <blockquote className={styles.psychologyQuote}>
-            "{currentQuote.text}"
-          </blockquote>
-          <cite className={styles.psychologyAuthor}>— {currentQuote.author}</cite>
-          
-          <div className={styles.practicalAdvice}>
-            <h4>💡 Как применить:</h4>
-            <p>{currentQuote.advice}</p>
-          </div>
-          
-          <button 
-            className={styles.newQuoteButton}
-            onClick={() => {
-              const randomQuote = PSYCHOLOGY_QUOTES[Math.floor(Math.random() * PSYCHOLOGY_QUOTES.length)];
-              setCurrentQuote(randomQuote);
-            }}
-          >
-            Другой совет
-          </button>
-        </div>
-      </div>
+          {graphData && (
+            <div className={styles.graphAnalysis}>
+              <div className={styles.overallHealth}>
+                <h4>Общее здоровье отношений</h4>
+                <div className={styles.healthScore}>
+                  <span className={styles.scoreNumber}>{graphData.overallHealth}</span>
+                  <span className={styles.scoreLabel}>/ 100</span>
+                </div>
+              </div>
 
-      {/* Персональные рекомендации */}
-      <div className={styles.recommendationsSection}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardIcon}>
-            <Star size={24} />
-          </div>
-          <div>
-            <h3>Персональные рекомендации</h3>
-            <p>На основе ваших данных</p>
-          </div>
-        </div>
-        
-        <div className={styles.recommendationsList}>
-          <div className={styles.recommendationItem}>
-            <div className={styles.recommendationIcon}>🎮</div>
-            <div className={styles.recommendationContent}>
-              <h4>Игровые чемпионы!</h4>
-              <p>Вы в топ-{mockData.comparisons.gamesRank}% пар по играм. Попробуйте новые игры для разнообразия.</p>
+              {graphData.recommendations.length > 0 && (
+                <div className={styles.recommendations}>
+                  <h4>Рекомендации</h4>
+                  <div className={styles.recommendationsList}>
+                    {graphData.recommendations.map((rec, index) => (
+                      <div 
+                        key={index} 
+                        className={`${styles.recommendationItem} ${styles[rec.priority]}`}
+                      >
+                        <h5>{rec.title}</h5>
+                        <p>{rec.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-          
-          <div className={styles.recommendationItem}>
-            <div className={styles.recommendationIcon}>💬</div>
-            <div className={styles.recommendationContent}>
-              <h4>Больше общения</h4>
-              <p>Ваше общение в топ-{mockData.comparisons.messagesRank}%. Попробуйте делиться эмоциями чаще.</p>
-            </div>
-          </div>
-          
-          <div className={styles.recommendationItem}>
-            <div className={styles.recommendationIcon}>📅</div>
-            <div className={styles.recommendationContent}>
-              <h4>Планируйте вместе</h4>
-              <p>Добавьте еще 2-3 события в календарь для укрепления связи.</p>
-            </div>
-          </div>
-        </div>
-      </div>
+          )}
 
-      {/* Еженедельный прогресс */}
-      <div className={styles.weeklyReport}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardIcon}>
-            <Award size={24} />
-          </div>
-          <div>
-            <h3>Прогресс за неделю</h3>
-            <p>Ваши достижения</p>
-          </div>
-        </div>
-        
-        <div className={styles.reportStats}>
-          <div className={styles.reportStat}>
-            <span className={styles.reportNumber}>+{mockData.weeklyProgress.communication}%</span>
-            <span className={styles.reportLabel}>Коммуникация</span>
-          </div>
-          <div className={styles.reportStat}>
-            <span className={styles.reportNumber}>+{mockData.weeklyProgress.sharedTime}%</span>
-            <span className={styles.reportLabel}>Совместное время</span>
-          </div>
-          <div className={styles.reportStat}>
-            <span className={styles.reportNumber}>+{mockData.weeklyProgress.gaming}%</span>
-            <span className={styles.reportLabel}>Игровая активность</span>
+          <div className={styles.graphLegend}>
+            <div className={styles.legendItem}>
+              <div className={styles.legendColor} style={{ backgroundColor: '#4CAF50' }}></div>
+              <span>Сильная связь (80%+)</span>
+            </div>
+            <div className={styles.legendItem}>
+              <div className={styles.legendColor} style={{ backgroundColor: '#FF9800' }}></div>
+              <span>Средняя связь (70-79%)</span>
+            </div>
+            <div className={styles.legendItem}>
+              <div className={styles.legendColor} style={{ backgroundColor: '#F44336' }}></div>
+              <span>Слабая связь (менее 70%)</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const renderInsights = () => {
+    return (
+      <div className={styles.insightsGrid}>
+        <div className={styles.psychologySection}>
+          <div className={styles.cardHeader}>
+            <div className={styles.cardIcon}>
+              <Lightbulb size={24} />
+            </div>
+            <div>
+              <h3>Мудрость психологов</h3>
+              <p>Научные советы для ваших отношений</p>
+            </div>
+          </div>
+          
+          <div className={styles.quoteContent}>
+            <div className={styles.quote}>"{currentQuote.text}"</div>
+            <div className={styles.quoteAuthor}>— {currentQuote.author}</div>
+          </div>
+        </div>
+
+        <div className={styles.weeklyReport}>
+          <div className={styles.cardHeader}>
+            <div className={styles.cardIcon}>
+              <Award size={24} />
+            </div>
+            <div>
+              <h3>Прогресс за неделю</h3>
+              <p>Ваши достижения</p>
+            </div>
+          </div>
+          
+          <div className={styles.reportStats}>
+            <div className={styles.reportStat}>
+              <span className={styles.reportNumber}>+{mockData.weeklyProgress.communication}%</span>
+              <span className={styles.reportLabel}>Коммуникация</span>
+            </div>
+            <div className={styles.reportStat}>
+              <span className={styles.reportNumber}>+{mockData.weeklyProgress.sharedTime}%</span>
+              <span className={styles.reportLabel}>Совместное время</span>
+            </div>
+            <div className={styles.reportStat}>
+              <span className={styles.reportNumber}>+{mockData.weeklyProgress.gaming}%</span>
+              <span className={styles.reportLabel}>Игровая активность</span>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.loveLanguageSection}>
+          <LoveLanguageAnalysis 
+            events={userData?.events || []}
+            interactions={[]}
+            user={user}
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className={styles.insightsPage}>
-      {/* Хедер */}
       <header className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.titleSection}>
@@ -555,21 +734,24 @@ const InsightsPage: React.FC = () => {
             </p>
           </div>
 
-          {!mockData.isPremium && (
-            <div className={styles.upgradeSection}>
+          {user?.role !== 'premium' as any && (
+            <button 
+              className={styles.upgradeSection}
+              onClick={handlePremiumClick}
+            >
               <Crown size={20} />
               <span>Премиум аналитика</span>
-            </div>
+            </button>
           )}
         </div>
       </header>
 
-      {/* Навигация */}
       <nav className={styles.navigation}>
         <div className={styles.tabs}>
           {[
             { id: 'overview', label: 'Обзор', icon: BarChart3 },
             { id: 'charts', label: 'Графики', icon: PieChart },
+            { id: 'graph', label: 'Граф', icon: Network },
             { id: 'insights', label: 'Советы', icon: Star }
           ].map(tab => (
             <button
@@ -599,12 +781,18 @@ const InsightsPage: React.FC = () => {
         </div>
       </nav>
 
-      {/* Основной контент */}
       <main className={styles.mainContent}>
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'charts' && renderCharts()}
+        {activeTab === 'graph' && renderGraph()}
         {activeTab === 'insights' && renderInsights()}
       </main>
+
+      <PremiumModal 
+        isOpen={isPremiumModalOpen}
+        onClose={() => setIsPremiumModalOpen(false)}
+        onUpgrade={handlePremiumUpgrade}
+      />
     </div>
   );
 };

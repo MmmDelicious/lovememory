@@ -7,6 +7,7 @@ import { useGameSocket } from '../../hooks/useGameSocket';
 
 import QuizGame from '../../components/QuizGame/QuizGame';
 import ChessGame from '../../components/ChessGame/ChessGame';
+import ChessGameEnhanced from '../../components/ChessGame/ChessGameEnhanced';
 import WordleGame from '../../components/WordleGame/WordleGame';
 import styles from './GameRoomPage.module.css';
 import victoryAnimation from '../../assets/victory.json';
@@ -75,7 +76,7 @@ const GameRoomPage = () => {
           </div>
         );
       case 'chess':
-        return <ChessGame 
+        return <ChessGameEnhanced 
                   gameState={gameState} 
                   user={user} 
                   makeMove={makeMove}
@@ -102,18 +103,31 @@ const GameRoomPage = () => {
   };
   
   const renderGameEndOverlay = () => {
-    let resultText, resultStyle, animationData;
+    let resultText, resultStyle, animationData, coinsInfo = null;
+    
+    // Получаем информацию о монетах из результатов экономической системы
+    const userEconomyResult = gameState.economyResults?.[user.id];
+    
     if (gameState.winner === 'draw') {
       resultText = 'Ничья!';
       resultStyle = styles.drawText;
+      if (userEconomyResult?.type === 'draw') {
+        coinsInfo = `Ставка возвращена: +${userEconomyResult.coinsChange} монет`;
+      }
     } else if (gameState.winner === user.id) {
       resultText = 'Победа!';
       resultStyle = styles.winnerText;
       animationData = victoryAnimation;
+      if (userEconomyResult?.type === 'winner') {
+        coinsInfo = `Выигрыш: +${userEconomyResult.coinsChange} монет`;
+      }
     } else {
       resultText = 'Поражение';
       resultStyle = styles.loserText;
       animationData = defeatAnimation;
+      if (userEconomyResult?.type === 'loser') {
+        coinsInfo = `Потеряно: ${userEconomyResult.coinsChange} монет`;
+      }
     }
 
     return (
@@ -121,6 +135,12 @@ const GameRoomPage = () => {
         <div className={styles.overlayContent}>
           {animationData && <LottiePlayer loop={false} play animationData={animationData} className={styles.lottieAnimation} />}
           <h2 className={resultStyle}>{resultText}</h2>
+          {coinsInfo && (
+            <div className={styles.coinsInfo}>
+              <div className={styles.coinsIcon}>💰</div>
+              <span>{coinsInfo}</span>
+            </div>
+          )}
           <button onClick={handleReturnToLobby} className={styles.lobbyButton}>Вернуться в лобби</button>
         </div>
       </div>

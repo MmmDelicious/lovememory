@@ -1,6 +1,6 @@
 const TicTacToeGame = require('./TicTacToeGame');
 const ChessGame = require('./ChessGame');
-const PokerGame = require('./PokerGame');
+const { PokerGame } = require('./PokerGame');
 const QuizGame = require('./QuizGame');
 const WordleGame = require('./WordleGame');
 
@@ -46,7 +46,7 @@ class GameManager {
         gameInstance = new QuizGame(quizPlayers);
         break;
       case 'wordle':
-        gameInstance = new WordleGame(roomId, options);
+        gameInstance = new WordleGame(roomId, options, options.onStateChange);
         // Добавляем игроков после создания
         for (const player of players) {
           const playerId = player.id || player;

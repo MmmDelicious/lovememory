@@ -63,8 +63,14 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
   const handleJoinRoom = (roomId: string) => {
     const room = rooms.find((r: Room) => r.id === roomId);
     if (!room) return;
-    const path = gameType === 'poker' ? `/games/poker/${roomId}` : `/games/room/${roomId}`;
-    navigate(path);
+    
+    if (gameType === 'poker') {
+      // Для покера перенаправляем на покерную страницу, где будет показано модальное окно buy-in
+      navigate(`/games/poker/${roomId}`);
+    } else {
+      // Для остальных игр обычный переход
+      navigate(`/games/room/${roomId}`);
+    }
   };
 
   const filteredAndSortedRooms = useMemo(() => {
@@ -246,7 +252,7 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
                     className={`${styles.roomCard} ${!canJoin ? styles.disabled : ''} ${isInProgress ? styles.inProgress : ''}`}
                     onClick={() => canJoin && handleJoinRoom(room.id)}
                   >
-                    <div className={styles.cardGlow}></div>
+
                     
                     <div className={styles.cardHeader}>
                       <div className={styles.hostSection}>
@@ -290,7 +296,10 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
                         
                         <div className={styles.infoItem}>
                           <Coins size={16} />
-                          <span>{room.bet}</span>
+                          <span>{room.bet} монет</span>
+                          {gameType !== 'poker' && (
+                            <span className={styles.betWarning} title="Ставка списывается при входе в комнату">⚠️</span>
+                          )}
                         </div>
                         
                         {room.difficulty && (

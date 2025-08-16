@@ -2,19 +2,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.8rem 2rem;
+  padding: 0.8rem 0.5rem;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
-  z-index: 5; /* keep above content but avoid creating unnecessary scroll */
+  z-index: 5;
   width: 100%;
   transition: background 0.3s ease;
 }
 
 .logoWrapper {
   display: block;
+  flex-shrink: 0;
 }
 
 .logo {
@@ -36,6 +37,8 @@
   display: flex;
   align-items: center;
   gap: 1.2rem;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .desktopNav {
@@ -97,4 +100,31 @@
   height: 20px;
 }
 
-/* Убраны мобильные специфичные стили */
+/* Адаптивные стили для лучшего использования пространства */
+@media (min-width: 768px) {
+  .header {
+    padding: 0.8rem 1rem;
+  }
+  
+  .nav {
+    gap: 1.5rem;
+  }
+  
+  .desktopNav {
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .header {
+    padding: 0.8rem 1.5rem;
+  }
+  
+  .nav {
+    gap: 2rem;
+  }
+  
+  .desktopNav {
+    gap: 2rem;
+  }
+}

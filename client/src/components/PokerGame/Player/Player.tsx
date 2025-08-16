@@ -1,5 +1,5 @@
 import React from 'react';
-import UserAvatar from '../../UserAvatar/UserAvatar';
+import UserAvatar from '../../UserAvatar/UserAvatar.tsx';
 import PlayingCard from '../../PlayingCard/PlayingCard';
 import type { PlayerProps } from '../../../../types/game.types';
 import styles from './Player.module.css';
@@ -38,6 +38,8 @@ const Player: React.FC<PlayerProps> = ({
 
     // Для других игроков
     const playerCards = player.hand || player.cards || [];
+    const shouldShowCards = showCards || player.showCards; // Показываем карты если общий флаг или игрок выбрал показать
+    
     return [0, 1].map((index) => {
       const card = playerCards[index];
       
@@ -50,8 +52,8 @@ const Player: React.FC<PlayerProps> = ({
           <PlayingCard 
             suit={card?.suit}
             rank={card?.rank}
-            faceUp={showCards && player.inHand} 
-            isWinning={showCards && card ? isWinningCard(card) : false}
+            faceUp={shouldShowCards && player.inHand} 
+            isWinning={shouldShowCards && card ? isWinningCard(card) : false}
           />
         </div>
       );

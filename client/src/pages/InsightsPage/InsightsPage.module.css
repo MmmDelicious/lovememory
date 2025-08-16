@@ -57,6 +57,8 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: var(--shadow-md);
+    border: none;
+    font-size: 0.9rem;
   }
   
   .upgradeSection:hover {
@@ -620,6 +622,101 @@
     flex-direction: column;
     gap: var(--space-6);
   }
+
+  .loveLanguageSection {
+    width: 100%;
+  }
+
+  .graphAnalysis {
+    margin-top: 24px;
+    padding: 20px;
+    background: var(--color-background);
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+  }
+
+  .overallHealth {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .overallHealth h4 {
+    margin: 0 0 12px 0;
+    color: var(--color-text-primary);
+    font-size: 1.1rem;
+  }
+
+  .healthScore {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .scoreNumber {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  .scoreLabel {
+    font-size: 1.2rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+  }
+
+  .recommendations h4 {
+    margin: 0 0 16px 0;
+    color: var(--color-text-primary);
+    font-size: 1.1rem;
+  }
+
+  .recommendationsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .recommendationItem {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-left: 4px solid;
+  }
+
+  .recommendationItem.high {
+    background: #fff3e0;
+    border-left-color: #ff9800;
+  }
+
+  .recommendationItem.medium {
+    background: #e3f2fd;
+    border-left-color: #2196f3;
+  }
+
+  .recommendationItem h5 {
+    margin: 0 0 6px 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .recommendationItem p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+  }
+
+  .nodeInsights {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--color-primary-light);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+    font-style: italic;
+  }
   
   .psychologySection {
     background: var(--color-surface);
@@ -767,13 +864,329 @@
     font-weight: 500;
   }
   
+  /* Graph Styles */
+  .graphContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+  
+  .graphHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .graphLegend {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+  }
+  
+  .legendItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+  }
+  
+  .legendColor {
+    width: 16px;
+    height: 4px;
+    border-radius: 2px;
+  }
+  
+  .graphVisualization {
+    position: relative;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  
+  .graphSvg {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    background: radial-gradient(circle at 50% 50%, rgba(217, 122, 108, 0.05) 0%, transparent 70%);
+    border-radius: var(--border-radius);
+  }
+  
+  .connectionsGroup .connectionLine {
+    transition: all 0.3s ease;
+  }
+  
+  .connectionLine:hover {
+    stroke-width: 6 !important;
+    opacity: 1 !important;
+  }
+  
+  .nodesGroup {
+    cursor: grab;
+  }
+  
+  .nodeGroup:hover .nodeCircle {
+    transform: scale(1.1);
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)) !important;
+  }
+  
+  .nodeCircle {
+    transition: all 0.3s ease;
+    stroke-width: 2;
+  }
+
+  .selectedNode {
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .connectedNode {
+    animation: nodeGlow 2s ease-in-out infinite;
+  }
+  
+  .nodeIcon {
+    pointer-events: none;
+    user-select: none;
+    transition: all 0.3s ease;
+  }
+  
+  .nodeLabel {
+    font-family: var(--font-family-body);
+    font-size: 12px;
+    font-weight: 600;
+    fill: var(--color-text-primary);
+    pointer-events: none;
+    user-select: none;
+  }
+  
+  .nodeStrength {
+    font-family: var(--font-family-heading);
+    font-size: 10px;
+    font-weight: 700;
+    pointer-events: none;
+    user-select: none;
+  }
+  
+  .nodeDetailsPanel {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    width: 280px;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+    z-index: 10;
+    animation: slideInRight 0.3s ease;
+  }
+  
+  .nodeDetailsHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  }
+  
+  .nodeDetailsIcon {
+    font-size: 1.5rem;
+  }
+  
+  .nodeDetailsHeader h4 {
+    flex: 1;
+    margin: 0;
+    color: var(--color-text-primary);
+    font-family: var(--font-family-heading);
+    font-weight: 600;
+  }
+  
+  .closeDetailsButton {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: var(--space-1);
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+  }
+  
+  .closeDetailsButton:hover {
+    background: var(--color-border);
+    color: var(--color-text-primary);
+  }
+  
+  .nodeDetailsContent {
+    padding: var(--space-4);
+  }
+  
+  .nodeDetailsStat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+  }
+  
+  .nodeDetailsStat .statLabel {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .nodeDetailsStat .statValue {
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  
+  .nodeDescription {
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin: var(--space-3) 0;
+    padding: var(--space-3);
+    background: var(--color-surface);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--color-border);
+  }
+  
+  .nodeActions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  .actionButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-family-body);
+  }
+  
+  .actionButton:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .actionButton:nth-child(2) {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+  }
+  
+  .actionButton:nth-child(2):hover {
+    background: var(--color-border);
+    transform: translateY(-1px);
+  }
+  
+  .graphStats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-4);
+  }
+  
+  .statCard {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+  }
+  
+  .statCard:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  
+  .statIcon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  
+  .statInfo {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .statNumber {
+    font-family: var(--font-family-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    line-height: 1;
+  }
+  
+  .statInfo .statLabel {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: var(--space-1);
+  }
+  
   /* Animations */
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInUp {
+    from {
+      transform: translate(-50%, -30%);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, -50%);
+      opacity: 1;
+    }
+  }
+  
   @keyframes pulse {
     0%, 100% {
       transform: scale(1);
     }
     50% {
       transform: scale(1.05);
+    }
+  }
+  
+  @keyframes nodeGlow {
+    0%, 100% {
+      filter: drop-shadow(0 0 5px currentColor);
+    }
+    50% {
+      filter: drop-shadow(0 0 15px currentColor);
     }
   }
   
@@ -824,6 +1237,37 @@
   
     .scoreNumber {
       font-size: 1.5rem;
+    }
+
+    /* Graph responsive */
+    .graphHeader {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .graphLegend {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .nodeDetailsPanel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 320px;
+      animation: slideInUp 0.3s ease;
+    }
+
+    .graphStats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .statCard {
+      flex-direction: column;
+      text-align: center;
+      gap: var(--space-2);
     }
   }
   

@@ -23,6 +23,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   isWinning = false, 
   isCommunity = false 
 }) => {
+  // Карта рубашкой вверх
   if (!faceUp) {
     return (
       <div className={`${styles.card} ${styles.faceDown}`}>
@@ -33,6 +34,7 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
     );
   }
 
+  // Пустая карта (нет масти или ранга)
   if (!suit || !rank) {
     return (
       <div className={`${styles.card} ${styles.empty}`}>
@@ -57,7 +59,6 @@ const PlayingCard: React.FC<PlayingCardProps> = ({
   
   const cardClasses = [
     styles.card,
-    styles.faceUp,
     colorClass ? styles[colorClass] : '',
     isWinning ? styles.winning : '',
     isCommunity ? styles.community : ''

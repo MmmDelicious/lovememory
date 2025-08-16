@@ -21,6 +21,8 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
       setActiveTab('calendar');
     } else if (path.startsWith('/games')) {
       setActiveTab('games');
+    } else if (path.startsWith('/shop')) {
+      setActiveTab('shop');
     } else if (path.startsWith('/insights')) {
       setActiveTab('insights');
     } else if (path.startsWith('/profile')) {
@@ -43,6 +45,9 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
         break;
       case 'games':
         navigate('/games');
+        break;
+      case 'shop':
+        navigate('/shop');
         break;
       case 'insights':
         navigate('/insights');

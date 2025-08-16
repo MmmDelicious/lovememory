@@ -1,4 +1,5 @@
 const { GameRoom, User, sequelize } = require('../models');
+const economyService = require('./economy.service');
 
 class GameService {
   async findRooms(gameType, io) {
@@ -61,15 +62,10 @@ class GameService {
       throw error;
     }
 
-    const host = await User.findByPk(hostId);
-    if (!host) {
-      const error = new Error('Создатель комнаты не найден.');
-      error.statusCode = 404;
-      throw error;
-    }
-
-    if (host.coins < bet) {
-      const error = new Error('Insufficient coins.');
+    // Проверяем возможность ставки через экономический сервис
+    const canBet = await economyService.canPlayerBet(hostId, bet);
+    if (!canBet.canBet) {
+      const error = new Error(canBet.reason);
       error.statusCode = 400;
       throw error;
     }
@@ -196,48 +192,35 @@ class GameService {
     }
   }
 
-  async finalizeGame(roomId, winnerUserId, loserUserId) {
-    const t = await sequelize.transaction();
+  async finalizeGame(roomId, winnerId, loserId, isDraw = false) {
     try {
-      const room = await GameRoom.findByPk(roomId, { transaction: t });
-      if (!room || room.status !== 'in_progress') {
-        await t.rollback();
-        console.log(`Транзакция отменена: комната ${roomId} не найдена или ее статус не 'in_progress'`);
-        return;
+      const room = await GameRoom.findByPk(roomId);
+      if (!room) {
+        console.log(`Комната ${roomId} не найдена`);
+        return null;
       }
 
-      const winner = await User.findByPk(winnerUserId, { transaction: t });
-      const loser = await User.findByPk(loserUserId, { transaction: t });
-
-      if (!winner || !loser) {
-        await t.rollback();
-        return;
+      const economyType = economyService.getEconomyType(room.gameType);
+      
+      if (economyType === 'poker') {
+        // Для покера используем старую логику
+        console.log(`[FINALIZE] Покер игра ${roomId} завершается через PokerGame`);
+        return null;
       }
-      
-      // Улучшенная экономическая модель
-      const baseReward = room.bet;
-      const winnerBonus = Math.floor(baseReward * 0.1); // 10% бонус победителю
-      const totalWinnerReward = baseReward + winnerBonus;
-      
-      winner.coins += totalWinnerReward;
-      loser.coins -= room.bet;
-      
-      if (loser.coins < 0) loser.coins = 0;
 
-      await winner.save({ transaction: t });
-      await loser.save({ transaction: t });
+      // Для стандартных игр используем новую экономическую систему
+      const playerIds = isDraw ? [winnerId, loserId] : [winnerId, loserId];
+      const result = await economyService.finalizeStandardGame(roomId, isDraw ? null : winnerId, playerIds, isDraw);
       
-      // Изменяем статус на 'finished' вместо удаления комнаты
-      room.status = 'finished';
-      await room.save({ transaction: t });
-
-      await t.commit();
-      console.log(`Игра ${roomId} завершена. Победитель ${winner.id} получил ${totalWinnerReward} монет (${baseReward} + ${winnerBonus} бонус).`);
-      return { winner, loser };
-
+      if (result.success) {
+        console.log(`[FINALIZE] Стандартная игра ${roomId} завершена через новую экономическую систему`);
+        return result.results;
+      } else {
+        console.error(`[FINALIZE] Ошибка завершения игры ${roomId}:`, result.reason);
+        return null;
+      }
     } catch (error) {
-      await t.rollback();
-      console.error(`!!! Ошибка в finalizeGame для комнаты ${roomId}:`, error);
+      console.error(`[FINALIZE] Ошибка в finalizeGame для комнаты ${roomId}:`, error);
       return null;
     }
   }

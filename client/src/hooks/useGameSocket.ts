@@ -80,6 +80,12 @@ export const useGameSocket = (
     socket.on('game_end', handleStateUpdate);
     socket.on('new_hand_started', handleStateUpdate);
     
+    // Обработчик уведомления о возможности rebuy
+    socket.on('rebuy_opportunity', (data: { message: string }) => {
+      console.log('[CLIENT] Rebuy opportunity:', data.message);
+      // Можно показать уведомление пользователю
+    });
+    
     if (setCoinsCallback) {
       socket.on('update_coins', setCoinsCallback);
     }
@@ -97,6 +103,7 @@ export const useGameSocket = (
       socket.off('game_update');
       socket.off('game_end');
       socket.off('new_hand_started');
+      socket.off('rebuy_opportunity');
       socket.off('update_coins');
       socket.off('error');
       socket.disconnect();

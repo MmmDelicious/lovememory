@@ -20,7 +20,7 @@ const PairingWidget = ({ pairing, isPairingLoading, partner, sendRequest, delete
         <div className={styles.widgetBody}>
           {isPairingLoading ? <p>Загрузка...</p> : partner ? (
             <>
-              <p>Вы в паре с <strong>{partner.first_name || partner.email}</strong>.</p>
+              <p>Вы в паре с <strong>{partner.first_name || partner.last_name || 'Пользователь'}</strong>.</p>
               <Button onClick={() => deletePairing(pairing.id)} type="secondary" style={{ width: '100%' }}>Разорвать связь</Button>
             </>
           ) : (

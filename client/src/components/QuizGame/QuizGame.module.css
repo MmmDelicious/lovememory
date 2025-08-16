@@ -187,6 +187,25 @@
     color: #634832;
     margin: 0 0 1.5rem 0;
   }
+
+  .coinsInfo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 1rem 1.5rem;
+    background: rgba(231, 122, 101, 0.1);
+    border: 1px solid rgba(231, 122, 101, 0.3);
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #634832;
+  }
+
+  .coinsIcon {
+    font-size: 1.3rem;
+  }
   
   .finalScores {
     display: flex;

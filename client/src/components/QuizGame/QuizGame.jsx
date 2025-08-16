@@ -25,6 +25,20 @@ const QuizGame = ({ gameState, user, makeMove, handleReturnToLobby }) => {
     const isWinner = gameState.winner === user.id;
     const isDraw = gameState.winner === 'draw';
     let resultText = isDraw ? 'Ничья!' : isWinner ? 'Победа!' : 'Поражение';
+    
+    // Получаем информацию о монетах из результатов экономической системы
+    const userEconomyResult = gameState.economyResults?.[user.id];
+    let coinsInfo = null;
+    
+    if (userEconomyResult) {
+      if (userEconomyResult.type === 'winner') {
+        coinsInfo = `Выигрыш: +${userEconomyResult.coinsChange} монет`;
+      } else if (userEconomyResult.type === 'loser') {
+        coinsInfo = `Потеряно: ${userEconomyResult.coinsChange} монет`;
+      } else if (userEconomyResult.type === 'draw') {
+        coinsInfo = `Ставка возвращена: +${userEconomyResult.coinsChange} монет`;
+      }
+    }
 
     return (
       <div className={styles.gameEndContainer}>
@@ -32,6 +46,12 @@ const QuizGame = ({ gameState, user, makeMove, handleReturnToLobby }) => {
         <h1 className={styles.gameTitle}>Игра окончена</h1>
         <div className={styles.results}>
           <h2 className={styles.resultText}>{resultText}</h2>
+          {coinsInfo && (
+            <div className={styles.coinsInfo}>
+              <div className={styles.coinsIcon}>💰</div>
+              <span>{coinsInfo}</span>
+            </div>
+          )}
           <div className={styles.finalScores}>
             {gameState.players.map(playerId => (
               <div key={playerId} className={styles.finalPlayerScore}>

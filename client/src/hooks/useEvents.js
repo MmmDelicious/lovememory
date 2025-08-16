@@ -51,12 +51,25 @@ const formatEvent = (event, userId) => {
     }
   }
 
+  // Обработка конечной даты для FullCalendar
+  let endForCalendar = event.end_date;
+  
+  // Если это событие на весь день и есть конечная дата
+  if (!hasTime && endDate) {
+    // Для allDay событий FullCalendar использует exclusive end date
+    // Поэтому добавляем 1 день к конечной дате
+    const exclusiveEndDate = new Date(endDate);
+    exclusiveEndDate.setDate(exclusiveEndDate.getDate() + 1);
+    endForCalendar = exclusiveEndDate.toISOString();
+  }
+
   return {
     id: event.id,
     title: event.title,
     start: event.event_date,
-    end: event.end_date,
+    end: endForCalendar,
     allDay: !hasTime,
+    editable: true, // Разрешаем перетаскивание всех событий
     backgroundColor: EVENT_TYPE_COLORS[event.event_type] || EVENT_TYPE_COLORS.plan,
     borderColor: EVENT_TYPE_COLORS[event.event_type] || EVENT_TYPE_COLORS.plan,
     extendedProps: {

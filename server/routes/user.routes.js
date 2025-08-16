@@ -1,14 +1,27 @@
-const { Router } = require('express');
-const { getProfile, updateProfile, getProfileStats, uploadAvatar } = require('../controllers/user.controller');
+const express = require('express');
+const router = express.Router();
+const userController = require('../controllers/user.controller');
 const authMiddleware = require('../middleware/auth.middleware');
 const upload = require('../middleware/upload.middleware');
 
-const router = Router();
-router.use(authMiddleware);
+// Профиль пользователя
+router.get('/profile', authMiddleware, userController.getProfile);
+router.put('/profile', authMiddleware, upload.single('avatar'), userController.updateProfile);
 
-router.get('/profile', getProfile);
-router.put('/profile', updateProfile);
-router.get('/stats', getProfileStats);
-router.post('/avatar', upload.single('avatar'), uploadAvatar);
+// Статистика пользователя
+router.get('/stats', authMiddleware, userController.getProfileStats);
+
+// Загрузка аватара
+router.post('/avatar', authMiddleware, upload.single('avatar'), userController.uploadAvatar);
+
+// История посещенных мест (новый эндпоинт)
+router.get('/place-history', authMiddleware, userController.getPlaceHistory);
+router.post('/place-history', authMiddleware, userController.addPlaceToHistory);
+
+// Поиск пользователей
+router.get('/search', authMiddleware, userController.searchUsers);
+
+// Сохранение FCM токена
+router.post('/fcm-token', authMiddleware, userController.saveFCMToken);
 
 module.exports = router;

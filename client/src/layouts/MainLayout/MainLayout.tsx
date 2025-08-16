@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, useLocation, Link } from 'react-router-dom';
+import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
 import MobileLayout from '../../layouts/MobileLayout/MobileLayout';
 import DashboardPage from '../../pages/DashboardPage/DashboardPage';
 import MobileDashboard from '../../pages/MobileDashboard/MobileDashboard';
@@ -8,6 +8,10 @@ import MobileGames from '../../pages/GamesPage/MobileGames';
 import InsightsPage from '../../pages/InsightsPage/InsightsPage';
 import MobileInsights from '../../pages/InsightsPage/MobileInsights';
 import ProfilePage from '../../pages/ProfilePage/ProfilePage';
+import NotificationDropdown from '../../components/NotificationDropdown/NotificationDropdown';
+import UserDropdown from '../../components/UserDropdown/UserDropdown';
+import GiftDisplay from '../../components/GiftDisplay/GiftDisplay';
+import { useGifts } from '../../hooks/useGifts';
 import { 
   Home, 
   Calendar, 
@@ -19,24 +23,26 @@ import {
   Bell,
   Menu,
   X,
-  BarChart3
+  BarChart3,
+  Gift
 } from 'lucide-react';
 import styles from './MainLayout.module.css';
-// import { useAuth } from '../../context/AuthContext';
-// import { useCurrency } from '../../context/CurrencyContext';
+import { useAuth } from '../../context/AuthContext';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const MainLayout: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
   
-  // Временно закомментировано до создания контекстов
-  // const { user } = useAuth();
-  // const { coins } = useCurrency();
-  
-  // Mock данные для демонстрации
-  const user = { first_name: 'Александр', avatar: null };
-  const coins = 1250;
+  const { user, logout } = useAuth();
+  const { coins } = useCurrency();
+  const { receivedGift, isGiftVisible, closeGift } = useGifts();
+  const navigate = useNavigate();
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+  };
 
   // Check if mobile
   React.useEffect(() => {
@@ -64,6 +70,12 @@ const MainLayout: React.FC = () => {
       active: location.pathname.startsWith('/games')
     },
     {
+      path: '/shop',
+      icon: <Gift size={20} />,
+      label: 'Магазин',
+      active: location.pathname === '/shop'
+    },
+    {
       path: '/insights',
       icon: <BarChart3 size={20} />,
       label: 'Аналитика',
@@ -89,6 +101,8 @@ const MainLayout: React.FC = () => {
           return <MobileDashboard />;
         case '/games':
           return <MobileGames />;
+        case '/shop':
+          return <Outlet />;
         case '/insights':
           return <MobileInsights />;
         case '/profile':
@@ -137,36 +151,35 @@ const MainLayout: React.FC = () => {
           </nav>
 
           {/* User Section */}
-          <div className={styles.userSection}>
-            {/* Coins */}
-            <div className={styles.coinsDisplay}>
-              <Coins size={18} />
-              <span>{coins.toLocaleString()}</span>
+          {user ? (
+            <div className={styles.userSection}>
+              {/* Coins */}
+              <div className={styles.coinsDisplay}>
+                <Coins size={18} />
+                <span>{coins.toLocaleString()}</span>
+              </div>
+
+              {/* Notifications */}
+              <NotificationDropdown />
+
+              {/* User Dropdown */}
+              <UserDropdown user={user} onLogout={logout} onNavigate={handleNavigate} />
+
+              {/* Mobile Menu Button */}
+              <button 
+                className={styles.mobileMenuButton}
+                onClick={toggleMobileMenu}
+              >
+                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
             </div>
-
-            {/* Notifications */}
-            <button className={styles.notificationButton}>
-              <Bell size={20} />
-              <span className={styles.notificationBadge}>3</span>
-            </button>
-
-            {/* User Avatar */}
-            <div className={styles.userAvatar}>
-              {user.avatar ? (
-                <img src={user.avatar} alt={user.first_name} />
-              ) : (
-                <span>{user.first_name[0].toUpperCase()}</span>
-              )}
+          ) : (
+            <div className={styles.authSection}>
+              <Link to="/login" className={styles.loginButton}>
+                Войти
+              </Link>
             </div>
-
-            {/* Mobile Menu Button */}
-            <button 
-              className={styles.mobileMenuButton}
-              onClick={toggleMobileMenu}
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
+          )}
         </div>
 
         {/* Mobile Navigation */}
@@ -207,6 +220,11 @@ const MainLayout: React.FC = () => {
         <div className={styles.floatingHeart} style={{ '--delay': '3s' } as React.CSSProperties}>💖</div>
         <div className={styles.floatingHeart} style={{ '--delay': '6s' } as React.CSSProperties}>💝</div>
       </div>
+
+      {/* Gift Display */}
+      {isGiftVisible && receivedGift && (
+        <GiftDisplay gift={receivedGift} onClose={closeGift} />
+      )}
     </div>
   );
 };

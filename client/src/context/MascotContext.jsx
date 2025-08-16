@@ -5,28 +5,47 @@ import greetAnimation from '../assets/greet.json';
 import globalMascotAnimation from '../assets/AI.json';
 import { askAI } from '../services/ai.service';
 import { MASCOT_CONFIG } from '../config/mascot.config.js';
+import smartMascotService from '../services/smartMascot.service';
+import { useAuth } from './AuthContext';
 
 const MascotContext = createContext();
 
 export const useMascot = () => useContext(MascotContext);
 
-const generateMessage = (page, data) => {
-  if (page === 'pairing' && data?.requesterName) return `Кажется, ${data.requesterName} хочет создать с вами пару! Примем приглашение?`;
+const generateMessage = (page, data, user = null, partner = null) => {
+  // Обновляем контекст умного маскота
+  if (user) {
+    smartMascotService.updateUserContext(user, partner);
+  }
+
+  if (page === 'pairing' && data?.requesterName) {
+    const userName = user?.name || '';
+    return `${userName ? userName + ', к' : 'К'}ажется, ${data.requesterName} хочет создать с вами пару! Примем приглашение? 💕`;
+  }
+  
   if (page === 'dashboard' && data?.event) {
-    const eventDate = new Date(data.event.event_date), today = new Date();
-    today.setHours(0, 0, 0, 0); eventDate.setHours(0, 0, 0, 0);
-    const eventDateStr = new Date(data.event.event_date).toLocaleDateString('ru-RU', { month: 'long', day: 'numeric' });
+    const eventDate = new Date(data.event.event_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    eventDate.setHours(0, 0, 0, 0);
     const diffTime = eventDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) return `Эх, сегодня классный день будет! Глянем планы: "${data.event.title}"`;
-    if (diffDays === 1) return `Ух ты! Завтра у нас по плану "${data.event.title}". Не забыли?`;
-    if (diffDays > 1) return `Через ${diffDays} дней у нас будет "${data.event.title}"! Уже в предвкушении!`;
-    if (diffDays < 0) return `Помните, ${eventDateStr} был хороший денёк? "${data.event.title}". Давайте освежим воспоминания!`;
+    
+    // Используем умный сервис для генерации сообщений
+    if (diffDays < 0) {
+      // Прошлое событие - используем новый алгоритм для воспоминаний
+      return smartMascotService.generatePastMemoryMessage(data.event);
+    } else {
+      // Будущее событие - используем новый алгоритм
+      return smartMascotService.generateFutureEventMessage(data.event);
+    }
   }
-  return data?.message || 'Привет! Я здесь, чтобы помочь!';
+  
+  return data?.message || smartMascotService.generateContextualMessage();
 };
 
 export const MascotProvider = ({ children }) => {
+  const { user } = useAuth();
   const [mascot, setMascot] = useState(null);
   const [mascotTargets, setMascotTargets] = useState([]);
   const [isLoopActive, setIsLoopActive] = useState(false);
@@ -87,6 +106,13 @@ export const MascotProvider = ({ children }) => {
     else if (config.type === 'greeter') { helperAnimation = greetAnimation; mascotType = 'greeter'; }
     else { helperAnimation = runnerAnimation; mascotType = 'runner'; }
     
+    // Записываем взаимодействие в умный сервис
+    smartMascotService.recordInteraction('mascot_shown', {
+      page: config.page,
+      eventData: config.data,
+      messageType: config.type
+    });
+    
     if (isAIVisible && !isChatOpen) {
         handleMascotInterception(config, helperAnimation);
         return;
@@ -94,13 +120,13 @@ export const MascotProvider = ({ children }) => {
     
     hideMascot();
     setTimeout(() => {
-      const message = config.message || generateMessage(config.page, config.data);
+      const message = config.message || generateMessage(config.page, config.data, user, user?.partner);
       const elementRect = config.element.getBoundingClientRect();
       const finalConfig = { ...config, message, animationData: helperAnimation, mascotType, isTumbling: config.isTumbling ?? (mascotType === 'flyer' && Math.random() > 0.5), side: config.side ?? (elementRect.left < window.innerWidth / 2 ? 'right' : 'left'), };
       setMascot(finalConfig);
       if (config.duration) { hideTimerRef.current = setTimeout(() => { if (config.onDismiss) { config.onDismiss(); } else { hideMascot(); } }, config.duration); }
     }, 100);
-  }, [isMobile, hideMascot, isAIVisible, isChatOpen, handleMascotInterception]);
+  }, [isMobile, hideMascot, isAIVisible, isChatOpen, handleMascotInterception, user]);
 
   const registerMascotTargets = useCallback((targets) => setMascotTargets(targets), []);
   const clearMascotTargets = useCallback(() => setMascotTargets([]), []);

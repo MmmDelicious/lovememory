@@ -93,25 +93,7 @@
     transform: translateY(-50%);
 }
 
-.card {
-    width: 75px;
-    height: 105px;
-    background-color: var(--card-bg);
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: 26px;
-    font-weight: bold;
-    position: relative;
-    color: #c78469;
-}
-
-.card.faceDown {
-    background-image: repeating-linear-gradient(45deg, var(--primary-accent), var(--primary-accent) 5px, var(--card-bg) 5px, var(--card-bg) 10px);
-}
+/* Стили карт теперь в PlayingCard.module.css */
 
 .communityCards {
     position: absolute;
@@ -123,6 +105,7 @@
     z-index: 15;
 }
 
+/* Размеры для разных типов карт */
 .communityCards .card {
     width: 80px;
     height: 115px;
@@ -166,27 +149,7 @@
     z-index: 2;
 }
 
-.card .rank {
-    position: absolute;
-    top: 5px;
-    left: 7px;
-    font-size: 22px;
-}
-
-.card .suit {
-    font-size: 55px;
-    -webkit-text-stroke: 1.5px;
-}
-
-.hearts, .diamonds {
-    color: var(--secondary-accent);
-    -webkit-text-stroke-color: var(--secondary-accent);
-}
-
-.clubs, .spades {
-    color: var(--text-color);
-    -webkit-text-stroke-color: var(--text-color);
-}
+/* Цвета мастей теперь в PlayingCard.module.css */
 
 .bettingArea {
     position: absolute;
@@ -778,4 +741,73 @@
     .timerText {
         font-size: 11px;
     }
+}
+
+/* Buy-in banner styles */
+.buyInBanner {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.95) 0%, rgba(255, 152, 0, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 193, 7, 0.7);
+  box-shadow: 0 8px 32px rgba(255, 193, 7, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  min-width: 280px;
+}
+
+.buyInBanner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(255, 193, 7, 0.4);
+  background: linear-gradient(135deg, rgba(255, 193, 7, 1) 0%, rgba(255, 152, 0, 1) 100%);
+}
+
+.buyInIcon {
+  font-size: 32px;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
+.buyInText {
+  color: #1a1a1a;
+  font-size: 18px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  margin-bottom: 4px;
+}
+
+.buyInSubtext {
+  color: #444;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* Стили для showdown фазы */
+.showdownMessage {
+  color: var(--color-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 15px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 193, 7, 0.1) 100%);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.1);
+}
+
+.showdownInfo {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  font-style: italic;
+  opacity: 0.8;
 }

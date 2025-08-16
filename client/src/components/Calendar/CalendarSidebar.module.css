@@ -1,10 +1,11 @@
-.sidebarContent {
+  .sidebarContent {
     flex: 1;
     padding: var(--space-4);
-    overflow: hidden;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     position: relative;
+    height: 100%;
   }
   
 /* Mobile close button removed in web-focused build */
@@ -28,6 +29,38 @@
   .sectionHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); }
   .sectionHeader h3 { font-size: 14px; font-weight: 600; color: var(--color-text-primary); margin: 0; }
   
+  .headerActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .collapseButton {
+    background: none;
+    border: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    transition: all 0.2s ease;
+  }
+  
+  .collapseButton:hover {
+    background: var(--color-background);
+    color: var(--color-text-primary);
+  }
+  
+  .customTemplatesList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
   .calendarList { display: flex; flex-direction: column; gap: 6px; }
   .calendarItemBtn { display: flex; align-items: center; gap: var(--space-2); padding: 6px 8px; background: var(--color-background); border: 1px solid var(--color-border); border-radius: 8px; cursor: pointer; width: 100%; text-align: left; }
   .calendarItemBtn:hover { border-color: var(--color-primary); }
@@ -42,5 +75,107 @@
   .templateItem { display: flex; align-items: center; gap: var(--space-2); padding: 6px 8px; background: var(--color-background); border: 1px solid var(--color-border); border-radius: 8px; cursor: grab; user-select: none; }
   .templateItem:active { cursor: grabbing; }
   .templateName { font-size: 13px; color: var(--color-text-primary); }
+
+  .createTemplateButton {
+    background: var(--color-primary);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .createTemplateButton:hover {
+    background: var(--color-primary-hover);
+    transform: scale(1.1);
+  }
+
+  .templateDivider {
+    display: flex;
+    align-items: center;
+    margin: var(--space-4) 0 var(--space-3) 0;
+    position: relative;
+  }
+
+  .templateDivider::before {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+    margin-right: var(--space-2);
+  }
+
+  .templateDivider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+    margin-left: var(--space-2);
+  }
+
+  .templateDivider span {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+  }
+
+
+
+  .customTemplateItem {
+    position: relative;
+    margin-bottom: 6px;
+  }
+
+  .customTemplateItem:hover .templateActions {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .templateActions {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 2px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 2px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .templateActionButton {
+    background: none;
+    border: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    transition: all 0.2s ease;
+  }
+
+  .templateActionButton:hover {
+    background: var(--color-background);
+    color: var(--color-text-primary);
+  }
+
+  .templateActionButton:last-child:hover {
+    color: var(--color-error);
+  }
   
 /* Removed mobile media rules */

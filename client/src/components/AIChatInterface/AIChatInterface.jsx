@@ -3,6 +3,7 @@ import { useAIMascot } from '../../context/AIMascotContext';
 import AIChat from '../AIChat/AIChat';
 import AIToggleButton from '../AIToggleButton/AIToggleButton';
 import FreeRoamMascot from '../FreeRoamMascot/FreeRoamMascot';
+import DateGeneratorModal from '../DateGeneratorModal/DateGeneratorModal';
 import { useAuth } from '../../context/AuthContext';
 
 const AIChatInterface = () => {
@@ -14,7 +15,9 @@ const AIChatInterface = () => {
     globalMascotAnimation,
     isAILoading,
     sendMessageToAI,
-    toggleAIMascot
+    toggleAIMascot,
+    isDateGeneratorOpen,
+    closeDateGenerator
   } = useAIMascot();
   const { user } = useAuth();
 
@@ -49,12 +52,20 @@ const AIChatInterface = () => {
       case 'mood':
         sendMessageToAI('Подними мне настроение! Расскажи что-нибудь позитивное', 'mood');
         break;
+            case 'generateDate':
+        sendMessageToAI('Сгенерируй идеальное свидание для нас!', 'generateDate');
+        break;
       case 'hide':
         toggleAIMascot();
         break;
       default:
         break;
     }
+  };
+
+  const handleEventCreated = (event) => {
+    // Можно добавить обновление календаря или показ уведомления
+    console.log('Date event created:', event);
   };
 
   return (
@@ -72,6 +83,13 @@ const AIChatInterface = () => {
         <AIToggleButton />
         {isChatOpen && <AIChat />}
       </div>
+      
+      {/* Модальное окно генератора свиданий */}
+      <DateGeneratorModal
+        isOpen={isDateGeneratorOpen}
+        onClose={closeDateGenerator}
+        onEventCreated={handleEventCreated}
+      />
     </>
   );
 };

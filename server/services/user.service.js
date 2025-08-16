@@ -6,7 +6,7 @@ const path = require('path');
 class UserService {
   async getProfile(userId) {
     const user = await User.findByPk(userId, {
-      attributes: ['id', 'email', 'first_name', 'last_name', 'bio', 'avatarUrl', 'telegram_chat_id', 'coins', 'gender', 'age', 'city']
+      attributes: ['id', 'email', 'first_name', 'last_name', 'bio', 'avatarUrl', 'telegram_chat_id', 'coins', 'gender', 'age', 'city', 'role', 'last_active', 'streak_days', 'total_login_days', 'preferences']
     });
     if (!user) {
       const error = new Error('Пользователь не найден.');
@@ -25,7 +25,7 @@ class UserService {
   }
 
   async updateProfile(userId, updateData) {
-    const { first_name, last_name, bio, telegram_chat_id, gender, age, city } = updateData;
+    const { first_name, last_name, bio, telegram_chat_id, gender, age, city, preferences } = updateData;
     const user = await User.findByPk(userId);
 
     if (!user) {
@@ -51,6 +51,7 @@ class UserService {
     if (gender !== undefined) user.gender = gender;
     if (age !== undefined) user.age = age;
     if (city !== undefined) user.city = city;
+    if (preferences !== undefined) user.preferences = preferences;
     
     await user.save();
     
@@ -69,7 +70,12 @@ class UserService {
         coins: user.coins,
         gender: user.gender,
         age: user.age,
-        city: user.city
+        city: user.city,
+        role: user.role,
+        last_active: user.last_active,
+        streak_days: user.streak_days,
+        total_login_days: user.total_login_days,
+        preferences: user.preferences
     };
   }
 
@@ -100,7 +106,7 @@ class UserService {
 
     // Получаем информацию о пользователе
     const user = await User.findByPk(userId, {
-      attributes: ['coins', 'createdAt']
+      attributes: ['coins', 'createdAt', 'streak_days', 'total_login_days', 'last_active', 'role']
     });
 
     // Вычисляем дни с регистрации
@@ -111,7 +117,11 @@ class UserService {
       memories: memoriesCount,
       gamesPlayed: gamesPlayed,
       coins: user.coins,
-      daysSinceRegistration: daysSinceRegistration
+      daysSinceRegistration: daysSinceRegistration,
+      streakDays: user.streak_days,
+      totalLoginDays: user.total_login_days,
+      lastActive: user.last_active,
+      role: user.role
     };
   }
 

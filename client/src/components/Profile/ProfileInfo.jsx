@@ -24,7 +24,7 @@ const ProfileInfo = ({ user, partner, partnerAvatar }) => {
       {partner && (
         <div className={styles.partnerSection}>
           <img src={partnerAvatar} alt="Partner" className={styles.partnerAvatar} />
-          <span className={styles.partnerText}>В паре с: {partner.first_name || partner.email}</span>
+          <span className={styles.partnerText}>В паре с: {partner.first_name || partner.last_name || 'Пользователь'}</span>
         </div>
       )}
     </div>

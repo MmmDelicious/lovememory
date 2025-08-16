@@ -13,6 +13,7 @@ export const AIMascotProvider = ({ children }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isAILoading, setIsAILoading] = useState(false);
   const [interceptedMascot, setInterceptedMascot] = useState(null);
+  const [isDateGeneratorOpen, setIsDateGeneratorOpen] = useState(false);
 
   const moveGlobalMascotToPosition = useCallback((newPosition) => {
     setGlobalMascot(prev => {
@@ -88,7 +89,18 @@ export const AIMascotProvider = ({ children }) => {
   const sendMessageToAI = useCallback(async (prompt, context) => {
     setIsAILoading(true);
     try {
-      if (context && MASCOT_CONFIG.CONTEXT_MENU_ACTIONS[context]) {
+      // Проверяем специальные контексты
+      if (context === 'generateDate') {
+        const responses = MASCOT_CONFIG.CONTEXT_MENU_ACTIONS[context].responses;
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        setGlobalMascotMessage(randomResponse);
+        
+        // Открываем генератор свиданий через небольшую задержку
+        setTimeout(() => {
+          setIsDateGeneratorOpen(true);
+        }, 2000);
+        
+      } else if (context && MASCOT_CONFIG.CONTEXT_MENU_ACTIONS[context]) {
         const responses = MASCOT_CONFIG.CONTEXT_MENU_ACTIONS[context].responses;
         const randomResponse = responses[Math.floor(Math.random() * responses.length)];
         setGlobalMascotMessage(randomResponse);
@@ -104,6 +116,14 @@ export const AIMascotProvider = ({ children }) => {
     }
   }, [setGlobalMascotMessage]);
 
+  const openDateGenerator = useCallback(() => {
+    setIsDateGeneratorOpen(true);
+  }, []);
+
+  const closeDateGenerator = useCallback(() => {
+    setIsDateGeneratorOpen(false);
+  }, []);
+
   const value = {
     globalMascot,
     globalMascotAnimation,
@@ -116,6 +136,9 @@ export const AIMascotProvider = ({ children }) => {
     interceptedMascot,
     handleMascotInterception,
     setGlobalMascotMessage,
+    isDateGeneratorOpen,
+    openDateGenerator,
+    closeDateGenerator
   };
 
   return <AIMascotContext.Provider value={value}>{children}</AIMascotContext.Provider>;

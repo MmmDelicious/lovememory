@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Gamepad2, BarChart3, User, Calendar } from 'lucide-react';
+import { Home, Gamepad2, BarChart3, User, Calendar, Gift } from 'lucide-react';
 import styles from './MobileNavigation.module.css';
 
 interface MobileNavigationProps {
@@ -15,14 +15,14 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ activeTab, onTabCha
       icon: Home
     },
     {
-      id: 'calendar',
-      label: 'Календарь',
-      icon: Calendar
-    },
-    {
       id: 'games',
       label: 'Игры',
       icon: Gamepad2
+    },
+    {
+      id: 'shop',
+      label: 'Магазин',
+      icon: Gift
     },
     {
       id: 'insights',

@@ -209,6 +209,7 @@
 .searchWrapper {
   position: relative;
   flex: 1;
+  max-width: 400px;
 }
 
 .searchIcon {
@@ -427,17 +428,17 @@
 .roomCard {
   position: relative;
   background: var(--color-surface);
-  border: 2px solid var(--color-border);
-  border-radius: var(--border-radius-lg);
-  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   overflow: hidden;
 }
 
 .roomCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
   border-color: var(--color-primary);
 }
 
@@ -455,48 +456,35 @@
 
 .roomCard.inProgress {
   border-color: #ff6b35;
-  background: linear-gradient(135deg, #fff8f6 0%, #fff5f2 100%);
+  background: var(--color-surface);
 }
 
-.cardGlow {
-  position: absolute;
-  inset: -2px;
-  background: linear-gradient(135deg, var(--color-primary), transparent, var(--color-primary));
-  border-radius: var(--border-radius-lg);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  z-index: -1;
-}
-
-.roomCard:hover .cardGlow {
-  opacity: 0.1;
-}
+/* Убираем сложные эффекты свечения */
 
 .cardHeader {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-3);
 }
 
 .hostSection {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .hostAvatar {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  width: 40px;
+  height: 40px;
+  background: var(--color-primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-weight: 700;
-  font-size: 1.2rem;
-  box-shadow: var(--shadow-md);
+  font-weight: 600;
+  font-size: 1rem;
   overflow: hidden;
 }
 
@@ -521,11 +509,10 @@
 }
 
 .hostName {
-  font-family: var(--font-family-heading);
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: var(--color-text-primary);
   margin: 0;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .roomStatus {
@@ -545,26 +532,25 @@
 }
 
 .statusBadge.waitingBadge {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: #4CAF50;
   color: white;
 }
 
 .statusBadge.fullBadge {
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  background: #6c757d;
   color: white;
 }
 
-.statusBadge {
-  background: linear-gradient(135deg, #ff6b35 0%, #ff5722 100%);
+.statusBadge.inProgressBadge {
+  background: #ff6b35;
   color: white;
 }
 
 .statusDot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background: currentColor;
   border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
 }
 
 .cardContent {
@@ -591,6 +577,18 @@
   color: var(--color-primary);
 }
 
+.betWarning {
+  font-size: 0.8rem;
+  margin-left: var(--space-1);
+  cursor: help;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.betWarning:hover {
+  opacity: 1;
+}
+
 .difficulty {
   font-weight: 600;
 }
@@ -608,13 +606,13 @@
 .joinOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(217, 122, 108, 0.95) 0%, rgba(185, 93, 79, 0.95) 100%);
+  background: rgba(217, 122, 108, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: all 0.3s ease;
-  border-radius: var(--border-radius-lg);
+  transition: opacity 0.2s ease;
+  border-radius: var(--border-radius);
 }
 
 .roomCard:hover .joinOverlay {

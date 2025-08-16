@@ -142,8 +142,16 @@ export interface Player {
   export interface GameConfig {
     id: string;
     name: string;
+    description: string;
     category: string;
-    Icon: React.ComponentType<any>;
+    icon: React.ComponentType<any>;
+    minPlayers: number;
+    maxPlayers: number;
+    difficulty: string;
+    players: string;
+    minBet: number;
+    maxBet: number;
+    defaultBet: number;
   }
   
   // Пропсы для игровых компонентов

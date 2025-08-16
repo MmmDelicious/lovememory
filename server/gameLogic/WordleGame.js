@@ -2,8 +2,9 @@ const { getRandomWord, getDictionary } = require('./wordle/dictionaries');
 const { evaluateGuess } = require('./wordle/utils');
 
 class WordleGame {
-  constructor(roomId, settings = {}) {
+  constructor(roomId, settings = {}, callback = null) {
     this.roomId = roomId;
+    this.gameType = 'wordle'; // Добавляем gameType для совместимости с сокетами
     this.players = [];
     this.status = 'waiting'; // waiting, in_progress, finished
     this.language = settings.language || 'russian';
@@ -16,6 +17,7 @@ class WordleGame {
     this.currentRound = 1;
     this.maxRounds = settings.rounds || 3;
     this.winner = null;
+    this.onStateChange = callback;
   }
 
   addPlayer(playerId, playerName) {
@@ -64,11 +66,13 @@ class WordleGame {
 
   generateNewWord() {
     this.targetWord = getRandomWord(this.language).toUpperCase();
+    console.log(`[WordleGame] Generated new word: "${this.targetWord}" for round ${this.currentRound}`);
     
     // Очищаем попытки для нового раунда
     for (const playerId of this.players.map(p => p.id)) {
       this.playerGuesses[playerId] = [];
       this.playerResults[playerId] = [];
+      console.log(`[WordleGame] Cleared guesses/results for player ${playerId}`);
     }
   }
 
@@ -77,6 +81,8 @@ class WordleGame {
   }
 
   makeGuess(playerId, guess) {
+    console.log(`[WordleGame] Player ${playerId} making guess: "${guess}"`);
+    
     if (this.status !== 'in_progress') {
       throw new Error('Game is not in progress');
     }
@@ -86,17 +92,15 @@ class WordleGame {
     }
 
     const normalizedGuess = guess.toUpperCase();
-    const dictionary = getDictionary(this.language);
     
-    // Проверяем, что слово есть в словаре
-    if (!dictionary.includes(normalizedGuess.toLowerCase())) {
-      throw new Error('Word not in dictionary');
+    console.log(`[WordleGame] Normalized guess: "${normalizedGuess}", Target word: "${this.targetWord}"`);
+    
+    // Проверяем длину слова (должно быть ровно 5 букв)
+    if (normalizedGuess.length !== 5) {
+      throw new Error('Word must be exactly 5 letters');
     }
 
-    // Проверяем длину слова
-    if (normalizedGuess.length !== this.targetWord.length) {
-      throw new Error('Wrong word length');
-    }
+    // Словарь проверяется на фронте, тут просто обрабатываем
 
     // Добавляем попытку
     this.playerGuesses[playerId].push(normalizedGuess);
@@ -104,6 +108,8 @@ class WordleGame {
     // Оцениваем попытку
     const result = evaluateGuess(normalizedGuess, this.targetWord);
     this.playerResults[playerId].push(result);
+    
+    console.log(`[WordleGame] Guess result for "${normalizedGuess}":`, result);
 
     // Проверяем, угадал ли игрок
     const isCorrect = result.every(r => r === 'correct');
@@ -116,8 +122,13 @@ class WordleGame {
       
       this.nextRound();
     } else if (this.playerGuesses[playerId].length >= this.maxAttempts) {
-      // Игрок исчерпал попытки
+      // Игрок исчерпал попытки - переходим к следующему раунду
       this.checkRoundEnd();
+    }
+
+    // Уведомляем о изменении состояния
+    if (this.onStateChange) {
+      this.onStateChange(this);
     }
 
     return this.getGameState();
@@ -126,12 +137,25 @@ class WordleGame {
   checkRoundEnd() {
     // Проверяем, закончили ли все игроки раунд
     const allPlayersFinished = this.players.every(player => {
-      const guesses = this.playerGuesses[player.id];
-      const lastResult = this.playerResults[player.id][this.playerResults[player.id].length - 1];
+      const guesses = this.playerGuesses[player.id] || [];
+      const results = this.playerResults[player.id] || [];
       
-      return guesses.length >= this.maxAttempts || 
-             (lastResult && lastResult.every(r => r === 'correct'));
+      // Игрок закончил, если:
+      // 1. Потратил все попытки
+      // 2. Угадал слово (последний результат - все 'correct')
+      if (guesses.length >= this.maxAttempts) {
+        return true;
+      }
+      
+      if (results.length > 0) {
+        const lastResult = results[results.length - 1];
+        return lastResult && lastResult.every(r => r === 'correct');
+      }
+      
+      return false;
     });
+
+    console.log(`[WordleGame] checkRoundEnd: allPlayersFinished = ${allPlayersFinished}`);
 
     if (allPlayersFinished) {
       this.nextRound();
@@ -139,10 +163,14 @@ class WordleGame {
   }
 
   nextRound() {
+    console.log(`[WordleGame] nextRound: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}`);
+    
     if (this.currentRound >= this.maxRounds) {
+      console.log(`[WordleGame] Game ending - max rounds reached`);
       this.endGame();
     } else {
       this.currentRound++;
+      console.log(`[WordleGame] Moving to round ${this.currentRound}, generating new word`);
       this.generateNewWord();
     }
   }

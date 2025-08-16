@@ -64,7 +64,7 @@ const User = sequelize.define('User', {
     },
   },
   role: {
-    type: DataTypes.ENUM('user', 'admin'),
+    type: DataTypes.ENUM('user', 'admin', 'premium'),
     allowNull: false,
     defaultValue: 'user',
   },
@@ -76,7 +76,27 @@ const User = sequelize.define('User', {
   coins: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: 1000
+    defaultValue: () => Math.floor(Math.random() * 500) + 1000 // 1000-1500 монет
+  },
+  last_active: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: DataTypes.NOW
+  },
+  streak_days: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  total_login_days: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1
+  },
+  preferences: {
+    type: DataTypes.JSONB,
+    allowNull: true,
+    defaultValue: {}
   }
 });
 

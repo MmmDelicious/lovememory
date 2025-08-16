@@ -134,10 +134,12 @@ const ENGLISH_WORDS = [
   
   const getRandomWord = (language = 'russian', previousWord = null) => {
     const words = getDictionary(language);
-    let newWord = words[Math.floor(Math.random() * words.length)];
+    // Фильтруем только 5-буквенные слова
+    const fiveLetterWords = words.filter(word => word.length === 5);
+    let newWord = fiveLetterWords[Math.floor(Math.random() * fiveLetterWords.length)];
   
     while (newWord === previousWord) {
-      newWord = words[Math.floor(Math.random() * words.length)];
+      newWord = fiveLetterWords[Math.floor(Math.random() * fiveLetterWords.length)];
     }
   
     return newWord || (language === 'english' ? 'world' : 'слово');

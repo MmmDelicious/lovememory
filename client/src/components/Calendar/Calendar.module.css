@@ -5,16 +5,7 @@
 
 /* Deprecated mobile layout styles removed; CalendarLayout handles layout */
 
-.sidebar {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-  overflow-y: auto;
-}
+
 
 .sidebarContent {
   flex: 1;
@@ -52,15 +43,36 @@
 
 .categoryDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
+.plannerLayout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-4);
+  height: 100vh;
+  overflow: hidden;
+  padding: var(--space-4);
+  box-sizing: border-box;
+}
+
+.sidebar {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 2 * var(--space-4));
+  overflow: hidden;
+}
+
 .mainContent { 
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 0; /* объединяем шапку и сетку в единый блок без скруглений */
+  border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  height: calc(100vh - 2 * var(--space-4));
+  overflow: hidden;
 }
 
 .calendarHeaderMain { padding: var(--space-4) var(--space-4) var(--space-3); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
@@ -79,7 +91,15 @@
 
 .filtersWrapper { flex-shrink: 0; padding: var(--space-4); border-bottom: 1px solid var(--color-border); }
 
-.calendarWrapper { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; padding: var(--space-4) var(--space-4) 0; background: var(--color-surface); }
+.calendarWrapper { 
+  flex: 1 1 auto; 
+  display: flex; 
+  flex-direction: column; 
+  min-height: 0; 
+  padding: var(--space-4); 
+  background: var(--color-surface); 
+  overflow: hidden;
+}
 
 .calendarWrapper :global(.fc) {
   --fc-border-color: var(--color-border);
@@ -91,14 +111,138 @@
 .calendarWrapper :global(.fc-daygrid-day) { background: var(--color-surface); }
 .calendarWrapper :global(.fc) *:focus { outline: none !important; box-shadow: none !important; }
 .calendarWrapper :global(.fc-daygrid-day-number) { pointer-events: none; }
-.calendarWrapper :global(.fc-daygrid-day-events) { margin: 2px 0 !important; }
-.calendarWrapper :global(.fc-daygrid-event-harness) { margin: 1px 0 !important; }
-.calendarWrapper :global(.fc-event) { background: transparent !important; border: none !important; cursor: pointer; padding: 0; transition: transform 0.2s ease; width: 100%; }
-.calendarWrapper :global(.fc-event:hover) { transform: translateY(-1px); }
+.calendarWrapper :global(.fc-daygrid-day-events) {
+  margin: 4px 0 !important;
+  padding: 0;
+  display: block;
+}
 
-.eventContentWrapper { padding: 2px 6px 2px 8px; overflow: hidden; height: 100%; border-radius: 6px; }
-.eventTitle { font-family: var(--font-family-body); font-size: 0.7rem; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 3px; letter-spacing: 0.1px; }
-.eventTime { font-weight: 500; color: #fff; opacity: 0.9; padding-right: 6px; }
+.calendarWrapper :global(.fc-daygrid-event-harness),
+.calendarWrapper :global(.fc-daygrid-event-harness-abs) {
+  margin: 4px 6px !important;
+  z-index: 1;
+  position: relative;
+}
+
+.calendarWrapper :global(.fc-daygrid-event-harness:hover) { 
+  z-index: 10; 
+}
+
+/* Делает плашку события на всю ширину ячейки дня */
+.calendarWrapper :global(.fc-daygrid-event) {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.calendarWrapper :global(.fc-h-event) {
+  display: block !important;
+  width: 100% !important;
+}
+
+.calendarWrapper :global(.fc-daygrid-event .fc-event-main),
+.calendarWrapper :global(.fc-daygrid-event .fc-event-main-frame) {
+  width: 100% !important;
+}
+
+/* Многодневные события */
+.calendarWrapper :global(.fc-daygrid-dot-event) {
+  display: block !important;
+  width: 100% !important;
+  margin: 1px 0 !important;
+}
+
+.calendarWrapper :global(.fc-daygrid-more-link) {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  padding: 2px 4px;
+  margin: 1px 0;
+  border-radius: 3px;
+  background: var(--color-background);
+}
+
+/* Стили для событий, которые продолжаются несколько дней */
+.calendarWrapper :global(.fc-event.fc-event-start) {
+  border-top-left-radius: 4px !important;
+  border-bottom-left-radius: 4px !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+.calendarWrapper :global(.fc-event.fc-event-end) {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: 4px !important;
+  border-bottom-right-radius: 4px !important;
+}
+
+.calendarWrapper :global(.fc-event:not(.fc-event-start):not(.fc-event-end)) {
+  border-radius: 0 !important;
+}
+
+/* Дополнительные стили для улучшения отображения многодневных событий */
+.calendarWrapper :global(.fc-event.fc-event-start) .eventContentWrapper {
+  border-left: 4px solid rgba(0,0,0,0.2);
+  padding-left: 8px;
+}
+
+.calendarWrapper :global(.fc-event.fc-event-end) .eventContentWrapper {
+  border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+.calendarWrapper :global(.fc-event:not(.fc-event-start):not(.fc-event-end)) .eventContentWrapper {
+  border-left: 4px solid rgba(0,0,0,0.2);
+  border-right: none;
+  border-radius: 0;
+}
+
+.calendarWrapper :global(.fc-event) { 
+  background: transparent !important; 
+  border: none !important; 
+  cursor: pointer; 
+  padding: 0; 
+  transition: transform 0.2s ease, z-index 0.2s ease; 
+  width: 100%; 
+  position: relative;
+  overflow: hidden;
+}
+
+.calendarWrapper :global(.fc-event:hover) { 
+  transform: translateY(-1px); 
+  z-index: 20;
+}
+
+.eventContentWrapper {
+  padding: 1px 6px 1px 8px;
+  overflow: hidden;
+  height: 100%;
+  border-radius: 4px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  border-right: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.eventTitle {
+  font-family: var(--font-family-body);
+  font-size: 0.68rem;
+  font-weight: 400;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.1px;
+}
+
+.eventTime {
+  font-weight: 400;
+  font-size: 0.64rem;
+  color: #fff;
+  opacity: 0.85;
+  padding-right: 4px;
+}
 
 .calendarWrapper :global(.fc-daygrid-day-number) { color: var(--color-text-secondary); padding: 8px; }
 .calendarWrapper :global(.fc-day-today .fc-daygrid-day-number) { font-weight: 700; color: var(--color-primary); }

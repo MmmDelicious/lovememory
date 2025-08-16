@@ -11,10 +11,13 @@
   --color-surface: #FFFFFF;    /* Clean white for cards/modals */
   --color-primary: #D97A6C;    /* Vibrant and warm terracotta-rose */
   --color-primary-hover: #C96A5C; /* Darker shade for interaction */
+  --color-primary-light: rgba(217, 122, 108, 0.1); /* Light primary for backgrounds */
   --color-secondary: #EADFD8;  /* Soft, warm secondary accent */
   --color-text-primary: #4A3F3D; /* Rich, warm dark brown */
   --color-text-secondary: #8C7F7D; /* Softer brown for secondary text */
+  --color-text-tertiary: #B8A8A4; /* Even lighter text */
   --color-border: #F2E9E8;      /* Light, warm border */
+  --color-border-light: #F8F1F0; /* Very light border */
   --color-error: #D35D5D;
   --color-success: #4CAF50;
 
@@ -52,10 +55,13 @@
   --color-surface: #382E2C;
   --color-primary: #E89F93;
   --color-primary-hover: #F0B8AF;
+  --color-primary-light: rgba(232, 159, 147, 0.1);
   --color-secondary: #5A4A46;
   --color-text-primary: #FFF8F6;
   --color-text-secondary: #B8A8A4;
+  --color-text-tertiary: #8C7F7D;
   --color-border: #4D423F;
+  --color-border-light: #413732;
   --color-error: #E57373;
   --color-success: #66BB6A;
   --shadow-xl: 0 25px 50px -12px rgba(103, 56, 46, 0.15);

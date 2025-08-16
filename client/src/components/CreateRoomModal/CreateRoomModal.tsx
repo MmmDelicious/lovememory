@@ -287,6 +287,16 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
               <span className={styles.inputHint}>
                 {gameSettings.minBet} - {gameSettings.maxBet} монет
               </span>
+              {gameType !== 'poker' && (
+                <div className={styles.betInfo}>
+                  ⚠️ Ставка списывается при входе в комнату. Победитель получает {formData.bet * gameSettings.defaultMaxPlayers} монет (ставки всех игроков)
+                </div>
+              )}
+              {gameType === 'poker' && (
+                <div className={styles.betInfo}>
+                  💰 В покере вы играете на свои монеты. Указанная сумма - максимальная ставка за стол
+                </div>
+              )}
             </div>
           </div>
 
