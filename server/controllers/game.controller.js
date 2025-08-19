@@ -25,10 +25,24 @@ class GameController {
   async getValidMoves(req, res, next) {
     try {
       const { roomId, square } = req.body;
+      
+      if (!roomId || !square) {
+        return res.status(400).json({ error: 'Missing roomId or square' });
+      }
+      
       const game = GameManager.getGame(roomId);
       
-      if (!game || game.gameType !== 'chess') {
-        return res.status(400).json({ error: 'Invalid game or game type' });
+      if (!game) {
+        return res.status(400).json({ error: 'Game not found' });
+      }
+      
+      if (game.gameType !== 'chess') {
+        return res.status(400).json({ error: 'Invalid game type' });
+      }
+      
+      // Проверяем, что игра активна
+      if (game.status !== 'in_progress') {
+        return res.status(400).json({ error: 'Game not in progress' });
       }
       
       // Проверяем, что это ход игрока
@@ -37,7 +51,7 @@ class GameController {
       }
       
       // Проверяем, что игрок запрашивает ходы для своей фигуры
-      const piece = game.game.get(square);
+      const piece = game.game ? game.game.get(square) : null;
       if (!piece) {
         return res.status(400).json({ error: 'No piece at square' });
       }
@@ -52,6 +66,7 @@ class GameController {
       const validMoves = game.getValidMoves(square);
       res.status(200).json({ validMoves });
     } catch (error) {
+      console.error('[CONTROLLER] Error in getValidMoves:', error);
       next(error);
     }
   }

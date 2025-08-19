@@ -29,7 +29,7 @@ const GameRoomPage = () => {
   const renderStatusMessage = () => {
     if (!gameState || !user) return "Подключение к игре...";
     if (gameState.status === 'finished') return "Игра окончена";
-    if (gameState.status !== 'in_progress') return "Ожидание второго игрока...";
+    if (gameState.status !== 'in_progress') return "";
 
     if (gameState.gameType === 'quiz') {
       return "Время для квиза!";
@@ -40,6 +40,31 @@ const GameRoomPage = () => {
     }
 
     return gameState.currentPlayerId === user.id ? "Ваш ход" : "Ход соперника";
+  };
+
+  // Показываем единый индикатор поиска для всех игр
+  const renderSearchIndicator = () => {
+    if (gameState && gameState.status !== 'in_progress' && gameState.status !== 'finished') {
+      return (
+        <div className="game-search-indicator game-search-indicator--prominent">
+          <div className="game-search-spinner"></div>
+          <span className="game-search-text">Поиск соперника...</span>
+        </div>
+      );
+    }
+    return null;
+  };
+  
+  // Компонент для отображения ID комнаты
+  const renderRoomId = () => {
+    if (!roomId) return null;
+    return (
+      <div className={styles.roomIdDisplay} onClick={() => navigator.clipboard?.writeText(roomId)}>
+        <span className={styles.roomIdLabel}>ID:</span>
+        <span className={styles.roomIdValue}>{roomId.substring(0, 8)}</span>
+        <span className={styles.copyIcon}>📋</span>
+      </div>
+    );
   };
   
   const renderGameBoard = () => {
@@ -148,13 +173,18 @@ const GameRoomPage = () => {
   }
 
   return (
-    <div className={styles.gameRoomContainer}>
+    <div className={`${styles.gameRoomContainer} ${(gameState && gameState.status !== 'in_progress' && gameState.status !== 'finished') ? styles.waiting : ''}`}>
+      {renderSearchIndicator()}
+      {renderRoomId()}
+      
       <button onClick={handleReturnToLobby} className={styles.exitButton}>
         Выйти
       </button>
+      
       <div className={styles.gameArea}>
-        <h1 className={styles.title}>Комната #{roomId.substring(0, 6)}</h1>
-        <h2 className={styles.status}>{renderStatusMessage()}</h2>
+        {gameState?.status === 'in_progress' && renderStatusMessage() && (
+          <h2 className={styles.status}>{renderStatusMessage()}</h2>
+        )}
         {renderGameBoard()}
       </div>
     </div>

@@ -123,7 +123,7 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
   // Обработка клавиатуры
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (gameState?.status !== 'in_progress') return;
+      if (isWaiting) return;
 
       if (e.key === 'Enter') {
         handleSubmit();
@@ -197,15 +197,15 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
     );
   }
 
-  if (!gameState || gameState.status === 'waiting') {
-    return <div className={styles.boardPlaceholder}>Ожидание соперника...</div>;
-  }
+  // Показываем интерфейс всегда, но неактивный во время ожидания
+  const isWaiting = !gameState || gameState.status === 'waiting';
 
   return (
-    <div className={styles.wordleContainer}>
+    <div className={`${styles.wordleContainer} ${isWaiting ? styles.waiting : ''}`}>
+      
       <div className={styles.gameInfo}>
         <div className={styles.round}>
-          Раунд {gameState.currentRound} из {gameState.maxRounds}
+          Раунд {gameState?.currentRound || 1} из {gameState?.maxRounds || 3}
         </div>
         <div className={styles.language}>
           Язык: {language === 'russian' ? '🇷🇺 Русский' : '🇺🇸 English'}
@@ -274,7 +274,7 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
                 <button
                   className={`${styles.key} ${styles.specialKey}`}
                   onClick={handleSubmit}
-                  disabled={currentGuess.length !== 5}
+                  disabled={currentGuess.length !== 5 || isWaiting}
                 >
                   ВВОД
                 </button>
@@ -285,7 +285,7 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
                   key={letter}
                   className={`${styles.key} ${styles[getLetterStatus(letter)]}`}
                   onClick={() => handleKeyPress(letter)}
-                  disabled={currentGuess.length >= wordLength}
+                  disabled={currentGuess.length >= wordLength || isWaiting}
                 >
                   {letter}
                 </button>
@@ -295,7 +295,7 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
                 <button
                   className={`${styles.key} ${styles.specialKey}`}
                   onClick={handleBackspace}
-                  disabled={currentGuess.length === 0}
+                  disabled={currentGuess.length === 0 || isWaiting}
                 >
                   ⌫
                 </button>

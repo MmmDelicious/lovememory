@@ -9,6 +9,20 @@
     padding: 1rem;
     font-family: 'Inter', sans-serif;
   }
+
+  /* Стили для состояния ожидания */
+  .chessGameContainer.waiting {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .chessGameContainer.waiting .chessBoard {
+    opacity: 0.6;
+  }
+
+  .chessGameContainer.waiting .square {
+    cursor: not-allowed !important;
+  }
   
   .boardWrapper {
     flex-shrink: 0;

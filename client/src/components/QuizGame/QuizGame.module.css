@@ -253,3 +253,17 @@
     color: #7A6C65;
     font-style: italic;
   }
+
+  /* Стили для состояния ожидания */
+  .quizContainer.waiting {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .quizContainer.waiting .optionsGrid {
+    opacity: 0.5;
+  }
+
+  .quizContainer.waiting .optionButton {
+    cursor: not-allowed !important;
+  }

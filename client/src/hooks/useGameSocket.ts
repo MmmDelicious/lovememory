@@ -57,6 +57,19 @@ export const useGameSocket = (
       setGameState(newGameState);
     };
 
+    const handleRoomInfo = (roomInfo: any) => {
+      console.log('[CLIENT] Received room info:', roomInfo);
+      setGameState(prevState => ({
+        ...prevState,
+        gameType: roomInfo.gameType,
+        status: roomInfo.status || prevState?.status || 'waiting',
+        players: prevState?.players || [],
+        currentPlayerId: prevState?.currentPlayerId || null,
+        winner: prevState?.winner || null,
+        isDraw: prevState?.isDraw || false
+      }));
+    };
+
     const handlePlayerListUpdate = (players: any[]) => {
       console.log('[CLIENT] Received player list update:', players);
       setGameState(prevState => {
@@ -70,10 +83,16 @@ export const useGameSocket = (
             isDraw: false
           } as GameState;
         }
-        return { ...prevState, players: players.map(p => p.id) };
+        // Сохраняем существующий gameType если он уже установлен
+        return { 
+          ...prevState, 
+          players: players.map(p => p.id),
+          gameType: prevState.gameType !== 'unknown' ? prevState.gameType : 'unknown'
+        };
       });
     };
 
+    socket.on('room_info', handleRoomInfo);
     socket.on('player_list_update', handlePlayerListUpdate);
     socket.on('game_start', handleStateUpdate);
     socket.on('game_update', handleStateUpdate);

@@ -98,6 +98,15 @@ function initSocket(server, app) {
             userRooms.add(roomId);
             console.log(`[SERVER] User ${socket.user.id} successfully joined room ${roomId}`);
             
+            // Отправляем информацию о комнате клиенту
+            socket.emit('room_info', {
+                id: room.id,
+                gameType: room.gameType,
+                status: room.status,
+                bet: room.bet,
+                maxPlayers: room.maxPlayers
+            });
+            
             const currentSockets = await io.in(roomId).fetchSockets();
             // Подтягиваем профиль, чтобы был общий аватар/пол
             const userIdsForInfo = currentSockets.map(s => s.user.id);
@@ -796,6 +805,15 @@ function initSocket(server, app) {
             }
             
             GameManager.removeGame(roomId);
+            
+            // Удаляем пустую комнату из базы данных
+            try {
+              await room.destroy();
+              console.log(`[SERVER] Deleted empty poker room ${roomId} from database`);
+            } catch (error) {
+              console.error(`[SERVER] Error deleting poker room ${roomId}:`, error);
+            }
+            
             io.emit('room_list_updated');
             return; 
         }
@@ -849,9 +867,16 @@ function initSocket(server, app) {
       if (remainingSockets.length === 0) {
         console.log(`[SERVER] Room ${roomId} is empty, deleting it`);
         GameManager.removeGame(roomId);
-        if (await gameService.deleteRoom(roomId)) {
-          console.log(`[SERVER] Room ${roomId} deleted successfully`);
-          io.emit('room_list_updated');
+        
+        // Удаляем пустую комнату из базы данных
+        if (room) {
+          try {
+            await room.destroy();
+            console.log(`[SERVER] Deleted empty room ${roomId} from database`);
+            io.emit('room_list_updated');
+          } catch (error) {
+            console.error(`[SERVER] Error deleting room ${roomId}:`, error);
+          }
         }
       } else {
         console.log(`[SERVER] Room ${roomId} still has ${remainingSockets.length} players, not deleting`);

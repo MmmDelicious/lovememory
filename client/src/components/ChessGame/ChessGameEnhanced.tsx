@@ -180,6 +180,19 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
     return gameState.capturedPieces || { white: [], black: [] };
   }, [gameState.capturedPieces]);
 
+  // Показываем доску всегда, даже в состоянии ожидания
+  const getInitialBoard = () => {
+    return {
+      'a8': 'r', 'b8': 'n', 'c8': 'b', 'd8': 'q', 'e8': 'k', 'f8': 'b', 'g8': 'n', 'h8': 'r',
+      'a7': 'p', 'b7': 'p', 'c7': 'p', 'd7': 'p', 'e7': 'p', 'f7': 'p', 'g7': 'p', 'h7': 'p',
+      'a2': 'P', 'b2': 'P', 'c2': 'P', 'd2': 'P', 'e2': 'P', 'f2': 'P', 'g2': 'P', 'h2': 'P',
+      'a1': 'R', 'b1': 'N', 'c1': 'B', 'd1': 'Q', 'e1': 'K', 'f1': 'B', 'g1': 'N', 'h1': 'R'
+    };
+  };
+  
+  const board = gameState.board || getInitialBoard();
+  const isWaiting = gameState.status === 'waiting';
+
   useEffect(() => {
     if (gameState) {
       setWhiteTime(gameState.whiteTime || 300);
@@ -239,6 +252,12 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
   }, [gameState.board, makeMove]);
 
   const fetchValidMoves = useCallback(async (square: string) => {
+    // Не делаем запрос если игра в состоянии ожидания
+    if (isWaiting || gameState.status !== 'in_progress') {
+      setValidMoves([]);
+      return;
+    }
+    
     try {
       const response = await fetch(`/api/games/valid-moves`, {
         method: 'POST',
@@ -258,7 +277,7 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
       console.error('Error fetching valid moves:', error);
       setValidMoves([]);
     }
-  }, [token, roomId]);
+  }, [token, roomId, isWaiting, gameState.status]);
 
   const handleChessSquareClick = useCallback((square: string) => {
     if (gameState.status !== 'in_progress' || gameState.currentPlayerId !== user.id || isPaused) {
@@ -270,7 +289,7 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
       return;
     }
 
-    const pieceOnSquare = gameState.board[square];
+    const pieceOnSquare = board[square];
     if (!pieceOnSquare) {
       setSelectedSquare(null);
       setValidMoves([]);
@@ -291,7 +310,7 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
       setSelectedSquare(null);
       setValidMoves([]);
     }
-  }, [gameState, user.id, isPaused, selectedSquare, validMoves, handleChessMove, isPlayerWhite, fetchValidMoves]);
+  }, [gameState, user.id, isPaused, selectedSquare, validMoves, handleChessMove, isPlayerWhite, fetchValidMoves, isWaiting, board]);
 
   const handlePause = useCallback(() => {
     makeMove({ action: 'pause' });
@@ -321,10 +340,6 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
     makeMove({ action: 'request_undo' });
   }, [makeMove]);
 
-  if (!gameState.board) {
-    return <div className={styles.boardPlaceholder}>Загрузка шахматной доски...</div>;
-  }
-
   const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
   const ranks = ['8', '7', '6', '5', '4', '3', '2', '1'];
   const shouldFlipBoard = !isPlayerWhite;
@@ -342,7 +357,7 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
       className += ` ${styles.lastMove}`;
     }
     
-    if (validMoves.includes(square)) {
+    if (validMoves.includes(square) && !isWaiting) {
       const pieceOnTarget = gameState.board[square];
       className += ` ${pieceOnTarget ? styles.capture : styles.validMove}`;
     }
@@ -357,7 +372,7 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
   const currentGameStatus = gameState.gameStatus || (gameState.status === 'finished' ? 'checkmate' : 'playing');
 
   return (
-    <div className={styles.chessGameContainer}>
+    <div className={`${styles.chessGameContainer} ${isWaiting ? styles.waiting : ''}`}>
       {/* Header */}
       <div className={styles.gameHeader}>
         <div className={styles.headerCenter}>
@@ -386,7 +401,7 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
           {boardRanks.map(rank => 
             boardFiles.map(file => {
               const square = `${file}${rank}`;
-              const piece = gameState.board[square];
+                                  const piece = board[square];
               return (
                 <div
                   key={square}

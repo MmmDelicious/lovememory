@@ -66,13 +66,20 @@ const QuizGame = ({ gameState, user, makeMove, handleReturnToLobby }) => {
     );
   }
 
-  if (!gameState.currentQuestion) return <div className={styles.boardPlaceholder}>Загрузка вопроса...</div>;
-  const { question, options, questionNumber, totalQuestions, timeRemaining } = gameState.currentQuestion;
+  // Показываем интерфейс всегда, но неактивный во время ожидания
+  const isWaiting = !gameState.currentQuestion || gameState.status === 'waiting';
+  const { question, options, questionNumber, totalQuestions, timeRemaining } = gameState.currentQuestion || {
+    question: "Ожидание соперника...",
+    options: ["Вариант 1", "Вариант 2", "Вариант 3", "Вариант 4"],
+    questionNumber: 1,
+    totalQuestions: 10,
+    timeRemaining: 15
+  };
 
   const progressPercentage = (questionNumber / totalQuestions) * 100;
 
   return (
-    <div className={styles.quizContainer}>
+    <div className={`${styles.quizContainer} ${isWaiting ? styles.waiting : ''}`}>
         <h3 className={styles.brandTitle}>Lovememory</h3>
         <h1 className={styles.gameTitle}>Couples Quiz</h1>
 
@@ -102,7 +109,7 @@ const QuizGame = ({ gameState, user, makeMove, handleReturnToLobby }) => {
                     key={index}
                     className={`${styles.optionButton} ${selectedAnswer === index ? styles.selected : ''}`}
                     onClick={() => handleQuizMove(index)}
-                    disabled={isAnswerSubmitted}
+                    disabled={isAnswerSubmitted || isWaiting}
                 >
                     {option}
                 </button>
