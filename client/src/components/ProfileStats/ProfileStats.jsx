@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import styles from './ProfileStats.module.css';
 import userService from '../../services/user.service';
 import { FaCoins, FaCalendarAlt, FaGamepad, FaCommentDots, FaChartLine } from 'react-icons/fa';
 
-const ProfileStats = ({ user }) => {
+const ProfileStats = memo(({ user }) => {
   const [stats, setStats] = useState({
     events: 0,
     memories: 0,
@@ -88,6 +88,8 @@ const ProfileStats = ({ user }) => {
       ))}
     </div>
   );
-};
+});
+
+ProfileStats.displayName = 'ProfileStats';
 
 export default ProfileStats;

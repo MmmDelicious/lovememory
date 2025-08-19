@@ -6,15 +6,14 @@ import PokerModal from '../PokerModal/PokerModal';
 import styles from './PokerTable.module.css';
 import Player from './Player/Player';
 
+import type { GameState, GameRoom } from '../../../types/common';
+
 interface PokerTableProps {
-  gameState: any;
+  gameState: GameState;
   onAction: (action: string, value?: number) => void;
   onRebuy: (rebuyAmount: number) => void;
   userId: string;
-  roomData?: {
-    bet: number;
-    [key: string]: any;
-  };
+  roomData?: GameRoom;
   onOpenBuyIn?: () => void;
 }
 

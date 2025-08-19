@@ -31,18 +31,31 @@ class GameService {
 
     console.log(`[SERVER] Found ${rooms.length} rooms in database for ${gameType}`);
 
-    const roomsWithPlayerCount = await Promise.all(
-      rooms.map(async (room) => {
-        const sockets = await io.in(room.id).fetchSockets();
-        const roomWithCount = {
-          ...room,
-          players: sockets.map(s => s.user.id),
-          playerCount: sockets.length,
-        };
-        console.log(`[SERVER] Room ${room.id} (${room.status}) has ${sockets.length} connected players`);
-        return roomWithCount;
-      })
-    );
+    // Оптимизация: получаем информацию о всех комнатах за один проход
+    const roomIds = rooms.map(room => room.id);
+    const roomSocketsMap = new Map();
+    
+    // Получаем все комнаты одним запросом
+    for (const roomId of roomIds) {
+      try {
+        const sockets = await io.in(roomId).fetchSockets();
+        roomSocketsMap.set(roomId, sockets);
+      } catch (error) {
+        console.error(`Error fetching sockets for room ${roomId}:`, error);
+        roomSocketsMap.set(roomId, []);
+      }
+    }
+    
+    const roomsWithPlayerCount = rooms.map((room) => {
+      const sockets = roomSocketsMap.get(room.id) || [];
+      const roomWithCount = {
+        ...room,
+        players: sockets.map(s => s.user?.id).filter(Boolean),
+        playerCount: sockets.length,
+      };
+      console.log(`[SERVER] Room ${room.id} (${room.status}) has ${sockets.length} connected players`);
+      return roomWithCount;
+    });
 
     console.log(`[SERVER] Returning ${roomsWithPlayerCount.length} rooms for ${gameType}`);
     return roomsWithPlayerCount;

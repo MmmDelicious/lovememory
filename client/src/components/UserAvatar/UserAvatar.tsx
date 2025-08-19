@@ -13,7 +13,7 @@ interface User {
 interface UserAvatarProps {
   user?: User;
   size?: 'small' | 'medium' | 'large';
-  variant?: 'circle' | 'rounded' | 'square';
+  variant?: 'circle' | 'rounded' | 'square' | 'default';
   className?: string;
 }
 

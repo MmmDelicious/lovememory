@@ -21,6 +21,9 @@ const server = http.createServer(app);
 
 const io = initSocket(server, app);
 
+// Делаем io доступным глобально для services
+global.io = io;
+
 // Build CORS allow-list. Supports comma-separated ALLOWED_ORIGINS.
 const defaultOrigin = process.env.CLIENT_URL || "http://localhost:5173";
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')

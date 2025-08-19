@@ -901,6 +901,56 @@ function initSocket(server, app) {
 
     socket.on('leave_room', handleLeaveOrDisconnect);
 
+    // Lesson Events - Синхронизация уроков между партнерами
+    socket.on('lesson:join-room', (data) => {
+      const { relationshipId } = data;
+      if (relationshipId) {
+        const roomName = `lesson:${relationshipId}`;
+        socket.join(roomName);
+        socket.lessonRoom = roomName;
+        console.log(`[SOCKET] User ${socket.user.id} joined lesson room: ${roomName}`);
+      }
+    });
+
+    socket.on('lesson:completed', (data) => {
+      const { lessonId, relationshipId, progress } = data;
+      if (socket.lessonRoom) {
+        // Уведомляем партнера о выполнении урока
+        socket.to(socket.lessonRoom).emit('lesson:partner-completed', {
+          lessonId,
+          userId: socket.user.id,
+          userName: socket.user.first_name,
+          progress,
+          timestamp: new Date().toISOString()
+        });
+        console.log(`[SOCKET] Lesson ${lessonId} completed by user ${socket.user.id} in room ${socket.lessonRoom}`);
+      }
+    });
+
+    socket.on('lesson:progress-updated', (data) => {
+      if (socket.lessonRoom) {
+        // Синхронизируем обновление прогресса
+        socket.to(socket.lessonRoom).emit('lesson:progress-sync', {
+          userId: socket.user.id,
+          progress: data.progress,
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
+    socket.on('lesson:start-together', (data) => {
+      const { lessonId } = data;
+      if (socket.lessonRoom) {
+        // Уведомляем партнера о начале совместного урока
+        socket.to(socket.lessonRoom).emit('lesson:partner-started', {
+          lessonId,
+          userId: socket.user.id,
+          userName: socket.user.first_name,
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+
     socket.on('disconnect', () => {
       console.log(`[SERVER] Socket ${socket.id} (user ${socket.user.id}) disconnected.`);
       for (const roomId of userRooms) {

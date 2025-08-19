@@ -1,0 +1,124 @@
+[
+  {
+    "id": "words_001",
+    "title": "Комплимент дня",
+    "text": "Скажи партнёру что-то, что ты в нём ценишь. Даже мелочь вроде улыбки может сильно поднять настроение.",
+    "source": "5 языков любви",
+    "tags": ["daily", "words_of_affirmation"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["chat_idle"],
+      "last_event_gap_days": [2, "more"]
+    },
+    "effect": { "words": 2, "heat_score": 1 }
+  },
+  {
+    "id": "words_002",
+    "title": "Напоминание в календаре",
+    "text": "Добавь в календарь повторяющееся напоминание: раз в неделю писать партнёру благодарность.",
+    "source": "5 языков любви",
+    "tags": ["calendar", "habit"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["calendar"]
+    },
+    "effect": { "words": 3 }
+  },
+  {
+    "id": "time_001",
+    "title": "Совместный вечер",
+    "text": "Запланируйте вечер без телефонов и дел. Только вы двое.",
+    "source": "7 принципов счастливого брака",
+    "tags": ["calendar", "quality_time"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["low_heat_score", "calendar"],
+      "last_event_gap_days": [5, "more"]
+    },
+    "effect": { "time": 4, "heat_score": 2 }
+  },
+  {
+    "id": "time_002",
+    "title": "Игра вдвоём",
+    "text": "Сыграйте сегодня вместе в одну из игр в приложении. Даже 10 минут дадут чувство близости.",
+    "source": "Игровая терапия",
+    "tags": ["games", "time"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["games_idle"]
+    },
+    "effect": { "time": 2, "heat_score": 1 }
+  },
+  {
+    "id": "gifts_001",
+    "title": "Неожиданный подарок",
+    "text": "Выбери в магазине маленький виртуальный подарок и отправь партнёру с коротким посланием.",
+    "source": "5 языков любви",
+    "tags": ["gifts", "shop"],
+    "triggers": {
+      "love_language": ["gifts"],
+      "context": ["shop"]
+    },
+    "effect": { "gifts": 3, "heat_score": 1 }
+  },
+  {
+    "id": "gifts_002",
+    "title": "Фото-подарок",
+    "text": "Загрузи в магазин фотографию с вашего последнего свидания и отправь партнёру с подписью.",
+    "source": "Практика осознанности",
+    "tags": ["gifts", "photos"],
+    "triggers": {
+      "love_language": ["gifts"],
+      "context": ["calendar_done"]
+    },
+    "effect": { "gifts": 2, "heat_score": 1 }
+  },
+  {
+    "id": "acts_001",
+    "title": "Маленькая помощь",
+    "text": "Спроси у партнёра, есть ли мелочь, с которой ты можешь помочь. Даже простое «я закажу ужин» может согреть.",
+    "source": "5 языков любви",
+    "tags": ["acts_of_service"],
+    "triggers": {
+      "love_language": ["acts"],
+      "context": ["low_heat_score"]
+    },
+    "effect": { "acts": 3, "heat_score": 2 }
+  },
+  {
+    "id": "acts_002",
+    "title": "Календарь заботы",
+    "text": "Добавь событие в календарь: раз в месяц делать партнёру сюрприз (например, приготовить завтрак).",
+    "source": "7 принципов счастливого брака",
+    "tags": ["acts_of_service", "calendar"],
+    "triggers": {
+      "love_language": ["acts"],
+      "context": ["calendar"]
+    },
+    "effect": { "acts": 2 }
+  },
+  {
+    "id": "touch_001",
+    "title": "Физическая близость",
+    "text": "Когда увидитесь, обними партнёра на 20 секунд. Доказано, что такие объятия снижают стресс.",
+    "source": "Исследования по окситоцину",
+    "tags": ["physical_touch"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["calendar_event_today"]
+    },
+    "effect": { "touch": 3, "heat_score": 2 }
+  },
+  {
+    "id": "touch_002",
+    "title": "Ритуал приветствия",
+    "text": "Создайте маленький ритуал приветствия — например, всегда целовать друг друга при встрече.",
+    "source": "Эмоционально-фокусированная терапия",
+    "tags": ["physical_touch", "habit"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["low_heat_score"]
+    },
+    "effect": { "touch": 2 }
+  }
+]

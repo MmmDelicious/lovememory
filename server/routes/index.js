@@ -8,6 +8,7 @@ const userRoutes = require('./user.routes');
 const gameRoutes = require('./game.routes');
 const aiRoutes = require('./ai.routes');
 const giftRoutes = require('./gift.routes');
+const lessonRoutes = require('./lesson.routes');
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/user', userRoutes);
 router.use('/games', gameRoutes);
 router.use('/ai', aiRoutes);
 router.use('/gifts', giftRoutes);
+router.use('/lessons', lessonRoutes);
 
 module.exports = router;

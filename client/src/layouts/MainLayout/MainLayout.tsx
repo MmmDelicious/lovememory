@@ -24,7 +24,8 @@ import {
   Menu,
   X,
   BarChart3,
-  Gift
+  Gift,
+  BookOpen
 } from 'lucide-react';
 import styles from './MainLayout.module.css';
 import { useAuth } from '../../context/AuthContext';
@@ -68,6 +69,12 @@ const MainLayout: React.FC = () => {
       icon: <Gamepad2 size={20} />,
       label: 'Игры',
       active: location.pathname.startsWith('/games')
+    },
+    {
+      path: '/lessons',
+      icon: <BookOpen size={20} />,
+      label: 'Уроки',
+      active: location.pathname.startsWith('/lessons')
     },
     {
       path: '/shop',

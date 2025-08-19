@@ -6,6 +6,10 @@ const Media = require('./Media');
 const Pair = require('./Pair');
 const GameRoom = require('./GameRoom');
 const Gift = require('./Gift');
+const RelationshipMetrics = require('./RelationshipMetrics');
+const Lesson = require('./Lesson');
+const UserLessonProgress = require('./UserLessonProgress');
+const PairDailyLesson = require('./PairDailyLesson');
 
 const models = {
   User,
@@ -15,6 +19,10 @@ const models = {
   Pair,
   GameRoom,
   Gift,
+  RelationshipMetrics,
+  Lesson,
+  UserLessonProgress,
+  PairDailyLesson,
 };
 
 Object.keys(models).forEach(modelName => {

@@ -1,0 +1,337 @@
+.container {
+  max-width: 100%;
+  margin: 0;
+  padding: var(--space-6);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.headerIcon {
+  color: var(--color-text-secondary);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.tipCard {
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--space-10);
+}
+
+.tipCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--color-primary);
+}
+
+.tipHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-6);
+}
+
+.categoryBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-primary);
+  color: white;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--border-radius-lg);
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+}
+
+.quoteIcon {
+  color: var(--color-text-tertiary);
+  opacity: 0.6;
+}
+
+.tipContent {
+  margin-bottom: var(--space-6);
+}
+
+.tipTitle {
+  margin: 0 0 var(--space-4) 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+}
+
+.tipText {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-5);
+  font-weight: 400;
+}
+
+.tipMeta {
+  margin-bottom: var(--space-5);
+}
+
+.authorInfo {
+  background: var(--color-secondary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-4);
+}
+
+.author {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.book {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.tag {
+  background: var(--color-primary);
+  color: white;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+}
+
+.newTipButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-primary);
+  color: white;
+  border: 2px solid var(--color-primary-hover);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--border-radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-family-body);
+}
+
+.newTipButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: var(--color-primary-hover);
+}
+
+.allTipsSection {
+  margin-top: var(--space-10);
+}
+
+.allTipsTitle {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-6);
+  font-family: var(--font-family-heading);
+}
+
+.tipsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+.miniTipCard {
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.miniTipCard:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.miniTipCard.expanded {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.miniTipHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.miniCategoryIcon {
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-primary-light);
+  border-radius: var(--border-radius-md);
+}
+
+.miniTipTitle {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  flex: 1;
+  font-family: var(--font-family-heading);
+}
+
+.miniTipContent {
+  overflow: hidden;
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.miniTipText {
+  margin: 0 0 var(--space-3) 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.miniTipAuthor {
+  font-size: 0.85rem;
+  color: var(--color-text-tertiary);
+  font-style: italic;
+  text-align: right;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-4);
+  }
+  
+  .tipCard {
+    padding: var(--space-6);
+  }
+  
+  .tipHeader {
+    flex-direction: column;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+  
+  .categoryBadge {
+    align-self: flex-start;
+  }
+  
+  .quoteIcon {
+    align-self: flex-end;
+  }
+  
+  .tipTitle {
+    font-size: 1.3rem;
+  }
+  
+  .tipText {
+    font-size: 1rem;
+  }
+  
+  .tipsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: var(--space-3);
+  }
+  
+  .sectionTitle {
+    font-size: 1.5rem;
+  }
+  
+  .tipCard {
+    padding: var(--space-5);
+  }
+  
+  .tipTitle {
+    font-size: 1.2rem;
+  }
+  
+  .tipText {
+    font-size: 0.95rem;
+  }
+  
+  .newTipButton {
+    font-size: 0.9rem;
+    padding: var(--space-3) var(--space-5);
+  }
+  
+  .categoryBadge {
+    font-size: 0.8rem;
+    padding: var(--space-2) var(--space-3);
+  }
+  
+  .tags {
+    gap: var(--space-1);
+  }
+  
+  .tag {
+    font-size: 0.75rem;
+    padding: var(--space-1) var(--space-2);
+  }
+}

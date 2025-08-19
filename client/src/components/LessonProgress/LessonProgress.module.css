@@ -1,0 +1,384 @@
+.container {
+  max-width: 100%;
+  margin: 0;
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: var(--space-10) var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border);
+  border-top: 3px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto var(--space-5);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.overallStats {
+  background: var(--color-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-8);
+  color: white;
+  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--color-primary-hover);
+}
+
+.overallStats h2 {
+  margin: 0 0 var(--space-6) 0;
+  font-size: 1.5rem;
+  text-align: center;
+  font-family: var(--font-family-heading);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-5);
+}
+
+.statCard {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--border-radius);
+  padding: var(--space-6);
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-5px);
+}
+
+.statIcon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-3);
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+  font-family: var(--font-family-heading);
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.themesSection {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-8);
+  border: 2px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+}
+
+.themesSection h2 {
+  margin: 0 0 var(--space-6) 0;
+  font-size: 1.5rem;
+  text-align: center;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+}
+
+.themesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-5);
+}
+
+.themeCard {
+  background: var(--color-secondary);
+  border-radius: var(--border-radius);
+  padding: var(--space-5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid var(--color-border);
+}
+
+.themeCard:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.themeHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.themeEmoji {
+  font-size: 1.5rem;
+}
+
+.themeName {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--color-text-primary);
+  flex: 1;
+  font-family: var(--font-family-heading);
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease;
+}
+
+.progressText {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.progressNumbers {
+  opacity: 0.8;
+}
+
+.progressPercent {
+  font-weight: 600;
+}
+
+.themeDetails {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.lastCompleted {
+  margin-top: var(--space-3);
+  font-size: 0.8rem;
+  color: var(--color-text-tertiary);
+  text-align: center;
+}
+
+.individualStats {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-8);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.statsComparison {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-8);
+}
+
+.playerStats h3 {
+  margin: 0 0 var(--space-5) 0;
+  font-size: 1.3rem;
+  color: var(--color-text-primary);
+  text-align: center;
+  font-family: var(--font-family-heading);
+}
+
+.playerCard {
+  background: var(--color-secondary);
+  border-radius: var(--border-radius);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+}
+
+.playerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.playerRow:last-child {
+  border-bottom: none;
+}
+
+.playerValue {
+  font-weight: 600;
+  color: #4CAF50;
+}
+
+.relationshipMetrics {
+  background: var(--color-primary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-8);
+  color: white;
+  box-shadow: var(--shadow-xl);
+}
+
+.relationshipMetrics h2 {
+  margin: 0 0 var(--space-6) 0;
+  font-size: 1.5rem;
+  text-align: center;
+  font-family: var(--font-family-heading);
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-5);
+}
+
+.metricCard {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--border-radius);
+  padding: var(--space-5);
+  text-align: center;
+}
+
+.metricLabel {
+  display: block;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: var(--space-4);
+}
+
+.heatMeter {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+}
+
+.heatFill {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #FFC107, #FF5722);
+  border-radius: 5px;
+  transition: width 1s ease;
+}
+
+.metricValue {
+  font-size: 1.3rem;
+  font-weight: 600;
+  font-family: var(--font-family-heading);
+}
+
+.stageValue,
+.languageValue {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-4);
+    gap: var(--space-5);
+  }
+  
+  .overallStats,
+  .themesSection,
+  .individualStats,
+  .relationshipMetrics {
+    padding: var(--space-5);
+  }
+  
+  .statsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-4);
+  }
+  
+  .statCard {
+    padding: var(--space-5) var(--space-4);
+  }
+  
+  .statValue {
+    font-size: 1.5rem;
+  }
+  
+  .statIcon {
+    font-size: 2rem;
+  }
+  
+  .themesGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .statsComparison {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+  
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: var(--space-3);
+  }
+  
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .statCard {
+    padding: var(--space-4) var(--space-3);
+  }
+  
+  .statValue {
+    font-size: 1.3rem;
+  }
+  
+  .statLabel {
+    font-size: 0.8rem;
+  }
+  
+  .themeName {
+    font-size: 1rem;
+  }
+  
+  .progressText {
+    font-size: 0.8rem;
+  }
+  
+  .overallStats,
+  .themesSection,
+  .individualStats,
+  .relationshipMetrics {
+    padding: var(--space-4);
+  }
+}

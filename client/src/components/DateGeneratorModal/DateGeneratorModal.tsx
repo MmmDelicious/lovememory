@@ -4,22 +4,7 @@ import dateGeneratorService from '../../services/dateGenerator.service';
 import styles from './DateGeneratorModal.module.css';
 import DebugDataViewer from '../DebugDataViewer/DebugDataViewer';
 
-interface DateOption {
-  id: string;
-  title: string;
-  activity: any;
-  restaurant: any;
-  schedule: Array<{
-    time: string;
-    endTime: string;
-    activity: string;
-    description: string;
-  }>;
-  reasoning: string;
-  estimatedCost: number;
-  duration: number;
-  atmosphere: string;
-}
+import type { DateOption, DateScheduleItem } from '../../../types/common';
 
 interface ReasoningStep {
   text: string;

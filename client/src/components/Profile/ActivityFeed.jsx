@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { Link } from 'react-router-dom';
 import Button from '../Button/Button';
@@ -6,7 +6,7 @@ import styles from './ActivityFeed.module.css';
 import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { eventService } from '../../services';
 
-const ActivityFeed = ({ events, areEventsLoading, deleteEvent }) => {
+const ActivityFeed = memo(({ events, areEventsLoading, deleteEvent }) => {
   const isCompact = useMediaQuery({ maxWidth: 480 });
   const [activeTab, setActiveTab] = useState('events');
   const [galleryItems, setGalleryItems] = useState([]);
@@ -16,7 +16,7 @@ const ActivityFeed = ({ events, areEventsLoading, deleteEvent }) => {
     return new Date(dateString).toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' });
   };
 
-  const fetchGallery = async () => {
+  const fetchGallery = useCallback(async () => {
     if (!events || !events.length) {
       setGalleryItems([]);
       return;
@@ -34,14 +34,13 @@ const ActivityFeed = ({ events, areEventsLoading, deleteEvent }) => {
     } finally {
       setIsGalleryLoading(false);
     }
-  };
+  }, [events]);
 
   useEffect(() => {
     if (activeTab === 'gallery') {
       fetchGallery();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, events]);
+  }, [activeTab, fetchGallery]);
 
   const renderEvents = () => {
     if (areEventsLoading) return <div className={styles.placeholder}>Загрузка событий...</div>;
@@ -101,6 +100,8 @@ const ActivityFeed = ({ events, areEventsLoading, deleteEvent }) => {
       </div>
     </div>
   );
-};
+});
+
+ActivityFeed.displayName = 'ActivityFeed';
 
 export default ActivityFeed;

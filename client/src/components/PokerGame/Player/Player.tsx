@@ -1,5 +1,5 @@
 import React from 'react';
-import UserAvatar from '../../UserAvatar/UserAvatar.tsx';
+import UserAvatar from '../../UserAvatar/UserAvatar';
 import PlayingCard from '../../PlayingCard/PlayingCard';
 import type { PlayerProps } from '../../../../types/game.types';
 import styles from './Player.module.css';

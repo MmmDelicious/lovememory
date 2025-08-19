@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from './WordleGameComponent.module.css';
-import { User } from 'lucide-react';
+import { User as UserIcon } from 'lucide-react';
 
 const KEYBOARD_ROWS = [
   ['Й', 'Ц', 'У', 'К', 'Е', 'Н', 'Г', 'Ш', 'Щ', 'З'],
@@ -83,7 +83,7 @@ function PlayerStats({ name, score, isLeading }: { name: string, score: number, 
             <div className={styles.playerStatsGradient} style={{ background: isLeading ? 'linear-gradient(180deg, #D97A6C 0%, #E89F93 100%)' : 'linear-gradient(180deg, #FFFFFF 0%, #FFF8F6 100%)' }}>
                 <div className={styles.playerStatsHeader}>
                     <div className={styles.playerInfo}>
-                        <div className={styles.playerAvatar} style={{ backgroundColor: isLeading ? 'rgba(255,255,255,0.2)' : '#EADFD8' }}><User size={16} color={isLeading ? '#FFFFFF' : '#D97A6C'} strokeWidth={2}/></div>
+                        <div className={styles.playerAvatar} style={{ backgroundColor: isLeading ? 'rgba(255,255,255,0.2)' : '#EADFD8' }}><UserIcon size={16} color={isLeading ? '#FFFFFF' : '#D97A6C'} strokeWidth={2}/></div>
                         <div>
                             <div className={styles.playerName} style={{ color: isLeading ? '#FFFFFF' : '#4A3F3D' }}>{name}</div>
                             <div className={styles.playerScore} style={{ color: isLeading ? 'rgba(255,255,255,0.8)' : '#8C7F7D' }}>{score} слов</div>
@@ -95,10 +95,12 @@ function PlayerStats({ name, score, isLeading }: { name: string, score: number, 
     );
 }
 
+import type { GameState, User } from '../../../types/common';
+
 interface WordleGameProps {
-  gameState: any;
+  gameState: GameState;
   makeMove: (move: { guess: string }) => void;
-  user: { id: string };
+  user: Pick<User, 'id'>;
 }
 
 const WordleGameComponent: React.FC<WordleGameProps> = ({ gameState, makeMove, user }) => {

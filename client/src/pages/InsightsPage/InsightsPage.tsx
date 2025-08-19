@@ -13,7 +13,9 @@ import {
   Crown,
   Target,
   Lightbulb,
-  Network
+  Network,
+  Zap,
+  Activity
 } from 'lucide-react';
 import styles from './InsightsPage.module.css';
 import userService from '../../services/user.service';
@@ -21,6 +23,7 @@ import { useAuth } from '../../context/AuthContext';
 import LoveLanguageAnalysis from '../../components/LoveLanguageAnalysis/LoveLanguageAnalysis';
 import PremiumModal from '../../components/PremiumModal/PremiumModal';
 import relationshipGraphService from '../../services/relationshipGraph.service';
+import HexagonChart from '../../components/HexagonChart/HexagonChart';
 
 // Mock данные для демонстрации (используются как фолбэк)
 const mockData = {
@@ -178,11 +181,10 @@ const InsightsPage: React.FC = () => {
           </div>
 
           <div className={styles.scoreDisplay}>
-            <div className={styles.scoreCircle}>
-              <div 
-                className={styles.scoreProgress}
-                style={{ '--progress': `${(animatedScore / 100) * 360}deg` } as React.CSSProperties}
-              />
+            <div 
+              className={styles.scoreCircle}
+              style={{ '--progress': animatedScore } as React.CSSProperties}
+            >
               <div className={styles.scoreContent}>
                 <span className={styles.scoreNumber}>{animatedScore}</span>
                 <span className={styles.scoreMax}>из 100</span>
@@ -225,7 +227,7 @@ const InsightsPage: React.FC = () => {
           <div className={styles.activitiesGrid}>
             <div className={styles.activityItem}>
               <Calendar size={24} />
-              <div>
+              <div className={styles.activityInfo}>
                 <span className={styles.activityNumber}>{stats.events}</span>
                 <span className={styles.activityLabel}>События</span>
                 <span className={styles.activityRank}>
@@ -235,8 +237,8 @@ const InsightsPage: React.FC = () => {
             </div>
 
             <div className={styles.activityItem}>
-              <Trophy size={24} />
-              <div>
+              <Activity size={24} />
+              <div className={styles.activityInfo}>
                 <span className={styles.activityNumber}>{stats.gamesPlayed}</span>
                 <span className={styles.activityLabel}>Игры сыграно</span>
                 <span className={styles.activityRank}>
@@ -246,8 +248,8 @@ const InsightsPage: React.FC = () => {
             </div>
 
             <div className={styles.activityItem}>
-              <Trophy size={24} />
-              <div>
+              <Zap size={24} />
+              <div className={styles.activityInfo}>
                 <span className={styles.activityNumber}>{stats.coins}</span>
                 <span className={styles.activityLabel}>Монеты</span>
                 <span className={styles.activityRank}>
@@ -258,7 +260,7 @@ const InsightsPage: React.FC = () => {
 
             <div className={styles.activityItem}>
               <Heart size={24} />
-              <div>
+              <div className={styles.activityInfo}>
                 <span className={styles.activityNumber}>{stats.memories}</span>
                 <span className={styles.activityLabel}>Воспоминания</span>
                 <span className={styles.activityRank}>
@@ -710,6 +712,29 @@ const InsightsPage: React.FC = () => {
         </div>
 
         <div className={styles.loveLanguageSection}>
+          <div className={styles.modernCard}>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardIcon}>
+                <Heart size={24} />
+              </div>
+              <div>
+                <h3>Языки любви</h3>
+                <p>Анализ предпочтений в отношениях</p>
+              </div>
+            </div>
+            
+            <HexagonChart
+              data={[
+                { label: "Слова поддержки", value: 85 },
+                { label: "Время вместе", value: 75 },
+                { label: "Подарки", value: 60 },
+                { label: "Помощь делом", value: 90 },
+                { label: "Прикосновения", value: 70 },
+                { label: "Внимание", value: 80 }
+              ]}
+            />
+          </div>
+          
           <LoveLanguageAnalysis 
             events={userData?.events || []}
             interactions={[]}

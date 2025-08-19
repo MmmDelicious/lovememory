@@ -80,34 +80,37 @@ class UserService {
   }
 
   async getProfileStats(userId) {
-    // Получаем количество событий
-    const eventsCount = await Event.count({
-      where: { userId: userId }
-    });
-
-    // Получаем количество медиа (воспоминаний)
-    const memoriesCount = await Media.count({
-      include: [{
-        model: Event,
+    // Оптимизация: выполняем все запросы параллельно
+    const [eventsCount, memoriesCount, gamesPlayed, user] = await Promise.all([
+      // Получаем количество событий
+      Event.count({
         where: { userId: userId }
-      }]
-    });
-
-    // Получаем количество сыгранных игр (используем правильный статус)
-    const gamesPlayed = await GameRoom.count({
-      where: {
-        [Op.or]: [
-          { hostId: userId },
-          { players: { [Op.contains]: [userId] } }
-        ],
-        status: 'finished'
-      }
-    });
-
-    // Получаем информацию о пользователе
-    const user = await User.findByPk(userId, {
-      attributes: ['coins', 'createdAt', 'streak_days', 'total_login_days', 'last_active', 'role']
-    });
+      }),
+      
+      // Получаем количество медиа (воспоминаний)
+      Media.count({
+        include: [{
+          model: Event,
+          where: { userId: userId }
+        }]
+      }),
+      
+      // Получаем количество сыгранных игр
+      GameRoom.count({
+        where: {
+          [Op.or]: [
+            { hostId: userId },
+            { players: { [Op.contains]: [userId] } }
+          ],
+          status: 'finished'
+        }
+      }),
+      
+      // Получаем информацию о пользователе
+      User.findByPk(userId, {
+        attributes: ['coins', 'createdAt', 'streak_days', 'total_login_days', 'last_active', 'role']
+      })
+    ]);
 
     // Вычисляем дни с регистрации
     const daysSinceRegistration = Math.floor((new Date() - new Date(user.createdAt)) / (1000 * 60 * 60 * 24));

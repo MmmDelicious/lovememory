@@ -141,7 +141,9 @@ const getGifts = async (req, res) => {
           attributes: ['id', 'first_name', 'last_name', 'avatarUrl']
         }
       ],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      limit: 50, // Добавляем лимит для производительности
+      offset: parseInt(req.query.offset) || 0 // Пагинация
     });
     
     res.json(gifts);
@@ -201,7 +203,8 @@ const getUnviewedGifts = async (req, res) => {
           attributes: ['id', 'first_name', 'last_name', 'avatarUrl']
         }
       ],
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      limit: 20 // Лимит для непросмотренных подарков
     });
     
     res.json(gifts);
