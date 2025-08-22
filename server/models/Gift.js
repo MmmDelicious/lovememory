@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
 const Gift = sequelize.define('Gift', {
   id: {
     type: DataTypes.UUID,
@@ -79,8 +78,6 @@ const Gift = sequelize.define('Gift', {
     }
   ]
 });
-
-// Associations
 Gift.associate = (models) => {
   Gift.belongsTo(models.User, {
     foreignKey: 'fromUserId',
@@ -91,5 +88,5 @@ Gift.associate = (models) => {
     as: 'recipient'
   });
 };
-
 module.exports = Gift;
+

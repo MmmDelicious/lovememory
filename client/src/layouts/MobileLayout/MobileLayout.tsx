@@ -2,17 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MobileNavigation from '../../components/MobileNavigation/MobileNavigation';
 import styles from './MobileLayout.module.css';
-
 interface MobileLayoutProps {
   children: React.ReactNode;
 }
-
 const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
-
-  // Update active tab based on current route
   useEffect(() => {
     const path = location.pathname;
     if (path === '/dashboard' || path === '/') {
@@ -33,11 +29,8 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
       setActiveTab('dashboard');
     }
   }, [location.pathname]);
-
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    
-    // Navigate to the appropriate route
     switch (tab) {
       case 'dashboard':
         navigate('/dashboard');
@@ -62,7 +55,6 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
         break;
     }
   };
-
   return (
     <div className={styles.mobileLayout}>
       <main className={styles.mobileContent}>
@@ -75,5 +67,4 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
     </div>
   );
 };
-
 export default MobileLayout;

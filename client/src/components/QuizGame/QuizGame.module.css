@@ -267,3 +267,122 @@
   .quizContainer.waiting .optionButton {
     cursor: not-allowed !important;
   }
+
+  /* Team Scores Styles */
+  .teamScores {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+
+  .teamScore {
+    flex: 1;
+    background: linear-gradient(135deg, #FFFFFF 0%, #FFF8F6 100%);
+    border-radius: 16px;
+    padding: 16px;
+    border: 2px solid #EADCD1;
+    box-shadow: 0 4px 16px rgba(103, 56, 46, 0.04);
+    transition: all 0.3s ease;
+  }
+
+  .teamScore:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(103, 56, 46, 0.08);
+  }
+
+  .teamHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #EADCD1;
+  }
+
+  .teamName {
+    font-size: 14px;
+    font-weight: 600;
+    color: #634832;
+  }
+
+  .teamPoints {
+    font-size: 24px;
+    font-weight: 700;
+    color: #E77A65;
+  }
+
+  .teamMembers {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .teamMember {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #7A6C65;
+    font-weight: 500;
+  }
+
+  .teamMember span {
+    color: #E77A65;
+    font-weight: 600;
+  }
+
+  /* Team Results Styles */
+  .teamResults {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .teamResult {
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 2px solid #EADCD1;
+  }
+
+  .teamResultHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #EADCD1;
+  }
+
+  .teamResultName {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #634832;
+  }
+
+  .teamResultScore {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #E77A65;
+  }
+
+  .teamResultMembers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .teamMemberResult {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #7A6C65;
+  }
+
+  .teamMemberResult span:last-child {
+    font-weight: 600;
+    color: #E77A65;
+  }

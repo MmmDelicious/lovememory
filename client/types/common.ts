@@ -143,14 +143,36 @@ export interface Card {
 export interface Lesson {
   id: string;
   title: string;
-  description: string;
-  category: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  estimatedDuration: number;
-  content: LessonContent;
-  triggers: LessonTrigger[];
-  effects: LessonEffect[];
-  isActive: boolean;
+  text: string;
+  description?: string;
+  category?: string;
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  estimatedDuration?: number;
+  content?: LessonContent;
+  triggers?: LessonTrigger[];
+  effects?: LessonEffect[];
+  isActive?: boolean;
+  tags?: string[];
+  interactive_type?: 'prompt' | 'quiz' | 'chat' | 'photo' | 'choice';
+  animation_file?: string;
+  base_coins_reward?: number;
+  streak_bonus?: number;
+  theme?: string;
+  difficulty_level?: number;
+  required_streak?: number;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  // Поддержка вложенной структуры для совместимости
+  Lesson?: {
+    title: string;
+    text: string;
+    tags: string[];
+    interactive_type: 'prompt' | 'quiz' | 'chat' | 'photo' | 'choice';
+    animation_file?: string;
+    base_coins_reward: number;
+    streak_bonus?: number;
+  };
 }
 
 export interface LessonContent {

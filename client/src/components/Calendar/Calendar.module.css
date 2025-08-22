@@ -161,6 +161,28 @@
   background: var(--color-background);
 }
 
+/* Day with events indicator */
+.calendarWrapper :global(.fc-daygrid-day.fc-day-with-events) {
+  position: relative;
+}
+
+.calendarWrapper :global(.fc-daygrid-day.fc-day-with-events::after) {
+  content: '📱';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 0.7rem;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.calendarWrapper :global(.fc-daygrid-day.fc-day-with-events:hover::after) {
+  opacity: 1;
+  transform: scale(1.2);
+  transition: all 0.2s ease;
+}
+
 /* Стили для событий, которые продолжаются несколько дней */
 .calendarWrapper :global(.fc-event.fc-event-start) {
   border-top-left-radius: 4px !important;

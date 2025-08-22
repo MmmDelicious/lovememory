@@ -14,11 +14,9 @@ import {
   MapPin
 } from 'lucide-react';
 import styles from './MobileDashboard.module.css';
-
 const MobileDashboard: React.FC = () => {
   const [currentView, setCurrentView] = useState<'dashboard' | 'calendar'>('dashboard');
   const [currentDate, setCurrentDate] = useState(new Date());
-
   const upcomingEvents = [
     {
       id: 1,
@@ -45,15 +43,12 @@ const MobileDashboard: React.FC = () => {
       location: 'Сокольники'
     }
   ];
-
   const quickStats = [
     { label: 'События', value: '12', icon: Calendar, trend: '+3' },
     { label: 'Игры', value: '8', icon: Gamepad2, trend: '+2' },
     { label: 'Гармония', value: '87%', icon: Heart, trend: '+5%' },
     { label: 'Рейтинг', value: 'Топ 15%', icon: Trophy, trend: '↑2' }
   ];
-
-  // Простой календарь
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -61,29 +56,20 @@ const MobileDashboard: React.FC = () => {
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-    
     const days = [];
-    
-    // Пустые дни в начале
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
-    // Дни месяца
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-    
     return days;
   };
-
   const monthNames = [
     'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
     'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
   ];
-
   const weekDays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentDate(prev => {
       const newDate = new Date(prev);
@@ -95,23 +81,19 @@ const MobileDashboard: React.FC = () => {
       return newDate;
     });
   };
-
   const hasEvent = (day: number) => {
-    // Простая проверка - есть ли события в этот день
     return day === 20 || day === 22 || day === 25;
   };
-
   const isToday = (day: number) => {
     const today = new Date();
     return day === today.getDate() && 
            currentDate.getMonth() === today.getMonth() && 
            currentDate.getFullYear() === today.getFullYear();
   };
-
   if (currentView === 'calendar') {
     return (
       <div className={styles.mobileCalendar}>
-        {/* Calendar Header */}
+        {}
         <div className={styles.calendarHeader}>
           <button 
             className={styles.backButton}
@@ -124,8 +106,7 @@ const MobileDashboard: React.FC = () => {
             <Plus size={24} />
           </button>
         </div>
-
-        {/* Month Navigation */}
+        {}
         <div className={styles.monthNav}>
           <button onClick={() => navigateMonth('prev')}>
             <ChevronLeft size={20} />
@@ -135,15 +116,13 @@ const MobileDashboard: React.FC = () => {
             <ChevronRight size={20} />
           </button>
         </div>
-
-        {/* Calendar Grid */}
+        {}
         <div className={styles.calendarGrid}>
-          {/* Week days header */}
+          {}
           {weekDays.map(day => (
             <div key={day} className={styles.weekDay}>{day}</div>
           ))}
-          
-          {/* Calendar days */}
+          {}
           {getDaysInMonth(currentDate).map((day, index) => (
             <div 
               key={index} 
@@ -164,8 +143,7 @@ const MobileDashboard: React.FC = () => {
             </div>
           ))}
         </div>
-
-        {/* Events List */}
+        {}
         <div className={styles.calendarEvents}>
           <h3>Ближайшие события</h3>
           <div className={styles.eventsList}>
@@ -194,10 +172,9 @@ const MobileDashboard: React.FC = () => {
       </div>
     );
   }
-
   return (
     <div className={styles.mobileDashboard}>
-      {/* Header */}
+      {}
       <div className={styles.header}>
         <div className={styles.greeting}>
           <h1>Привет, Александр! 👋</h1>
@@ -215,8 +192,7 @@ const MobileDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Quick Stats */}
+      {}
       <div className={styles.statsSection}>
         <h2>Статистика</h2>
         <div className={styles.statsGrid}>
@@ -237,8 +213,7 @@ const MobileDashboard: React.FC = () => {
           })}
         </div>
       </div>
-
-      {/* Quick Actions */}
+      {}
       <div className={styles.quickActions}>
         <h2>Быстрые действия</h2>
         <div className={styles.actionGrid}>
@@ -248,7 +223,6 @@ const MobileDashboard: React.FC = () => {
             </div>
             <span>Играть</span>
           </Link>
-          
           <button 
             className={styles.actionCard}
             onClick={() => setCurrentView('calendar')}
@@ -258,14 +232,12 @@ const MobileDashboard: React.FC = () => {
             </div>
             <span>Событие</span>
           </button>
-          
           <Link to="/insights" className={styles.actionCard}>
             <div className={styles.actionIcon}>
               <BarChart3 size={24} />
             </div>
             <span>Статистика</span>
           </Link>
-          
           <button className={styles.actionCard}>
             <div className={styles.actionIcon}>
               <Users size={24} />
@@ -274,8 +246,7 @@ const MobileDashboard: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* Upcoming Events */}
+      {}
       <div className={styles.upcomingSection}>
         <div className={styles.sectionHeader}>
           <h2>Ближайшие события</h2>
@@ -286,7 +257,6 @@ const MobileDashboard: React.FC = () => {
             Все <ChevronRight size={16} />
           </button>
         </div>
-        
         <div className={styles.eventsList}>
           {upcomingEvents.slice(0, 3).map(event => (
             <div key={event.id} className={styles.eventCard}>
@@ -312,8 +282,7 @@ const MobileDashboard: React.FC = () => {
           ))}
         </div>
       </div>
-
-      {/* Love Quote */}
+      {}
       <div className={styles.quoteCard}>
         <div className={styles.quoteIcon}>💝</div>
         <blockquote>
@@ -325,5 +294,4 @@ const MobileDashboard: React.FC = () => {
     </div>
   );
 };
-
 export default MobileDashboard;

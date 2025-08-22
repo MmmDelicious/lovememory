@@ -4,15 +4,14 @@ import LottiePlayer from 'react-lottie-player';
 import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { useGameSocket } from '../../hooks/useGameSocket';
-
 import QuizGame from '../../components/QuizGame/QuizGame';
 import ChessGame from '../../components/ChessGame/ChessGame';
 import ChessGameEnhanced from '../../components/ChessGame/ChessGameEnhanced';
 import WordleGame from '../../components/WordleGame/WordleGame';
+import CodenamesGame from '../../components/CodenamesGame/CodenamesGame';
 import styles from './GameRoomPage.module.css';
 import victoryAnimation from '../../assets/victory.json';
 import defeatAnimation from '../../assets/defeat.json';
-
 const GameRoomPage = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
@@ -20,29 +19,43 @@ const GameRoomPage = () => {
   const { setCoins } = useCurrency();
   const { gameState, makeMove } = useGameSocket(roomId, token, setCoins);
   const [isMakingMove, setIsMakingMove] = React.useState(false);
-
   const handleReturnToLobby = () => {
     const gameType = gameState?.gameType || 'unknown';
     navigate(`/games/${gameType}`);
   };
-
   const renderStatusMessage = () => {
     if (!gameState || !user) return "Подключение к игре...";
     if (gameState.status === 'finished') return "Игра окончена";
     if (gameState.status !== 'in_progress') return "";
-
     if (gameState.gameType === 'quiz') {
       return "Время для квиза!";
     }
-
     if (gameState.gameType === 'chess') {
       return gameState.currentPlayerId === user.id ? "Ваш ход" : "Ход соперника";
     }
-
+    if (gameState.gameType === 'codenames') {
+      const userRole = gameState.playerRole;
+      const isYourTeam = userRole?.team === gameState.currentTeam;
+      if (isYourTeam) {
+        if (gameState.currentPhase === 'giving_clue') {
+          if (gameState.currentPlayer === user.id) {
+            return "Ваш ход - дайте подсказку команде";
+          } else {
+            return `Ваш капитан дает подсказку`;
+          }
+        } else {
+          if (gameState.currentPlayer === user.id) {
+            return "Ваш ход - выберите карту";
+          } else {
+            return `Ваш игрок выбирает карту`;
+          }
+        }
+      } else {
+        return "Ход оппонента";
+      }
+    }
     return gameState.currentPlayerId === user.id ? "Ваш ход" : "Ход соперника";
   };
-
-  // Показываем единый индикатор поиска для всех игр
   const renderSearchIndicator = () => {
     if (gameState && gameState.status !== 'in_progress' && gameState.status !== 'finished') {
       return (
@@ -54,8 +67,6 @@ const GameRoomPage = () => {
     }
     return null;
   };
-  
-  // Компонент для отображения ID комнаты
   const renderRoomId = () => {
     if (!roomId) return null;
     return (
@@ -66,11 +77,9 @@ const GameRoomPage = () => {
       </div>
     );
   };
-  
   const renderGameBoard = () => {
     if (!gameState) return <div className={styles.boardPlaceholder}>Загрузка игровой доски...</div>;
     if (gameState.status === 'finished' && gameState.gameType !== 'quiz') return renderGameEndOverlay();
-
     switch (gameState.gameType) {
       case 'tic-tac-toe':
         return (
@@ -82,7 +91,6 @@ const GameRoomPage = () => {
                   if (isMakingMove || gameState.status !== 'in_progress' || gameState.currentPlayerId !== user.id || cell !== null) {
                     return;
                   }
-                  
                   setIsMakingMove(true);
                   try {
                     makeMove(index);
@@ -122,17 +130,20 @@ const GameRoomPage = () => {
                   makeMove={makeMove} 
                   handleReturnToLobby={handleReturnToLobby} 
                />;
+      case 'codenames':
+        return <CodenamesGame 
+                  gameState={gameState} 
+                  user={user} 
+                  makeMove={makeMove} 
+                  handleReturnToLobby={handleReturnToLobby} 
+               />;
       default:
         return <div className={styles.boardPlaceholder}>Неизвестный тип игры.</div>;
     }
   };
-  
   const renderGameEndOverlay = () => {
     let resultText, resultStyle, animationData, coinsInfo = null;
-    
-    // Получаем информацию о монетах из результатов экономической системы
     const userEconomyResult = gameState.economyResults?.[user.id];
-    
     if (gameState.winner === 'draw') {
       resultText = 'Ничья!';
       resultStyle = styles.drawText;
@@ -154,7 +165,6 @@ const GameRoomPage = () => {
         coinsInfo = `Потеряно: ${userEconomyResult.coinsChange} монет`;
       }
     }
-
     return (
       <div className={styles.overlay}>
         <div className={styles.overlayContent}>
@@ -171,16 +181,13 @@ const GameRoomPage = () => {
       </div>
     );
   }
-
   return (
     <div className={`${styles.gameRoomContainer} ${(gameState && gameState.status !== 'in_progress' && gameState.status !== 'finished') ? styles.waiting : ''}`}>
       {renderSearchIndicator()}
       {renderRoomId()}
-      
       <button onClick={handleReturnToLobby} className={styles.exitButton}>
         Выйти
       </button>
-      
       <div className={styles.gameArea}>
         {gameState?.status === 'in_progress' && renderStatusMessage() && (
           <h2 className={styles.status}>{renderStatusMessage()}</h2>
@@ -190,5 +197,4 @@ const GameRoomPage = () => {
     </div>
   );
 };
-
 export default GameRoomPage;

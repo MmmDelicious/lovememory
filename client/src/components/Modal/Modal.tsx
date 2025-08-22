@@ -1,13 +1,11 @@
 import React from 'react';
 import BaseModal from '../BaseModal/BaseModal';
-
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
 }
-
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
   return (
     <BaseModal 
@@ -20,5 +18,4 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
     </BaseModal>
   );
 };
-
 export default Modal;

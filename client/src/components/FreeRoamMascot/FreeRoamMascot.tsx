@@ -2,13 +2,11 @@ import React, { useState, useCallback } from 'react';
 import Lottie from 'lottie-react';
 import RadialMenu from '../RadialMenu/RadialMenu';
 import styles from './FreeRoamMascot.module.css';
-
 interface MascotState {
   position: { x: number; y: number };
   message: string;
   direction: 'left' | 'right';
 }
-
 interface FreeRoamMascotProps {
   state: MascotState;
   animationData: any;
@@ -16,7 +14,6 @@ interface FreeRoamMascotProps {
   isAILoading?: boolean;
   onContextMenuAction?: (actionId: string) => void;
 }
-
 const FreeRoamMascot: React.FC<FreeRoamMascotProps> = ({ 
   state, 
   animationData, 
@@ -26,38 +23,30 @@ const FreeRoamMascot: React.FC<FreeRoamMascotProps> = ({
 }) => {
   const { position, message, direction } = state;
   const [isRadialMenuOpen, setIsRadialMenuOpen] = useState(false);
-
   const wrapperClasses = [
     styles.mascotWrapper,
     direction === 'right' ? styles.flipped : ''
   ].join(' ');
-
   const displayMessage = isAILoading ? "Думаю..." : message;
-
   const handleRightClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsRadialMenuOpen(prev => !prev);
   }, []);
-
   const handleLeftClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (onClick) {
       onClick();
     }
   }, [onClick]);
-
   const handleRadialMenuAction = useCallback((actionId: string) => {
     if (onContextMenuAction) {
       onContextMenuAction(actionId);
     }
   }, [onContextMenuAction]);
-
   const handleRadialMenuClose = useCallback(() => {
     setIsRadialMenuOpen(false);
   }, []);
-
-  // Конфигурация элементов радиального меню
   const radialMenuItems = [
     { id: 'chat', label: 'Чат', icon: '💬' },
     { id: 'joke', label: 'Шутка', icon: '😂' },
@@ -67,7 +56,6 @@ const FreeRoamMascot: React.FC<FreeRoamMascotProps> = ({
     { id: 'mood', label: 'Настроение', icon: '😊' },
     { id: 'hide', label: 'Скрыть', icon: '🙈' }
   ];
-
   return (
     <div
       className={styles.mascotContainer}
@@ -86,8 +74,7 @@ const FreeRoamMascot: React.FC<FreeRoamMascotProps> = ({
       <div className={wrapperClasses}>
         <Lottie animationData={animationData} loop={true} />
       </div>
-
-      {/* Радиальное меню внутри контейнера маскота */}
+      {}
       <RadialMenu
         isOpen={isRadialMenuOpen}
         items={radialMenuItems}
@@ -100,5 +87,5 @@ const FreeRoamMascot: React.FC<FreeRoamMascotProps> = ({
     </div>
   );
 };
-
 export default FreeRoamMascot;
+

@@ -3,14 +3,11 @@ import authService from '../services/auth.service';
 import pairService from '../services/pair.service';
 import api from '../services/api';
 import type { AuthData, AuthContextType, User, RegisterRequest } from '../../types/auth';
-
 const AuthContext = createContext<AuthContextType | null>(null);
-
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [authData, setAuthData] = useState<AuthData | null>(null);
   const [partner, setPartner] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
   const setAuthentication = useCallback((newAuthData: AuthData) => {
     if (newAuthData && newAuthData.token && newAuthData.user) {
       localStorage.setItem('auth', JSON.stringify(newAuthData));
@@ -20,7 +17,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       console.error('Attempted to set invalid auth data', newAuthData);
     }
   }, []);
-
   const updateUser = useCallback((updatedUser: User) => {
     if (authData) {
       const newAuthData: AuthData = {
@@ -30,14 +26,12 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       setAuthentication(newAuthData);
     }
   }, [authData, setAuthentication]);
-
   const clearAuthData = useCallback((): void => {
     localStorage.removeItem('auth');
     delete api.defaults.headers.common['Authorization'];
     setAuthData(null);
     setPartner(null);
   }, []);
-
   const fetchPartner = useCallback(async (): Promise<void> => {
     if (!authData?.token) {
       setPartner(null);
@@ -57,19 +51,16 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       setPartner(null);
     }
   }, [authData?.token]);
-
   const login = async (email: string, password: string): Promise<AuthData> => {
     const newAuthData = await authService.login(email, password);
     setAuthentication(newAuthData);
     return newAuthData;
   };
-
   const register = async (userData: RegisterRequest): Promise<AuthData> => {
     const newAuthData = await authService.register(userData);
     setAuthentication(newAuthData);
     return newAuthData;
   };
-
   const logout = async (): Promise<void> => {
     try {
       await authService.logout();
@@ -77,7 +68,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       clearAuthData();
     }
   };
-
   useEffect(() => {
     const handleInitialLoad = () => {
       const storedAuth = localStorage.getItem('auth');
@@ -93,7 +83,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       setIsLoading(false);
     };
     handleInitialLoad();
-
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === 'auth') {
         const storedAuth = localStorage.getItem('auth');
@@ -105,10 +94,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       }
     };
     window.addEventListener('storage', handleStorageChange);
-
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [clearAuthData, setAuthentication]);
-
   useEffect(() => {
     const handleGoogleAuth = (event: MessageEvent) => {
       if (event.origin !== import.meta.env.VITE_SERVER_URL) {
@@ -123,13 +110,11 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     window.addEventListener('message', handleGoogleAuth);
     return () => window.removeEventListener('message', handleGoogleAuth);
   }, [setAuthentication]);
-
   useEffect(() => {
     if (authData?.token) {
       fetchPartner();
     }
   }, [authData, fetchPartner]);
-
   const value: AuthContextType = {
     user: authData?.user ?? null,
     partner,
@@ -141,10 +126,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     register,
     updateUser,
   };
-
   return <AuthContext.Provider value={value}>{!isLoading && children}</AuthContext.Provider>;
 };
-
 export const useAuth = (): AuthContextType => {
   const ctx = useContext(AuthContext);
   if (!ctx) {
@@ -152,5 +135,4 @@ export const useAuth = (): AuthContextType => {
   }
   return ctx;
 };
-
 

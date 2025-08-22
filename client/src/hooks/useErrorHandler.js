@@ -1,19 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-
 export const useErrorHandler = () => {
   const navigate = useNavigate();
-
   const handleError = (error, customMessage = null) => {
     console.error('Error occurred:', error);
-
     let errorCode = 500;
     let errorMessage = customMessage || 'Произошла непредвиденная ошибка';
-
-    // Определяем код ошибки и сообщение
     if (error.response) {
-      // Ошибка от сервера
       errorCode = error.response.status;
-      
       switch (errorCode) {
         case 400:
           errorMessage = 'Неверный запрос';
@@ -34,15 +27,11 @@ export const useErrorHandler = () => {
           errorMessage = error.response.data?.message || errorMessage;
       }
     } else if (error.request) {
-      // Ошибка сети
       errorCode = 0;
       errorMessage = 'Проблемы с подключением к серверу';
     } else {
-      // Другие ошибки
       errorMessage = error.message || errorMessage;
     }
-
-    // Навигация на страницу ошибки с параметрами
     navigate('/error', { 
       state: { 
         errorCode, 
@@ -51,6 +40,5 @@ export const useErrorHandler = () => {
       replace: true 
     });
   };
-
   return { handleError };
 }; 

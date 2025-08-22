@@ -1,20 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './Sidebar.module.css';
 import Button from '../Button/Button';
 import eventService from '../../services/event.service';
 import RecurrenceSelector from '../Calendar/RecurrenceSelector';
-
+import { toast } from '../../context/ToastContext';
+import { 
+  FaTasks, FaBookmark, FaHeart, FaBirthdayCake, 
+  FaPlane, FaWineGlass, FaGift, FaStar, FaChevronDown,
+  FaTimes, FaPlus, FaTrash
+} from 'react-icons/fa';
 interface EventType {
   value: string;
   label: string;
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
 }
-
 interface MediaItem {
   id: string;
   file_url: string;
 }
-
 interface EventData {
   id?: string;
   title?: string;
@@ -31,7 +34,6 @@ interface EventData {
     rawEvent?: EventData;
   };
 }
-
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -41,17 +43,24 @@ interface SidebarProps {
   selectedDate: string | null;
   onViewDay?: () => void;
 }
-
+const EVENT_TYPES: EventType[] = [
+  { value: 'plan', label: 'Планы', icon: FaTasks },
+  { value: 'memory', label: 'Воспоминания', icon: FaBookmark },
+  { value: 'anniversary', label: 'Годовщины', icon: FaHeart },
+  { value: 'birthday', label: 'Дни рождения', icon: FaBirthdayCake },
+  { value: 'travel', label: 'Путешествия', icon: FaPlane },
+  { value: 'date', label: 'Свидания', icon: FaWineGlass },
+  { value: 'gift', label: 'Подарки', icon: FaGift },
+  { value: 'milestone', label: 'Важные моменты', icon: FaStar }
+];
 const formatDate = (date: string | null | undefined): string => {
   if (!date) return '';
   return new Date(date).toISOString().slice(0, 10);
 };
-
 const formatTime = (date: string | null | undefined): string => {
   if (!date || !date.includes('T')) return '';
   return new Date(date).toTimeString().slice(0, 5);
 };
-
 const Sidebar: React.FC<SidebarProps> = ({ 
   isOpen, 
   onClose, 
@@ -74,61 +83,52 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [recurrenceRule, setRecurrenceRule] = useState<any>(null);
   const [showRecurrenceModal, setShowRecurrenceModal] = useState(false);
   const [error, setError] = useState('');
+  const [isSelectOpen, setIsSelectOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
-
-  const EVENT_TYPES: EventType[] = [
-    { value: 'plan', label: 'Планы', icon: '📅' },
-    { value: 'memory', label: 'Воспоминания', icon: '💭' },
-    { value: 'anniversary', label: 'Годовщины', icon: '💕' },
-    { value: 'birthday', label: 'Дни рождения', icon: '🎂' },
-    { value: 'travel', label: 'Путешествия', icon: '✈️' },
-    { value: 'date', label: 'Свидания', icon: '💖' },
-    { value: 'gift', label: 'Подарки', icon: '🎁' },
-    { value: 'milestone', label: 'Важные моменты', icon: '⭐' }
-  ];
-
+  const sidebarRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (eventData) {
       const rawEvent = eventData.extendedProps?.rawEvent || eventData;
-      
       setTitle(rawEvent.title || '');
       setDescription(rawEvent.description || '');
       setIsShared(!!rawEvent.isShared);
       setEventType(rawEvent.event_type || 'plan');
       setIsRecurring(!!rawEvent.is_recurring);
       setRecurrenceRule(rawEvent.recurrence_rule || null);
-      
-      // Apply defaults: base 08:00 - 09:00 when creating a new event
       const baseDateISO = rawEvent.event_date || eventData.event_date || (eventData.date ? `${eventData.date}T08:00:00` : null);
       const baseEndISO = rawEvent.end_date || (baseDateISO ? new Date(new Date(baseDateISO).getTime() + 60*60*1000).toISOString() : null);
-
       setStartDate(formatDate(baseDateISO || eventData.date));
       setStartTime(formatTime(baseDateISO));
-      
       setEndDate(formatDate(baseEndISO));
       setEndTime(formatTime(baseEndISO));
-
       if (rawEvent.id) {
         fetchMedia(rawEvent.id);
       } else {
         setMedia([]);
       }
+    } else {
+      setTitle('');
+      setDescription('');
+      setStartDate('');
+      setStartTime('');
+      setEndDate('');
+      setEndTime('');
+      setMedia([]);
+      setIsShared(false);
+      setEventType('plan');
+      setIsRecurring(false);
+      setRecurrenceRule(null);
     }
+    setError('');
   }, [eventData]);
-
-  // Body scroll lock while sidebar is open
   useEffect(() => {
     if (isOpen) {
-      const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => { 
-        document.body.style.overflow = originalOverflow; 
+        document.body.style.overflow = 'unset'; 
       };
     }
   }, [isOpen]);
-
-  // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -137,40 +137,43 @@ const Sidebar: React.FC<SidebarProps> = ({
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isOpen, onClose]);
-
-  const fetchMedia = async (eventId: string) => {
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        setIsSelectOpen(false);
+      }
+    };
+    if (isSelectOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isSelectOpen]);
+  const fetchMedia = useCallback(async (eventId: string) => {
     try {
       const response = await eventService.getMediaForEvent(eventId);
       setMedia(response.data);
     } catch (error) {
-      console.error("Ошибка при загрузке медиа:", error);
+      console.error('Error fetching media:', error);
     }
-  };
-
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
+  }, []);
+  const handleSave = useCallback(() => {
     setError('');
     if (!title || title.trim() === '') {
       setError('Название обязательно');
       return;
     }
-
     const combineDateTime = (date: string, time: string): string | null => {
       if (!date) return null;
       if (time) {
-        // Интерпретируем как локальное время и сохраняем в ISO (UTC) без ручных сдвигов
         const localDateTime = new Date(`${date}T${time}`);
         return localDateTime.toISOString();
       } else {
-        // Локальная полуночь, затем ISO (UTC)
         const localStartOfDay = new Date(`${date}T00:00:00`);
         return localStartOfDay.toISOString();
       }
     };
-
     const finalStartDate = combineDateTime(startDate, startTime);
     const finalEndDate = combineDateTime(endDate, endTime);
-
     onSave({ 
       ...eventData, 
       title, 
@@ -182,15 +185,13 @@ const Sidebar: React.FC<SidebarProps> = ({
       is_recurring: isRecurring,
       recurrence_rule: isRecurring ? recurrenceRule : null
     });
-  };
-
-  const handleDelete = () => {
+  }, [eventData, title, description, startDate, startTime, endDate, endTime, eventType, isShared, isRecurring, recurrenceRule, onSave]);
+  const handleDelete = useCallback(() => {
     if (eventData?.id && window.confirm('Вы уверены, что хотите удалить это событие?')) {
       onDelete(eventData.id);
     }
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  }, [eventData?.id, onDelete]);
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && eventData?.id) {
       try {
@@ -198,194 +199,206 @@ const Sidebar: React.FC<SidebarProps> = ({
         fetchMedia(eventData.id);
         e.target.value = '';
       } catch (error) {
-        console.error("Ошибка при загрузке файла:", error);
-        alert('Не удалось загрузить файл.');
+        toast.error('Не удалось загрузить файл.', 'Ошибка загрузки');
       }
     }
-  };
-
+  }, [eventData?.id, fetchMedia]);
+  const handleDeleteMedia = useCallback(async (mediaId: string) => {
+    try {
+      await eventService.deleteMedia(mediaId);
+      if (eventData?.id) {
+        fetchMedia(eventData.id);
+      }
+    } catch (error) {
+      toast.error('Не удалось удалить файл.', 'Ошибка удаления');
+    }
+  }, [eventData?.id, fetchMedia]);
+  const selectedEventType = EVENT_TYPES.find(type => type.value === eventType) || EVENT_TYPES[0];
   if (!isOpen || !eventData) return null;
-  
   const mainDate = eventData.date || eventData.event_date;
   const formattedDate = mainDate ? new Date(mainDate).toLocaleDateString('ru-RU', { 
     day: 'numeric', 
     month: 'long', 
     year: 'numeric' 
   }) : '';
-
   return (
     <>
-      <div className={`${styles.overlay} ${isOpen ? styles.open : ''}`} onClick={onClose}></div>
-      <div
-        ref={dialogRef}
-        className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="sidebar-title"
-      >
+      <div className={styles.overlay} onClick={onClose} />
+      <div className={styles.sidebar} ref={sidebarRef}>
+        {}
         <div className={styles.header}>
-            <h2 id="sidebar-title" className={styles.title}>
-              {eventData.title || 'Новое событие'}
-            </h2>
-            <button className={styles.closeButton} onClick={onClose} aria-label="Закрыть боковую панель">×</button>
+          <div className={styles.headerTop}>
+            <h2 className={styles.dateTitle}>{formattedDate}</h2>
+            <button 
+              className={styles.closeButton} 
+              onClick={onClose}
+              aria-label="Закрыть"
+            >
+              <FaTimes />
+            </button>
+          </div>
+          <input 
+            type="text" 
+            value={title} 
+            onChange={(e) => setTitle(e.target.value)} 
+            placeholder="Название события" 
+            className={styles.titleInput}
+          />
         </div>
-        
-        <div className={styles.dateInfo}>
-          <span className={styles.dateLabel}>📅 {formattedDate}</span>
-          {eventData.timeRange && (
-            <span className={styles.timeLabel}>⏰ {eventData.timeRange}</span>
-          )}
-        </div>
-        <form onSubmit={handleSave} className={styles.form}>
-          <div className={styles.scrollableContent}>
-            <div className={styles.formGroup}>
-              <label htmlFor="title">Название <span className={styles.required}>*</span></label>
-              <input 
-                id="title" 
-                type="text" 
-                value={title} 
-                onChange={(e) => setTitle(e.target.value)} 
-                placeholder="Название события" 
-                className={styles.input} 
-                required 
-              />
+        {}
+        <div className={styles.content}>
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className={styles.form}>
+            {}
+            <div className={styles.section}>
+              <label className={styles.sectionTitle}>Категория</label>
+              <div className={styles.selectWrapper}>
+                <button
+                  type="button"
+                  className={styles.selectButton}
+                  onClick={() => setIsSelectOpen(!isSelectOpen)}
+                  aria-expanded={isSelectOpen}
+                >
+                  <div className={styles.selectValue}>
+                    <selectedEventType.icon className={styles.typeIcon} />
+                    <span>{selectedEventType.label}</span>
+                  </div>
+                  <FaChevronDown className={`${styles.selectArrow} ${isSelectOpen ? styles.selectArrowOpen : ''}`} />
+                </button>
+                {isSelectOpen && (
+                  <div className={styles.selectDropdown}>
+                    {EVENT_TYPES.map(type => {
+                      const IconComponent = type.icon;
+                      return (
+                        <button
+                          key={type.value}
+                          type="button"
+                          className={`${styles.selectOption} ${type.value === eventType ? styles.selectOptionActive : ''}`}
+                          onClick={() => {
+                            setEventType(type.value);
+                            setIsSelectOpen(false);
+                          }}
+                        >
+                          <IconComponent className={styles.typeIcon} />
+                          <span>{type.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="eventType">Тип события</label>
-              <select 
-                id="eventType" 
-                value={eventType} 
-                onChange={(e) => setEventType(e.target.value)} 
-                className={styles.input}
-              >
-                {EVENT_TYPES.map(type => (
-                  <option key={type.value} value={type.value}>
-                    {type.icon} {type.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             {error && <div className={styles.error}>{error}</div>}
-
-            <div className={styles.dateTimeRow}>
-              <div className={styles.formGroup}>
-                <label htmlFor="startDate">Дата начала</label>
-                <input 
-                  id="startDate" 
-                  type="date" 
-                  value={startDate} 
-                  onChange={(e) => setStartDate(e.target.value)} 
-                  className={styles.input} 
-                />
+            {}
+            <div className={styles.section}>
+              <label className={styles.sectionTitle}>Дата и время</label>
+              <div className={styles.dateTimeGroup}>
+                <label className={styles.fieldLabel}>Начало</label>
+                <div className={styles.dateTimeRow}>
+                  <input 
+                    type="date" 
+                    value={startDate} 
+                    onChange={(e) => setStartDate(e.target.value)} 
+                    className={styles.input} 
+                  />
+                  <input 
+                    type="time" 
+                    value={startTime} 
+                    onChange={(e) => setStartTime(e.target.value)} 
+                    className={styles.input} 
+                  />
+                </div>
               </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="startTime">Время</label>
-                <input 
-                  id="startTime" 
-                  type="time" 
-                  value={startTime} 
-                  onChange={(e) => setStartTime(e.target.value)} 
-                  className={styles.input} 
-                />
-              </div>
-            </div>
-
-            <div className={styles.dateTimeRow}>
-              <div className={styles.formGroup}>
-                <label htmlFor="endDate">Дата окончания</label>
-                <input 
-                  id="endDate" 
-                  type="date" 
-                  value={endDate} 
-                  onChange={(e) => setEndDate(e.target.value)} 
-                  className={styles.input} 
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="endTime">Время</label>
-                <input 
-                  id="endTime" 
-                  type="time" 
-                  value={endTime} 
-                  onChange={(e) => setEndTime(e.target.value)} 
-                  className={styles.input} 
-                />
+              <div className={styles.dateTimeGroup}>
+                <label className={styles.fieldLabel}>Окончание</label>
+                <div className={styles.dateTimeRow}>
+                  <input 
+                    type="date" 
+                    value={endDate} 
+                    onChange={(e) => setEndDate(e.target.value)} 
+                    className={styles.input} 
+                  />
+                  <input 
+                    type="time" 
+                    value={endTime} 
+                    onChange={(e) => setEndTime(e.target.value)} 
+                    className={styles.input} 
+                  />
+                </div>
               </div>
             </div>
-            
-            <div className={styles.formGroup}>
-              <label htmlFor="description">Описание</label>
+            {}
+            <div className={styles.section}>
+              <label className={styles.sectionTitle}>Описание</label>
               <textarea 
-                id="description" 
                 value={description} 
                 onChange={(e) => setDescription(e.target.value)} 
-                placeholder="Добавьте описание..." 
+                placeholder="Добавьте детали о событии..." 
                 className={styles.textarea} 
-                rows={5}
+                rows={4}
               />
             </div>
-            
-            <div className={styles.checkboxRow}>
-              <input 
-                id="isShared" 
-                type="checkbox" 
-                checked={isShared} 
-                onChange={e => setIsShared(e.target.checked)} 
-              />
-              <label htmlFor="isShared">Показывать партнёру</label>
-            </div>
-
-            <div className={styles.checkboxRow}>
-              <input 
-                id="isRecurring" 
-                type="checkbox" 
-                checked={isRecurring} 
-                onChange={e => {
-                  setIsRecurring(e.target.checked);
-                  if (!e.target.checked) {
-                    setRecurrenceRule(null);
-                  }
-                }} 
-              />
-              <label htmlFor="isRecurring">Повторяющееся событие</label>
-            </div>
-
-            {isRecurring && (
-              <div className={styles.recurrenceSection}>
+            {}
+            <div className={styles.section}>
+              <label className={styles.sectionTitle}>Настройки</label>
+              <label className={styles.checkbox}>
+                <input 
+                  type="checkbox" 
+                  checked={isShared} 
+                  onChange={e => setIsShared(e.target.checked)} 
+                />
+                <span className={styles.checkboxCustom}></span>
+                <span className={styles.checkboxLabel}>Поделиться с партнёром</span>
+              </label>
+              <label className={styles.checkbox}>
+                <input 
+                  type="checkbox" 
+                  checked={isRecurring} 
+                  onChange={e => {
+                    setIsRecurring(e.target.checked);
+                    if (!e.target.checked) setRecurrenceRule(null);
+                  }} 
+                />
+                <span className={styles.checkboxCustom}></span>
+                <span className={styles.checkboxLabel}>Повторяющееся событие</span>
+              </label>
+              {isRecurring && (
                 <button 
                   type="button"
                   className={styles.recurrenceButton}
                   onClick={() => setShowRecurrenceModal(true)}
                 >
-                  <span className={styles.recurrenceIcon}>🔄</span>
-                  <span>
-                    {recurrenceRule ? 
-                      `${recurrenceRule.freq.toLowerCase()} ${recurrenceRule.interval > 1 ? `(каждые ${recurrenceRule.interval})` : ''}` : 
-                      'Настроить повторение'
-                    }
-                  </span>
+                  {recurrenceRule ? 
+                    `Повтор: ${recurrenceRule.freq.toLowerCase()} ${recurrenceRule.interval > 1 ? `(каждые ${recurrenceRule.interval})` : ''}` : 
+                    'Настроить повторение'
+                  }
                 </button>
-              </div>
-            )}
-
+              )}
+            </div>
+            {}
             {eventData.id && (
-              <div className={styles.mediaSection}>
-                <h3>Фотографии</h3>
+              <div className={styles.section}>
+                <label className={styles.sectionTitle}>Фотографии</label>
                 <div className={styles.mediaGrid}>
                   {media.map(m => (
                     <div key={m.id} className={styles.mediaItem}>
-                      <img src={`${eventService.FILES_BASE_URL}${m.file_url}`} alt="Воспоминание" />
+                      <img src={`${eventService.FILES_BASE_URL}${m.file_url}`} alt="" />
+                      <button
+                        type="button"
+                        className={styles.deleteMediaButton}
+                        onClick={() => handleDeleteMedia(m.id)}
+                        title="Удалить фото"
+                      >
+                        <FaTrash />
+                      </button>
                     </div>
                   ))}
                   <button 
                     type="button" 
                     className={styles.addMediaButton} 
                     onClick={() => fileInputRef.current?.click()}
+                    title="Добавить фото"
                   >
-                    +
+                    <FaPlus />
                   </button>
                 </div>
                 <input 
@@ -393,22 +406,29 @@ const Sidebar: React.FC<SidebarProps> = ({
                   ref={fileInputRef} 
                   style={{ display: 'none' }} 
                   onChange={handleFileChange} 
-                  accept="image/*" 
+                  accept="image/*"
                 />
               </div>
             )}
-          </div>
+          </form>
+        </div>
+        <div className={styles.footer}>
           <div className={styles.actions}>
-            <Button type="primary" submit>Сохранить</Button>
-            {eventData.id && <Button onClick={handleDelete} type="secondary">Удалить</Button>}
+            {eventData.id && (
+              <Button onClick={handleDelete} variant="secondary">
+                Удалить
+              </Button>
+            )}
             {selectedDate && onViewDay && (
-              <Button onClick={onViewDay} type="outline">
+              <Button onClick={onViewDay} variant="outline">
                 Посмотреть день
               </Button>
             )}
+            <Button variant="primary" onClick={handleSave}>
+              Сохранить
+            </Button>
           </div>
-        </form>
-        
+        </div>
         <RecurrenceSelector
           isOpen={showRecurrenceModal}
           onClose={() => setShowRecurrenceModal(false)}
@@ -419,5 +439,4 @@ const Sidebar: React.FC<SidebarProps> = ({
     </>
   );
 };
-
 export default Sidebar;

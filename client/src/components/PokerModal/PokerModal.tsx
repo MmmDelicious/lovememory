@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { X, Coins, DollarSign, RefreshCw } from 'lucide-react';
 import { useCurrency } from '../../context/CurrencyContext';
 import styles from './PokerModal.module.css';
-
 interface PokerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,7 +11,6 @@ interface PokerModalProps {
   roomName?: string;
   currentStack?: number;
 }
-
 const PokerModal: React.FC<PokerModalProps> = ({
   isOpen,
   onClose,
@@ -24,39 +22,28 @@ const PokerModal: React.FC<PokerModalProps> = ({
 }) => {
   const { coins } = useCurrency();
   const [amount, setAmount] = useState(Math.min(maxAmount, coins, 200));
-
-  // Вычисляем реальный максимум - меньше из максимума и баланса игрока
   const actualMax = Math.min(maxAmount, coins);
   const minAmount = Math.min(50, actualMax);
-
   const handleConfirm = () => {
     if (amount >= minAmount && amount <= actualMax) {
       onConfirm(amount);
-      // Только для rebuy автоматически закрываем модал
       if (mode === 'rebuy') {
         onClose();
       }
     }
   };
-
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAmount(Number(e.target.value));
   };
-
   const setPresetAmount = (percentage: number) => {
     const calculatedAmount = Math.floor(actualMax * percentage);
     setAmount(Math.max(minAmount, calculatedAmount));
   };
-
   if (!isOpen) return null;
-
   const canAfford = coins >= minAmount;
   const isValidAmount = amount >= minAmount && amount <= actualMax;
-
-  // Настройки для разных режимов
   const isBuyIn = mode === 'buyin';
   const isRebuy = mode === 'rebuy';
-
   const config = {
     buyin: {
       icon: <DollarSign size={24} />,
@@ -75,9 +62,7 @@ const PokerModal: React.FC<PokerModalProps> = ({
       errorMessage: 'Для rebuy необходимо минимум'
     }
   };
-
   const currentConfig = config[mode];
-
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -95,7 +80,6 @@ const PokerModal: React.FC<PokerModalProps> = ({
             <X size={20} />
           </button>
         </div>
-
         <div className={styles.content}>
           {!canAfford ? (
             <div className={styles.errorState}>
@@ -108,7 +92,7 @@ const PokerModal: React.FC<PokerModalProps> = ({
             </div>
           ) : (
             <>
-              {/* Информация о балансе/статусе */}
+              {}
               {isBuyIn && (
                 <div className={styles.balanceInfo}>
                   <div className={styles.balanceItem}>
@@ -120,7 +104,6 @@ const PokerModal: React.FC<PokerModalProps> = ({
                   </div>
                 </div>
               )}
-
               {isRebuy && (
                 <div className={styles.statusInfo}>
                   <div className={styles.statusItem}>
@@ -140,13 +123,11 @@ const PokerModal: React.FC<PokerModalProps> = ({
                   </div>
                 </div>
               )}
-
-              {/* Основная секция выбора суммы */}
+              {}
               <div className={styles.amountSection}>
                 <label className={styles.label}>
                   {currentConfig.sectionLabel}
                 </label>
-                
                 <div className={styles.amountDisplay}>
                   <div className={styles.amountValue}>
                     {amount} монет
@@ -155,7 +136,6 @@ const PokerModal: React.FC<PokerModalProps> = ({
                     {minAmount} - {actualMax} монет
                   </div>
                 </div>
-
                 <div className={styles.sliderContainer}>
                   <input
                     type="range"
@@ -171,7 +151,6 @@ const PokerModal: React.FC<PokerModalProps> = ({
                     <span>{actualMax}</span>
                   </div>
                 </div>
-
                 <div className={styles.presetButtons}>
                   <button 
                     type="button" 
@@ -203,8 +182,7 @@ const PokerModal: React.FC<PokerModalProps> = ({
                   </button>
                 </div>
               </div>
-
-              {/* Дополнительная информация для разных режимов */}
+              {}
               {isBuyIn && (
                 <div className={styles.infoBox}>
                   <div className={styles.infoIcon}>ℹ️</div>
@@ -219,7 +197,6 @@ const PokerModal: React.FC<PokerModalProps> = ({
                   </div>
                 </div>
               )}
-
               {isRebuy && (
                 <div className={styles.resultPreview}>
                   <div className={styles.previewLabel}>После rebuy:</div>
@@ -231,7 +208,6 @@ const PokerModal: React.FC<PokerModalProps> = ({
             </>
           )}
         </div>
-
         <div className={styles.actions}>
           <button 
             type="button" 
@@ -254,5 +230,5 @@ const PokerModal: React.FC<PokerModalProps> = ({
     </div>
   );
 };
-
 export default PokerModal;
+

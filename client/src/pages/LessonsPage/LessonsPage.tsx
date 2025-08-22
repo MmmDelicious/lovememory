@@ -7,7 +7,6 @@ import LessonPath from '../../components/LessonPath/LessonPath';
 import PsychologyTips from '../../components/PsychologyTips/PsychologyTips';
 import { lessonService } from '../../services/lesson.service';
 import styles from './LessonsPage.module.css';
-
 const LessonsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'daily' | 'progress' | 'path' | 'psychology'>('daily');
   const [dailyLesson, setDailyLesson] = useState(null);
@@ -15,18 +14,14 @@ const LessonsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
-
-  // Загрузка данных
   useEffect(() => {
     loadData();
   }, [refreshKey]);
-
   const loadData = async () => {
     console.log('🎯 LessonsPage: Loading data for tab:', activeTab);
     try {
       setLoading(true);
       setError(null);
-
       if (activeTab === 'daily') {
         console.log('📚 LessonsPage: Fetching daily lesson...');
         const lesson = await lessonService.getTodaysLesson();
@@ -45,50 +40,45 @@ const LessonsPage: React.FC = () => {
       setLoading(false);
     }
   };
-
-  // Обновление данных при смене табов
   useEffect(() => {
     if (!loading) {
       loadData();
     }
   }, [activeTab]);
-
   const handleCompleteLesson = async (feedback: string) => {
     try {
       if (!dailyLesson?.Lesson?.id) return;
-
       await lessonService.completeLesson(dailyLesson.Lesson.id, feedback);
-      
-      // Обновляем данные
       setRefreshKey(prev => prev + 1);
     } catch (err: any) {
       setError(err.message || 'Не удалось выполнить урок');
     }
   };
-
   const tabVariants = {
     inactive: { opacity: 0.7, scale: 0.95 },
     active: { opacity: 1, scale: 1 }
   };
-
   const contentVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20 }
   };
-
   const tabs = [
     { id: 'daily', label: 'Урок дня', icon: BookOpen },
     { id: 'progress', label: 'Прогресс', icon: TrendingUp },
     { id: 'path', label: 'Путь', icon: Map },
     { id: 'psychology', label: 'Советы', icon: Lightbulb }
   ];
-
   return (
     <div className={styles.container}>
-
-
-      {/* Навигационные табы */}
+      {}
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>Уроки</h1>
+          <p className={styles.heroSubtitle}>Развивайте отношения каждый день</p>
+        </div>
+      </section>
+      {}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -115,8 +105,7 @@ const LessonsPage: React.FC = () => {
           })}
         </div>
       </motion.div>
-
-      {/* Основной контент */}
+      {}
       <div className={styles.content}>
         <AnimatePresence mode="wait">
           {activeTab === 'daily' && (
@@ -129,14 +118,13 @@ const LessonsPage: React.FC = () => {
               transition={{ duration: 0.3 }}
             >
               <DailyLesson
-                lesson={dailyLesson}
+                lesson={dailyLesson?.Lesson}
                 onComplete={handleCompleteLesson}
                 loading={loading}
                 completionStatus={dailyLesson?.completionStatus}
               />
             </motion.div>
           )}
-
           {activeTab === 'progress' && (
             <motion.div
               key="progress"
@@ -152,7 +140,6 @@ const LessonsPage: React.FC = () => {
               />
             </motion.div>
           )}
-
           {activeTab === 'path' && (
             <motion.div
               key="path"
@@ -169,12 +156,10 @@ const LessonsPage: React.FC = () => {
                 streakDays={progress?.streakDays || 0}
                 onLessonSelect={(lessonId) => {
                   console.log('Selected lesson:', lessonId);
-                  // TODO: Navigate to specific lesson
                 }}
               />
             </motion.div>
           )}
-
           {activeTab === 'psychology' && (
             <motion.div
               key="psychology"
@@ -194,8 +179,7 @@ const LessonsPage: React.FC = () => {
           )}
         </AnimatePresence>
       </div>
-
-      {/* Ошибка */}
+      {}
       <AnimatePresence>
         {error && (
           <motion.div
@@ -223,5 +207,4 @@ const LessonsPage: React.FC = () => {
     </div>
   );
 };
-
 export default LessonsPage;

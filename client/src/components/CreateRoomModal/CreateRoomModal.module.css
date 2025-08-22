@@ -238,6 +238,51 @@
   opacity: 0.8;
 }
 
+/* Player Info for Format Display */
+.playerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.formatIndicator {
+  padding: var(--space-4);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-background);
+}
+
+.teamFormat {
+  text-align: center;
+}
+
+.teamFormat span {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  display: block;
+  margin-bottom: var(--space-2);
+}
+
+.classicFormat {
+  text-align: center;
+}
+
+.classicFormat span {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  display: block;
+  margin-bottom: var(--space-2);
+}
+
+.formatDescription {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
 /* Checkbox */
 .checkboxLabel {
   display: flex;

@@ -3,7 +3,6 @@ import Lottie from 'lottie-react';
 import Worker404 from '../../assets/Worker404.json';
 import Worker500 from '../../assets/Worker500.json';
 import styles from './ErrorDisplay.module.css';
-
 const ErrorDisplay = ({ 
   errorCode = 404, 
   errorMessage = 'Страница не найдена',
@@ -13,16 +12,13 @@ const ErrorDisplay = ({
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [animationData, setAnimationData] = useState(Worker404);
-
   useEffect(() => {
-    // Выбираем анимацию в зависимости от кода ошибки
     if (errorCode >= 500) {
       setAnimationData(Worker500);
     } else {
       setAnimationData(Worker404);
     }
   }, [errorCode]);
-
   const getErrorTitle = () => {
     switch (errorCode) {
       case 404:
@@ -43,7 +39,6 @@ const ErrorDisplay = ({
         return 'Произошла ошибка';
     }
   };
-
   const getErrorDescription = () => {
     switch (errorCode) {
       case 404:
@@ -64,7 +59,6 @@ const ErrorDisplay = ({
         return 'Произошла непредвиденная ошибка. Попробуйте позже.';
     }
   };
-
   const getComfortingMessage = () => {
     const messages = [
       "Не волнуйтесь, это временно! 🔧",
@@ -78,11 +72,10 @@ const ErrorDisplay = ({
     ];
     return messages[Math.floor(Math.random() * messages.length)];
   };
-
   return (
     <div className={styles.errorContainer}>
       <div className={styles.errorContent}>
-        {/* Lottie анимация */}
+        {}
         <div className={styles.animationContainer}>
           <Lottie 
             animationData={animationData} 
@@ -90,24 +83,20 @@ const ErrorDisplay = ({
             className={styles.lottieAnimation}
           />
         </div>
-
-        {/* Основная информация об ошибке */}
+        {}
         <div className={styles.errorInfo}>
           <h1 className={styles.errorCode}>{errorCode}</h1>
           <h2 className={styles.errorTitle}>{getErrorTitle()}</h2>
           <p className={styles.errorDescription}>{getErrorDescription()}</p>
-          
           {errorMessage && errorMessage !== getErrorTitle() && (
             <p className={styles.errorMessage}>{errorMessage}</p>
           )}
-          
-          {/* Успокаивающее сообщение */}
+          {}
           <div className={styles.comfortingMessage}>
             <p>{getComfortingMessage()}</p>
           </div>
         </div>
-
-        {/* Детали ошибки (если есть) */}
+        {}
         {errorDetails && (
           <div className={styles.errorDetails}>
             <button 
@@ -116,7 +105,6 @@ const ErrorDisplay = ({
             >
               {showDetails ? 'Скрыть детали' : 'Показать детали ошибки'}
             </button>
-            
             {showDetails && (
               <div className={styles.detailsContent}>
                 <pre className={styles.errorStack}>
@@ -129,15 +117,13 @@ const ErrorDisplay = ({
             )}
           </div>
         )}
-
-        {/* Кнопки действий */}
+        {}
         <div className={styles.actionButtons}>
           {onRetry && (
             <button className={styles.retryButton} onClick={onRetry}>
               Попробовать снова
             </button>
           )}
-          
           {onGoHome && (
             <button className={styles.homeButton} onClick={onGoHome}>
               Перейти домой
@@ -148,5 +134,4 @@ const ErrorDisplay = ({
     </div>
   );
 };
-
 export default ErrorDisplay; 

@@ -1,9 +1,7 @@
 import React from 'react';
 import styles from './Button.module.css';
-
 type ButtonType = 'primary' | 'secondary' | 'outline';
 type ButtonSize = 'sm' | 'md';
-
 interface ButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
@@ -14,7 +12,6 @@ interface ButtonProps {
   size?: ButtonSize;
   fullWidth?: boolean;
 }
-
 const Button: React.FC<ButtonProps> = ({
   children,
   onClick = undefined,
@@ -30,10 +27,8 @@ const Button: React.FC<ButtonProps> = ({
     visualType === 'secondary' ? styles.secondary :
     visualType === 'outline' ? styles.outline :
     styles.primary;
-
   const sizeClass = size === 'sm' ? styles.sm : '';
   const widthClass = fullWidth ? styles.fullWidth : '';
-
   return (
     <button
       type={submit ? 'submit' : 'button'}
@@ -45,5 +40,5 @@ const Button: React.FC<ButtonProps> = ({
     </button>
   );
 };
-
 export default Button;
+

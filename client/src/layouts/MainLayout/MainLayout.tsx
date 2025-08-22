@@ -30,33 +30,25 @@ import {
 import styles from './MainLayout.module.css';
 import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
-
 const MainLayout: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
-  
   const { user, logout } = useAuth();
   const { coins } = useCurrency();
   const { receivedGift, isGiftVisible, closeGift } = useGifts();
   const navigate = useNavigate();
-
   const handleNavigate = (path: string) => {
     navigate(path);
   };
-
-  // Check if mobile
   React.useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
   const navigationItems = [
     {
       path: '/dashboard',
@@ -95,12 +87,9 @@ const MainLayout: React.FC = () => {
       active: location.pathname === '/profile'
     }
   ];
-
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-
-  // Mobile Layout
   if (isMobile) {
     const renderMobileContent = () => {
       switch (location.pathname) {
@@ -121,29 +110,25 @@ const MainLayout: React.FC = () => {
           return <MobileDashboard />;
       }
     };
-
     return (
       <MobileLayout>
         {renderMobileContent()}
       </MobileLayout>
     );
   }
-
-  // Desktop Layout
   return (
     <div className={styles.layout}>
-      {/* Header */}
+      {}
       <header className={styles.header}>
         <div className={styles.headerContent}>
-          {/* Logo */}
+          {}
           <Link to="/dashboard" className={styles.logo}>
             <div className={styles.logoIcon}>
               <Heart size={24} />
             </div>
             <span className={styles.logoText}>LoveApp</span>
           </Link>
-
-          {/* Desktop Navigation */}
+          {}
           <nav className={styles.desktopNav}>
             {navigationItems.map((item) => (
               <Link
@@ -156,23 +141,19 @@ const MainLayout: React.FC = () => {
               </Link>
             ))}
           </nav>
-
-          {/* User Section */}
+          {}
           {user ? (
             <div className={styles.userSection}>
-              {/* Coins */}
+              {}
               <div className={styles.coinsDisplay}>
                 <Coins size={18} />
                 <span>{coins.toLocaleString()}</span>
               </div>
-
-              {/* Notifications */}
+              {}
               <NotificationDropdown />
-
-              {/* User Dropdown */}
+              {}
               <UserDropdown user={user} onLogout={logout} onNavigate={handleNavigate} />
-
-              {/* Mobile Menu Button */}
+              {}
               <button 
                 className={styles.mobileMenuButton}
                 onClick={toggleMobileMenu}
@@ -188,8 +169,7 @@ const MainLayout: React.FC = () => {
             </div>
           )}
         </div>
-
-        {/* Mobile Navigation */}
+        {}
         <nav className={`${styles.mobileNav} ${isMobileMenuOpen ? styles.mobileNavOpen : ''}`}>
           {navigationItems.map((item) => (
             <Link
@@ -202,9 +182,7 @@ const MainLayout: React.FC = () => {
               <span>{item.label}</span>
             </Link>
           ))}
-          
           <div className={styles.mobileNavDivider}></div>
-          
           <Link
             to="/settings"
             className={styles.mobileNavItem}
@@ -215,25 +193,21 @@ const MainLayout: React.FC = () => {
           </Link>
         </nav>
       </header>
-
-      {/* Main Content */}
+      {}
       <main className={styles.main}>
         <Outlet />
       </main>
-
-      {/* Background Elements */}
+      {}
       <div className={styles.backgroundElements}>
         <div className={styles.floatingHeart} style={{ '--delay': '0s' } as React.CSSProperties}>💕</div>
         <div className={styles.floatingHeart} style={{ '--delay': '3s' } as React.CSSProperties}>💖</div>
         <div className={styles.floatingHeart} style={{ '--delay': '6s' } as React.CSSProperties}>💝</div>
       </div>
-
-      {/* Gift Display */}
+      {}
       {isGiftVisible && receivedGift && (
         <GiftDisplay gift={receivedGift} onClose={closeGift} />
       )}
     </div>
   );
 };
-
 export default MainLayout;

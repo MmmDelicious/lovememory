@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Platform } 
 export default function MascotOverlay() {
   const [visible, setVisible] = useState(true);
   const [message] = useState<string>(
-    'Привет! Я здесь, чтобы помочь. Открой Игры и залетай в комнату ♠️♥️'
+    'Привет! Я здесь, чтобы помочь. Открой Игры и залетай в комнату '
   );
 
   const translate = useRef(new Animated.Value(40)).current;
@@ -109,7 +109,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Platform } 
 export default function MascotOverlay() {
   const [visible, setVisible] = useState(true);
   const [message, setMessage] = useState<string>(
-    'Привет! Я здесь, чтобы помочь. Открой Игры и залетай в комнату ♠️♥️'
+    'Привет! Я здесь, чтобы помочь. Открой Игры и залетай в комнату '
   );
 
   const translate = useRef(new Animated.Value(40)).current;
@@ -149,7 +149,7 @@ export default function MascotOverlay() {
             return <LottieView source={anim} autoPlay loop style={styles.lottie} />;
           })()
         ) : (
-          <Text style={styles.avatarEmoji}>🤖</Text>
+          <Text style={styles.avatarEmoji}>AI</Text>
         )}
       </TouchableOpacity>
       <View style={styles.bubble}>

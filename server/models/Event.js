@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
 const Event = sequelize.define('Event', {
   id: {
     type: DataTypes.UUID,
@@ -56,16 +55,13 @@ const Event = sequelize.define('Event', {
       key: 'id',
     },
   },
-
   userId: {
     type: DataTypes.UUID,
     allowNull: false,
   }
 });
-
 Event.associate = (models) => {
   Event.belongsTo(models.User, { foreignKey: 'userId' });
   Event.hasMany(models.Media, { foreignKey: 'eventId', onDelete: 'CASCADE' });
 };
-
 module.exports = Event;

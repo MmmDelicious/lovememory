@@ -1,16 +1,13 @@
 import React, { useEffect, useReducer, useRef, useState, useLayoutEffect } from 'react';
 import Lottie from 'lottie-react';
 import styles from './LottieMascot.module.css';
-
 const animationDuration = 2500;
 const bubbleFadeOutDuration = 2000;
-
 const initialState = {
   phase: 'before-animate',
   showInterruptBubble: false,
   showDismissBubble: false,
 };
-
 function reducer(state, action) {
   switch (action.type) {
     case 'START_ANIMATION':
@@ -29,15 +26,12 @@ function reducer(state, action) {
       throw new Error();
   }
 }
-
 const LottieMascot = ({ message, buttonText, imageUrl, onActionClick, onDismiss, side, animationData, mascotType, isTumbling, element: targetElement }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [position, setPosition] = useState(null);
   const lottieRef = useRef();
-
   useLayoutEffect(() => {
     if (!targetElement) return;
-
     const updatePosition = () => {
       const targetRect = targetElement.getBoundingClientRect();
       setPosition({
@@ -46,23 +40,19 @@ const LottieMascot = ({ message, buttonText, imageUrl, onActionClick, onDismiss,
       });
     };
     updatePosition();
-    
     window.addEventListener('scroll', updatePosition, true);
     window.addEventListener('resize', updatePosition);
-
     return () => {
       window.removeEventListener('scroll', updatePosition, true);
       window.removeEventListener('resize', updatePosition);
     };
   }, [targetElement]);
-
   useEffect(() => {
     if (position) {
       const timer = setTimeout(() => dispatch({ type: 'START_ANIMATION' }), 10);
       return () => clearTimeout(timer);
     }
   }, [position]);
-
   useEffect(() => {
     let timer;
     if (state.phase === 'appearing') {
@@ -77,11 +67,9 @@ const LottieMascot = ({ message, buttonText, imageUrl, onActionClick, onDismiss,
     }
     return () => clearTimeout(timer);
   }, [state.phase, onDismiss]);
-
   const startDismissal = () => {
     dispatch({ type: 'DISMISS' });
   };
-
   const handleClick = (e) => {
     if (state.phase === 'dismissed' || state.phase === 'interrupted') return;
     if (state.phase === 'arrived') {
@@ -91,13 +79,11 @@ const LottieMascot = ({ message, buttonText, imageUrl, onActionClick, onDismiss,
       dispatch({ type: 'INTERRUPT' });
     }
   };
-
   const handleButtonClick = () => {
     if (onActionClick) {
       onActionClick(startDismissal);
     }
   };
-
   const getInitialPosition = () => {
     switch (side) {
       case 'top': return { top: '-150px', left: position.x + 'px' };
@@ -107,7 +93,6 @@ const LottieMascot = ({ message, buttonText, imageUrl, onActionClick, onDismiss,
       default: return { top: position.y + 'px', left: '-150px' };
     }
   };
-
   const getTargetPosition = () => {
     if (state.phase === 'interrupted' || state.phase === 'dismissed') {
       if (mascotType === 'flyer') {
@@ -117,12 +102,9 @@ const LottieMascot = ({ message, buttonText, imageUrl, onActionClick, onDismiss,
     }
     return { top: position.y + 'px', left: position.x + 'px' };
   };
-
   if (!position) return null;
-
   const isLeaving = state.phase === 'interrupted' || state.phase === 'dismissed';
   const isArrived = state.phase === 'arrived';
-
   const playerClasses = [
     styles.lottiePlayer,
     isArrived ? styles.arrived : '',
@@ -130,9 +112,7 @@ const LottieMascot = ({ message, buttonText, imageUrl, onActionClick, onDismiss,
     styles[mascotType],
     isTumbling && !isLeaving ? styles.tumbling : ''
   ].join(' ');
-
   const flipDirection = isLeaving ? (side === 'left' ? -1 : 1) : (side === 'right' ? -1 : 1);
-
   return (
     <div
       className={styles.mascotContainer}
@@ -168,5 +148,4 @@ const LottieMascot = ({ message, buttonText, imageUrl, onActionClick, onDismiss,
     </div>
   );
 };
-
 export default LottieMascot;

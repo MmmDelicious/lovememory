@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import placesService from '../../services/places.service';
 import eventsAfisha from '../../services/eventsAfisha.service';
 import styles from './DebugDataViewer.module.css';
-
 interface DebugDataViewerProps {
   isOpen: boolean;
   onClose: () => void;
   city: string;
   coordinates?: { latitude: number; longitude: number };
 }
-
 const DebugDataViewer: React.FC<DebugDataViewerProps> = ({ 
   isOpen, 
   onClose, 
@@ -22,16 +20,13 @@ const DebugDataViewer: React.FC<DebugDataViewerProps> = ({
     events: [],
     loading: true
   });
-
   useEffect(() => {
     if (isOpen && coordinates) {
       fetchData();
     }
   }, [isOpen, coordinates, city]);
-
   const fetchData = async () => {
     setData(prev => ({ ...prev, loading: true }));
-    
     try {
       const [activities, restaurants, events] = await Promise.all([
         placesService.searchActivities(city, coordinates!, { radius: 8000, limit: 15 }),
@@ -42,15 +37,12 @@ const DebugDataViewer: React.FC<DebugDataViewerProps> = ({
         }),
         eventsAfisha.searchEvents(city, 14)
       ]);
-
       setData({
         activities,
         restaurants,
         events,
         loading: false
       });
-
-      // Также выводим в консоль для удобства
       console.log('=== ПОЛНЫЕ ДАННЫЕ ДЛЯ ОТЛАДКИ ===');
       console.log('Город:', city);
       console.log('Координаты:', coordinates);
@@ -61,19 +53,15 @@ const DebugDataViewer: React.FC<DebugDataViewerProps> = ({
       console.log('События найдено:', events.length);
       console.log('События:', events);
       console.log('====================================');
-      
     } catch (error) {
       console.error('Ошибка загрузки данных:', error);
       setData(prev => ({ ...prev, loading: false }));
     }
   };
-
   const formatData = (obj: any) => {
     return JSON.stringify(obj, null, 2);
   };
-
   if (!isOpen) return null;
-
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
@@ -81,13 +69,11 @@ const DebugDataViewer: React.FC<DebugDataViewerProps> = ({
           <h2>🔍 Отладка данных для города: {city}</h2>
           <button onClick={onClose} className={styles.closeButton}>×</button>
         </div>
-        
         <div className={styles.content}>
           {data.loading ? (
             <div className={styles.loading}>Загружаю данные...</div>
           ) : (
             <div className={styles.sections}>
-              
               <div className={styles.section}>
                 <h3>🎯 Активности ({data.activities.length})</h3>
                 <div className={styles.summary}>
@@ -111,7 +97,6 @@ const DebugDataViewer: React.FC<DebugDataViewerProps> = ({
                   <pre className={styles.jsonData}>{formatData(data.activities)}</pre>
                 </details>
               </div>
-
               <div className={styles.section}>
                 <h3>🍽️ Рестораны и кафе ({data.restaurants.length})</h3>
                 <div className={styles.summary}>
@@ -135,7 +120,6 @@ const DebugDataViewer: React.FC<DebugDataViewerProps> = ({
                   <pre className={styles.jsonData}>{formatData(data.restaurants)}</pre>
                 </details>
               </div>
-
               <div className={styles.section}>
                 <h3>🎭 События и афиша ({data.events.length})</h3>
                 <div className={styles.summary}>
@@ -159,11 +143,9 @@ const DebugDataViewer: React.FC<DebugDataViewerProps> = ({
                   <pre className={styles.jsonData}>{formatData(data.events)}</pre>
                 </details>
               </div>
-
             </div>
           )}
         </div>
-        
         <div className={styles.footer}>
           <button onClick={fetchData} className={styles.refreshButton} disabled={data.loading}>
             🔄 Обновить данные
@@ -176,5 +158,5 @@ const DebugDataViewer: React.FC<DebugDataViewerProps> = ({
     </div>
   );
 };
-
 export default DebugDataViewer;
+

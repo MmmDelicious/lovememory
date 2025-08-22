@@ -1,18 +1,5 @@
 import api from './api';
-import type { LessonFeedback } from '../../types/common';
-
-export interface Lesson {
-  id: string;
-  title: string;
-  text: string;
-  theme: string;
-  interactive_type: 'prompt' | 'quiz' | 'chat' | 'photo' | 'choice';
-  difficulty_level: number;
-  base_coins_reward: number;
-  animation_file?: string;
-  tags: string[];
-}
-
+import type { LessonFeedback, Lesson } from '../../types/common';
 export interface DailyLessonResponse {
   Lesson: Lesson;
   completionStatus: {
@@ -24,7 +11,6 @@ export interface DailyLessonResponse {
   date: string;
   relationship_id: number;
 }
-
 export interface LessonProgress {
   pair: {
     streak: number;
@@ -60,7 +46,6 @@ export interface LessonProgress {
     };
   };
 }
-
 export interface LessonHistoryItem {
   id: number;
   lesson_id: string;
@@ -70,7 +55,6 @@ export interface LessonHistoryItem {
   feedback?: LessonFeedback;
   Lesson: Lesson;
 }
-
 export interface LessonStats {
   totalCompleted: number;
   completedLast30Days: number;
@@ -79,11 +63,7 @@ export interface LessonStats {
   totalStreakBonus: number;
   weeklyLessons: number;
 }
-
 class LessonService {
-  /**
-   * Получить урок дня
-   */
   async getTodaysLesson(): Promise<DailyLessonResponse> {
     console.log('🎯 LessonService: Fetching daily lesson...');
     try {
@@ -95,10 +75,6 @@ class LessonService {
       throw new Error(error.response?.data?.message || 'Не удалось загрузить урок дня');
     }
   }
-
-  /**
-   * Отметить урок как выполненный
-   */
   async completeLesson(lessonId: string, feedback?: string): Promise<any> {
     console.log('🎯 LessonService: Completing lesson:', lessonId, { feedback });
     try {
@@ -113,10 +89,6 @@ class LessonService {
       throw new Error(error.response?.data?.message || 'Не удалось выполнить урок');
     }
   }
-
-  /**
-   * Получить прогресс по урокам
-   */
   async getProgress(): Promise<LessonProgress> {
     console.log('🎯 LessonService: Fetching lesson progress...');
     try {
@@ -128,10 +100,6 @@ class LessonService {
       throw new Error(error.response?.data?.message || 'Не удалось загрузить прогресс');
     }
   }
-
-  /**
-   * Получить историю выполненных уроков
-   */
   async getLessonHistory(page: number = 1, limit: number = 20, theme?: string): Promise<{
     lessons: LessonHistoryItem[];
     pagination: {
@@ -146,21 +114,15 @@ class LessonService {
         page: page.toString(),
         limit: limit.toString()
       });
-      
       if (theme) {
         params.append('theme', theme);
       }
-
       const response = await api.get(`/lessons/history?${params}`);
       return response.data.data;
     } catch (error: unknown) {
       throw new Error(error.response?.data?.message || 'Не удалось загрузить историю уроков');
     }
   }
-
-  /**
-   * Получить статистику пользователя
-   */
   async getStats(): Promise<LessonStats> {
     try {
       const response = await api.get('/lessons/stats');
@@ -169,10 +131,6 @@ class LessonService {
       throw new Error(error.response?.data?.message || 'Не удалось загрузить статистику');
     }
   }
-
-  /**
-   * Получить прогресс по темам
-   */
   async getThemeProgress(): Promise<{
     [key: string]: {
       completed: number;
@@ -188,10 +146,6 @@ class LessonService {
       throw new Error(error.response?.data?.message || 'Не удалось загрузить прогресс по темам');
     }
   }
-
-  /**
-   * Обновить метрики отношений
-   */
   async updateRelationshipMetrics(metrics: {
     love_language_primary?: string;
     love_language_secondary?: string;
@@ -205,10 +159,6 @@ class LessonService {
       throw new Error(error.response?.data?.message || 'Не удалось обновить метрики отношений');
     }
   }
-
-  /**
-   * Получить уроки недели
-   */
   async getWeeklyLessons(weekOffset: number = 0): Promise<any[]> {
     try {
       const response = await api.get(`/lessons/weekly?weekOffset=${weekOffset}`);
@@ -217,23 +167,14 @@ class LessonService {
       throw new Error(error.response?.data?.message || 'Не удалось загрузить недельные уроки');
     }
   }
-
-  /**
-   * Получить рекомендации по урокам
-   */
   async getLessonRecommendations(): Promise<Lesson[]> {
     try {
-      // TODO: Реализовать endpoint для рекомендаций
       const response = await api.get('/lessons/recommendations');
       return response.data.data;
     } catch (error: unknown) {
       throw new Error(error.response?.data?.message || 'Не удалось загрузить рекомендации');
     }
   }
-
-  /**
-   * Поиск уроков
-   */
   async searchLessons(query: string, filters?: {
     theme?: string;
     difficulty?: number;
@@ -241,21 +182,15 @@ class LessonService {
   }): Promise<Lesson[]> {
     try {
       const params = new URLSearchParams({ query });
-      
       if (filters?.theme) params.append('theme', filters.theme);
       if (filters?.difficulty) params.append('difficulty', filters.difficulty.toString());
       if (filters?.interactiveType) params.append('interactiveType', filters.interactiveType);
-
       const response = await api.get(`/lessons/search?${params}`);
       return response.data.data;
     } catch (error: unknown) {
       throw new Error(error.response?.data?.message || 'Не удалось найти уроки');
     }
   }
-
-  /**
-   * Получить достижения пользователя
-   */
   async getAchievements(): Promise<any[]> {
     try {
       const response = await api.get('/lessons/achievements');
@@ -264,10 +199,6 @@ class LessonService {
       throw new Error(error.response?.data?.message || 'Не удалось загрузить достижения');
     }
   }
-
-  /**
-   * Проверить доступность новых тем
-   */
   async checkUnlockedThemes(): Promise<string[]> {
     try {
       const response = await api.get('/lessons/unlocked-themes');
@@ -276,10 +207,6 @@ class LessonService {
       throw new Error(error.response?.data?.message || 'Не удалось проверить разблокированные темы');
     }
   }
-
-  /**
-   * Отправить отзыв о уроке
-   */
   async submitLessonFeedback(lessonId: string, rating: number, comment?: string): Promise<void> {
     try {
       await api.post(`/lessons/${lessonId}/feedback`, {
@@ -290,10 +217,6 @@ class LessonService {
       throw new Error(error.response?.data?.message || 'Не удалось отправить отзыв');
     }
   }
-
-  /**
-   * Получить календарь выполненных уроков
-   */
   async getLessonCalendar(year: number, month: number): Promise<{
     [date: string]: {
       completed: boolean;
@@ -309,5 +232,5 @@ class LessonService {
     }
   }
 }
-
 export const lessonService = new LessonService();
+

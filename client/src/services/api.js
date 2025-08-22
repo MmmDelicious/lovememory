@@ -1,9 +1,7 @@
 import axios from 'axios';
-
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
 });
-
 api.interceptors.request.use(
   (config) => {
     const storedData = localStorage.getItem('auth');
@@ -23,13 +21,11 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    // Детальное логирование ошибки API
     console.group('🔥 API ERROR 🔥');
     console.error('Full Error Object:', error);
     console.error('Request Config:', error.config);
@@ -37,7 +33,6 @@ api.interceptors.response.use(
     console.error('Request Method:', error.config?.method);
     console.error('Request Headers:', error.config?.headers);
     console.error('Request Data:', error.config?.data);
-    
     if (error.response) {
       console.error('Response Status:', error.response.status);
       console.error('Response Headers:', error.response.headers);
@@ -50,7 +45,6 @@ api.interceptors.response.use(
     }
     console.error('Timestamp:', new Date().toISOString());
     console.groupEnd();
-    
     if (error.response?.status === 401) {
       localStorage.removeItem('auth');
       setTimeout(() => {
@@ -58,7 +52,6 @@ api.interceptors.response.use(
       }, 1000);
       return Promise.reject(error);
     }
-    
     if (error.response?.status >= 500) {
       setTimeout(() => {
         const errorInfo = encodeURIComponent(JSON.stringify({
@@ -69,7 +62,6 @@ api.interceptors.response.use(
       }, 2000);
       return Promise.reject(error);
     }
-    
     if (!error.response) {
       const errorInfo = encodeURIComponent(JSON.stringify({
         errorCode: 0,
@@ -78,9 +70,7 @@ api.interceptors.response.use(
       window.location.href = `/error?error=${errorInfo}`;
       return Promise.reject(error);
     }
-    
     return Promise.reject(error);
   }
 );
-
 export default api;

@@ -2,7 +2,6 @@ import React from 'react';
 import maleAvatar from '../../assets/man.png';
 import femaleAvatar from '../../assets/woman.png';
 import styles from './GenderSelector.module.css';
-
 const GenderSelector = ({ selectedGender, onGenderChange }) => {
   return (
     <div className={styles.genderSelector}>
@@ -17,7 +16,6 @@ const GenderSelector = ({ selectedGender, onGenderChange }) => {
           </div>
           <span className={styles.avatarLabel}>Мужской</span>
         </div>
-        
         <div 
           className={`${styles.avatarOption} ${selectedGender === 'female' ? styles.selected : ''}`}
           onClick={() => onGenderChange('female')}
@@ -28,7 +26,6 @@ const GenderSelector = ({ selectedGender, onGenderChange }) => {
           <span className={styles.avatarLabel}>Женский</span>
         </div>
       </div>
-      
       <button 
         type="button"
         className={`${styles.otherButton} ${selectedGender === 'other' ? styles.selected : ''}`}
@@ -39,5 +36,4 @@ const GenderSelector = ({ selectedGender, onGenderChange }) => {
     </div>
   );
 };
-
 export default GenderSelector; 

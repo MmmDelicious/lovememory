@@ -4,7 +4,8 @@ import {
   FaCogs, 
   FaQuestionCircle, 
   FaKeyboard,
-  FaDice
+  FaDice,
+  FaEye
 } from 'react-icons/fa';
 import { GameConfig } from '../../types/game.types';
 
@@ -64,6 +65,20 @@ export const GAMES_CONFIG: Record<string, GameConfig> = {
     minBet: 10,
     maxBet: 500,
     defaultBet: 30
+  },
+  codenames: {
+    id: 'codenames',
+    name: 'Codenames',
+    description: 'Командная игра с ассоциациями и подсказками',
+    category: 'Командная',
+    icon: FaEye as ComponentType<any>,
+    minPlayers: 4,
+    maxPlayers: 4,
+    difficulty: 'Средняя',
+    players: '4 игрока (2v2)',
+    minBet: 15,
+    maxBet: 750,
+    defaultBet: 40
   }
 };
 
@@ -83,6 +98,10 @@ export const GAME_EXTRAS: Record<string, any> = {
   wordle: {
     emoji: '📝',
     background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+  },
+  codenames: {
+    emoji: '🕵️',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
   }
 };
 
@@ -130,6 +149,29 @@ export function getGameSettings(gameId: string) {
             { value: 'sports', label: 'Спорт' }
           ],
           default: 'mixed'
+        }
+      };
+    case 'codenames':
+      return {
+        ...baseSettings,
+        difficulty: {
+          type: 'select' as const,
+          label: 'Сложность',
+          options: [
+            { value: 'easy', label: 'Легкий (больше времени)' },
+            { value: 'normal', label: 'Обычный' },
+            { value: 'hard', label: 'Сложный (меньше времени)' }
+          ],
+          default: 'normal'
+        },
+        teamAssignment: {
+          type: 'select' as const,
+          label: 'Распределение команд',
+          options: [
+            { value: 'auto', label: 'Автоматическое' },
+            { value: 'manual', label: 'Ручное' }
+          ],
+          default: 'auto'
         }
       };
     default:

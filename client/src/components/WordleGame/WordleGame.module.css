@@ -76,6 +76,70 @@
   color: #D97A6C;
 }
 
+/* Team Scores Styles */
+.teamScores {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.teamScore {
+  flex: 1;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF8F6 100%);
+  border-radius: 16px;
+  padding: 16px;
+  border: 2px solid #F2E9E8;
+  box-shadow: 0 4px 16px rgba(103, 56, 46, 0.04);
+  transition: all 0.3s ease;
+}
+
+.teamScore:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(103, 56, 46, 0.08);
+}
+
+.teamHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #F2E9E8;
+}
+
+.teamName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4A3F3D;
+}
+
+.teamPoints {
+  font-size: 24px;
+  font-weight: 700;
+  color: #D97A6C;
+}
+
+.teamMembers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.teamMember {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #8C7F7D;
+  font-weight: 500;
+}
+
+.teamMember span {
+  color: #D97A6C;
+  font-weight: 600;
+}
+
 .gameBoard {
   display: flex;
   flex-direction: column;

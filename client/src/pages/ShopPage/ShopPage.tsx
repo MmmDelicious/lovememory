@@ -4,11 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import LottiePlayer from 'react-lottie-player';
 import styles from './ShopPage.module.css';
-
-// Import animations
+import { toast } from '../../context/ToastContext';
 import guitarAnimation from '../../assets/guitar.json';
 import runningCharacterAnimation from '../../assets/running-character.json';
-
 interface GiftOption {
   id: string;
   name: string;
@@ -17,7 +15,6 @@ interface GiftOption {
   price: number;
   category: 'romantic' | 'fun' | 'seasonal';
 }
-
 interface VirtualGift {
   id: string;
   fromUserId: string;
@@ -28,7 +25,6 @@ interface VirtualGift {
   createdAt: string;
   isDelivered: boolean;
 }
-
 const ShopPage: React.FC = () => {
   const { user, token } = useAuth();
   const { coins, setCoins, refreshCoins } = useCurrency();
@@ -39,8 +35,6 @@ const ShopPage: React.FC = () => {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState<'all' | 'romantic' | 'fun' | 'seasonal'>('all');
-
-  // Available gift options
   const giftOptions: GiftOption[] = [
     {
       id: 'guitar',
@@ -59,17 +53,12 @@ const ShopPage: React.FC = () => {
       category: 'fun'
     }
   ];
-
-  // Filter gifts by category
   const filteredGifts = activeCategory === 'all' 
     ? giftOptions 
     : giftOptions.filter(gift => gift.category === activeCategory);
-
-  // Generate default message based on user gender and gift type
   const generateDefaultMessage = (giftType: string): string => {
     const userGender = user?.gender || 'male';
     const senderName = user?.first_name || 'Ваш любимый человек';
-    
     const messages = {
       guitar: {
         male: `Дорогая! Эта мелодия напоминает мне о тебе... 🎸💕`,
@@ -80,24 +69,19 @@ const ShopPage: React.FC = () => {
         female: `Дорогой! Бегу к тебе со всей любовью! 🏃‍♀️💫`
       }
     };
-
     const defaultMsg = messages[giftType as keyof typeof messages]?.[userGender] || 
                      'Специально для тебя подготовил(а) этот подарок! 💝';
-    
     return `${defaultMsg}\n\nДля тебя приготовил(а): ${senderName}`;
   };
-
   const handleSelectGift = (gift: GiftOption) => {
     if (coins < gift.price) {
-      alert(`Недостаточно монеток! Нужно ${gift.price}, у вас ${coins}`);
+      toast.warning(`Недостаточно монеток! Нужно ${gift.price}, у вас ${coins}`, 'Недостаточно средств');
       return;
     }
-    
     setSelectedGift(gift);
     setGiftMessage(generateDefaultMessage(gift.id));
     setIsGiftModalOpen(true);
   };
-
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -109,21 +93,17 @@ const ShopPage: React.FC = () => {
       reader.readAsDataURL(file);
     }
   };
-
   const handleSendGift = async () => {
     if (!selectedGift || !user) return;
-
     setIsLoading(true);
     try {
       const formData = new FormData();
       formData.append('giftType', selectedGift.id);
       formData.append('message', giftMessage);
       formData.append('price', selectedGift.price.toString());
-      
       if (giftPhoto) {
         formData.append('photo', giftPhoto);
       }
-
       const response = await fetch('/api/gifts/send', {
         method: 'POST',
         headers: {
@@ -131,37 +111,30 @@ const ShopPage: React.FC = () => {
         },
         body: formData
       });
-
       if (response.ok) {
         const result = await response.json();
-        
-        // Update coins - use server response if available, otherwise refresh
         if (result.remainingCoins !== undefined) {
           setCoins(result.remainingCoins);
         } else {
           await refreshCoins();
         }
-        
-        // Close modal and reset
         setIsGiftModalOpen(false);
         setSelectedGift(null);
         setGiftMessage('');
         setGiftPhoto(null);
         setPhotoPreview(null);
-        
-        alert('Подарок успешно отправлен! 🎁');
+        toast.success('Подарок успешно отправлен! 🎁', 'Подарок отправлен');
       } else {
         const error = await response.json();
-        alert(`Ошибка: ${error.message}`);
+        toast.error(error.message, 'Ошибка отправки');
       }
     } catch (error) {
       console.error('Error sending gift:', error);
-      alert('Произошла ошибка при отправке подарка');
+      toast.error('Произошла ошибка при отправке подарка', 'Ошибка');
     } finally {
       setIsLoading(false);
     }
   };
-
   const closeModal = () => {
     setIsGiftModalOpen(false);
     setSelectedGift(null);
@@ -169,11 +142,10 @@ const ShopPage: React.FC = () => {
     setGiftPhoto(null);
     setPhotoPreview(null);
   };
-
   return (
     <div className={styles.shopPage}>
       <div className={styles.container}>
-        {/* Header */}
+        {}
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div className={styles.titleSection}>
@@ -183,7 +155,6 @@ const ShopPage: React.FC = () => {
                 <p className={styles.subtitle}>Премиальные функции для укрепления отношений</p>
               </div>
             </div>
-            
             <div className={styles.coinsDisplay}>
               <Sparkles className={styles.coinIcon} size={20} />
               <span className={styles.coinAmount}>{coins}</span>
@@ -191,8 +162,7 @@ const ShopPage: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Category Filter */}
+        {}
         <div className={styles.categoryFilter}>
           {[
             { id: 'all', label: 'Все', icon: Star },
@@ -210,8 +180,7 @@ const ShopPage: React.FC = () => {
             </button>
           ))}
         </div>
-
-        {/* Gift Cards */}
+        {}
         <div className={styles.giftGrid}>
           {filteredGifts.map((gift) => (
             <div key={gift.id} className={styles.giftCard}>
@@ -223,17 +192,14 @@ const ShopPage: React.FC = () => {
                   style={{ width: '120px', height: '120px' }}
                 />
               </div>
-              
               <div className={styles.giftInfo}>
                 <h3 className={styles.giftName}>{gift.name}</h3>
                 <p className={styles.giftDescription}>{gift.description}</p>
-                
                 <div className={styles.giftFooter}>
                   <div className={styles.giftPrice}>
                     <Sparkles size={16} />
                     <span>{gift.price}</span>
                   </div>
-                  
                   <button
                     className={`${styles.buyButton} ${coins < gift.price ? styles.disabled : ''}`}
                     onClick={() => handleSelectGift(gift)}
@@ -246,7 +212,6 @@ const ShopPage: React.FC = () => {
             </div>
           ))}
         </div>
-
         {filteredGifts.length === 0 && (
           <div className={styles.emptyState}>
             <Gift size={64} className={styles.emptyIcon} />
@@ -254,8 +219,7 @@ const ShopPage: React.FC = () => {
             <p>В этой категории пока нет доступных подарков</p>
           </div>
         )}
-
-        {/* Gift Modal */}
+        {}
         {isGiftModalOpen && selectedGift && (
           <div className={styles.modal}>
             <div className={styles.modalContent}>
@@ -265,9 +229,8 @@ const ShopPage: React.FC = () => {
                   <X size={24} />
                 </button>
               </div>
-
               <div className={styles.modalBody}>
-                {/* Gift Preview */}
+                {}
                 <div className={styles.giftPreview}>
                   <LottiePlayer
                     animationData={selectedGift.animation}
@@ -277,8 +240,7 @@ const ShopPage: React.FC = () => {
                   />
                   <h3>{selectedGift.name}</h3>
                 </div>
-
-                {/* Message Input */}
+                {}
                 <div className={styles.inputGroup}>
                   <label className={styles.inputLabel}>
                     <Type size={18} />
@@ -292,30 +254,27 @@ const ShopPage: React.FC = () => {
                     rows={4}
                   />
                 </div>
-
-                {/* Photo Upload */}
+                {}
                 <div className={styles.inputGroup}>
                   <label className={styles.inputLabel}>
                     <Camera size={18} />
                     Фото (необязательно)
                   </label>
-                  
                   <div className={styles.photoUpload}>
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={handlePhotoUpload}
-                      className={styles.fileInput}
                       id="photo-upload"
+                      onChange={handlePhotoUpload}
+                      style={{ display: 'none' }}
                     />
-                    <label htmlFor="photo-upload" className={styles.uploadButton}>
-                      <Camera size={20} />
-                      Выбрать фото
+                    <label htmlFor="photo-upload" className={styles.photoUploadButton}>
+                      <Camera size={18} />
+                      Добавить фото
                     </label>
-                    
                     {photoPreview && (
                       <div className={styles.photoPreview}>
-                        <img src={photoPreview} alt="Preview" />
+                        <img src={photoPreview} alt="Preview" className={styles.previewImage} />
                         <button 
                           className={styles.removePhoto}
                           onClick={() => {
@@ -329,8 +288,8 @@ const ShopPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-
-                {/* Cost Display */}
+                
+                {/* Информация о стоимости */}
                 <div className={styles.costInfo}>
                   <div className={styles.costRow}>
                     <span>Стоимость:</span>
@@ -348,7 +307,6 @@ const ShopPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-
               <div className={styles.modalFooter}>
                 <button 
                   className={styles.cancelButton} 
@@ -379,5 +337,5 @@ const ShopPage: React.FC = () => {
     </div>
   );
 };
-
 export default ShopPage;
+

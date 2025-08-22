@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay';
-
 const ErrorPage = ({ errorCode = 404, errorMessage = 'Страница не найдена' }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -10,9 +9,7 @@ const ErrorPage = ({ errorCode = 404, errorMessage = 'Страница не на
     errorMessage,
     errorDetails: null 
   });
-  
   useEffect(() => {
-    // Получаем параметры ошибки из состояния навигации
     const state = location.state;
     if (state?.errorCode || state?.errorMessage || state?.errorDetails) {
       setErrorInfo({
@@ -22,11 +19,8 @@ const ErrorPage = ({ errorCode = 404, errorMessage = 'Страница не на
       });
       return;
     }
-    
-    // Получаем параметры ошибки из URL (для глобальных обработчиков)
     const urlParams = new URLSearchParams(location.search);
     const errorParam = urlParams.get('error');
-    
     if (errorParam) {
       try {
         const parsedError = JSON.parse(decodeURIComponent(errorParam));
@@ -45,16 +39,12 @@ const ErrorPage = ({ errorCode = 404, errorMessage = 'Страница не на
       }
     }
   }, [location, errorCode, errorMessage]);
-
   const handleGoHome = () => {
     navigate('/dashboard');
   };
-
   const handleRetry = () => {
-    // Попытка перезагрузить страницу или повторить действие
     window.location.reload();
   };
-
   return (
     <ErrorDisplay
       errorCode={errorInfo.errorCode}
@@ -65,5 +55,4 @@ const ErrorPage = ({ errorCode = 404, errorMessage = 'Страница не на
     />
   );
 };
-
 export default ErrorPage; 

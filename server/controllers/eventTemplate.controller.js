@@ -1,5 +1,4 @@
 const eventTemplateService = require('../services/eventTemplate.service');
-
 exports.getTemplates = async (req, res, next) => {
   try {
     const templates = await eventTemplateService.getTemplatesForUser(req.user.id);
@@ -8,7 +7,6 @@ exports.getTemplates = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.createTemplate = async (req, res, next) => {
   try {
     const newTemplate = await eventTemplateService.createTemplate(req.user.id, req.body);
@@ -17,7 +15,6 @@ exports.createTemplate = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.updateTemplate = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -27,7 +24,6 @@ exports.updateTemplate = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.deleteTemplate = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -37,7 +33,6 @@ exports.deleteTemplate = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.getPopularTemplates = async (req, res, next) => {
   try {
     const limit = parseInt(req.query.limit) || 5;
@@ -47,7 +42,6 @@ exports.getPopularTemplates = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.getTemplatesByType = async (req, res, next) => {
   try {
     const { type } = req.params;
@@ -57,7 +51,6 @@ exports.getTemplatesByType = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.searchTemplates = async (req, res, next) => {
   try {
     const { q } = req.query;
@@ -70,23 +63,19 @@ exports.searchTemplates = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.duplicateTemplate = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
-    
     if (!name || name.trim() === '') {
       return res.status(400).json({ error: 'Название для копии шаблона обязательно' });
     }
-    
     const duplicatedTemplate = await eventTemplateService.duplicateTemplate(id, req.user.id, name);
     res.status(201).json(duplicatedTemplate);
   } catch (error) {
     next(error);
   }
 };
-
 exports.incrementUsage = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -96,3 +85,4 @@ exports.incrementUsage = async (req, res, next) => {
     next(error);
   }
 };
+

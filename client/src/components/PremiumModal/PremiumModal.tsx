@@ -2,16 +2,13 @@ import React from 'react';
 import { Crown, X, Star, Check } from 'lucide-react';
 import styles from './PremiumModal.module.css';
 import Button from '../Button/Button';
-
 interface PremiumModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpgrade: () => void;
 }
-
 const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onUpgrade }) => {
   if (!isOpen) return null;
-
   const premiumFeatures = [
     {
       icon: '📊',
@@ -44,14 +41,12 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onUpgrade 
       description: 'Быстрая помощь и новые функции в первую очередь'
     }
   ];
-
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
         <button className={styles.closeButton} onClick={onClose}>
           <X size={20} />
         </button>
-
         <div className={styles.header}>
           <div className={styles.iconWrapper}>
             <Crown size={32} />
@@ -59,7 +54,6 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onUpgrade 
           <h2>Премиум аналитика</h2>
           <p>Получите доступ к расширенным возможностям анализа ваших отношений</p>
         </div>
-
         <div className={styles.features}>
           {premiumFeatures.map((feature, index) => (
             <div key={index} className={styles.feature}>
@@ -72,7 +66,6 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onUpgrade 
             </div>
           ))}
         </div>
-
         <div className={styles.pricing}>
           <div className={styles.priceCard}>
             <div className={styles.priceHeader}>
@@ -88,7 +81,6 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onUpgrade 
             </div>
           </div>
         </div>
-
         <div className={styles.actions}>
           <Button 
             type="primary" 
@@ -102,7 +94,6 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onUpgrade 
             Может быть позже
           </button>
         </div>
-
         <div className={styles.guarantee}>
           <p>✨ Гарантия возврата средств в течение 14 дней</p>
         </div>
@@ -110,5 +101,5 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onUpgrade 
     </div>
   );
 };
-
 export default PremiumModal;
+

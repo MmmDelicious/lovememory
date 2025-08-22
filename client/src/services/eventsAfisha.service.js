@@ -3,17 +3,12 @@ class EventsAfishaService {
     this.cache = new Map();
     this.cacheExpiry = 1000 * 60 * 60 * 2; // 2 часа
   }
-
-  // Поиск событий на ближайшие даты
   async searchEvents(city, dateRange = 30) {
     const cacheKey = `events_${city}_${dateRange}`;
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
-
     try {
-      // В реальности здесь будут API calls к сервисам афиши
       const events = await this.fetchEventsFromMultipleSources(city, dateRange);
-      
       this.setCache(cacheKey, events);
       return events;
     } catch (error) {
@@ -21,8 +16,6 @@ class EventsAfishaService {
       return this.getFallbackEvents(city);
     }
   }
-
-  // Получение событий из разных источников
   async fetchEventsFromMultipleSources(city, dateRange) {
     const sources = [
       this.fetchKudaGoEvents(city, dateRange),
@@ -30,40 +23,30 @@ class EventsAfishaService {
       this.fetchTicketlandEvents(city, dateRange),
       this.fetchLocalEvents(city, dateRange)
     ];
-
     try {
       const results = await Promise.allSettled(sources);
       const allEvents = [];
-
       results.forEach(result => {
         if (result.status === 'fulfilled' && result.value) {
           allEvents.push(...result.value);
         }
       });
-
-      // Удаляем дубликаты и сортируем по дате
       return this.deduplicateAndSort(allEvents);
     } catch (error) {
       console.error('Error fetching from multiple sources:', error);
       return [];
     }
   }
-
-  // KudaGo API (бесплатный)
   async fetchKudaGoEvents(city, dateRange) {
     try {
       const citySlug = this.getCitySlug(city);
       const startDate = new Date();
       const endDate = new Date();
       endDate.setDate(endDate.getDate() + dateRange);
-
       const url = `https://kudago.com/public-api/v1.4/events/?location=${citySlug}&actual_since=${Math.floor(startDate.getTime() / 1000)}&actual_until=${Math.floor(endDate.getTime() / 1000)}&fields=id,title,short_title,description,dates,price,location,images,categories&expand=location,images`;
-
       const response = await fetch(url);
       if (!response.ok) throw new Error('KudaGo API error');
-
       const data = await response.json();
-      
       return data.results?.map(event => ({
         id: `kudago_${event.id}`,
         title: event.title,
@@ -84,45 +67,33 @@ class EventsAfishaService {
       return [];
     }
   }
-
-  // Timepad API
   async fetchTimepadEvents(city, dateRange) {
     try {
-      // Заглушка для Timepad API (требует регистрации)
       return this.getMockTimepadEvents(city, dateRange);
     } catch (error) {
       console.error('Timepad API error:', error);
       return [];
     }
   }
-
-  // Ticketland API
   async fetchTicketlandEvents(city, dateRange) {
     try {
-      // Заглушка для Ticketland API
       return this.getMockTicketlandEvents(city, dateRange);
     } catch (error) {
       console.error('Ticketland API error:', error);
       return [];
     }
   }
-
-  // Локальные события (моки для 2025 года)
   async fetchLocalEvents(city, dateRange) {
     const currentYear = new Date().getFullYear();
     const events2025 = this.getEvents2025(city);
-    
     return events2025.filter(event => {
       const eventDate = new Date(event.dates[0]?.start);
       const now = new Date();
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + dateRange);
-      
       return eventDate >= now && eventDate <= futureDate;
     });
   }
-
-  // События 2025 года (актуальные моки)
   getEvents2025(city) {
     const baseEvents = [
       {
@@ -174,8 +145,6 @@ class EventsAfishaService {
         url: null
       }
     ];
-
-    // Добавляем события специфичные для города
     if (city.toLowerCase().includes('москв')) {
       baseEvents.push({
         id: 'moscow_2025_1',
@@ -190,11 +159,8 @@ class EventsAfishaService {
         url: null
       });
     }
-
     return baseEvents;
   }
-
-  // Моки для Timepad
   getMockTimepadEvents(city, dateRange) {
     return [
       {
@@ -211,8 +177,6 @@ class EventsAfishaService {
       }
     ];
   }
-
-  // Моки для Ticketland
   getMockTicketlandEvents(city, dateRange) {
     return [
       {
@@ -229,8 +193,6 @@ class EventsAfishaService {
       }
     ];
   }
-
-  // Получение slug города для KudaGo
   getCitySlug(city) {
     const cityMap = {
       'москва': 'msk',
@@ -246,14 +208,10 @@ class EventsAfishaService {
       'ростов-на-дону': 'rnd',
       'уфа': 'ufa'
     };
-
     return cityMap[city.toLowerCase()] || 'msk';
   }
-
-  // Маппинг категорий KudaGo
   mapKudaGoCategory(categories) {
     if (!categories || categories.length === 0) return 'entertainment';
-    
     const categoryMap = {
       'concert': 'entertainment',
       'theater': 'cultural',
@@ -264,16 +222,12 @@ class EventsAfishaService {
       'party': 'entertainment',
       'sport': 'active'
     };
-
     const firstCategory = categories[0];
     return categoryMap[firstCategory] || 'entertainment';
   }
-
-  // Удаление дубликатов и сортировка
   deduplicateAndSort(events) {
     const uniqueEvents = [];
     const seen = new Set();
-
     events.forEach(event => {
       const key = `${event.title}_${event.dates[0]?.start}`;
       if (!seen.has(key)) {
@@ -281,16 +235,12 @@ class EventsAfishaService {
         uniqueEvents.push(event);
       }
     });
-
-    // Сортируем по дате
     return uniqueEvents.sort((a, b) => {
       const dateA = a.dates[0]?.start || new Date();
       const dateB = b.dates[0]?.start || new Date();
       return dateA - dateB;
     });
   }
-
-  // Fallback события
   getFallbackEvents(city) {
     return [
       {
@@ -307,8 +257,6 @@ class EventsAfishaService {
       }
     ];
   }
-
-  // Кэширование
   getFromCache(key) {
     const item = this.cache.get(key);
     if (item && Date.now() - item.timestamp < this.cacheExpiry) {
@@ -317,18 +265,15 @@ class EventsAfishaService {
     this.cache.delete(key);
     return null;
   }
-
   setCache(key, data) {
     this.cache.set(key, {
       data,
       timestamp: Date.now()
     });
   }
-
-  // Очистка кэша
   clearCache() {
     this.cache.clear();
   }
 }
-
 export default new EventsAfishaService();
+

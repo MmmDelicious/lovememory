@@ -24,8 +24,6 @@ import LoveLanguageAnalysis from '../../components/LoveLanguageAnalysis/LoveLang
 import PremiumModal from '../../components/PremiumModal/PremiumModal';
 import relationshipGraphService from '../../services/relationshipGraph.service';
 import HexagonChart from '../../components/HexagonChart/HexagonChart';
-
-// Mock данные для демонстрации (используются как фолбэк)
 const mockData = {
   harmonyScore: 87,
   previousScore: 82,
@@ -35,7 +33,6 @@ const mockData = {
     gaming: 8
   }
 };
-
 const PSYCHOLOGY_QUOTES = [
   {
     text: "Любовь - это не только смотреть друг на друга, но и смотреть в одном направлении.",
@@ -46,7 +43,6 @@ const PSYCHOLOGY_QUOTES = [
     author: "Джон Готман"
   }
 ];
-
 interface ProfileStats {
   events: number;
   memories: number;
@@ -54,7 +50,6 @@ interface ProfileStats {
   coins: number;
   daysSinceRegistration: number;
 }
-
 const InsightsPage: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'charts' | 'graph' | 'insights'>('overview');
@@ -68,15 +63,11 @@ const InsightsPage: React.FC = () => {
   const [hoveredConnection, setHoveredConnection] = useState<number | null>(null);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
   const [graphData, setGraphData] = useState<any>(null);
-
-  // Анимация счетчика гармонии
   useEffect(() => {
     if (!stats) return;
-    
     const harmonyScore = Math.min(100, Math.max(30, 
       (stats.events * 2) + (stats.gamesPlayed * 3) + (stats.memories * 1.5) + 40
     ));
-
     const timer = setTimeout(() => {
       let current = 0;
       const animate = () => {
@@ -90,21 +81,15 @@ const InsightsPage: React.FC = () => {
       };
       animate();
     }, 500);
-
     return () => clearTimeout(timer);
   }, [stats]);
-
-  // Смена цитат
   useEffect(() => {
     const interval = setInterval(() => {
       const randomQuote = PSYCHOLOGY_QUOTES[Math.floor(Math.random() * PSYCHOLOGY_QUOTES.length)];
       setCurrentQuote(randomQuote);
     }, 10000);
-
     return () => clearInterval(interval);
   }, []);
-
-  // Генерация данных графа отношений
   useEffect(() => {
     if (stats && userData) {
       const dynamicGraph = relationshipGraphService.generateDynamicGraph(
@@ -114,8 +99,6 @@ const InsightsPage: React.FC = () => {
       setGraphData(dynamicGraph);
     }
   }, [stats, userData]);
-
-  // Загрузка данных
   useEffect(() => {
     (async () => {
       let isMounted = true;
@@ -124,7 +107,6 @@ const InsightsPage: React.FC = () => {
           userService.getProfileStats(),
           userService.getProfile()
         ]);
-        
         if (isMounted) {
           setStats(statsResponse.data);
           setUserData(profileResponse.data);
@@ -133,23 +115,18 @@ const InsightsPage: React.FC = () => {
         console.error('Error loading user data:', e);
       }
     })();
-    
     return () => { 
-      // isMounted = false; 
     };
   }, []);
-
   const handlePremiumUpgrade = () => {
     console.log('Upgrading to premium...');
     setIsPremiumModalOpen(false);
   };
-
   const handlePremiumClick = () => {
     if (user?.role !== 'premium' as any) {
       setIsPremiumModalOpen(true);
     }
   };
-
   const renderOverview = () => {
     if (!stats || !userData) {
       return (
@@ -159,16 +136,13 @@ const InsightsPage: React.FC = () => {
         </div>
       );
     }
-
     const harmonyScore = Math.min(100, Math.max(30, 
       (stats.events * 2) + (stats.gamesPlayed * 3) + (stats.memories * 1.5) + 40
     ));
-
     const previousScore = Math.max(30, harmonyScore - Math.floor(Math.random() * 10 + 2));
-
     return (
       <div className={styles.overviewGrid}>
-        {/* Основная карточка с баллами */}
+        {}
         <div className={styles.harmonyCard}>
           <div className={styles.cardHeader}>
             <div className={styles.cardIcon}>
@@ -179,7 +153,6 @@ const InsightsPage: React.FC = () => {
               <p>Общая оценка ваших отношений</p>
             </div>
           </div>
-
           <div className={styles.scoreDisplay}>
             <div 
               className={styles.scoreCircle}
@@ -190,14 +163,12 @@ const InsightsPage: React.FC = () => {
                 <span className={styles.scoreMax}>из 100</span>
               </div>
             </div>
-            
             <div className={styles.scoreTrend}>
               <TrendingUp size={20} />
               <span>+{harmonyScore - previousScore} за месяц</span>
             </div>
           </div>
-
-          {/* Сравнение с другими парами */}
+          {}
           <div className={styles.comparisonSection}>
             <h4>Ваш рейтинг</h4>
             <div className={styles.rankDisplay}>
@@ -211,8 +182,7 @@ const InsightsPage: React.FC = () => {
             </p>
           </div>
         </div>
-
-        {/* Активности за месяц */}
+        {}
         <div className={styles.activitiesCard}>
           <div className={styles.cardHeader}>
             <div className={styles.cardIcon}>
@@ -223,7 +193,6 @@ const InsightsPage: React.FC = () => {
               <p>Ваша совместная деятельность</p>
             </div>
           </div>
-
           <div className={styles.activitiesGrid}>
             <div className={styles.activityItem}>
               <Calendar size={24} />
@@ -235,7 +204,6 @@ const InsightsPage: React.FC = () => {
                 </span>
               </div>
             </div>
-
             <div className={styles.activityItem}>
               <Activity size={24} />
               <div className={styles.activityInfo}>
@@ -246,7 +214,6 @@ const InsightsPage: React.FC = () => {
                 </span>
               </div>
             </div>
-
             <div className={styles.activityItem}>
               <Zap size={24} />
               <div className={styles.activityInfo}>
@@ -257,7 +224,6 @@ const InsightsPage: React.FC = () => {
                 </span>
               </div>
             </div>
-
             <div className={styles.activityItem}>
               <Heart size={24} />
               <div className={styles.activityInfo}>
@@ -270,8 +236,7 @@ const InsightsPage: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Показатели активности */}
+        {}
         <div className={styles.factorsCard}>
           <div className={styles.cardHeader}>
             <div className={styles.cardIcon}>
@@ -282,7 +247,6 @@ const InsightsPage: React.FC = () => {
               <p>Анализ различных аспектов</p>
             </div>
           </div>
-
           <div className={styles.factorsList}>
             {[
               { label: 'Планирование', value: Math.min(100, stats.events * 10), color: '#4CAF50' },
@@ -309,8 +273,7 @@ const InsightsPage: React.FC = () => {
             ))}
           </div>
         </div>
-
-        {/* Цитата */}
+        {}
         <div className={styles.quoteCard}>
           <div className={styles.quoteContent}>
             <div className={styles.quote}>"{currentQuote.text}"</div>
@@ -320,7 +283,6 @@ const InsightsPage: React.FC = () => {
       </div>
     );
   };
-
   const renderCharts = () => {
     if (!stats) {
       return (
@@ -332,17 +294,14 @@ const InsightsPage: React.FC = () => {
         </div>
       );
     }
-
     const baseScore = Math.min(100, Math.max(30, 
       (stats.events * 2) + (stats.gamesPlayed * 3) + (stats.memories * 1.5) + 40
     ));
-    
     const trendPoints = Array.from({ length: 7 }, (_, i) => {
       const variation = (Math.random() - 0.5) * 20;
       const timeProgress = i * 5;
       return Math.max(20, Math.min(100, baseScore - 20 + timeProgress + variation));
     });
-    
     return (
       <div className={styles.chartsGrid}>
         <div className={styles.chartCard}>
@@ -355,7 +314,6 @@ const InsightsPage: React.FC = () => {
               <p>Изменения за последние 6 месяцев</p>
             </div>
           </div>
-          
           <div className={styles.chartContainer}>
             <div className={styles.chartLabels}>
               <span>100</span>
@@ -371,13 +329,11 @@ const InsightsPage: React.FC = () => {
                   <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0"/>
                 </linearGradient>
               </defs>
-              
               <g stroke="var(--color-border)" strokeWidth="1">
                 {[40, 80, 120, 160].map(y => (
                   <line key={y} x1="50" y1={y} x2="350" y2={y} />
                 ))}
               </g>
-              
               <polyline
                 fill="none"
                 stroke="var(--color-primary)"
@@ -385,17 +341,14 @@ const InsightsPage: React.FC = () => {
                 points={trendPoints.map((point, i) => `${50 + i * 50},${200 - (point * 1.4)}`).join(' ')}
                 className={styles.trendLine}
               />
-              
               <polygon
                 fill="url(#trendGradient)"
                 points={`${trendPoints.map((point, i) => `${50 + i * 50},${200 - (point * 1.4)}`).join(' ')} 350,180 50,180`}
               />
-              
               {trendPoints.map((point, index) => {
                 const months = ['Авг', 'Сен', 'Окт', 'Ноя', 'Дек', 'Янв', 'Фев'];
                 const x = 50 + index * 50;
                 const y = 200 - (point * 1.4);
-                
                 return (
                   <g key={index}>
                     <circle
@@ -423,9 +376,7 @@ const InsightsPage: React.FC = () => {
       </div>
     );
   };
-
   const renderGraph = () => {
-    // Используем данные из сервиса или fallback на статичные данные
     const currentGraphData = graphData || {
       nodes: [
         { id: 'couple', label: 'Вы как пара', x: 250, y: 150, strength: 85, type: 'center' },
@@ -449,17 +400,14 @@ const InsightsPage: React.FC = () => {
       overallHealth: 82,
       recommendations: []
     };
-
     const getNodeSize = (strength: number) => {
       return Math.max(40, (strength / 100) * 80);
     };
-
     const getNodeColor = (strength: number) => {
       if (strength >= 80) return '#4CAF50'; // Зеленый - сильный
       if (strength >= 70) return '#FF9800'; // Оранжевый - средний
       return '#F44336'; // Красный - слабый
     };
-
     const getConnectionStyle = (connection: any) => {
       const styles: any = {
         strong: { strokeWidth: 4, opacity: 0.8, stroke: '#4CAF50' },
@@ -469,37 +417,28 @@ const InsightsPage: React.FC = () => {
       };
       return styles[connection.type] || styles.medium;
     };
-
     const handleNodeClick = (nodeId: string) => {
       setSelectedNode(selectedNode === nodeId ? null : nodeId);
     };
-
     const handleConnectionHover = (index: number | null) => {
       setHoveredConnection(index);
     };
-
     const getConnectionOpacity = (index: number, connection: any) => {
       if (hoveredConnection === null) return getConnectionStyle(connection).opacity;
       return hoveredConnection === index ? 1 : 0.2;
     };
-
     const getConnectedNodes = (nodeId: string) => {
       const connected = currentGraphData.connections
         .filter(conn => conn.from === nodeId || conn.to === nodeId)
         .map(conn => conn.from === nodeId ? conn.to : conn.from);
       return connected;
     };
-
     const isNodeConnected = (nodeId: string) => {
       if (!selectedNode) return false;
       return selectedNode === nodeId || getConnectedNodes(selectedNode).includes(nodeId);
     };
-
-
-
     const selectedNodeData = selectedNode ? 
       currentGraphData.nodes.find(node => node.id === selectedNode) : null;
-
     return (
       <div className={styles.graphContainer}>
         <div className={styles.graphContent}>
@@ -507,18 +446,14 @@ const InsightsPage: React.FC = () => {
             <h3>Граф ваших отношений</h3>
             <p>Интерактивная карта связей и аспектов отношений</p>
           </div>
-
           <div className={styles.graphVisualization}>
             <svg viewBox="0 0 500 300" className={styles.graphSvg}>
-              {/* Связи */}
+              {}
               {currentGraphData.connections.map((connection, index) => {
                 const fromNode = currentGraphData.nodes.find(n => n.id === connection.from);
                 const toNode = currentGraphData.nodes.find(n => n.id === connection.to);
-                
                 if (!fromNode || !toNode) return null;
-                
                 const style = getConnectionStyle(connection);
-                
                 return (
                   <line
                     key={index}
@@ -536,14 +471,12 @@ const InsightsPage: React.FC = () => {
                   />
                 );
               })}
-
-              {/* Узлы */}
+              {}
               {currentGraphData.nodes.map((node) => {
                 const size = getNodeSize(node.strength);
                 const color = getNodeColor(node.strength);
                 const isConnected = isNodeConnected(node.id);
                 const isSelected = selectedNode === node.id;
-                
                 return (
                   <g key={node.id}>
                     <circle
@@ -583,7 +516,6 @@ const InsightsPage: React.FC = () => {
               })}
             </svg>
           </div>
-
           {selectedNodeData && (
             <div className={styles.nodeDetails}>
               <h4>{selectedNodeData.label}</h4>
@@ -615,7 +547,6 @@ const InsightsPage: React.FC = () => {
               </div>
             </div>
           )}
-
           {graphData && (
             <div className={styles.graphAnalysis}>
               <div className={styles.overallHealth}>
@@ -625,7 +556,6 @@ const InsightsPage: React.FC = () => {
                   <span className={styles.scoreLabel}>/ 100</span>
                 </div>
               </div>
-
               {graphData.recommendations.length > 0 && (
                 <div className={styles.recommendations}>
                   <h4>Рекомендации</h4>
@@ -644,7 +574,6 @@ const InsightsPage: React.FC = () => {
               )}
             </div>
           )}
-
           <div className={styles.graphLegend}>
             <div className={styles.legendItem}>
               <div className={styles.legendColor} style={{ backgroundColor: '#4CAF50' }}></div>
@@ -663,7 +592,6 @@ const InsightsPage: React.FC = () => {
       </div>
     );
   };
-
   const renderInsights = () => {
     return (
       <div className={styles.insightsGrid}>
@@ -677,13 +605,11 @@ const InsightsPage: React.FC = () => {
               <p>Научные советы для ваших отношений</p>
             </div>
           </div>
-          
           <div className={styles.quoteContent}>
             <div className={styles.quote}>"{currentQuote.text}"</div>
             <div className={styles.quoteAuthor}>— {currentQuote.author}</div>
           </div>
         </div>
-
         <div className={styles.weeklyReport}>
           <div className={styles.cardHeader}>
             <div className={styles.cardIcon}>
@@ -694,7 +620,6 @@ const InsightsPage: React.FC = () => {
               <p>Ваши достижения</p>
             </div>
           </div>
-          
           <div className={styles.reportStats}>
             <div className={styles.reportStat}>
               <span className={styles.reportNumber}>+{mockData.weeklyProgress.communication}%</span>
@@ -710,7 +635,6 @@ const InsightsPage: React.FC = () => {
             </div>
           </div>
         </div>
-
         <div className={styles.loveLanguageSection}>
           <div className={styles.modernCard}>
             <div className={styles.cardHeader}>
@@ -722,7 +646,6 @@ const InsightsPage: React.FC = () => {
                 <p>Анализ предпочтений в отношениях</p>
               </div>
             </div>
-            
             <HexagonChart
               data={[
                 { label: "Слова поддержки", value: 85 },
@@ -734,7 +657,6 @@ const InsightsPage: React.FC = () => {
               ]}
             />
           </div>
-          
           <LoveLanguageAnalysis 
             events={userData?.events || []}
             interactions={[]}
@@ -744,7 +666,6 @@ const InsightsPage: React.FC = () => {
       </div>
     );
   };
-
   return (
     <div className={styles.insightsPage}>
       <header className={styles.header}>
@@ -758,7 +679,6 @@ const InsightsPage: React.FC = () => {
               Отслеживайте прогресс ваших отношений
             </p>
           </div>
-
           {user?.role !== 'premium' as any && (
             <button 
               className={styles.upgradeSection}
@@ -770,7 +690,6 @@ const InsightsPage: React.FC = () => {
           )}
         </div>
       </header>
-
       <nav className={styles.navigation}>
         <div className={styles.tabs}>
           {[
@@ -789,7 +708,6 @@ const InsightsPage: React.FC = () => {
             </button>
           ))}
         </div>
-
         <div className={styles.filters}>
           <div className={styles.timeFilter}>
             <Filter size={16} />
@@ -805,14 +723,12 @@ const InsightsPage: React.FC = () => {
           </div>
         </div>
       </nav>
-
       <main className={styles.mainContent}>
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'charts' && renderCharts()}
         {activeTab === 'graph' && renderGraph()}
         {activeTab === 'insights' && renderInsights()}
       </main>
-
       <PremiumModal 
         isOpen={isPremiumModalOpen}
         onClose={() => setIsPremiumModalOpen(false)}
@@ -821,5 +737,4 @@ const InsightsPage: React.FC = () => {
     </div>
   );
 };
-
 export default InsightsPage;

@@ -62,7 +62,14 @@ class GameService {
   }
 
   async createRoom(hostId, roomData) {
-    const { bet, gameType, tableType, maxPlayers = 2 } = roomData;
+    const { bet, gameType, tableType, maxPlayers = 2, gameFormat = '1v1', specialSettings = {} } = roomData;
+    
+    // Проверяем корректность количества игроков для Codenames
+    if (gameType === 'codenames' && maxPlayers !== 4) {
+      const error = new Error('Codenames requires exactly 4 players (2v2 format)');
+      error.statusCode = 400;
+      throw error;
+    }
 
     if (!bet || bet <= 0) {
       const error = new Error('Bet must be a positive number.');
@@ -108,7 +115,9 @@ class GameService {
       tableType: gameType === 'poker' ? tableType : null,
       blinds: gameType === 'poker' ? blinds : null,
       status: 'waiting',
-      players: []
+      players: [],
+      gameFormat,
+      gameSettings: specialSettings
     });
   }
 
@@ -128,7 +137,6 @@ class GameService {
   }
 
   async cleanupOrphanedRooms(io) {
-    console.log('[SERVER] Running cleanup for orphaned rooms...');
     try {
       const waitingRooms = await GameRoom.findAll({ where: { status: 'waiting' } });
       let deletedCount = 0;
@@ -137,18 +145,11 @@ class GameService {
         const sockets = await io.in(room.id).fetchSockets();
         if (sockets.length === 0) {
           await room.destroy();
-          console.log(`[SERVER] Deleted orphaned room ${room.id} as it was empty.`);
           deletedCount++;
         }
       }
-
-      if (deletedCount > 0) {
-        console.log(`[SERVER] Cleanup finished. Deleted ${deletedCount} orphaned rooms.`);
-      } else {
-        console.log('[SERVER] Cleanup finished. No orphaned rooms found.');
-      }
     } catch (error) {
-      console.error('[SERVER] [ERROR] in cleanupOrphanedRooms:', error);
+      // Cleanup error handled silently
     }
   }
 
@@ -244,7 +245,7 @@ class GameService {
   async cleanupFinishedGames() {
     try {
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      const deletedCount = await GameRoom.destroy({
+      await GameRoom.destroy({
         where: {
           status: 'finished',
           updatedAt: {
@@ -252,12 +253,8 @@ class GameService {
           }
         }
       });
-      
-      if (deletedCount > 0) {
-        console.log(`[CLEANUP] Deleted ${deletedCount} finished games older than 24 hours`);
-      }
     } catch (error) {
-      console.error('[CLEANUP] Error cleaning up finished games:', error);
+      // Cleanup error handled silently
     }
   }
 }

@@ -10,7 +10,6 @@ const RelationshipMetrics = require('./RelationshipMetrics');
 const Lesson = require('./Lesson');
 const UserLessonProgress = require('./UserLessonProgress');
 const PairDailyLesson = require('./PairDailyLesson');
-
 const models = {
   User,
   Event,
@@ -24,13 +23,10 @@ const models = {
   UserLessonProgress,
   PairDailyLesson,
 };
-
 Object.keys(models).forEach(modelName => {
   if (models[modelName].associate) {
     models[modelName].associate(models);
   }
 });
-
 models.sequelize = sequelize;
-
 module.exports = models;

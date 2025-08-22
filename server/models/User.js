@@ -1,7 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const bcrypt = require('bcryptjs');
-
 const User = sequelize.define('User', {
   id: {
     type: DataTypes.UUID,
@@ -99,25 +98,21 @@ const User = sequelize.define('User', {
     defaultValue: {}
   }
 });
-
 User.beforeCreate(async (user) => {
   if (user.password_hash && user.password_hash.length < 60) { // Only hash if it's not already hashed
     const salt = await bcrypt.genSalt(10);
     user.password_hash = await bcrypt.hash(user.password_hash, salt);
   }
 });
-
 User.prototype.validPassword = async function(password) {
   if (!this.password_hash) {
     return false;
   }
   return await bcrypt.compare(password, this.password_hash);
 };
-
 User.associate = (models) => {
   User.hasMany(models.Event, { foreignKey: 'userId', onDelete: 'CASCADE' });
   User.hasMany(models.GameRoom, { foreignKey: 'hostId', as: 'HostedRooms' });
-
   User.hasMany(models.Pair, {
     foreignKey: 'user1Id',
     as: 'SentPairRequests',
@@ -129,5 +124,4 @@ User.associate = (models) => {
     onDelete: 'CASCADE',
   });
 };
-
 module.exports = User;

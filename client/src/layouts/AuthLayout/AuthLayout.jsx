@@ -1,7 +1,6 @@
 import React from 'react';
 import styles from './AuthLayout.module.css';
 import { FaHeart } from 'react-icons/fa';
-
 const AuthLayout = ({ children }) => {
   return (
     <div className={styles.page}>
@@ -21,5 +20,4 @@ const AuthLayout = ({ children }) => {
     </div>
   );
 };
-
 export default AuthLayout;

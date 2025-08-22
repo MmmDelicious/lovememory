@@ -8,7 +8,6 @@ import PokerModal from '../../components/PokerModal/PokerModal';
 import LeaveGameButton from '../../components/LeaveGameButton/LeaveGameButton';
 import gameService from '../../services/game.service';
 import { io, Socket } from 'socket.io-client';
-
 interface RoomData {
   id: string;
   bet: number;
@@ -16,55 +15,42 @@ interface RoomData {
     first_name?: string;
   };
 }
-
 const PokerPage: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const { token, user } = useAuth();
   const { coins, setCoins } = useCurrency();
   const { gameState, makeMove } = useGameSocket(roomId!, token, setCoins);
   const navigate = useNavigate();
-  
   const [showBuyInModal, setShowBuyInModal] = useState<boolean>(false);
   const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [hasBoughtIn, setHasBoughtIn] = useState<boolean>(false);
   const [socket, setSocket] = useState<Socket | null>(null);
-
-  // Инициализация сокета для покерных операций
   useEffect(() => {
     if (!token) return;
-
     const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
     const socketInstance = io(SOCKET_URL, {
       auth: { token },
       transports: ['websocket', 'polling']
     });
-
     setSocket(socketInstance);
-
-    // Обработчики покерных событий
     socketInstance.on('poker_buy_in_success', (data) => {
       console.log('[POKER] Buy-in успешен:', data);
       setHasBoughtIn(true);
       setShowBuyInModal(false);
       setCoins(data.newBalance);
     });
-
     socketInstance.on('poker_rebuy_success', (data) => {
       console.log('[POKER] Rebuy успешен:', data);
       setCoins(data.newBalance);
     });
-
     socketInstance.on('poker_cash_out_success', (data) => {
       console.log('[POKER] Cash-out успешен:', data);
       setCoins(data.newBalance);
     });
-
     return () => {
       socketInstance.disconnect();
     };
   }, [token, setCoins]);
-
-  // Загрузка данных комнаты
   useEffect(() => {
     const fetchRoomData = async () => {
       try {
@@ -81,13 +67,10 @@ const PokerPage: React.FC = () => {
         navigate('/games/poker');
       }
     };
-
     if (roomId && !roomData) {
       fetchRoomData();
     }
   }, [roomId, roomData, navigate]);
-
-  // Проверяем, нужно ли показать модальное окно buy-in
   useEffect(() => {
     if (gameState && roomData && !hasBoughtIn) {
       const needsBuyIn = gameState.needsBuyIn || !gameState.hasBoughtIn;
@@ -96,36 +79,29 @@ const PokerPage: React.FC = () => {
       }
     }
   }, [gameState, roomData, hasBoughtIn]);
-
   const handleBuyIn = (buyInAmount) => {
     if (socket) {
       socket.emit('poker_buy_in', { roomId, buyInAmount });
     }
   };
-
   const handleCloseBuyInModal = () => {
     setShowBuyInModal(false);
     navigate('/games/poker'); // Возвращаемся в лобби
   };
-
   const handlePokerAction = (action, value = 0) => {
     makeMove({ action, value });
   };
-
   const handlePokerRebuy = (rebuyAmount) => {
     if (socket) {
       socket.emit('poker_rebuy', { roomId, rebuyAmount });
     }
   };
-
-  // Функция для выхода из игры с автоматическим cash-out
   const handleLeaveGame = () => {
     if (socket) {
       socket.emit('poker_cash_out', { roomId });
     }
     navigate('/games/poker');
   };
-
   if (!gameState || !user) {
     return (
       <div style={{ 
@@ -157,11 +133,9 @@ const PokerPage: React.FC = () => {
       </div>
     );
   }
-
   return (
     <>
       <LeaveGameButton gameType="poker" onLeave={handleLeaveGame} />
-      
       <PokerModal
         isOpen={showBuyInModal}
         onClose={handleCloseBuyInModal}
@@ -170,7 +144,6 @@ const PokerPage: React.FC = () => {
         mode="buyin"
         roomName={`Стол ${roomData?.Host?.first_name || 'Хоста'}`}
       />
-      
       <PokerTable
         gameState={gameState}
         onAction={handlePokerAction}
@@ -182,5 +155,4 @@ const PokerPage: React.FC = () => {
     </>
   );
 };
-
 export default PokerPage;

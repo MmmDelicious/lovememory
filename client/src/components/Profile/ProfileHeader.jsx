@@ -1,7 +1,6 @@
 import React from 'react';
 import styles from './ProfileHeader.module.css';
 import { FaStar, FaStarHalfAlt, FaHeart } from 'react-icons/fa';
-
 const ProfileHeader = ({ user, avatar }) => {
   return (
     <div className={styles.profileHeader}>
@@ -17,5 +16,4 @@ const ProfileHeader = ({ user, avatar }) => {
     </div>
   );
 };
-
 export default ProfileHeader;

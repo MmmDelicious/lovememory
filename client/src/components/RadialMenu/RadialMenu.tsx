@@ -1,12 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import styles from './RadialMenu.module.css';
-
 interface RadialMenuItem {
   id: string;
   label: string;
   icon: string;
 }
-
 interface RadialMenuProps {
   isOpen: boolean;
   items: RadialMenuItem[];
@@ -16,7 +14,6 @@ interface RadialMenuProps {
   radius?: number;
   itemSize?: number;
 }
-
 const RadialMenu: React.FC<RadialMenuProps> = ({ 
   isOpen, 
   items, 
@@ -28,14 +25,11 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (isOpen && menuRef.current) {
-      // Анимация появления
       const menu = menuRef.current;
       menu.style.opacity = '0';
       menu.style.transform = 'scale(0.8)';
-      
       requestAnimationFrame(() => {
         menu.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
         menu.style.opacity = '1';
@@ -43,7 +37,6 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
       });
     }
   }, [isOpen]);
-
   useEffect(() => {
     if (isOpen) {
       const handleEscape = (e: KeyboardEvent) => {
@@ -51,40 +44,30 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
           onClose();
         }
       };
-
       document.addEventListener('keydown', handleEscape);
-      
       return () => {
         document.removeEventListener('keydown', handleEscape);
       };
     }
   }, [isOpen, onClose]);
-
   if (!isOpen) {
     return null;
   }
-
   const handleItemClick = (actionId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     onAction(actionId);
     onClose();
   };
-
   const handleOverlayClick = (e: React.MouseEvent) => {
-    // Закрываем меню при клике на overlay
     if (e.target === overlayRef.current) {
       onClose();
     }
   };
-
   const handleContainerClick = (e: React.MouseEvent) => {
-    // Предотвращаем закрытие при клике на контейнер меню
     e.stopPropagation();
   };
-
   const sliceCount = items.length;
   const sliceAngle = 360 / sliceCount;
-
   return (
     <div 
       ref={overlayRef}
@@ -102,11 +85,10 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
         } as React.CSSProperties}
         onClick={handleContainerClick}
       >
-        {/* Радиальные элементы */}
+        {}
         {items.map((item, index) => {
           const itemAngle = sliceAngle * index - 90;
           const delay = index * 0.08;
-          
           return (
             <div
               key={item.id}
@@ -134,5 +116,5 @@ const RadialMenu: React.FC<RadialMenuProps> = ({
     </div>
   );
 };
-
 export default RadialMenu;
+

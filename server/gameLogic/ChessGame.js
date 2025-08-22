@@ -1,5 +1,4 @@
 const { Chess } = require('chess.js');
-
 class ChessGame {
   constructor(players) {
     this.players = players; // [player1_id (white), player2_id (black)]
@@ -9,23 +8,19 @@ class ChessGame {
     this.gameType = 'chess';
     this.status = 'in_progress';
     this.moveHistory = [];
-    
     this.whiteTime = 180; // 3 минуты
     this.blackTime = 180; // 3 минуты
     this.increment = 2;   // 2 секунды
-
     if (this.game.turn() !== 'w') {
       console.error('[ChessGame] Error: White should move first!');
     }
   }
-
   getCurrentPlayerId() {
     if (this.game.isGameOver()) {
       return null;
     }
     return this.game.turn() === 'w' ? this.players[0] : this.players[1];
   }
-
   getValidMoves(square) {
     try {
       const moves = this.game.moves({ square: square, verbose: true });
@@ -35,12 +30,10 @@ class ChessGame {
       return [];
     }
   }
-
   getState() {
     const board = {};
     const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     const ranks = ['8', '7', '6', '5', '4', '3', '2', '1'];
-
     ranks.forEach(rank => {
       files.forEach(file => {
         const square = `${file}${rank}`;
@@ -50,7 +43,6 @@ class ChessGame {
         }
       });
     });
-
     const state = {
       gameType: this.gameType,
       status: this.status,
@@ -65,46 +57,35 @@ class ChessGame {
       whiteTime: this.whiteTime,
       blackTime: this.blackTime,
     };
-
     return state;
   }
-
   cleanup() {
     console.log(`[CHESS] Game cleanup completed`);
   }
-
   makeMove(playerId, move) {
     if (this.game.isGameOver()) {
       throw new Error('Game is already over');
     }
-
     const playerIndex = this.players.indexOf(playerId);
     if (playerIndex === -1) {
       throw new Error('Player not in this game');
     }
     const playerColor = playerIndex === 0 ? 'w' : 'b';
-
     if (this.game.turn() !== playerColor) {
       throw new Error('Not your turn');
     }
-
     const fromSquare = move.from;
     const piece = this.game.get(fromSquare);
     if (!piece || piece.color !== playerColor) {
       throw new Error('Cannot move opponent\'s piece or empty square');
     }
-    
-    // Добавляем инкремент до хода
     if (playerColor === 'w') {
       this.whiteTime += this.increment;
     } else {
       this.blackTime += this.increment;
     }
-
     const result = this.game.move(move);
-    
     if (result === null) {
-      // Если ход не удался, откатываем инкремент
       if (playerColor === 'w') {
         this.whiteTime -= this.increment;
       } else {
@@ -112,9 +93,7 @@ class ChessGame {
       }
       throw new Error('Invalid move');
     }
-
     this.moveHistory.push(result.san);
-
     if (this.game.isGameOver()) {
       this.status = 'finished';
       if (this.game.isCheckmate()) {
@@ -124,9 +103,7 @@ class ChessGame {
         this.isDraw = true;
       }
     }
-
     return this.getState();
   }
 }
-
 module.exports = ChessGame;

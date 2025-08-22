@@ -14,7 +14,6 @@ import {
   Zap
 } from 'lucide-react';
 import styles from './MobileGames.module.css';
-
 interface Game {
   id: string;
   name: string;
@@ -27,7 +26,6 @@ interface Game {
   featured?: boolean;
   gradient: string;
 }
-
 const GAMES: Game[] = [
   {
     id: 'tic-tac-toe',
@@ -87,21 +85,16 @@ const GAMES: Game[] = [
     gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
   }
 ];
-
 const CATEGORIES = ['Все', 'Классика', 'Стратегия', 'Викторина', 'Карточные', 'Память'];
-
 const MobileGames: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('Все');
   const [searchQuery, setSearchQuery] = useState('');
-
   const filteredGames = GAMES.filter(game => {
     const matchesCategory = selectedCategory === 'Все' || game.category === selectedCategory;
     const matchesSearch = game.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
-
   const featuredGames = GAMES.filter(game => game.featured);
-
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'easy': return '#4CAF50';
@@ -110,7 +103,6 @@ const MobileGames: React.FC = () => {
       default: return '#9E9E9E';
     }
   };
-
   const getDifficultyLabel = (difficulty: string) => {
     switch (difficulty) {
       case 'easy': return 'Легко';
@@ -119,16 +111,14 @@ const MobileGames: React.FC = () => {
       default: return 'Неизвестно';
     }
   };
-
   return (
     <div className={styles.mobileGames}>
-      {/* Header */}
+      {}
       <div className={styles.header}>
         <h1>Игры для двоих 🎮</h1>
         <p>Играйте вместе и укрепляйте отношения</p>
       </div>
-
-      {/* Search */}
+      {}
       <div className={styles.searchContainer}>
         <div className={styles.searchBox}>
           <Search size={20} className={styles.searchIcon} />
@@ -141,8 +131,7 @@ const MobileGames: React.FC = () => {
           />
         </div>
       </div>
-
-      {/* Categories */}
+      {}
       <div className={styles.categoriesSection}>
         <div className={styles.categoriesScroll}>
           {CATEGORIES.map(category => (
@@ -156,8 +145,7 @@ const MobileGames: React.FC = () => {
           ))}
         </div>
       </div>
-
-      {/* Featured Games */}
+      {}
       {selectedCategory === 'Все' && (
         <div className={styles.featuredSection}>
           <div className={styles.sectionHeader}>
@@ -166,7 +154,6 @@ const MobileGames: React.FC = () => {
               Популярные
             </h2>
           </div>
-          
           <div className={styles.featuredScroll}>
             {featuredGames.map(game => (
               <Link
@@ -191,13 +178,11 @@ const MobileGames: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Games Grid */}
+      {}
       <div className={styles.gamesSection}>
         <div className={styles.sectionHeader}>
           <h2>Все игры ({filteredGames.length})</h2>
         </div>
-        
         <div className={styles.gamesGrid}>
           {filteredGames.map(game => (
             <Link
@@ -217,7 +202,6 @@ const MobileGames: React.FC = () => {
                   <p>{game.description}</p>
                 </div>
               </div>
-              
               <div className={styles.gameMeta}>
                 <div className={styles.metaItem}>
                   <Users size={14} />
@@ -238,8 +222,7 @@ const MobileGames: React.FC = () => {
           ))}
         </div>
       </div>
-
-      {/* Empty State */}
+      {}
       {filteredGames.length === 0 && (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>🎮</div>
@@ -250,5 +233,4 @@ const MobileGames: React.FC = () => {
     </div>
   );
 };
-
 export default MobileGames;

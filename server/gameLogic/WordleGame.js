@@ -1,6 +1,5 @@
 const { getRandomWord, getDictionary } = require('./wordle/dictionaries');
 const { evaluateGuess } = require('./wordle/utils');
-
 class WordleGame {
   constructor(roomId, settings = {}, callback = null) {
     this.roomId = roomId;
@@ -18,153 +17,149 @@ class WordleGame {
     this.maxRounds = settings.rounds || 3;
     this.winner = null;
     this.onStateChange = callback;
+    this.gameFormat = settings.gameFormat || '1v1'; // '1v1' или '2v2'
+    this.maxPlayers = this.gameFormat === '2v2' ? 4 : 2;
+    this.teams = {}; // Для формата 2x2: team1, team2
+    this.teamScores = {}; // Счет команд в формате 2x2
   }
-
   addPlayer(playerId, playerName) {
-    if (this.players.length >= 2) {
+    if (this.players.length >= this.maxPlayers) {
       throw new Error('Room is full');
     }
-
     const player = {
       id: playerId,
       name: playerName,
       ready: false
     };
-
     this.players.push(player);
     this.playerGuesses[playerId] = [];
     this.playerResults[playerId] = [];
     this.scores[playerId] = 0;
-
+    if (this.gameFormat === '2v2') {
+      this.assignPlayerToTeam(playerId);
+    }
     return this.getGameState();
   }
-
+  assignPlayerToTeam(playerId) {
+    if (!this.teams.team1) this.teams.team1 = [];
+    if (!this.teams.team2) this.teams.team2 = [];
+    if (this.teams.team1.length < 2) {
+      this.teams.team1.push(playerId);
+    } else if (this.teams.team2.length < 2) {
+      this.teams.team2.push(playerId);
+    }
+    if (!this.teamScores.team1) this.teamScores.team1 = 0;
+    if (!this.teamScores.team2) this.teamScores.team2 = 0;
+  }
+  updateTeamScore(playerId, points) {
+    if (this.teams.team1 && this.teams.team1.includes(playerId)) {
+      this.teamScores.team1 += points;
+    } else if (this.teams.team2 && this.teams.team2.includes(playerId)) {
+      this.teamScores.team2 += points;
+    }
+  }
+  getPlayerTeam(playerId) {
+    if (this.teams.team1 && this.teams.team1.includes(playerId)) {
+      return 'team1';
+    } else if (this.teams.team2 && this.teams.team2.includes(playerId)) {
+      return 'team2';
+    }
+    return null;
+  }
   removePlayer(playerId) {
     this.players = this.players.filter(p => p.id !== playerId);
     delete this.playerGuesses[playerId];
     delete this.playerResults[playerId];
     delete this.scores[playerId];
-
+    if (this.gameFormat === '2v2') {
+      if (this.teams.team1) {
+        this.teams.team1 = this.teams.team1.filter(id => id !== playerId);
+      }
+      if (this.teams.team2) {
+        this.teams.team2 = this.teams.team2.filter(id => id !== playerId);
+      }
+    }
     if (this.players.length === 0) {
       this.status = 'finished';
     }
-
     return this.getGameState();
   }
-
   startGame() {
-    if (this.players.length < 2) {
-      throw new Error('Need at least 2 players');
+    const requiredPlayers = this.gameFormat === '2v2' ? 4 : 2;
+    if (this.players.length < requiredPlayers) {
+      throw new Error(`Need ${requiredPlayers} players for ${this.gameFormat} format`);
     }
-
     this.status = 'in_progress';
     this.gameStartTime = Date.now();
     this.generateNewWord();
-    
     return this.getGameState();
   }
-
   generateNewWord() {
     this.targetWord = getRandomWord(this.language).toUpperCase();
     console.log(`[WordleGame] Generated new word: "${this.targetWord}" for round ${this.currentRound}`);
-    
-    // Очищаем попытки для нового раунда
     for (const playerId of this.players.map(p => p.id)) {
       this.playerGuesses[playerId] = [];
       this.playerResults[playerId] = [];
       console.log(`[WordleGame] Cleared guesses/results for player ${playerId}`);
     }
   }
-
   makeMove(playerId, move) {
     return this.makeGuess(playerId, move);
   }
-
   makeGuess(playerId, guess) {
     console.log(`[WordleGame] Player ${playerId} making guess: "${guess}"`);
-    
     if (this.status !== 'in_progress') {
       throw new Error('Game is not in progress');
     }
-
     if (!this.players.find(p => p.id === playerId)) {
       throw new Error('Player not in game');
     }
-
     const normalizedGuess = guess.toUpperCase();
-    
     console.log(`[WordleGame] Normalized guess: "${normalizedGuess}", Target word: "${this.targetWord}"`);
-    
-    // Проверяем длину слова (должно быть ровно 5 букв)
     if (normalizedGuess.length !== 5) {
       throw new Error('Word must be exactly 5 letters');
     }
-
-    // Словарь проверяется на фронте, тут просто обрабатываем
-
-    // Добавляем попытку
     this.playerGuesses[playerId].push(normalizedGuess);
-    
-    // Оцениваем попытку
     const result = evaluateGuess(normalizedGuess, this.targetWord);
     this.playerResults[playerId].push(result);
-    
     console.log(`[WordleGame] Guess result for "${normalizedGuess}":`, result);
-
-    // Проверяем, угадал ли игрок
     const isCorrect = result.every(r => r === 'correct');
-    
     if (isCorrect) {
-      // Игрок угадал слово
       const attempts = this.playerGuesses[playerId].length;
       const points = Math.max(0, 7 - attempts); // Больше очков за меньше попыток
       this.scores[playerId] += points;
-      
+      if (this.gameFormat === '2v2') {
+        this.updateTeamScore(playerId, points);
+      }
       this.nextRound();
     } else if (this.playerGuesses[playerId].length >= this.maxAttempts) {
-      // Игрок исчерпал попытки - переходим к следующему раунду
       this.checkRoundEnd();
     }
-
-    // Уведомляем о изменении состояния
     if (this.onStateChange) {
       this.onStateChange(this);
     }
-
     return this.getGameState();
   }
-
   checkRoundEnd() {
-    // Проверяем, закончили ли все игроки раунд
     const allPlayersFinished = this.players.every(player => {
       const guesses = this.playerGuesses[player.id] || [];
       const results = this.playerResults[player.id] || [];
-      
-      // Игрок закончил, если:
-      // 1. Потратил все попытки
-      // 2. Угадал слово (последний результат - все 'correct')
       if (guesses.length >= this.maxAttempts) {
         return true;
       }
-      
       if (results.length > 0) {
         const lastResult = results[results.length - 1];
         return lastResult && lastResult.every(r => r === 'correct');
       }
-      
       return false;
     });
-
     console.log(`[WordleGame] checkRoundEnd: allPlayersFinished = ${allPlayersFinished}`);
-
     if (allPlayersFinished) {
       this.nextRound();
     }
   }
-
   nextRound() {
     console.log(`[WordleGame] nextRound: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}`);
-    
     if (this.currentRound >= this.maxRounds) {
       console.log(`[WordleGame] Game ending - max rounds reached`);
       this.endGame();
@@ -174,27 +169,31 @@ class WordleGame {
       this.generateNewWord();
     }
   }
-
   endGame() {
     this.status = 'finished';
-    
-    // Определяем победителя
-    const maxScore = Math.max(...Object.values(this.scores));
-    const winners = this.players.filter(p => this.scores[p.id] === maxScore);
-    
-    if (winners.length === 1) {
-      this.winner = winners[0].id;
+    if (this.gameFormat === '2v2') {
+      if (this.teamScores.team1 > this.teamScores.team2) {
+        this.winner = 'team1';
+      } else if (this.teamScores.team2 > this.teamScores.team1) {
+        this.winner = 'team2';
+      } else {
+        this.winner = 'draw';
+      }
     } else {
-      this.winner = 'draw';
+      const maxScore = Math.max(...Object.values(this.scores));
+      const winners = this.players.filter(p => this.scores[p.id] === maxScore);
+      if (winners.length === 1) {
+        this.winner = winners[0].id;
+      } else {
+        this.winner = 'draw';
+      }
     }
   }
-
   getState() {
     return this.getGameState();
   }
-
   getGameState() {
-    return {
+    const baseState = {
       roomId: this.roomId,
       gameType: 'wordle',
       status: this.status,
@@ -206,25 +205,29 @@ class WordleGame {
       scores: this.scores,
       winner: this.winner,
       targetWordLength: this.targetWord ? this.targetWord.length : 5,
-      // Личные данные игрока добавляются в GameManager
+      gameFormat: this.gameFormat,
     };
+    if (this.gameFormat === '2v2') {
+      baseState.teams = this.teams;
+      baseState.teamScores = this.teamScores;
+    }
+    return baseState;
   }
-
   getStateForPlayer(playerId) {
     return this.getPlayerGameState(playerId);
   }
-
   getPlayerGameState(playerId) {
     const baseState = this.getGameState();
-    
-    return {
+    const playerState = {
       ...baseState,
       playerGuesses: this.playerGuesses[playerId] || [],
       playerResults: this.playerResults[playerId] || [],
-      // В финальном состоянии показываем правильное слово
       targetWord: this.status === 'finished' ? this.targetWord : undefined
     };
+    if (this.gameFormat === '2v2') {
+      playerState.playerTeam = this.getPlayerTeam(playerId);
+    }
+    return playerState;
   }
 }
-
 module.exports = WordleGame;

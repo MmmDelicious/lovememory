@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BookOpen, Quote, Lightbulb, Heart, Users, Brain } from 'lucide-react';
 import styles from './PsychologyTips.module.css';
-
 interface PsychologyTip {
   id: string;
   title: string;
@@ -12,14 +11,12 @@ interface PsychologyTip {
   category: 'communication' | 'attachment' | 'intimacy' | 'conflict' | 'growth' | 'mindfulness';
   tags: string[];
 }
-
 interface PsychologyTipsProps {
   userPreferences?: {
     focusAreas: string[];
     relationshipStage: string;
   };
 }
-
 const psychologyTips: PsychologyTip[] = [
   {
     id: 'gottman_01',
@@ -94,41 +91,29 @@ const psychologyTips: PsychologyTip[] = [
     tags: ['безопасность', 'защита', 'приоритеты']
   }
 ];
-
 const PsychologyTips: React.FC<PsychologyTipsProps> = ({ userPreferences }) => {
   const [currentTip, setCurrentTip] = useState<PsychologyTip | null>(null);
   const [tipHistory, setTipHistory] = useState<string[]>([]);
   const [expandedTip, setExpandedTip] = useState<string | null>(null);
-
   useEffect(() => {
     selectRandomTip();
   }, []);
-
   const selectRandomTip = () => {
-    // Фильтруем по предпочтениям пользователя
     let filteredTips = psychologyTips;
-    
     if (userPreferences?.focusAreas?.length) {
       filteredTips = psychologyTips.filter(tip => 
         tip.tags.some(tag => userPreferences.focusAreas.includes(tag)) ||
         userPreferences.focusAreas.includes(tip.category)
       );
     }
-
-    // Исключаем недавно показанные советы
     const availableTips = filteredTips.filter(tip => 
       !tipHistory.includes(tip.id)
     );
-
     const tipsToChooseFrom = availableTips.length > 0 ? availableTips : filteredTips;
     const randomTip = tipsToChooseFrom[Math.floor(Math.random() * tipsToChooseFrom.length)];
-    
     setCurrentTip(randomTip);
-    
-    // Обновляем историю (оставляем только последние 5)
     setTipHistory(prev => [randomTip.id, ...prev.slice(0, 4)]);
   };
-
   const getCategoryIcon = (category: string) => {
     const icons = {
       communication: <Users size={20} />,
@@ -140,7 +125,6 @@ const PsychologyTips: React.FC<PsychologyTipsProps> = ({ userPreferences }) => {
     };
     return icons[category as keyof typeof icons] || <BookOpen size={20} />;
   };
-
   const getCategoryLabel = (category: string) => {
     const labels = {
       communication: 'Общение',
@@ -152,9 +136,7 @@ const PsychologyTips: React.FC<PsychologyTipsProps> = ({ userPreferences }) => {
     };
     return labels[category as keyof typeof labels] || category;
   };
-
   if (!currentTip) return null;
-
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -166,7 +148,6 @@ const PsychologyTips: React.FC<PsychologyTipsProps> = ({ userPreferences }) => {
           Научно обоснованные принципы здоровых отношений
         </p>
       </div>
-
       <motion.div 
         className={styles.tipCard}
         initial={{ opacity: 0, y: 20 }}
@@ -178,26 +159,21 @@ const PsychologyTips: React.FC<PsychologyTipsProps> = ({ userPreferences }) => {
             {getCategoryIcon(currentTip.category)}
             <span>{getCategoryLabel(currentTip.category)}</span>
           </div>
-          
           <div className={styles.quoteIcon}>
             <Quote size={32} />
           </div>
         </div>
-
         <div className={styles.tipContent}>
           <h3 className={styles.tipTitle}>{currentTip.title}</h3>
-          
           <div className={styles.tipText}>
             {currentTip.content}
           </div>
-
           <div className={styles.tipMeta}>
             <div className={styles.authorInfo}>
               <div className={styles.author}>{currentTip.author}</div>
               <div className={styles.book}>"{currentTip.book}"</div>
             </div>
           </div>
-
           <div className={styles.tags}>
             {currentTip.tags.map(tag => (
               <span key={tag} className={styles.tag}>
@@ -206,7 +182,6 @@ const PsychologyTips: React.FC<PsychologyTipsProps> = ({ userPreferences }) => {
             ))}
           </div>
         </div>
-
         <div className={styles.actions}>
           <motion.button 
             className={styles.newTipButton}
@@ -219,8 +194,7 @@ const PsychologyTips: React.FC<PsychologyTipsProps> = ({ userPreferences }) => {
           </motion.button>
         </div>
       </motion.div>
-
-      {/* Все советы */}
+      {}
       <div className={styles.allTipsSection}>
         <h3 className={styles.allTipsTitle}>Библиотека советов</h3>
         <div className={styles.tipsGrid}>
@@ -237,7 +211,6 @@ const PsychologyTips: React.FC<PsychologyTipsProps> = ({ userPreferences }) => {
                 </div>
                 <div className={styles.miniTipTitle}>{tip.title}</div>
               </div>
-              
               <AnimatePresence>
                 {expandedTip === tip.id && (
                   <motion.div
@@ -260,5 +233,5 @@ const PsychologyTips: React.FC<PsychologyTipsProps> = ({ userPreferences }) => {
     </div>
   );
 };
-
 export default PsychologyTips;
+

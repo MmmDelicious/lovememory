@@ -2,16 +2,13 @@ import React, { useState } from 'react';
 import Button from '../Button/Button';
 import styles from './Widget.module.css';
 import { FaUsers } from 'react-icons/fa';
-
 const PairingWidget = ({ pairing, isPairingLoading, partner, sendRequest, deletePairing }) => {
   const [partnerEmail, setPartnerEmail] = useState('');
-
   const handleSendRequest = async (e) => {
     e.preventDefault();
     await sendRequest(partnerEmail);
     setPartnerEmail('');
   };
-
   return (
     <div className={`${styles.widget} ${styles.pairWidget}`}>
       <div className={styles.widgetIconWrapper}><FaUsers /></div>
@@ -35,5 +32,4 @@ const PairingWidget = ({ pairing, isPairingLoading, partner, sendRequest, delete
     </div>
   );
 };
-
 export default PairingWidget;

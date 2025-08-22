@@ -5,11 +5,9 @@ import greetAnimation from '../assets/greet.json';
 import { MASCOT_CONFIG } from '../config/mascot.config.js';
 import { useAIMascot } from './AIMascotContext';
 import { useDevice } from '../hooks/useDevice';
-
+import memoriesService from '../services/memories.service';
 const EventMascotContext = createContext();
-
 export const useEventMascot = () => useContext(EventMascotContext);
-
 const generateMessage = (page, data) => {
   if (page === 'pairing' && data?.requesterName) return `Кажется, ${data.requesterName} хочет создать с вами пару! Примем приглашение?`;
   if (page === 'dashboard' && data?.event) {
@@ -25,18 +23,27 @@ const generateMessage = (page, data) => {
     if (diffDays > 1) return `Через ${diffDays} дней у нас будет "${data.event.title}"! Уже в предвкушении!`;
     if (diffDays < 0) return `Помните, ${eventDateStr} был хороший денёк? "${data.event.title}". Давайте освежим воспоминания!`;
   }
+  if (page === 'memories' && data?.memoryCollection) {
+    const collection = data.memoryCollection;
+    const totalPhotos = collection.reduce((acc, event) => acc + event.media.length, 0);
+    const periodsCount = new Set(collection.map(e => e.memoryPeriod)).size;
+    const memories = [
+      `Ой! Нашел ${collection.length} воспоминаний из ${periodsCount > 1 ? 'разных периодов' : collection[0]?.memoryPeriod}! Хотите посмотреть? 📸`,
+      `Смотрите, что я откопал из архивов! ${totalPhotos} фотографий из прошлого! Ностальгируем? ✨`,
+      `Эй! У меня тут подборка из ${collection.length} моментов от ${collection[0]?.memoryPeriod}. Глянем? 💭`,
+      `О! Собрал для вас мини-галерею из ${totalPhotos} фото! Погрузимся в воспоминания? 🎞️`,
+    ];
+    return memories[Math.floor(Math.random() * memories.length)];
+  }
   return data?.message || 'Привет! Я здесь, чтобы помочь!';
 };
-
 export const EventMascotProvider = ({ children }) => {
   const [mascot, setMascot] = useState(null);
   const [mascotTargets, setMascotTargets] = useState([]);
   const [isLoopActive, setIsLoopActive] = useState(false);
   const hideTimerRef = useRef(null);
-  
   const { isMobile } = useDevice();
   const { isAIVisible, isChatOpen, handleMascotInterception } = useAIMascot();
-
   const hideMascot = useCallback(() => {
     if (hideTimerRef.current) {
       clearTimeout(hideTimerRef.current);
@@ -44,10 +51,8 @@ export const EventMascotProvider = ({ children }) => {
     }
     setMascot(null);
   }, []);
-
   const showMascot = useCallback((config) => {
     if (isMobile || !config.element) return;
-
     let helperAnimation, mascotType;
     if (config.type === 'flyer') {
       helperAnimation = flyerAnimation;
@@ -59,7 +64,6 @@ export const EventMascotProvider = ({ children }) => {
       helperAnimation = runnerAnimation;
       mascotType = 'runner';
     }
-    
     hideMascot();
     setTimeout(() => {
       const message = config.message || generateMessage(config.page, config.data);
@@ -73,13 +77,10 @@ export const EventMascotProvider = ({ children }) => {
         side: config.side ?? (elementRect.left < window.innerWidth / 2 ? 'right' : 'left'),
       };
       setMascot(finalConfig);
-      
-      // Если AI маскот активен, перехватываем через некоторое время
       if (isAIVisible && !isChatOpen) {
         const interceptionDelay = 2000; // 2 секунды на появление
         setTimeout(() => {
           handleMascotInterception(config, helperAnimation);
-          // Скрываем оригинальный маскот после перехвата
           setTimeout(() => {
             if (config.onDismiss) {
               config.onDismiss();
@@ -89,7 +90,6 @@ export const EventMascotProvider = ({ children }) => {
           }, MASCOT_CONFIG.INTERCEPTION_DELAY);
         }, interceptionDelay);
       } else {
-        // Если AI маскот не активен, показываем обычный маскот с его длительностью
         if (config.duration) {
           hideTimerRef.current = setTimeout(() => {
             if (config.onDismiss) {
@@ -102,36 +102,44 @@ export const EventMascotProvider = ({ children }) => {
       }
     }, 100);
   }, [isMobile, hideMascot, isAIVisible, isChatOpen, handleMascotInterception]);
-
   const registerMascotTargets = useCallback((targets) => setMascotTargets(targets), []);
   const clearMascotTargets = useCallback(() => setMascotTargets([]), []);
   const startMascotLoop = useCallback(() => setIsLoopActive(true), []);
   const stopMascotLoop = useCallback(() => setIsLoopActive(false), []);
-
   useEffect(() => {
-    if (!isLoopActive || mascotTargets.length === 0 || isMobile) return;
-    
-    const triggerRandomMascot = () => {
-      const target = mascotTargets[Math.floor(Math.random() * mascotTargets.length)];
-      if (!target.containerRef.current || !target.element) return;
-      const isFlyer = Math.random() > 0.5;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const eventDate = new Date(target.data.event.event_date);
-      const isPast = eventDate < today;
-      showMascot({
-        ...target,
-        buttonText: isPast ? 'Вспомнить' : 'Посмотреть',
-        type: isFlyer ? 'flyer' : 'runner',
-        side: isFlyer ? 'top' : undefined,
-        duration: MASCOT_CONFIG.BASE_DURATION + Math.random() * MASCOT_CONFIG.RANDOM_DURATION,
-      });
+    if (!isLoopActive || isMobile) return;
+    const triggerRandomMascot = async () => {
+      try {
+        const memoryCollection = await memoriesService.getRandomMemoryForMascot();
+        if (memoryCollection && memoryCollection.length > 0) {
+          const isFlyer = Math.random() > 0.5;
+          const targetElement = mascotTargets.length > 0 ? 
+            mascotTargets[Math.floor(Math.random() * mascotTargets.length)].element : 
+            document.body;
+          showMascot({
+            page: 'memories',
+            data: { memoryCollection },
+            element: targetElement,
+            buttonText: 'Вспомнить',
+            type: isFlyer ? 'flyer' : 'runner',
+            side: isFlyer ? 'top' : undefined,
+            isTumbling: isFlyer ? Math.random() > 0.5 : false,
+            duration: MASCOT_CONFIG.BASE_DURATION + Math.random() * MASCOT_CONFIG.RANDOM_DURATION,
+            onActionClick: () => {
+              window.dispatchEvent(new CustomEvent('showMemoryStory', { 
+                detail: { memoryCollection } 
+              }));
+            },
+          });
+          return;
+        }
+      } catch (error) {
+        console.error('Error loading memory collection for mascot:', error);
+      }
     };
-    
     const intervalId = setInterval(triggerRandomMascot, MASCOT_CONFIG.LOOP_INTERVAL);
     return () => clearInterval(intervalId);
   }, [isLoopActive, mascotTargets, isMobile, showMascot]);
-
   const value = {
     mascot,
     showMascot,
@@ -141,6 +149,5 @@ export const EventMascotProvider = ({ children }) => {
     startMascotLoop,
     stopMascotLoop,
   };
-
   return <EventMascotContext.Provider value={value}>{children}</EventMascotContext.Provider>;
 };

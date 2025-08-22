@@ -1,7 +1,6 @@
 import React from 'react';
 import Lottie from 'lottie-react';
 import styles from './InterceptedMascot.module.css';
-
 const InterceptedMascot = ({ animationData, position }) => {
   return (
     <div
@@ -17,5 +16,4 @@ const InterceptedMascot = ({ animationData, position }) => {
     </div>
   );
 };
-
 export default InterceptedMascot;

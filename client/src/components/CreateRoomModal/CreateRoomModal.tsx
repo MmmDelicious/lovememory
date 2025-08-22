@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { X, Users, Coins, Trophy, Clock, Shield, Target, Crown, Brain, Sparkles, Zap } from 'lucide-react';
 import styles from './CreateRoomModal.module.css';
-
 interface CreateRoomModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (formData: any) => void;
   gameType: string;
 }
-
 interface GameSettings {
   name: string;
   icon: React.ReactNode;
@@ -27,7 +25,6 @@ interface GameSettings {
     default: string;
   }[];
 }
-
 const GAME_SETTINGS: Record<string, GameSettings> = {
   'tic-tac-toe': {
     name: 'Крестики-нолики',
@@ -82,7 +79,7 @@ const GAME_SETTINGS: Record<string, GameSettings> = {
   'quiz': {
     name: 'Квиз',
     icon: <Brain size={20} />,
-    maxPlayersOptions: [2, 3, 4],
+    maxPlayersOptions: [2, 4],
     defaultMaxPlayers: 2,
     hasDifficulty: true,
     hasTimeLimit: true,
@@ -103,15 +100,23 @@ const GAME_SETTINGS: Record<string, GameSettings> = {
         ],
         default: 'general'
       },
-      {
-        label: 'Количество вопросов',
-        options: [
-          { value: '10', label: '10 вопросов' },
-          { value: '15', label: '15 вопросов' },
-          { value: '20', label: '20 вопросов' }
-        ],
-        default: '15'
-      }
+              {
+          label: 'Количество вопросов',
+          options: [
+            { value: '10', label: '10 вопросов' },
+            { value: '15', label: '15 вопросов' },
+            { value: '20', label: '20 вопросов' }
+          ],
+          default: '15'
+        },
+        {
+          label: 'Формат игры',
+          options: [
+            { value: '1v1', label: '🎯 1 против 1' },
+            { value: '2v2', label: '⚔️ Команды 2x2' }
+          ],
+          default: '1v1'
+        }
     ]
   },
   'poker': {
@@ -173,7 +178,7 @@ const GAME_SETTINGS: Record<string, GameSettings> = {
   'wordle': {
     name: 'Wordle',
     icon: <Target size={20} />,
-    maxPlayersOptions: [2],
+    maxPlayersOptions: [2, 4],
     defaultMaxPlayers: 2,
     hasDifficulty: false,
     hasTimeLimit: false,
@@ -191,19 +196,58 @@ const GAME_SETTINGS: Record<string, GameSettings> = {
         ],
         default: 'russian'
       },
+              {
+          label: 'Количество раундов',
+          options: [
+            { value: '1', label: '1 раунд' },
+            { value: '3', label: '3 раунда' },
+            { value: '5', label: '5 раундов' }
+          ],
+          default: '3'
+        },
+        {
+          label: 'Формат игры',
+          options: [
+            { value: '1v1', label: '🎯 1 против 1' },
+            { value: '2v2', label: '⚔️ Команды 2x2' }
+          ],
+          default: '1v1'
+        }
+    ]
+  },
+  'codenames': {
+    name: 'Codenames',
+    icon: <Zap size={20} />,
+    maxPlayersOptions: [4],
+    defaultMaxPlayers: 4,
+    hasDifficulty: true,
+    hasTimeLimit: false,
+    hasPrivateRooms: true,
+    minBet: 15,
+    maxBet: 750,
+    defaultBet: 40,
+    description: 'Командная игра на ассоциации (2x2)',
+    specialSettings: [
       {
-        label: 'Количество раундов',
+        label: 'Сложность слов',
         options: [
-          { value: '1', label: '1 раунд' },
-          { value: '3', label: '3 раунда' },
-          { value: '5', label: '5 раундов' }
+          { value: 'easy', label: '😊 Простые слова' },
+          { value: 'medium', label: '🤔 Средняя сложность' },
+          { value: 'hard', label: '🔥 Сложные слова' }
         ],
-        default: '3'
+        default: 'medium'
+      },
+      {
+        label: 'Распределение команд',
+        options: [
+          { value: 'auto', label: '🎲 Автоматическое' },
+          { value: 'manual', label: '👥 Ручное' }
+        ],
+        default: 'auto'
       }
     ]
   }
 };
-
 const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
   isOpen,
   onClose,
@@ -211,7 +255,6 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
   gameType
 }) => {
   const gameSettings = GAME_SETTINGS[gameType] || GAME_SETTINGS['tic-tac-toe'];
-  
   const [formData, setFormData] = useState({
     bet: gameSettings.defaultBet,
     maxPlayers: gameSettings.defaultMaxPlayers,
@@ -223,16 +266,20 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
       return acc;
     }, {} as Record<string, string>) || {}
   });
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    const submitData = {
+      ...formData,
+      maxPlayers: effectiveMaxPlayers,
+      gameFormat: currentGameFormat
+    };
+    onSubmit(submitData);
   };
-
+  const currentGameFormat = gameType === 'codenames' ? '2v2' : formData.specialSettings['Формат игры'];
+  const effectiveMaxPlayers = currentGameFormat === '2v2' ? 4 : formData.maxPlayers;
   const updateFormData = (key: string, value: any) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
-
   const updateSpecialSetting = (label: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -242,9 +289,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
       }
     }));
   };
-
   if (!isOpen) return null;
-
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -262,13 +307,11 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
             <X size={20} />
           </button>
         </div>
-
         <div className={styles.gameDescription}>
           <p>{gameSettings.description}</p>
         </div>
-
         <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Ставка */}
+          {}
           <div className={styles.field}>
             <label className={styles.label}>
               <Coins size={16} />
@@ -289,7 +332,10 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
               </span>
               {gameType !== 'poker' && (
                 <div className={styles.betInfo}>
-                  ⚠️ Ставка списывается при входе в комнату. Победитель получает {formData.bet * gameSettings.defaultMaxPlayers} монет (ставки всех игроков)
+                  ⚠️ Ставка списывается при входе в комнату. Победитель получает {formData.bet * effectiveMaxPlayers} монет (ставки всех игроков)
+                  {currentGameFormat === '2v2' && (
+                    <div>🏆 В командном формате выигравшая команда делит приз поровну</div>
+                  )}
                 </div>
               )}
               {gameType === 'poker' && (
@@ -299,29 +345,52 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
               )}
             </div>
           </div>
-
-          {/* Количество игроков */}
+          {}
           <div className={styles.field}>
             <label className={styles.label}>
               <Users size={16} />
               Количество игроков
             </label>
-            <div className={styles.playerOptions}>
-              {gameSettings.maxPlayersOptions.map(count => (
-                <button
-                  key={count}
-                  type="button"
-                  className={`${styles.playerOption} ${formData.maxPlayers === count ? styles.active : ''}`}
-                  onClick={() => updateFormData('maxPlayers', count)}
-                >
-                  <Users size={16} />
-                  <span>{count} {count === 2 ? 'игрока' : count <= 4 ? 'игрока' : 'игроков'}</span>
-                </button>
-              ))}
-            </div>
+            {(gameType === 'wordle' || gameType === 'quiz' || gameType === 'codenames') ? (
+              <div className={styles.playerInfo}>
+                <div className={styles.formatIndicator}>
+                  {currentGameFormat === '2v2' ? (
+                    <div className={styles.teamFormat}>
+                      <span>⚔️ Команды 2×2 (4 игрока)</span>
+                      <p className={styles.formatDescription}>
+                        {gameType === 'codenames' 
+                          ? 'Игра всегда проходит в формате 2×2: капитаны дают подсказки, игроки отгадывают слова команды.'
+                          : 'Игроки разделяются на 2 команды по 2 человека. Команды соревнуются друг с другом.'
+                        }
+                      </p>
+                    </div>
+                  ) : (
+                    <div className={styles.classicFormat}>
+                      <span>🎯 1 против 1 (2 игрока)</span>
+                      <p className={styles.formatDescription}>
+                        Классическая игра один на один.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className={styles.playerOptions}>
+                {gameSettings.maxPlayersOptions.map(count => (
+                  <button
+                    key={count}
+                    type="button"
+                    className={`${styles.playerOption} ${formData.maxPlayers === count ? styles.active : ''}`}
+                    onClick={() => updateFormData('maxPlayers', count)}
+                  >
+                    <Users size={16} />
+                    <span>{count} {count === 2 ? 'игрока' : count <= 4 ? 'игрока' : 'игроков'}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-
-          {/* Сложность (если поддерживается) */}
+          {}
           {gameSettings.hasDifficulty && (
             <div className={styles.field}>
               <label className={styles.label}>
@@ -352,8 +421,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
               </div>
             </div>
           )}
-
-          {/* Специальные настройки для каждой игры */}
+          {}
           {gameSettings.specialSettings?.map(setting => (
             <div key={setting.label} className={styles.field}>
               <label className={styles.label}>
@@ -373,8 +441,7 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
               </select>
             </div>
           ))}
-
-          {/* Приватная комната (если поддерживается) */}
+          {}
           {gameSettings.hasPrivateRooms && (
             <div className={styles.field}>
               <label className={styles.checkboxLabel}>
@@ -396,7 +463,6 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
               </label>
             </div>
           )}
-
           <div className={styles.actions}>
             <button type="button" onClick={onClose} className={styles.cancelButton}>
               Отмена
@@ -412,5 +478,4 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
     </div>
   );
 };
-
 export default CreateRoomModal;

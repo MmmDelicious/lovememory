@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
 const Media = sequelize.define('Media', {
   id: {
     type: DataTypes.UUID,
@@ -24,9 +23,7 @@ const Media = sequelize.define('Media', {
     defaultValue: 'image',
   },
 });
-
 Media.associate = (models) => {
   Media.belongsTo(models.Event, { foreignKey: 'eventId' });
 };
-
 module.exports = Media;

@@ -2,7 +2,6 @@ import React, { useState, useEffect, memo } from 'react';
 import styles from './ProfileStats.module.css';
 import userService from '../../services/user.service';
 import { FaCoins, FaCalendarAlt, FaGamepad, FaCommentDots, FaChartLine } from 'react-icons/fa';
-
 const ProfileStats = memo(({ user }) => {
   const [stats, setStats] = useState({
     events: 0,
@@ -13,7 +12,6 @@ const ProfileStats = memo(({ user }) => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
   useEffect(() => {
     const loadStats = async () => {
       if (!user?.id) return;
@@ -30,7 +28,6 @@ const ProfileStats = memo(({ user }) => {
     };
     loadStats();
   }, [user]);
-
   const statItems = [
     {
       Icon: FaCoins,
@@ -58,7 +55,6 @@ const ProfileStats = memo(({ user }) => {
       label: 'Дней с регистрации',
     }
   ];
-
   if (isLoading) {
     return (
       <div className={styles.statsGrid}>
@@ -70,11 +66,9 @@ const ProfileStats = memo(({ user }) => {
       </div>
     );
   }
-
   if (error) {
     return <div className={styles.errorContainer}>{error}</div>;
   }
-
   return (
     <div className={styles.statsGrid}>
       {statItems.map((item, index) => (
@@ -89,7 +83,5 @@ const ProfileStats = memo(({ user }) => {
     </div>
   );
 });
-
 ProfileStats.displayName = 'ProfileStats';
-
 export default ProfileStats;

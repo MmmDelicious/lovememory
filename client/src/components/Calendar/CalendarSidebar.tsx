@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { FaChevronLeft, FaChevronRight, FaPlus, FaEdit, FaTrash, FaCopy, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import styles from './CalendarSidebar.module.css';
 import type { EventTemplateData } from '../EventTemplateModal/EventTemplateModal';
-
 interface CalendarSidebarProps {
   onClose: () => void;
   monthLabel: string;
@@ -23,7 +22,6 @@ interface CalendarSidebarProps {
   onDeleteTemplate?: (templateId: string) => void;
   onDuplicateTemplate?: (template: EventTemplateData) => void;
 }
-
 const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
   onClose,
   monthLabel,
@@ -47,10 +45,9 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
   const [isTemplatesCollapsed, setIsTemplatesCollapsed] = useState(false);
   const [isCustomTemplatesCollapsed, setIsCustomTemplatesCollapsed] = useState(false);
   const [isFiltersCollapsed, setIsFiltersCollapsed] = useState(false);
-
   return (
     <div className={styles.sidebarContent}>
-      {/* Мини-календарь */}
+      {}
       <div className={styles.miniCalendar}>
         <div className={styles.miniHeader}>
           <span className={styles.miniTitle}>{monthLabel}</span>
@@ -84,8 +81,7 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Стандартные шаблоны событий */}
+      {}
       <div className={styles.sidebarSection}>
         <div className={styles.sectionHeader}>
           <h3>Шаблоны событий</h3>
@@ -108,7 +104,6 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
             </button>
           </div>
         </div>
-        
         {!isTemplatesCollapsed && (
           <div className={styles.templateList} ref={templateContainerRef}>
             {sortedTypeEntries.map(([type, color]) => (
@@ -129,8 +124,7 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
           </div>
         )}
       </div>
-
-      {/* Пользовательские шаблоны */}
+      {}
       {customTemplates.length > 0 && (
         <div className={styles.sidebarSection}>
           <div className={styles.sectionHeader}>
@@ -143,7 +137,6 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
               {isCustomTemplatesCollapsed ? <FaChevronDown /> : <FaChevronUp />}
             </button>
           </div>
-
           {!isCustomTemplatesCollapsed && (
             <div className={styles.customTemplatesList} ref={customTemplatesRef}>
               {customTemplates.map((template) => (
@@ -164,7 +157,6 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
                     <span className={styles.categoryDot} style={{ backgroundColor: template.color }} />
                     <span className={styles.templateName}>{template.name}</span>
                   </div>
-                  
                   <div className={styles.templateActions}>
                     {onEditTemplate && (
                       <button
@@ -200,41 +192,8 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
           )}
         </div>
       )}
-
-      {/* Фильтры */}
-      <div className={styles.sidebarSection}>
-        <div className={styles.sectionHeader}>
-          <h3>Фильтры</h3>
-          <button
-            className={styles.collapseButton}
-            onClick={() => setIsFiltersCollapsed(!isFiltersCollapsed)}
-            title={isFiltersCollapsed ? "Развернуть" : "Свернуть"}
-          >
-            {isFiltersCollapsed ? <FaChevronDown /> : <FaChevronUp />}
-          </button>
-        </div>
-
-        {!isFiltersCollapsed && (
-          <div className={styles.calendarList}>
-            <button
-              className={`${styles.calendarItemBtn} ${filter === 'mine' ? styles.active : ''}`}
-              onClick={() => setFilter(filter === 'mine' ? 'all' : 'mine')}
-            >
-              <span className={styles.calendarColor} style={{ backgroundColor: '#D97A6C' }}></span>
-              <span className={styles.calendarName}>Мои</span>
-            </button>
-            <button
-              className={`${styles.calendarItemBtn} ${filter === 'shared' ? styles.active : ''}`}
-              onClick={() => setFilter(filter === 'shared' ? 'all' : 'shared')}
-            >
-              <span className={styles.calendarColor} style={{ backgroundColor: '#EADFD8' }}></span>
-              <span className={styles.calendarName}>Общие</span>
-            </button>
-          </div>
-        )}
-      </div>
     </div>
   );
 };
-
 export default CalendarSidebar;
+

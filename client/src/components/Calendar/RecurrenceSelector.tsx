@@ -1,26 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import styles from './RecurrenceSelector.module.css';
-
 interface FrequencyOption {
   value: string;
   label: string;
   icon: string;
 }
-
 interface RecurrenceRule {
   freq: string;
   interval: number;
   until?: string | null;
   count?: number | null;
 }
-
 interface RecurrenceSelectorProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (rule: RecurrenceRule) => void;
   initialRule?: RecurrenceRule | null;
 }
-
 const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({ 
   isOpen, 
   onClose, 
@@ -32,14 +28,12 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
   const [endType, setEndType] = useState<'never' | 'on' | 'count'>('never');
   const [endDate, setEndDate] = useState('');
   const [endCount, setEndCount] = useState(10);
-
   const FREQUENCIES: FrequencyOption[] = [
     { value: 'daily', label: 'Ежедневно', icon: '📅' },
     { value: 'weekly', label: 'Еженедельно', icon: '📆' },
     { value: 'monthly', label: 'Ежемесячно', icon: '🗓️' },
     { value: 'yearly', label: 'Ежегодно', icon: '🎂' }
   ];
-
   useEffect(() => {
     if (initialRule) {
       setFrequency(initialRule.freq.toLowerCase());
@@ -53,7 +47,6 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
       }
     }
   }, [initialRule]);
-
   const handleSave = () => {
     const rule: RecurrenceRule = {
       freq: frequency.toUpperCase(),
@@ -64,25 +57,20 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
     onSave(rule);
     onClose();
   };
-
   const getFrequencyText = (): string => {
     const freq = FREQUENCIES.find(f => f.value === frequency);
     if (interval === 1) {
       return freq?.label || frequency;
     }
-    
     const intervalText: Record<string, string> = {
       daily: `Каждые ${interval} дня`,
       weekly: `Каждые ${interval} недели`,
       monthly: `Каждые ${interval} месяца`,
       yearly: `Каждые ${interval} года`
     };
-    
     return intervalText[frequency] || freq?.label || frequency;
   };
-
   if (!isOpen) return null;
-
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -90,7 +78,6 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
           <h3>Настройка повторения</h3>
           <button className={styles.closeButton} onClick={onClose}>✕</button>
         </div>
-        
         <div className={styles.content}>
           <div className={styles.section}>
             <label>Повторять</label>
@@ -107,7 +94,6 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
               ))}
             </div>
           </div>
-
           <div className={styles.section}>
             <label htmlFor="interval">Интервал</label>
             <div className={styles.intervalContainer}>
@@ -123,7 +109,6 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
               <span className={styles.intervalText}>{getFrequencyText()}</span>
             </div>
           </div>
-
           <div className={styles.section}>
             <label>Окончание</label>
             <div className={styles.endOptions}>
@@ -137,7 +122,6 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
                 />
                 <span>Никогда</span>
               </label>
-              
               <label className={styles.radioOption}>
                 <input
                   type="radio"
@@ -158,7 +142,6 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
                   disabled={endType !== 'on'}
                 />
               </label>
-              
               <label className={styles.radioOption}>
                 <input
                   type="radio"
@@ -184,7 +167,6 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
               </label>
             </div>
           </div>
-
           <div className={styles.preview}>
             <h4>Предварительный просмотр:</h4>
             <p className={styles.previewText}>
@@ -194,7 +176,6 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
             </p>
           </div>
         </div>
-        
         <div className={styles.actions}>
           <button className={styles.cancelButton} onClick={onClose}>
             Отмена
@@ -207,5 +188,5 @@ const RecurrenceSelector: React.FC<RecurrenceSelectorProps> = ({
     </div>
   );
 };
-
 export default RecurrenceSelector;
+

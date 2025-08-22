@@ -47,7 +47,6 @@ const ENGLISH_WORDS = [
     "beast", "worry", "ivory", "split", "slave", "hedge", "lotus", "shaft", "cargo", "prose", 
     "altar", "small", "flash", "piper", "quest", "quota", "catch", "torch", "slice", "feast"
   ];
-  
   const RUSSIAN_WORDS = [
     "время", "жизнь", "город", "закон", "школа", "место", "дверь", "земля", "деньги", "улица",
     "книга", "вода", "стена", "образ", "свет", "сила", "право", "сердце", "друг", "песня",
@@ -127,24 +126,18 @@ const ENGLISH_WORDS = [
     "цилиндр", "поршень", "турбина", "реактор", "генератор", "батарея", "диод", "чип", "плата", "память",
     "процессор"
   ];
-  
   const getDictionary = (language = 'russian') => {
     return language === 'english' ? ENGLISH_WORDS : RUSSIAN_WORDS;
   };
-  
   const getRandomWord = (language = 'russian', previousWord = null) => {
     const words = getDictionary(language);
-    // Фильтруем только 5-буквенные слова
     const fiveLetterWords = words.filter(word => word.length === 5);
     let newWord = fiveLetterWords[Math.floor(Math.random() * fiveLetterWords.length)];
-  
     while (newWord === previousWord) {
       newWord = fiveLetterWords[Math.floor(Math.random() * fiveLetterWords.length)];
     }
-  
     return newWord || (language === 'english' ? 'world' : 'слово');
   };
-  
   module.exports = {
     getDictionary,
     getRandomWord,

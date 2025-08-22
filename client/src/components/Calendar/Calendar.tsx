@@ -5,15 +5,17 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
 import type { EventDropArg, EventClickArg, EventContentArg } from '@fullcalendar/core';
 import Sidebar from '../Sidebar/Sidebar';
-import { FaChevronLeft, FaChevronRight, FaFilter, FaListUl, FaPlus } from 'react-icons/fa';
+import StoryViewer from '../StoryViewer/StoryViewer';
+import { FaChevronLeft, FaChevronRight, FaFilter, FaListUl, FaPlus, FaPlay } from 'react-icons/fa';
 import { useEventMascot } from '../../context/EventMascotContext';
+import { toast } from '../../context/ToastContext';
 import styles from './Calendar.module.css';
 import CalendarFilters from './SearchAndFilter';
 import CalendarSidebar from './CalendarSidebar';
 import { EVENT_TYPE_COLORS } from '../../hooks/useEvents';
 import { getHueFromHex, darken } from '../../utils/color';
 import type { EventTemplateData } from '../EventTemplateModal/EventTemplateModal';
-
+import memoriesService from '../../services/memories.service';
 interface CalendarEvent {
   id: string;
   title: string;
@@ -40,7 +42,6 @@ interface CalendarEvent {
     timeRange?: string;
   };
 }
-
 interface CalendarProps {
   events: CalendarEvent[];
   userId: string;
@@ -53,14 +54,12 @@ interface CalendarProps {
   onDeleteTemplate?: (templateId: string) => void;
   onDuplicateTemplate?: (template: EventTemplateData) => void;
 }
-
 interface ContextMenuState {
   show: boolean;
   x: number;
   y: number;
   event: EventClickArg | null;
 }
-
 interface EventData {
   id?: string;
   title: string;
@@ -74,13 +73,11 @@ interface EventData {
   recurrence_rule?: any;
   timeRange?: string;
 }
-
 interface DateClickArg {
   dateStr: string;
   date: Date;
   allDay: boolean;
 }
-
 interface EventReceiveArg {
   event: {
     id: string;
@@ -90,7 +87,6 @@ interface EventReceiveArg {
     remove: () => void;
   };
 }
-
 const Calendar: React.FC<CalendarProps> = ({ 
   events, 
   userId, 
@@ -118,8 +114,10 @@ const Calendar: React.FC<CalendarProps> = ({
   const customTemplatesRef = useRef<HTMLDivElement>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showList, setShowList] = useState(false);
+  const [storyViewerOpen, setStoryViewerOpen] = useState(false);
+  const [storyDate, setStoryDate] = useState<string>('');
+  const [memoryStoryData, setMemoryStoryData] = useState<any>(null);
   const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useEventMascot();
-
   const TYPE_LABELS: Record<string, string> = {
     plan: 'План',
     memory: 'Воспоминание',
@@ -130,17 +128,12 @@ const Calendar: React.FC<CalendarProps> = ({
     gift: 'Подарок',
     deadline: 'Дедлайн',
   };
-
   const sortedTypeEntries = useMemo(() => {
     return Object.entries(EVENT_TYPE_COLORS)
       .sort(([, c1], [, c2]) => getHueFromHex(c1) - getHueFromHex(c2));
   }, []);
-
-  // Инициализация Draggable для шаблонов
   useEffect(() => {
     const draggables: any[] = [];
-    
-    // Стандартные шаблоны
     if (templateContainerRef.current) {
       const standardDraggable = new Draggable(templateContainerRef.current, {
         itemSelector: '.js-template-item',
@@ -161,8 +154,6 @@ const Calendar: React.FC<CalendarProps> = ({
       });
       draggables.push(standardDraggable);
     }
-    
-    // Пользовательские шаблоны
     if (customTemplatesRef.current) {
       const customDraggable = new Draggable(customTemplatesRef.current, {
         itemSelector: '.js-template-item',
@@ -183,8 +174,6 @@ const Calendar: React.FC<CalendarProps> = ({
       });
       draggables.push(customDraggable);
     }
-    
-    // Cleanup функция
     return () => {
       draggables.forEach(draggable => {
         if (draggable.destroy) {
@@ -193,14 +182,12 @@ const Calendar: React.FC<CalendarProps> = ({
       });
     };
   }, [customTemplates]);
-
   const updateMascotTargets = useCallback(() => {
     const calendarApi = calendarRef.current?.getApi();
     if (!calendarApi || events.length === 0) {
       registerMascotTargets([]);
       return;
     }
-    
     const calendarEl = (calendarApi as any).el as HTMLElement;
     const dayCells = calendarEl.querySelectorAll('[data-date]');
     const cellMap = new Map<string, HTMLElement>();
@@ -211,7 +198,6 @@ const Calendar: React.FC<CalendarProps> = ({
         cellMap.set(date, element);
       }
     });
-
     const allEvents = calendarApi.getEvents();
     const targets = allEvents.reduce<any[]>((acc, event) => {
       const dayCell = cellMap.get(event.startStr.split('T')[0]);
@@ -228,11 +214,9 @@ const Calendar: React.FC<CalendarProps> = ({
     }, []);
     registerMascotTargets(targets);
   }, [events, registerMascotTargets]);
-
   useEffect(() => {
     updateMascotTargets();
     startMascotLoop();
-
     const calendarApi = calendarRef.current?.getApi();
     if (calendarApi) {
       const handleDatesSet = (arg: any) => {
@@ -243,7 +227,6 @@ const Calendar: React.FC<CalendarProps> = ({
       };
       calendarApi.on('datesSet', handleDatesSet);
     }
-
     return () => {
       stopMascotLoop();
       clearMascotTargets();
@@ -253,7 +236,6 @@ const Calendar: React.FC<CalendarProps> = ({
       }
     };
   }, [updateMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets]);
-
   const handleInteraction = <T extends any[]>(handler: (...args: T) => void) => (...args: T) => {
     hideMascot();
     if (document.activeElement && 'blur' in document.activeElement) {
@@ -261,7 +243,6 @@ const Calendar: React.FC<CalendarProps> = ({
     }
     handler(...args);
   };
-
   const handleContextMenu = (event: React.MouseEvent, clickInfo: EventClickArg) => {
     event.preventDefault();
     const { clientX, clientY } = event;
@@ -271,16 +252,12 @@ const Calendar: React.FC<CalendarProps> = ({
     const y = clientY + menuHeight > window.innerHeight ? window.innerHeight - menuHeight - 5 : clientY;
     setContextMenu({ show: true, x, y, event: clickInfo });
   };
-
   const handleContextMenuClose = () => {
     setContextMenu({ show: false, x: 0, y: 0, event: null });
   };
-
-  const handleContextMenuAction = (action: 'delete' | 'view' | 'edit') => {
+  const handleContextMenuAction = (action: 'delete' | 'view' | 'edit' | 'story') => {
     if (!contextMenu.event) return;
-    
     const { event } = contextMenu.event;
-    
     switch (action) {
       case 'delete':
         handleDeleteEvent(event.id);
@@ -288,6 +265,10 @@ const Calendar: React.FC<CalendarProps> = ({
       case 'view':
         const eventDate = event.startStr.split('T')[0];
         navigate(`/day/${eventDate}`);
+        break;
+      case 'story':
+        const storyEventDate = event.startStr.split('T')[0];
+        openStoryMode(storyEventDate);
         break;
       case 'edit':
         setSelectedDate(event.startStr.split('T')[0]);
@@ -299,24 +280,65 @@ const Calendar: React.FC<CalendarProps> = ({
         setSidebarOpen(true);
         break;
     }
-    
     handleContextMenuClose();
   };
-
+  const openStoryMode = useCallback((date: string) => {
+    const dayEvents = events.filter(event => 
+      event.start.split('T')[0] === date
+    );
+    if (dayEvents.length === 0) {
+      toast.warning('В этот день нет событий для показа', 'Story mode');
+      return;
+    }
+    setStoryDate(date);
+    setStoryViewerOpen(true);
+  }, [events, toast]);
+  const closeStoryMode = useCallback(() => {
+    setStoryViewerOpen(false);
+    setTimeout(() => {
+      setStoryDate('');
+      setMemoryStoryData(null);
+    }, 300);
+  }, []);
+  useEffect(() => {
+    const handleShowMemoryStory = async (event: any) => {
+      const { memoryCollection } = event.detail;
+      if (!memoryCollection || memoryCollection.length === 0) return;
+      try {
+        const memoryStory = await memoriesService.createMemoryStory(memoryCollection);
+        setMemoryStoryData(memoryStory);
+        setStoryDate(''); // Очищаем дату, так как это воспоминание
+        setStoryViewerOpen(true);
+      } catch (error) {
+        toast.error('Не удалось загрузить воспоминание', 'Ошибка');
+      }
+    };
+    window.addEventListener('showMemoryStory', handleShowMemoryStory);
+    return () => window.removeEventListener('showMemoryStory', handleShowMemoryStory);
+  }, [toast]);
+  const handleDayCellDidMount = (arg: any) => {
+    const dateStr = arg.date.toISOString().split('T')[0];
+    const hasEvents = events.some(event => event.start.split('T')[0] === dateStr);
+    if (hasEvents) {
+      arg.el.classList.add('fc-day-with-events');
+    }
+  };
   useEffect(() => {
     const handleClickOutside = () => {
       if (contextMenu.show) {
         handleContextMenuClose();
       }
     };
-
     document.addEventListener('click', handleClickOutside);
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
   }, [contextMenu.show]);
-  
   const handleDateClick = (arg: DateClickArg) => {
+    if ((arg as any).jsEvent?.shiftKey) {
+      openStoryMode(arg.dateStr);
+      return;
+    }
     setSelectedDate(arg.dateStr);
     const eventOnDay = events.find(e => e.start.split('T')[0] === arg.dateStr);
     if (eventOnDay?.extendedProps?.rawEvent) {
@@ -327,10 +349,8 @@ const Calendar: React.FC<CalendarProps> = ({
     }
     setSidebarOpen(true);
   };
-  
   const handleEventClick = (clickInfo: EventClickArg) => {
     if (!clickInfo.event.extendedProps?.rawEvent) return;
-    
     setSelectedDate(clickInfo.event.startStr.split('T')[0]);
     setSelectedEvent({ 
       ...clickInfo.event.extendedProps.rawEvent, 
@@ -339,19 +359,16 @@ const Calendar: React.FC<CalendarProps> = ({
     });
     setSidebarOpen(true);
   };
-  
   const handleCloseSidebar = () => {
     setSidebarOpen(false);
     setSelectedEvent(null);
     setSelectedDate(null);
   };
-
   const handleViewDay = () => {
     if (selectedDate) {
       navigate(`/day/${selectedDate}`);
     }
   };
-
   const handleSaveEvent = async (eventData: EventData) => {
     try {
       const dataToSave = {
@@ -364,7 +381,6 @@ const Calendar: React.FC<CalendarProps> = ({
         is_recurring: eventData.is_recurring,
         recurrence_rule: eventData.recurrence_rule
       };
-
       if (eventData.id) {
         await onUpdateEvent(eventData.id, dataToSave);
       } else {
@@ -372,23 +388,18 @@ const Calendar: React.FC<CalendarProps> = ({
       }
       handleCloseSidebar();
     } catch (error) { 
-      console.error("Ошибка при сохранении события:", error); 
     }
   };
-
   const handleDeleteEvent = async (eventId: string) => {
     try {
       await onDeleteEvent(eventId);
       handleCloseSidebar();
     } catch (error) { 
-      console.error("Ошибка при удалении события:", error); 
     }
   };
-
   const handleEventDrop = async (dropInfo: EventDropArg) => {
     const { event } = dropInfo;
     if (!event.extendedProps?.rawEvent) return;
-    
     try {
       const oldStart = new Date(event.extendedProps.rawEvent.event_date);
       const oldEnd = event.extendedProps.rawEvent.end_date ? new Date(event.extendedProps.rawEvent.end_date) : null;
@@ -398,22 +409,17 @@ const Calendar: React.FC<CalendarProps> = ({
         const duration = oldEnd.getTime() - oldStart.getTime();
         newEnd = new Date(newStart.getTime() + duration);
       }
-      
       const updateData: any = {
         event_date: newStart.toISOString(),
       };
-      
       if (newEnd) {
         updateData.end_date = newEnd.toISOString();
       }
-      
       await onUpdateEvent(event.id, updateData);
     } catch (error) {
-      console.error("Ошибка при обновлении даты события:", error);
       dropInfo.revert();
     }
   };
-
   const renderEventContent = (eventInfo: EventContentArg) => {
     const raw = eventInfo.event.extendedProps?.rawEvent;
     let timeLabel = '';
@@ -428,14 +434,12 @@ const Calendar: React.FC<CalendarProps> = ({
         timeLabel = fmt(start);
       }
     }
-
     const barColor = eventInfo.event.backgroundColor || '#D97A6C';
     const style = {
       backgroundColor: barColor,
       borderLeft: `4px solid ${darken(barColor, 25)}`,
       color: '#fff'
     };
-
     return (
       <div className={styles.eventContentWrapper} style={style}>
         <div className={styles.eventTitle}>
@@ -445,7 +449,6 @@ const Calendar: React.FC<CalendarProps> = ({
       </div>
     );
   };
-
   const getDateFilters = () => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -461,17 +464,14 @@ const Calendar: React.FC<CalendarProps> = ({
     endOfMonth.setHours(23, 59, 59, 999);
     return { now, startOfWeek, endOfWeek, startOfMonth, endOfMonth };
   };
-
   const matchesFilter = (event: CalendarEvent) => {
     const { now, startOfWeek, endOfWeek, startOfMonth, endOfMonth } = getDateFilters();
     const eventDate = new Date(event.start);
     eventDate.setHours(0, 0, 0, 0);
-    
     if (filter.startsWith('type:')) {
       const type = filter.split(':')[1];
       return event.extendedProps?.eventType === type;
     }
-
     switch (filter) {
       case 'all': return true;
       case 'mine': return event.extendedProps?.isOwner;
@@ -487,27 +487,22 @@ const Calendar: React.FC<CalendarProps> = ({
       default: return true;
     }
   };
-
   const filteredEvents = events.filter(event => matchesFilter(event));
-  
   const handleCalendarContainerClick = () => {
     if (document.activeElement && 'blur' in document.activeElement) {
       (document.activeElement as HTMLElement).blur();
     }
   };
-
   const gotoDate = (date: Date) => {
     const api = calendarRef.current?.getApi();
     if (api) {
       api.gotoDate(date);
     }
   };
-
   const goPrev = () => calendarRef.current?.getApi()?.prev();
   const goNext = () => calendarRef.current?.getApi()?.next();
   const goToday = () => calendarRef.current?.getApi()?.today();
   const changeView = (view: string) => calendarRef.current?.getApi()?.changeView(view);
-
   const handleAddQuick = () => {
     const isoDate = new Date(currentDate);
     isoDate.setHours(0, 0, 0, 0);
@@ -517,7 +512,6 @@ const Calendar: React.FC<CalendarProps> = ({
     setSelectedEvent({ title: '', description: '', date: dateStr, event_date: startISO, end_date: endISO });
     setSidebarOpen(true);
   };
-
   const monthLabel = useMemo(() => {
     if (currentTitle) return currentTitle;
     try {
@@ -526,7 +520,6 @@ const Calendar: React.FC<CalendarProps> = ({
       return ''; 
     }
   }, [currentDate, currentTitle]);
-
   const findFirstFreeOneHourSlot = (dateStr: string) => {
     const TARGET_START_HOUR = 8; // базовое время 08:00
     const eventsOnDay = events
@@ -536,29 +529,23 @@ const Calendar: React.FC<CalendarProps> = ({
         end: e.extendedProps?.rawEvent?.end_date ? new Date(e.extendedProps.rawEvent.end_date) : null,
       }))
       .sort((a,b) => a.start.getTime() - b.start.getTime());
-
     let slotStart = new Date(`${dateStr}T${String(TARGET_START_HOUR).padStart(2,'0')}:00:00`);
     let slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
-
     const overlaps = (aStart: Date, aEnd: Date | null, bStart: Date, bEnd: Date | null) => {
       const endA = aEnd || new Date(aStart.getTime() + 60*60*1000);
       const endB = bEnd || new Date(bStart.getTime() + 60*60*1000);
       return aStart < endB && bStart < endA;
     };
-
     for (const ev of eventsOnDay) {
       if (overlaps(slotStart, slotEnd, ev.start, ev.end)) {
-        // сдвигаем в конец занятого интервала на ближайший целый час
         const nextStart = ev.end ? new Date(ev.end) : new Date(ev.start.getTime() + 60*60*1000);
         nextStart.setMinutes(0,0,0);
         slotStart = nextStart;
         slotEnd = new Date(slotStart.getTime() + 60*60*1000);
       }
     }
-
     return { startISO: slotStart.toISOString(), endISO: slotEnd.toISOString() };
   };
-
   const getMiniCalendarDays = useCallback((baseDate: Date) => {
     const result: Date[] = [];
     const firstOfMonth = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
@@ -572,19 +559,14 @@ const Calendar: React.FC<CalendarProps> = ({
     }
     return result;
   }, []);
-
   const miniDays = useMemo(() => getMiniCalendarDays(currentDate), [getMiniCalendarDays, currentDate]);
-
   const handleEventReceive = (info: EventReceiveArg) => {
     try {
       const type = info.event.extendedProps?.eventType || 'plan';
       const dateStr = info.event.startStr.split('T')[0];
       const templateId = info.event.extendedProps?.templateId;
-      
       setSelectedDate(dateStr);
-      
       if (templateId && customTemplates.length > 0) {
-        // Найти соответствующий пользовательский шаблон
         const template = customTemplates.find(t => t.id === templateId);
         if (template) {
           const { startISO, endISO } = findFirstFreeOneHourSlot(dateStr);
@@ -618,13 +600,11 @@ const Calendar: React.FC<CalendarProps> = ({
           end_date: endISO 
         });
       }
-      
       setSidebarOpen(true);
     } finally {
       info.event.remove();
     }
   };
-
   return (
     <div className={styles.plannerLayout} ref={calendarContainerRef} onClick={handleCalendarContainerClick}>
       <aside className={styles.sidebar}>
@@ -649,7 +629,6 @@ const Calendar: React.FC<CalendarProps> = ({
           onDuplicateTemplate={onDuplicateTemplate}
         />
       </aside>
-
       <main className={styles.mainContent}>
         <div className={styles.calendarHeaderMain}>
           <div className={styles.calendarTitle}>
@@ -706,13 +685,11 @@ const Calendar: React.FC<CalendarProps> = ({
             </button>
           </div>
         </div>
-
         {showFilters && (
           <div className={styles.filtersWrapper}>
             <CalendarFilters activeFilter={filter} onFilterChange={(f) => setFilter(f)} />
           </div>
         )}
-
         {showList && (
           <div className={styles.eventListPanel}>
             {filteredEvents.length === 0 ? (
@@ -751,7 +728,6 @@ const Calendar: React.FC<CalendarProps> = ({
             )}
           </div>
         )}
-
         <div className={styles.calendarWrapper}>
           <FullCalendar
             ref={calendarRef}
@@ -774,7 +750,6 @@ const Calendar: React.FC<CalendarProps> = ({
             expandRows={true}
             dayMaxEventRows={3}
             dayMaxEvents={true}
-            
             eventReceive={handleInteraction(handleEventReceive)}
             eventDrop={handleInteraction(handleEventDrop)}
             dateClick={handleInteraction(handleDateClick)}
@@ -788,10 +763,10 @@ const Calendar: React.FC<CalendarProps> = ({
                 handleContextMenu(e as any, mockClickInfo);
               });
             }}
+            dayCellDidMount={handleDayCellDidMount}
           />
         </div>
       </main>
-
       {contextMenu.show && (
         <div 
           className={styles.contextMenu}
@@ -803,12 +778,14 @@ const Calendar: React.FC<CalendarProps> = ({
           <div className={styles.contextMenuItem} onClick={() => handleContextMenuAction('view')}>
             👁️ Посмотреть день
           </div>
+          <div className={styles.contextMenuItem} onClick={() => handleContextMenuAction('story')}>
+            🎬 Посмотреть Stories
+          </div>
           <div className={styles.contextMenuItem} onClick={() => handleContextMenuAction('delete')}>
             🗑️ Удалить событие
           </div>
         </div>
       )}
-
       <Sidebar 
         isOpen={isSidebarOpen} 
         onClose={handleCloseSidebar}
@@ -818,8 +795,14 @@ const Calendar: React.FC<CalendarProps> = ({
         selectedDate={selectedDate}
         onViewDay={handleViewDay}
       />
+      <StoryViewer
+        date={storyDate}
+        memoryData={memoryStoryData}
+        isOpen={storyViewerOpen}
+        onClose={closeStoryMode}
+      />
     </div>
   );
 };
-
 export default Calendar;
+

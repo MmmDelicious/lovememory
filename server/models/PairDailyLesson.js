@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
 const PairDailyLesson = sequelize.define('PairDailyLesson', {
   id: {
     type: DataTypes.INTEGER,
@@ -68,12 +67,9 @@ const PairDailyLesson = sequelize.define('PairDailyLesson', {
     }
   ]
 });
-
-// Методы для работы с ежедневными уроками пар
 PairDailyLesson.prototype.markCompleted = function(userId, relationshipMetrics) {
   const isUser = relationshipMetrics.user_id === userId;
   const isPartner = relationshipMetrics.partner_id === userId;
-  
   if (isUser) {
     this.user_completed = true;
     this.user_completed_at = new Date();
@@ -83,17 +79,13 @@ PairDailyLesson.prototype.markCompleted = function(userId, relationshipMetrics) 
   } else {
     throw new Error('User is not part of this relationship');
   }
-  
   return this.save();
 };
-
 PairDailyLesson.prototype.isBothCompleted = function() {
   return this.user_completed && this.partner_completed;
 };
-
 PairDailyLesson.prototype.getCompletionStatus = function(userId, relationshipMetrics) {
   const isUser = relationshipMetrics.user_id === userId;
-  
   if (isUser) {
     return {
       userCompleted: this.user_completed,
@@ -110,11 +102,8 @@ PairDailyLesson.prototype.getCompletionStatus = function(userId, relationshipMet
     };
   }
 };
-
-// Статические методы
 PairDailyLesson.getTodaysLesson = async function(relationshipId, date = null) {
   const targetDate = date || new Date().toISOString().split('T')[0];
-  
   return await this.findOne({
     where: {
       relationship_id: relationshipId,
@@ -129,16 +118,12 @@ PairDailyLesson.getTodaysLesson = async function(relationshipId, date = null) {
     }]
   });
 };
-
 PairDailyLesson.getWeeklyLessons = async function(relationshipId, weekOffset = 0) {
   const startOfWeek = new Date();
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() - (weekOffset * 7));
-  
   const endOfWeek = new Date(startOfWeek);
   endOfWeek.setDate(endOfWeek.getDate() + 6);
-  
   const Op = sequelize.Sequelize.Op;
-  
   return await this.findAll({
     where: {
       relationship_id: relationshipId,
@@ -156,26 +141,20 @@ PairDailyLesson.getWeeklyLessons = async function(relationshipId, weekOffset = 0
     order: [['date', 'ASC']]
   });
 };
-
 PairDailyLesson.getCompletionStreak = async function(relationshipId) {
   const Op = sequelize.Sequelize.Op;
-  
   const lessons = await this.findAll({
     where: { relationship_id: relationshipId },
     order: [['date', 'DESC']],
     raw: true
   });
-  
   if (lessons.length === 0) return 0;
-  
   let streak = 0;
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
-  
   for (const lesson of lessons) {
     const lessonDate = new Date(lesson.date);
     const daysDiff = Math.floor((currentDate - lessonDate) / (1000 * 60 * 60 * 24));
-    
     if (daysDiff === streak && lesson.user_completed && lesson.partner_completed) {
       streak++;
       currentDate = new Date(lessonDate);
@@ -186,19 +165,13 @@ PairDailyLesson.getCompletionStreak = async function(relationshipId) {
       break;
     }
   }
-  
   return streak;
 };
-
 PairDailyLesson.getProgressStats = async function(relationshipId) {
   const Op = sequelize.Sequelize.Op;
-  
-  // Общее количество назначенных уроков
   const totalAssigned = await this.count({
     where: { relationship_id: relationshipId }
   });
-  
-  // Количество полностью завершенных (обоими партнерами)
   const fullyCompleted = await this.count({
     where: {
       relationship_id: relationshipId,
@@ -206,11 +179,8 @@ PairDailyLesson.getProgressStats = async function(relationshipId) {
       partner_completed: true
     }
   });
-  
-  // Статистика за последние 30 дней
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  
   const recentAssigned = await this.count({
     where: {
       relationship_id: relationshipId,
@@ -219,7 +189,6 @@ PairDailyLesson.getProgressStats = async function(relationshipId) {
       }
     }
   });
-  
   const recentCompleted = await this.count({
     where: {
       relationship_id: relationshipId,
@@ -230,7 +199,6 @@ PairDailyLesson.getProgressStats = async function(relationshipId) {
       }
     }
   });
-  
   return {
     totalAssigned,
     fullyCompleted,
@@ -240,17 +208,15 @@ PairDailyLesson.getProgressStats = async function(relationshipId) {
     recentCompletionRate: recentAssigned > 0 ? (recentCompleted / recentAssigned) * 100 : 0
   };
 };
-
 PairDailyLesson.associate = (models) => {
   PairDailyLesson.belongsTo(models.RelationshipMetrics, {
     foreignKey: 'relationship_id',
     as: 'Relationship'
   });
-  
   PairDailyLesson.belongsTo(models.Lesson, {
     foreignKey: 'lesson_id',
     as: 'Lesson'
   });
 };
-
 module.exports = PairDailyLesson;
+

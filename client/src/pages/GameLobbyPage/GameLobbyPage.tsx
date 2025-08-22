@@ -4,11 +4,10 @@ import { Search, Users, Coins, ArrowLeft, Plus, Gamepad2, Filter, Clock, Trophy,
 import styles from './GameLobbyPage.module.css';
 import { useGameLobby } from '../../hooks/useGameLobby';
 import CreateRoomModal from '../../components/CreateRoomModal/CreateRoomModal';
-
+import { toast } from '../../context/ToastContext';
 interface GameLobbyPageProps {
   gameType?: string;
 }
-
 interface Room {
   id: string;
   bet: number;
@@ -23,32 +22,29 @@ interface Room {
   difficulty?: 'easy' | 'medium' | 'hard';
   isPrivate?: boolean;
 }
-
 const GAME_DISPLAY_NAMES: Record<string, string> = {
   'tic-tac-toe': 'Крестики-нолики',
   'chess': 'Шахматы',
   'poker': 'Покер',
   'quiz': 'Квиз',
+  'codenames': 'Codenames',
 };
-
 const GAME_DESCRIPTIONS: Record<string, string> = {
   'tic-tac-toe': 'Классическая игра для двоих',
   'chess': 'Стратегическая битва умов',
   'poker': 'Карточная игра на удачу и мастерство',
   'quiz': 'Проверьте свои знания вместе',
+  'codenames': 'Командная игра на ассоциации (2x2)',
 };
-
 const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp }) => {
   const { gameType: gameTypeParam } = useParams<{ gameType: string }>();
   const gameType = gameTypeProp || gameTypeParam || '';
-
   const { rooms, isLoading, error, createRoom } = useGameLobby(gameType);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [maxBet, setMaxBet] = useState(1000);
   const [sortBy, setSortBy] = useState<'newest' | 'bet' | 'players'>('newest');
   const navigate = useNavigate();
-
   const handleCreateRoom = async (formData: any) => {
     try {
       const newRoom = await createRoom({ ...formData, gameType });
@@ -56,23 +52,18 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
       const path = gameType === 'poker' ? `/games/poker/${newRoom.id}` : `/games/room/${newRoom.id}`;
       navigate(path);
     } catch (err: any) {
-      alert(`Ошибка: ${err.response?.data?.message || 'Не удалось создать комнату.'}`);
+      toast.error(err.response?.data?.message || 'Не удалось создать комнату.', 'Ошибка создания комнаты');
     }
   };
-
   const handleJoinRoom = (roomId: string) => {
     const room = rooms.find((r: Room) => r.id === roomId);
     if (!room) return;
-    
     if (gameType === 'poker') {
-      // Для покера перенаправляем на покерную страницу, где будет показано модальное окно buy-in
       navigate(`/games/poker/${roomId}`);
     } else {
-      // Для остальных игр обычный переход
       navigate(`/games/room/${roomId}`);
     }
   };
-
   const filteredAndSortedRooms = useMemo(() => {
     let filtered = rooms
       .filter((room: Room) => room.bet <= maxBet)
@@ -82,8 +73,6 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
         return hostName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                roomId.toLowerCase().includes(searchTerm.toLowerCase());
       });
-
-    // Сортировка
     filtered.sort((a: Room, b: Room) => {
       switch (sortBy) {
         case 'bet':
@@ -95,24 +84,19 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
     });
-
     return filtered;
   }, [rooms, searchTerm, maxBet, sortBy]);
-  
   const gameName = GAME_DISPLAY_NAMES[gameType] || 'Игровые комнаты';
   const gameDescription = GAME_DESCRIPTIONS[gameType] || 'Найдите партнера для игры';
-
   const activeRooms = rooms.filter((room: Room) => room.status === 'waiting').length;
   const playingRooms = rooms.filter((room: Room) => room.status === 'in_progress').length;
-
   return (
     <div className={styles.container}>
-      {/* Hero Section */}
+      {}
       <div className={styles.hero}>
         <div className={styles.heroBackground}>
           <div className={styles.heroPattern}></div>
         </div>
-        
         <header className={styles.header}>
           <button 
             onClick={() => navigate('/games')} 
@@ -121,7 +105,6 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
           >
             <ArrowLeft size={20} />
           </button>
-          
           <div className={styles.headerContent}>
             <div className={styles.gameIconWrapper}>
               <div className={styles.gameIcon}>
@@ -129,12 +112,10 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
               </div>
               <div className={styles.gameIconGlow}></div>
             </div>
-            
             <div className={styles.titleSection}>
               <h1 className={styles.title}>{gameName}</h1>
               <p className={styles.subtitle}>{gameDescription}</p>
             </div>
-
             <div className={styles.statsRow}>
               <div className={styles.statItem}>
                 <div className={styles.statIcon}>
@@ -145,9 +126,7 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
                   <span className={styles.statLabel}>Ожидают</span>
                 </div>
               </div>
-              
               <div className={styles.statDivider}></div>
-              
               <div className={styles.statItem}>
                 <div className={styles.statIcon}>
                   <Clock size={16} />
@@ -159,7 +138,6 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
               </div>
             </div>
           </div>
-
           <button 
             onClick={() => setIsModalOpen(true)} 
             className={styles.createButton}
@@ -169,8 +147,7 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
           </button>
         </header>
       </div>
-
-      {/* Controls Section */}
+      {}
       <div className={styles.controlsSection}>
         <div className={styles.searchAndFilter}>
           <div className={styles.searchWrapper}>
@@ -183,7 +160,6 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
           <div className={styles.filterControls}>
             <div className={styles.sortWrapper}>
               <Filter size={16} />
@@ -199,7 +175,6 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
             </div>
           </div>
         </div>
-        
         <div className={styles.betFilter}>
           <div className={styles.betFilterHeader}>
             <span className={styles.betFilterLabel}>Максимальная ставка</span>
@@ -219,8 +194,7 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
           />
         </div>
       </div>
-
-      {/* Rooms Section */}
+      {}
       <div className={styles.roomsSection}>
         {isLoading && (
           <div className={styles.loadingState}>
@@ -229,7 +203,6 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
             <p>Поиск активных игр</p>
           </div>
         )}
-        
         {error && (
           <div className={styles.errorState}>
             <div className={styles.errorIcon}>⚠️</div>
@@ -237,7 +210,6 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
             <p className={styles.errorText}>{error}</p>
           </div>
         )}
-        
         {!isLoading && !error && (
           <div className={styles.roomsGrid}>
             {filteredAndSortedRooms.length > 0 ? (
@@ -245,15 +217,12 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
                 const isFull = room.playerCount >= room.maxPlayers;
                 const isInProgress = room.status === 'in_progress';
                 const canJoin = !isFull && !isInProgress;
-                
                 return (
                   <div 
                     key={room.id} 
                     className={`${styles.roomCard} ${!canJoin ? styles.disabled : ''} ${isInProgress ? styles.inProgress : ''}`}
                     onClick={() => canJoin && handleJoinRoom(room.id)}
                   >
-
-                    
                     <div className={styles.cardHeader}>
                       <div className={styles.hostSection}>
                         <div className={styles.hostAvatar}>
@@ -268,7 +237,6 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
                           <h3 className={styles.hostName}>{room.Host?.first_name || 'Аноним'}</h3>
                         </div>
                       </div>
-                      
                       <div className={styles.roomStatus}>
                         {isInProgress ? (
                           <div className={styles.statusBadge}>
@@ -286,14 +254,12 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
                         )}
                       </div>
                     </div>
-
                     <div className={styles.cardContent}>
                       <div className={styles.roomInfo}>
                         <div className={styles.infoItem}>
                           <Users size={16} />
                           <span>{room.playerCount}/{room.maxPlayers}</span>
                         </div>
-                        
                         <div className={styles.infoItem}>
                           <Coins size={16} />
                           <span>{room.bet} монет</span>
@@ -301,7 +267,6 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
                             <span className={styles.betWarning} title="Ставка списывается при входе в комнату">⚠️</span>
                           )}
                         </div>
-                        
                         {room.difficulty && (
                           <div className={styles.infoItem}>
                             <Trophy size={16} />
@@ -313,12 +278,10 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
                           </div>
                         )}
                       </div>
-                      
                       <div className={styles.roomId}>
                         ID: #{room.id.substring(0, 8)}
                       </div>
                     </div>
-
                     {canJoin && (
                       <div className={styles.joinOverlay}>
                         <div className={styles.joinButton}>
@@ -349,7 +312,6 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
           </div>
         )}
       </div>
-      
       <CreateRoomModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -359,5 +321,4 @@ const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp })
     </div>
   );
 };
-
 export default GameLobbyPage;

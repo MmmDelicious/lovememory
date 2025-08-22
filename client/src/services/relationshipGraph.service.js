@@ -1,8 +1,3 @@
-/**
- * Сервис для анализа и построения графика отношений
- * Динамически анализирует активность пары и строит граф связей
- */
-
 class RelationshipGraphService {
   constructor() {
     this.baseNodes = [
@@ -77,7 +72,6 @@ class RelationshipGraphService {
         description: 'Способность получать удовольствие вместе'
       }
     ];
-
     this.baseConnections = [
       { from: 'couple', to: 'communication', strength: 0.9, type: 'strong' },
       { from: 'couple', to: 'trust', strength: 0.85, type: 'strong' },
@@ -96,8 +90,6 @@ class RelationshipGraphService {
       { from: 'fun_together', to: 'intimacy', strength: 0.65, type: 'medium' }
     ];
   }
-
-  // Анализ статистики пользователя для расчета силы узлов
   analyzeUserStats(stats) {
     const analysis = {
       communication: Math.min(100, Math.max(40, 
@@ -128,16 +120,11 @@ class RelationshipGraphService {
         stats.gamesPlayed * 8 + stats.events * 4 + 60
       ))
     };
-
-    // Центральный узел рассчитывается как среднее
     analysis.couple = Math.min(100, Math.max(60,
       Object.values(analysis).reduce((sum, val) => sum + val, 0) / Object.keys(analysis).length
     ));
-
     return analysis;
   }
-
-  // Анализ событий для выявления паттернов
   analyzeEvents(events) {
     const patterns = {
       communication: 0,
@@ -147,61 +134,46 @@ class RelationshipGraphService {
       future_plans: 0,
       personal_growth: 0
     };
-
     events.forEach(event => {
       const title = event.title?.toLowerCase() || '';
       const description = event.description?.toLowerCase() || '';
       const content = title + ' ' + description;
-
-      // Анализируем контент событий
       if (content.includes('разговор') || content.includes('обсуждение') || 
           content.includes('поговорить') || content.includes('общение')) {
         patterns.communication += 3;
       }
-
       if (content.includes('вместе') || content.includes('свидание') || 
           content.includes('время') || content.includes('провели')) {
         patterns.shared_time += 2;
       }
-
       if (content.includes('веселье') || content.includes('смех') || 
           content.includes('игра') || content.includes('развлечение')) {
         patterns.fun_together += 2;
       }
-
       if (content.includes('близость') || content.includes('объятия') || 
           content.includes('поцелуй') || content.includes('нежность')) {
         patterns.intimacy += 3;
       }
-
       if (content.includes('план') || content.includes('будущее') || 
           content.includes('мечта') || content.includes('цель')) {
         patterns.future_plans += 2;
       }
-
       if (content.includes('развитие') || content.includes('обучение') || 
           content.includes('новое') || content.includes('рост')) {
         patterns.personal_growth += 2;
       }
     });
-
     return patterns;
   }
-
-  // Генерация динамического графа
   generateDynamicGraph(stats, events = []) {
     const statsAnalysis = this.analyzeUserStats(stats);
     const eventPatterns = this.analyzeEvents(events);
-
-    // Объединяем анализ статистики и событий
     const enhancedNodes = this.baseNodes.map(node => {
       const statsBonus = statsAnalysis[node.id] || node.baseStrength;
       const eventBonus = eventPatterns[node.id] || 0;
-      
       const finalStrength = Math.min(100, Math.max(20, 
         Math.round((statsBonus + eventBonus) * 0.8 + node.baseStrength * 0.2)
       ));
-
       return {
         ...node,
         strength: finalStrength,
@@ -210,22 +182,17 @@ class RelationshipGraphService {
         insights: this.generateNodeInsights(node.id, finalStrength, eventPatterns[node.id] || 0)
       };
     });
-
-    // Адаптируем связи на основе силы узлов
     const enhancedConnections = this.baseConnections.map(connection => {
       const fromNode = enhancedNodes.find(n => n.id === connection.from);
       const toNode = enhancedNodes.find(n => n.id === connection.to);
-      
       const avgStrength = (fromNode.strength + toNode.strength) / 200; // Нормализуем
       const dynamicStrength = Math.min(1, Math.max(0.2, connection.strength * avgStrength));
-
       return {
         ...connection,
         strength: dynamicStrength,
         dynamicType: this.getConnectionType(dynamicStrength)
       };
     });
-
     return {
       nodes: enhancedNodes,
       connections: enhancedConnections,
@@ -233,8 +200,6 @@ class RelationshipGraphService {
       recommendations: this.generateRecommendations(enhancedNodes)
     };
   }
-
-  // Позиции узлов в SVG пространстве
   getNodePosition(nodeId) {
     const positions = {
       couple: { x: 250, y: 150 },
@@ -250,23 +215,17 @@ class RelationshipGraphService {
     };
     return positions[nodeId] || { x: 250, y: 150 };
   }
-
-  // Определение типа связи по силе
   getConnectionType(strength) {
     if (strength >= 0.8) return 'strong';
     if (strength >= 0.6) return 'medium';
     if (strength >= 0.3) return 'weak';
     return 'potential';
   }
-
-  // Расчет общего здоровья отношений
   calculateOverallHealth(nodes) {
     const totalStrength = nodes.reduce((sum, node) => sum + node.strength, 0);
     const averageStrength = totalStrength / nodes.length;
     return Math.round(averageStrength);
   }
-
-  // Генерация инсайтов для узла
   generateNodeInsights(nodeId, strength, eventActivity) {
     const insights = {
       couple: {
@@ -320,21 +279,15 @@ class RelationshipGraphService {
         low: "Добавьте больше веселья и спонтанности в отношения."
       }
     };
-
     const level = strength >= 80 ? 'high' : strength >= 60 ? 'medium' : 'low';
     return insights[nodeId]?.[level] || "Развивайте этот аспект отношений.";
   }
-
-  // Генерация рекомендаций
   generateRecommendations(nodes) {
     const recommendations = [];
-    
-    // Находим самые слабые узлы
     const weakNodes = nodes
       .filter(node => node.id !== 'couple')
       .sort((a, b) => a.strength - b.strength)
       .slice(0, 3);
-
     weakNodes.forEach(node => {
       switch(node.id) {
         case 'communication':
@@ -366,18 +319,13 @@ class RelationshipGraphService {
           });
       }
     });
-
     return recommendations.slice(0, 3); // Возвращаем топ-3 рекомендации
   }
-
-  // Получение связанных узлов
   getConnectedNodes(nodeId, connections) {
     return connections
       .filter(conn => conn.from === nodeId || conn.to === nodeId)
       .map(conn => conn.from === nodeId ? conn.to : conn.from);
   }
-
-  // Анализ силы связи между узлами
   getConnectionStrength(nodeId1, nodeId2, connections) {
     const connection = connections.find(conn => 
       (conn.from === nodeId1 && conn.to === nodeId2) ||
@@ -386,6 +334,5 @@ class RelationshipGraphService {
     return connection?.strength || 0;
   }
 }
-
 export default new RelationshipGraphService();
 

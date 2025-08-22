@@ -5,17 +5,14 @@ import Button from '../Button/Button';
 import styles from './ActivityFeed.module.css';
 import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
 import { eventService } from '../../services';
-
 const ActivityFeed = memo(({ events, areEventsLoading, deleteEvent }) => {
   const isCompact = useMediaQuery({ maxWidth: 480 });
   const [activeTab, setActiveTab] = useState('events');
   const [galleryItems, setGalleryItems] = useState([]);
   const [isGalleryLoading, setIsGalleryLoading] = useState(false);
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('ru-RU', { day: '2-digit', month: 'long', year: 'numeric' });
   };
-
   const fetchGallery = useCallback(async () => {
     if (!events || !events.length) {
       setGalleryItems([]);
@@ -35,19 +32,15 @@ const ActivityFeed = memo(({ events, areEventsLoading, deleteEvent }) => {
       setIsGalleryLoading(false);
     }
   }, [events]);
-
   useEffect(() => {
     if (activeTab === 'gallery') {
       fetchGallery();
     }
   }, [activeTab, fetchGallery]);
-
   const renderEvents = () => {
     if (areEventsLoading) return <div className={styles.placeholder}>Загрузка событий...</div>;
     const upcomingEvents = events?.filter(event => new Date(event.start) >= new Date()).sort((a, b) => new Date(a.start) - new Date(b.start));
-
     if (!upcomingEvents || upcomingEvents.length === 0) return <div className={styles.placeholder}>Нет предстоящих дел.</div>;
-
     return (
       <div className={styles.list}>
         {upcomingEvents.map(event => (
@@ -68,7 +61,6 @@ const ActivityFeed = memo(({ events, areEventsLoading, deleteEvent }) => {
       </div>
     );
   };
-
   const renderGallery = () => {
     if (isGalleryLoading) return <div className={styles.placeholder}>Загрузка галереи...</div>;
     if (!galleryItems.length) return <div className={styles.placeholder}>Медиа не найдено.</div>;
@@ -82,7 +74,6 @@ const ActivityFeed = memo(({ events, areEventsLoading, deleteEvent }) => {
       </div>
     );
   };
-
   return (
     <div className={`${styles.feedWrapper} ${isCompact ? styles.compact : ''}`}>
       <div className={styles.tabs}>
@@ -101,7 +92,5 @@ const ActivityFeed = memo(({ events, areEventsLoading, deleteEvent }) => {
     </div>
   );
 });
-
 ActivityFeed.displayName = 'ActivityFeed';
-
 export default ActivityFeed;

@@ -1,14 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styles from './Avatar.module.css';
-
 const Avatar = ({ src, alt = 'avatar', size = 'medium', variant = 'circle', className = '' }) => {
   const sizeClass = styles[size] || '';
   const variantClass = styles[variant] || '';
-
-  // Убеждаемся, что src всегда является строкой
   const imageSrc = src || '';
-
   return (
     <div className={`${styles.avatarContainer} ${sizeClass} ${variantClass} ${className}`.trim()}>
         <img
@@ -16,14 +12,12 @@ const Avatar = ({ src, alt = 'avatar', size = 'medium', variant = 'circle', clas
             alt={alt}
             className={styles.avatarImage}
             onError={(e) => {
-              // Если изображение не загружается, показываем fallback
               e.target.src = `https://ui-avatars.com/api/?name=${alt}&background=random&size=128`;
             }}
         />
     </div>
   );
 };
-
 Avatar.propTypes = {
   src: PropTypes.string,
   alt: PropTypes.string,
@@ -31,5 +25,4 @@ Avatar.propTypes = {
   variant: PropTypes.oneOf(['circle', 'rounded', 'square']),
   className: PropTypes.string,
 };
-
 export default Avatar;

@@ -5,7 +5,6 @@ import AIToggleButton from '../AIToggleButton/AIToggleButton';
 import FreeRoamMascot from '../FreeRoamMascot/FreeRoamMascot';
 import DateGeneratorModal from '../DateGeneratorModal/DateGeneratorModal';
 import { useAuth } from '../../context/AuthContext';
-
 const AIChatInterface = () => {
   const { 
     isChatOpen, 
@@ -20,18 +19,15 @@ const AIChatInterface = () => {
     closeDateGenerator
   } = useAIMascot();
   const { user } = useAuth();
-
   if (!user) {
     return null;
   }
-
   const aiInterfaceContainerStyle = {
     position: 'fixed',
     bottom: '30px',
     right: '30px',
     zIndex: 10000
   };
-
   const handleContextMenuAction = (actionId) => {
     switch (actionId) {
       case 'chat':
@@ -62,12 +58,9 @@ const AIChatInterface = () => {
         break;
     }
   };
-
   const handleEventCreated = (event) => {
-    // Можно добавить обновление календаря или показ уведомления
     console.log('Date event created:', event);
   };
-
   return (
     <>
       {isAIVisible && (
@@ -83,8 +76,7 @@ const AIChatInterface = () => {
         <AIToggleButton />
         {isChatOpen && <AIChat />}
       </div>
-      
-      {/* Модальное окно генератора свиданий */}
+      {}
       <DateGeneratorModal
         isOpen={isDateGeneratorOpen}
         onClose={closeDateGenerator}
@@ -93,5 +85,4 @@ const AIChatInterface = () => {
     </>
   );
 };
-
 export default AIChatInterface;

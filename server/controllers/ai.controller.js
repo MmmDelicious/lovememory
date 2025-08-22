@@ -1,5 +1,4 @@
 const aiService = require('../services/ai.service');
-
 const handleChat = async (req, res, next) => {
   try {
     const { prompt, context } = req.body;
@@ -12,7 +11,6 @@ const handleChat = async (req, res, next) => {
     next(error);
   }
 };
-
 module.exports = {
   handleChat,
 };

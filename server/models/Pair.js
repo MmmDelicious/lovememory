@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
 const Pair = sequelize.define('Pair', {
   id: {
     type: DataTypes.UUID,
@@ -29,7 +28,6 @@ const Pair = sequelize.define('Pair', {
     allowNull: false,
   },
 });
-
 Pair.associate = (models) => {
   Pair.belongsTo(models.User, {
     as: 'Requester',
@@ -40,5 +38,4 @@ Pair.associate = (models) => {
     foreignKey: 'user2Id',
   });
 };
-
 module.exports = Pair;

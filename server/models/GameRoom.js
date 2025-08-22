@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
 const GameRoom = sequelize.define('GameRoom', {
   id: {
     type: DataTypes.UUID,
@@ -48,11 +47,19 @@ const GameRoom = sequelize.define('GameRoom', {
     type: DataTypes.ARRAY(DataTypes.UUID),
     allowNull: false,
     defaultValue: [],
+  },
+  gameFormat: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: '1v1',
+  },
+  gameSettings: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    defaultValue: null,
   }
 });
-
 GameRoom.associate = (models) => {
   GameRoom.belongsTo(models.User, { as: 'Host', foreignKey: 'hostId' });
 };
-
 module.exports = GameRoom;

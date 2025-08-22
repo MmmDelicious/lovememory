@@ -1,10 +1,4 @@
-/**
- * Умная система ИИ маскота с персонализацией и контекстом
- * Анализирует поведение пары и генерирует персонализированные сообщения
- */
-
 import api from './api';
-
 class SmartMascotService {
   constructor() {
     this.userContext = {
@@ -17,12 +11,8 @@ class SmartMascotService {
       lastInteractions: [],
       memoryPersistence: new Map()
     };
-    
-    // Загружаем контекст из localStorage
     this.loadUserContext();
   }
-
-  // Загрузка пользовательского контекста
   loadUserContext() {
     try {
       const savedContext = localStorage.getItem('mascot_context');
@@ -34,8 +24,6 @@ class SmartMascotService {
       console.error('Error loading mascot context:', error);
     }
   }
-
-  // Сохранение контекста
   saveUserContext() {
     try {
       localStorage.setItem('mascot_context', JSON.stringify({
@@ -46,8 +34,6 @@ class SmartMascotService {
       console.error('Error saving mascot context:', error);
     }
   }
-
-  // Обновление контекста пользователя
   updateUserContext(userData, partnerData = null) {
     this.userContext.user = userData;
     if (partnerData) {
@@ -55,20 +41,15 @@ class SmartMascotService {
     }
     this.saveUserContext();
   }
-
-  // Обновление событий и активности
   updateRecentActivity(events, stats = {}) {
     this.userContext.recentEvents = events.slice(-10); // Последние 10 событий
     this.userContext.relationshipStats = stats;
     this.saveUserContext();
   }
-
-  // Генерация персонализированных сообщений для прошлых событий
   generatePastMemoryMessage(event) {
     const { user, partner } = this.userContext;
     const userName = user?.name || 'дорогой';
     const partnerName = partner?.name || 'ваш партнер';
-    
     const eventDate = new Date(event.event_date);
     const monthsAgo = Math.floor((new Date() - eventDate) / (1000 * 60 * 60 * 24 * 30));
     const dayName = eventDate.toLocaleDateString('ru-RU', { weekday: 'long' });
@@ -77,45 +58,27 @@ class SmartMascotService {
       day: 'numeric',
       year: eventDate.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
     });
-
     const memoryTemplates = [
-      // Романтические воспоминания
       `${userName}, помните тот волшебный ${dayName}, ${dateStr}? "${event.title}" - это было так прекрасно! ${partnerName} наверняка тоже помнит эти моменты ❤️`,
-      
-      // Ностальгические
       `Эх, как быстро летит время... ${monthsAgo} ${this.getMonthForm(monthsAgo)} назад у вас было "${event.title}". ${partnerName}, наверное, до сих пор улыбается, вспоминая тот день!`,
-      
-      // Интерактивные
       `${userName}, я тут листал ваши воспоминания и наткнулся на "${event.title}" от ${dateStr}. Может, расскажете ${partnerName} что-то особенное из того дня? 😊`,
-      
-      // Мотивирующие
       `Знаете, что меня вдохновляет в ваших отношениях? Такие моменты как "${event.title}" ${monthsAgo} ${this.getMonthForm(monthsAgo)} назад. Давайте создадим еще одно прекрасное воспоминание!`,
-      
-      // Глубокие
       `${userName}, иногда самые дорогие моменты становятся еще ценнее со временем. "${event.title}" ${dateStr} - один из таких. ${partnerName} тоже дорожит этими воспоминаниями ✨`
     ];
-
-    // Выбираем шаблон в зависимости от стиля общения
     const styleIndex = this.getStyleBasedIndex(memoryTemplates.length);
     return memoryTemplates[styleIndex];
   }
-
-  // Генерация креативных напоминаний о будущих событиях
   generateFutureEventMessage(event) {
     const { user, partner } = this.userContext;
     const userName = user?.name || 'дорогой';
     const partnerName = partner?.name || 'ваш партнер';
-    
     const eventDate = new Date(event.event_date);
     const today = new Date();
     const diffTime = eventDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
     const timeOfDay = this.getEventTimeContext(eventDate);
     const dayName = eventDate.toLocaleDateString('ru-RU', { weekday: 'long' });
-
     let futureTemplates = [];
-
     if (diffDays === 0) {
       futureTemplates = [
         `🎉 ${userName}, сегодня тот самый день! "${event.title}" ${timeOfDay}. ${partnerName} уже готовится? Будет незабываемо!`,
@@ -141,62 +104,46 @@ class SmartMascotService {
         `${userName}, я обожаю, как вы планируете время вместе! "${event.title}" будет через ${diffDays} ${this.getDayForm(diffDays)} - есть время добавить изюминку!`,
       ];
     }
-
     const styleIndex = this.getStyleBasedIndex(futureTemplates.length);
     return futureTemplates[styleIndex];
   }
-
-  // Контекстные сообщения на основе активности пары
   generateContextualMessage(context = {}) {
     const { user, partner, relationshipStats } = this.userContext;
     const userName = user?.name || 'дорогой';
     const partnerName = partner?.name || 'ваш партнер';
-
     const contextTemplates = {
-      // После долгого отсутствия активности
       idle: [
         `${userName}, давненько не видел вас с ${partnerName} здесь! Как дела? Может, время запланировать что-то особенное? 💭`,
         `Соскучился по вашим с ${partnerName} приключениям! ${userName}, что нового в ваших отношениях? 😊`,
         `${userName}, помните, что лучшие отношения требуют внимания. Когда в последний раз вы с ${partnerName} делали что-то спонтанное? ✨`,
       ],
-
-      // После активного периода
       active: [
         `${userName}, вы с ${partnerName} просто молодцы! Столько активности - отношения процветают! 🌟`,
         `Обожаю наблюдать за вашими с ${partnerName} приключениями, ${userName}! Вы знаете, как сделать жизнь яркой 🎨`,
         `${userName}, ваша с ${partnerName} энергия заразительна! Продолжайте в том же духе! 💪`,
       ],
-
-      // Поощрение коммуникации
       communication: [
         `${userName}, общение - это основа крепких отношений. Как часто вы с ${partnerName} делитесь своими мыслями? 💬`,
         `Знаете, ${userName}, ${partnerName} наверняка ценит ваши откровенные разговоры. Не стесняйтесь быть собой! 💕`,
         `${userName}, помните: даже простое "как дела?" может укрепить связь с ${partnerName} 🤗`,
       ],
-
-      // Предложения для развития отношений
       growth: [
         `${userName}, а не попробовать ли вам с ${partnerName} что-то новое? Новые опыты сближают! 🌱`,
         `Видел ваши успехи с ${partnerName}, ${userName}! А что если сделать следующий шаг в ваших отношениях? 🚀`,
         `${userName}, рост отношений - это путешествие. Куда бы вы хотели отправиться вместе с ${partnerName}? 🗺️`,
       ]
     };
-
     const contextType = context.type || this.determineContextType();
     const templates = contextTemplates[contextType] || contextTemplates.growth;
     const styleIndex = this.getStyleBasedIndex(templates.length);
-    
     return templates[styleIndex];
   }
-
-  // Определение типа контекста на основе активности
   determineContextType() {
     const { recentEvents, lastInteractions } = this.userContext;
     const now = new Date();
     const recentActivity = recentEvents.filter(event => 
       (now - new Date(event.created_at)) < (7 * 24 * 60 * 60 * 1000) // Последние 7 дней
     );
-
     if (recentActivity.length === 0 && lastInteractions.length === 0) {
       return 'idle';
     } else if (recentActivity.length > 3) {
@@ -207,8 +154,6 @@ class SmartMascotService {
       return 'growth';
     }
   }
-
-  // Анализ языков любви пары
   analyzeLoveLanguages(events, interactions = []) {
     const loveLanguageAnalysis = {
       physical_touch: 0,      // Объятия, прикосновения
@@ -217,58 +162,41 @@ class SmartMascotService {
       acts_of_service: 0,     // Помощь и забота
       receiving_gifts: 0      // Подарки
     };
-
-    // Анализируем события
     events.forEach(event => {
       const title = event.title.toLowerCase();
       const description = (event.description || '').toLowerCase();
       const content = title + ' ' + description;
-
-      // Качественное время
       if (content.includes('свидание') || content.includes('вместе') || 
           content.includes('поход') || content.includes('кино') ||
           content.includes('прогулка') || content.includes('путешествие')) {
         loveLanguageAnalysis.quality_time += 2;
       }
-
-      // Подарки
       if (content.includes('подарок') || content.includes('сюрприз') ||
           content.includes('цветы') || content.includes('покупка')) {
         loveLanguageAnalysis.receiving_gifts += 2;
       }
-
-      // Слова поддержки (чаще в играх и сообщениях)
       if (content.includes('поздравление') || content.includes('поддержка') ||
           content.includes('комплимент') || content.includes('признание')) {
         loveLanguageAnalysis.words_of_affirmation += 2;
       }
-
-      // Помощь и забота
       if (content.includes('помощь') || content.includes('забота') ||
           content.includes('приготовить') || content.includes('убрать')) {
         loveLanguageAnalysis.acts_of_service += 2;
       }
-
-      // Физическая близость
       if (content.includes('обнять') || content.includes('поцелуй') ||
           content.includes('массаж') || content.includes('близость')) {
         loveLanguageAnalysis.physical_touch += 2;
       }
     });
-
-    // Находим доминирующие языки любви
     const sortedLanguages = Object.entries(loveLanguageAnalysis)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 2);
-
     return {
       analysis: loveLanguageAnalysis,
       dominant: sortedLanguages,
       suggestions: this.generateLoveLanguageSuggestions(sortedLanguages)
     };
   }
-
-  // Генерация предложений на основе языков любви
   generateLoveLanguageSuggestions(dominantLanguages) {
     const suggestions = {
       physical_touch: [
@@ -297,25 +225,20 @@ class SmartMascotService {
         "Создайте подарок своими руками"
       ]
     };
-
     return dominantLanguages.map(([language]) => 
       suggestions[language][Math.floor(Math.random() * suggestions[language].length)]
     );
   }
-
-  // Утилиты для форматирования
   getMonthForm(months) {
     if (months === 1) return 'месяц';
     if (months >= 2 && months <= 4) return 'месяца';
     return 'месяцев';
   }
-
   getDayForm(days) {
     if (days === 1) return 'день';
     if (days >= 2 && days <= 4) return 'дня';
     return 'дней';
   }
-
   getEventTimeContext(eventDate) {
     const hour = eventDate.getHours();
     if (hour < 12) return 'утром';
@@ -323,12 +246,9 @@ class SmartMascotService {
     if (hour < 21) return 'вечером';
     return 'ночью';
   }
-
   getStyleBasedIndex(length) {
-    // Распределяем индексы в зависимости от стиля общения
     const { communicationStyle } = this.userContext;
     const random = Math.random();
-
     switch (communicationStyle) {
       case 'romantic':
         return Math.floor(random * Math.min(2, length)); // Более романтичные варианты
@@ -340,35 +260,22 @@ class SmartMascotService {
         return Math.floor(random * length);
     }
   }
-
-  // Запоминание взаимодействий
   recordInteraction(type, data = {}) {
     const interaction = {
       type,
       data,
       timestamp: new Date().toISOString()
     };
-
     this.userContext.lastInteractions.unshift(interaction);
-    
-    // Храним только последние 20 взаимодействий
     if (this.userContext.lastInteractions.length > 20) {
       this.userContext.lastInteractions = this.userContext.lastInteractions.slice(0, 20);
     }
-
     this.saveUserContext();
   }
-
-  // Адаптивное обучение стиля общения
   adaptCommunicationStyle(userReaction) {
     const { communicationStyle } = this.userContext;
-    
-    // Если пользователь позитивно реагирует, усиливаем текущий стиль
-    // Если негативно - пробуем другой
     if (userReaction === 'positive') {
-      // Стиль работает, продолжаем
     } else if (userReaction === 'negative') {
-      // Меняем стиль
       const styles = ['friendly', 'romantic', 'playful', 'wise'];
       const currentIndex = styles.indexOf(communicationStyle);
       const newIndex = (currentIndex + 1) % styles.length;
@@ -377,6 +284,5 @@ class SmartMascotService {
     }
   }
 }
-
 export default new SmartMascotService();
 

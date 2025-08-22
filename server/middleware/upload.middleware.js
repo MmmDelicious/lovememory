@@ -1,21 +1,16 @@
 const multer = require('multer');
 const path = require('path'); // <-- Добавить
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Используем абсолютный путь
     cb(null, path.join(__dirname, '../uploads/'));
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    // Очищаем имя файла от потенциально проблемных символов
     const originalname = file.originalname.replace(/[^a-zA-Z0-9.\-]/g, '');
     cb(null, file.fieldname + '-' + uniqueSuffix + '-' + originalname);
   }
 });
-
 const fileFilter = (req, file, cb) => {
-  // Белый список MIME типов для безопасности
   const allowedMimeTypes = [
     'image/jpeg',
     'image/jpg', 
@@ -23,18 +18,14 @@ const fileFilter = (req, file, cb) => {
     'image/gif',
     'image/webp'
   ];
-  
-  // Белый список расширений
   const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
   const fileExtension = path.extname(file.originalname).toLowerCase();
-  
   if (allowedMimeTypes.includes(file.mimetype) && allowedExtensions.includes(fileExtension)) {
     cb(null, true);
   } else {
     cb(new Error('Поддерживаются только изображения форматов JPEG, PNG, GIF, WebP!'), false);
   }
 };
-
 module.exports = multer({
   storage: storage,
   limits: {

@@ -1,5 +1,4 @@
 const eventService = require('../services/event.service');
-
 exports.getEvents = async (req, res, next) => {
   try {
     const events = await eventService.getEventsForUser(req.user.id);
@@ -8,7 +7,6 @@ exports.getEvents = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.createEvent = async (req, res, next) => {
   try {
     const newEvent = await eventService.createEvent(req.user.id, req.body);
@@ -17,7 +15,6 @@ exports.createEvent = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.updateEvent = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -27,7 +24,6 @@ exports.updateEvent = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.deleteEvent = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -37,7 +33,6 @@ exports.deleteEvent = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.uploadFile = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -47,7 +42,6 @@ exports.uploadFile = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.getMediaForEvent = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -57,7 +51,6 @@ exports.getMediaForEvent = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.moveMediaToEvent = async (req, res, next) => {
   try {
     const { mediaId } = req.params;

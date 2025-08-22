@@ -47,7 +47,6 @@ const ENGLISH_WORDS = [
     "beast", "worry", "ivory", "split", "slave", "hedge", "lotus", "shaft", "cargo", "prose", 
     "altar", "small", "flash", "piper", "quest", "quota", "catch", "torch", "slice", "feast"
   ];
-  
   const RUSSIAN_WORDS = [
     "абаза", "аббат", "аборт", "абрек", "абрис", "аванс", "авгур", "авеню", "авизо", "авось", 
   "автор", "агава", "агама", "агата", "агент", "агиас", "агнат", "агонь", "аграф", "адепт", 
@@ -224,25 +223,21 @@ const ENGLISH_WORDS = [
     "ЦИЛИНДР", "ПОРШЕНЬ", "ТУРБИНА", "РЕАКТОР", "ГЕНЕРАТОР", "БАТАРЕЯ", "ДИОД", "ЧИП", "ПЛАТА", "ПАМЯТЬ",
     "ПРОЦЕССОР"
   ];
-  
   const getDictionary = (language = 'russian') => {
     return language === 'english' ? ENGLISH_WORDS : RUSSIAN_WORDS;
   };
-  
   const getRandomWord = (language = 'russian', previousWord = null) => {
     const words = getDictionary(language);
     let newWord = words[Math.floor(Math.random() * words.length)];
-  
     while (newWord === previousWord) {
       newWord = words[Math.floor(Math.random() * words.length)];
     }
-  
     return newWord || (language === 'english' ? 'world' : 'слово');
   };
-  
   export {
     getDictionary,
     getRandomWord,
     ENGLISH_WORDS,
     RUSSIAN_WORDS
   };
+

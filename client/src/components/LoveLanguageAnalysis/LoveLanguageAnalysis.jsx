@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import styles from './LoveLanguageAnalysis.module.css';
 import smartMascotService from '../../services/smartMascot.service';
 import { FaHeart, FaClock, FaComments, FaHandsHelping, FaGift, FaChartPie, FaLightbulb } from 'react-icons/fa';
-
 const LOVE_LANGUAGES = {
   physical_touch: {
     name: 'Прикосновения',
@@ -35,17 +34,14 @@ const LOVE_LANGUAGES = {
     description: 'Выражение любви через внимательные подарки и сюрпризы'
   }
 };
-
 const LoveLanguageAnalysis = ({ events = [], interactions = [], user = null }) => {
   const [analysis, setAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
-
   useEffect(() => {
     const performAnalysis = async () => {
       setIsLoading(true);
       try {
-        // Используем умный сервис для анализа языков любви
         const loveLanguageData = smartMascotService.analyzeLoveLanguages(events, interactions);
         setAnalysis(loveLanguageData);
       } catch (error) {
@@ -54,14 +50,12 @@ const LoveLanguageAnalysis = ({ events = [], interactions = [], user = null }) =
         setIsLoading(false);
       }
     };
-
     if (events.length > 0) {
       performAnalysis();
     } else {
       setIsLoading(false);
     }
   }, [events, interactions]);
-
   if (isLoading) {
     return (
       <div className={styles.container}>
@@ -76,7 +70,6 @@ const LoveLanguageAnalysis = ({ events = [], interactions = [], user = null }) =
       </div>
     );
   }
-
   if (!analysis || Object.values(analysis.analysis).every(value => value === 0)) {
     return (
       <div className={styles.container}>
@@ -91,10 +84,8 @@ const LoveLanguageAnalysis = ({ events = [], interactions = [], user = null }) =
       </div>
     );
   }
-
   const totalScore = Object.values(analysis.analysis).reduce((sum, value) => sum + value, 0);
   const maxScore = Math.max(...Object.values(analysis.analysis));
-
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -102,14 +93,12 @@ const LoveLanguageAnalysis = ({ events = [], interactions = [], user = null }) =
         <h3>Ваши языки любви</h3>
         <p>Как вы выражаете и принимаете любовь</p>
       </div>
-
       <div className={styles.languagesGrid}>
         {Object.entries(LOVE_LANGUAGES).map(([key, language]) => {
           const score = analysis.analysis[key] || 0;
           const percentage = totalScore > 0 ? Math.round((score / totalScore) * 100) : 0;
           const isTopLanguage = score === maxScore && score > 0;
           const IconComponent = language.icon;
-
           return (
             <div 
               key={key}
@@ -121,7 +110,6 @@ const LoveLanguageAnalysis = ({ events = [], interactions = [], user = null }) =
                 <IconComponent />
                 {isTopLanguage && <div className={styles.topBadge}>Топ</div>}
               </div>
-              
               <div className={styles.languageInfo}>
                 <h4>{language.name}</h4>
                 <div className={styles.scoreBar}>
@@ -139,7 +127,6 @@ const LoveLanguageAnalysis = ({ events = [], interactions = [], user = null }) =
           );
         })}
       </div>
-
       {selectedLanguage && (
         <div className={styles.languageDetails}>
           <div className={styles.detailsHeader}>
@@ -152,21 +139,18 @@ const LoveLanguageAnalysis = ({ events = [], interactions = [], user = null }) =
             <h4>{LOVE_LANGUAGES[selectedLanguage].name}</h4>
           </div>
           <p>{LOVE_LANGUAGES[selectedLanguage].description}</p>
-          
           <div className={styles.score}>
             <span>Ваш показатель: </span>
             <strong>{analysis.analysis[selectedLanguage]} баллов</strong>
           </div>
         </div>
       )}
-
       {analysis.dominant.length > 0 && (
         <div className={styles.insights}>
           <div className={styles.insightsHeader}>
             <FaLightbulb className={styles.insightsIcon} />
             <h4>Персональные рекомендации</h4>
           </div>
-          
           <div className={styles.dominantLanguages}>
             <h5>Ваши основные языки любви:</h5>
             <div className={styles.dominantList}>
@@ -181,7 +165,6 @@ const LoveLanguageAnalysis = ({ events = [], interactions = [], user = null }) =
               ))}
             </div>
           </div>
-
           {analysis.suggestions.length > 0 && (
             <div className={styles.suggestions}>
               <h5>Рекомендации для укрепления отношений:</h5>
@@ -196,7 +179,6 @@ const LoveLanguageAnalysis = ({ events = [], interactions = [], user = null }) =
           )}
         </div>
       )}
-
       <div className={styles.footer}>
         <p className={styles.footerText}>
           💡 Понимание языков любви поможет вам лучше выражать чувства и понимать потребности партнера
@@ -205,6 +187,5 @@ const LoveLanguageAnalysis = ({ events = [], interactions = [], user = null }) =
     </div>
   );
 };
-
 export default LoveLanguageAnalysis;
 

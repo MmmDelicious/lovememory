@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import styles from './EventTemplateModal.module.css';
-
 interface EventTemplateModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (templateData: EventTemplateData) => Promise<void>;
   editingTemplate?: EventTemplateData | null;
 }
-
 export interface EventTemplateData {
   id?: string;
   name: string;
@@ -24,7 +22,6 @@ export interface EventTemplateData {
   default_recurrence_rule: any;
   tags: string[];
 }
-
 const EVENT_TYPES = [
   { value: 'custom', label: 'Пользовательский' },
   { value: 'plan', label: 'План' },
@@ -36,7 +33,6 @@ const EVENT_TYPES = [
   { value: 'gift', label: 'Подарок' },
   { value: 'deadline', label: 'Дедлайн' }
 ];
-
 const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
   isOpen,
   onClose,
@@ -57,10 +53,8 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
     default_recurrence_rule: null,
     tags: []
   });
-
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-
   useEffect(() => {
     if (editingTemplate) {
       setFormData({
@@ -85,29 +79,22 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
     }
     setErrors({});
   }, [editingTemplate, isOpen]);
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
     if (!formData.name.trim()) {
       newErrors.name = 'Название обязательно';
     }
-
     if (formData.duration_minutes < 5 || formData.duration_minutes > 1440) {
       newErrors.duration_minutes = 'От 5 минут до 24 часов';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) {
       return;
     }
-
     setIsLoading(true);
     try {
       await onSave(formData);
@@ -118,16 +105,13 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
       setIsLoading(false);
     }
   };
-
   const handleInputChange = (field: keyof EventTemplateData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
-
   if (!isOpen) return null;
-
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -137,7 +121,6 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
             <FaTimes />
           </button>
         </div>
-
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.content}>
             <div className={styles.row}>
@@ -152,7 +135,6 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
                 />
                 {errors.name && <span className={styles.errorText}>{errors.name}</span>}
               </div>
-
               <div className={styles.field}>
                 <label>Тип события</label>
                 <select
@@ -167,7 +149,6 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
                 </select>
               </div>
             </div>
-
             <div className={styles.row}>
               <div className={styles.field}>
                 <label>Цвет</label>
@@ -178,7 +159,6 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
                   className={styles.colorInput}
                 />
               </div>
-
               <div className={styles.field}>
                 <label>Заголовок по умолчанию</label>
                 <input
@@ -189,7 +169,6 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
                 />
               </div>
             </div>
-
             <div className={styles.row}>
               <div className={styles.checkboxGroup}>
                 <label className={styles.checkbox}>
@@ -200,7 +179,6 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
                   />
                   Весь день
                 </label>
-
                 <label className={styles.checkbox}>
                   <input
                     type="checkbox"
@@ -210,7 +188,6 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
                   Общий
                 </label>
               </div>
-
               {!formData.is_all_day && (
                 <div className={styles.field}>
                   <label>Длительность (мин)</label>
@@ -227,7 +204,6 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
               )}
             </div>
           </div>
-
           <div className={styles.actions}>
             <button type="button" onClick={onClose} className={styles.cancelButton}>
               Отмена
@@ -245,5 +221,4 @@ const EventTemplateModal: React.FC<EventTemplateModalProps> = ({
     </div>
   );
 };
-
 export default EventTemplateModal;

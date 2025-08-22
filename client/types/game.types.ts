@@ -102,9 +102,74 @@ export interface Player {
     board: (string | null)[];
     symbols: Record<string, 'X' | 'O'>;
   }
+
+  // Карта Codenames
+  export interface CodenamesCard {
+    id: number;
+    word: string;
+    type: 'red' | 'blue' | 'neutral' | 'assassin' | null;
+    revealed: boolean;
+  }
+
+  // Команда в Codenames
+  export interface CodenamesTeam {
+    captain: string;
+    player: string;
+    name: string;
+    color: string;
+  }
+
+  // Роль игрока в Codenames
+  export interface CodenamesPlayerRole {
+    team: 'team1' | 'team2';
+    role: 'captain' | 'player';
+  }
+
+  // Прогресс команды в Codenames
+  export interface CodenamesTeamProgress {
+    total: number;
+    revealed: number;
+  }
+
+  // Запись в истории игры Codenames
+  export interface CodenamesHistoryEntry {
+    type: 'clue' | 'guess' | 'pass';
+    team: 'team1' | 'team2';
+    player: string;
+    clue?: string;
+    number?: number;
+    cardId?: number;
+    word?: string;
+    cardType?: string;
+    timestamp: string;
+  }
+
+  // Состояние игры Codenames
+  export interface CodenamesGameState extends BaseGameState {
+    currentTeam: 'team1' | 'team2';
+    currentPhase: 'giving_clue' | 'guessing';
+    currentPlayer: string;
+    teams: Record<string, CodenamesTeam>;
+    board: CodenamesCard[];
+    currentClue: string | null;
+    currentClueNumber: number;
+    guessesLeft: number;
+    canPass: boolean;
+    teamProgress: Record<string, CodenamesTeamProgress>;
+    gameHistory: CodenamesHistoryEntry[];
+    playerRole: CodenamesPlayerRole;
+  }
+
+  // Ход в Codenames
+  export interface CodenamesMove {
+    type: 'give_clue' | 'guess' | 'pass';
+    clueWord?: string;
+    clueNumber?: number;
+    cardId?: number;
+  }
   
   // Объединенный тип состояния игры
-  export type GameState = PokerGameState | QuizGameState | ChessGameState | TicTacToeGameState;
+  export type GameState = PokerGameState | QuizGameState | ChessGameState | TicTacToeGameState | CodenamesGameState;
   
   // Типы ходов
   export interface ChessMove {
@@ -118,7 +183,7 @@ export interface Player {
     value?: number;
   }
   
-  export type GameMove = ChessMove | PokerMove | number; // number для TicTacToe и Quiz
+  export type GameMove = ChessMove | PokerMove | CodenamesMove | number; // number для TicTacToe и Quiz
   
   // Комната игры
   export interface GameRoom {

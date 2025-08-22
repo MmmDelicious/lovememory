@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Platform } 
 export default function MascotOverlay() {
   const [visible, setVisible] = useState(true);
   const [message] = useState<string>(
-    'Привет! Я здесь, чтобы помочь. Открой Игры и залетай в комнату ♠️♥️'
+    'Привет! Я здесь, чтобы помочь. Открой Игры и залетай в комнату!'
   );
 
   const translate = useRef(new Animated.Value(40)).current;
@@ -35,7 +35,7 @@ export default function MascotOverlay() {
       style={[styles.container, { opacity, transform: [{ translateY: translate }] }]}
     >
       <TouchableOpacity style={styles.avatar} onPress={() => setVisible(false)} activeOpacity={0.8}>
-        <Text style={styles.avatarEmoji}>🤖</Text>
+        <Text style={styles.avatarEmoji}>AI</Text>
       </TouchableOpacity>
       <View style={styles.bubble}>
         <Text style={styles.text}>{message}</Text>

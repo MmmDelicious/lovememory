@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from './Skeleton.module.css';
-
 interface SkeletonProps {
   variant?: 'text' | 'avatar' | 'card' | 'rectangular';
   width?: string | number;
@@ -9,7 +8,6 @@ interface SkeletonProps {
   className?: string;
   rounded?: boolean;
 }
-
 const Skeleton: React.FC<SkeletonProps> = ({
   variant = 'text',
   width,
@@ -20,16 +18,12 @@ const Skeleton: React.FC<SkeletonProps> = ({
 }) => {
   const getSkeletonStyle = () => {
     const style: React.CSSProperties = {};
-    
     if (width) style.width = typeof width === 'number' ? `${width}px` : width;
     if (height) style.height = typeof height === 'number' ? `${height}px` : height;
-    
     return style;
   };
-
   const getSkeletonClass = () => {
     let classes = styles.skeleton;
-    
     switch (variant) {
       case 'avatar':
         classes += ` ${styles.avatar}`;
@@ -43,13 +37,10 @@ const Skeleton: React.FC<SkeletonProps> = ({
       default:
         classes += ` ${styles.text}`;
     }
-    
     if (rounded) classes += ` ${styles.rounded}`;
     if (className) classes += ` ${className}`;
-    
     return classes;
   };
-
   if (count === 1) {
     return (
       <div 
@@ -58,7 +49,6 @@ const Skeleton: React.FC<SkeletonProps> = ({
       />
     );
   }
-
   return (
     <div className={styles.container}>
       {Array.from({ length: count }, (_, index) => (
@@ -71,28 +61,21 @@ const Skeleton: React.FC<SkeletonProps> = ({
     </div>
   );
 };
-
-// Предустановленные компоненты скелетонов
 export const SkeletonText: React.FC<{ lines?: number; width?: string }> = ({ 
   lines = 3, 
   width 
 }) => (
   <Skeleton variant="text" count={lines} width={width} />
 );
-
 export const SkeletonAvatar: React.FC<{ size?: number }> = ({ size = 40 }) => (
   <Skeleton variant="avatar" width={size} height={size} />
 );
-
 export const SkeletonCard: React.FC<{ height?: number }> = ({ height = 200 }) => (
   <Skeleton variant="card" height={height} />
 );
-
 export const SkeletonButton: React.FC<{ width?: number }> = ({ width = 120 }) => (
   <Skeleton variant="rectangular" width={width} height={40} rounded />
 );
-
-// Комплексные скелетоны
 export const SkeletonUserCard: React.FC = () => (
   <div className={styles.userCard}>
     <SkeletonAvatar size={48} />
@@ -102,7 +85,6 @@ export const SkeletonUserCard: React.FC = () => (
     </div>
   </div>
 );
-
 export const SkeletonEventCard: React.FC = () => (
   <div className={styles.eventCard}>
     <Skeleton variant="card" height={120} />
@@ -113,7 +95,6 @@ export const SkeletonEventCard: React.FC = () => (
     </div>
   </div>
 );
-
 export const SkeletonGameCard: React.FC = () => (
   <div className={styles.gameCard}>
     <Skeleton variant="rectangular" height={100} />
@@ -127,5 +108,5 @@ export const SkeletonGameCard: React.FC = () => (
     </div>
   </div>
 );
-
 export default Skeleton;
+

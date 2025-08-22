@@ -1,0 +1,768 @@
+/* Codenames Game Styles */
+
+.gameContainer {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--space-3);
+  height: 100vh;
+  width: 100vw;
+  padding: var(--space-3);
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+.gameMainArea {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding: 0 4px;
+  justify-content: flex-start;
+}
+
+/* Чаты команд */
+.teamChat {
+  grid-row: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  border: 3px solid;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.teamChatRed {
+  grid-column: 1;
+  border-color: #dc2626;
+}
+
+.teamChatBlue {
+  grid-column: 3;
+  border-color: #2563eb;
+}
+
+.teamChatHeader {
+  padding: var(--space-3);
+  color: white;
+  font-weight: 700;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.teamChatHeaderRed {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.teamChatHeaderBlue {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.teamChatMembers {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.teamChatMember {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) 0;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.teamChatMemberRole {
+  font-weight: 600;
+  min-width: 50px;
+}
+
+.teamChatMessages {
+  flex: 1;
+  padding: var(--space-2);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.teamChatMessage {
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-background);
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  color: var(--color-text-primary);
+}
+
+.teamChatInput {
+  padding: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.teamChatInputField {
+  width: 100%;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: 0.85rem;
+}
+
+.teamChatInputField:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* Информация о командах */
+.teamsInfo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.teamInfo {
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  padding: var(--space-2);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.teamInfo.currentTeam {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.teamHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-md);
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.teamHeader.teamred {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.teamHeader.teamblue {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.teamProgress {
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-md);
+}
+
+.teamMembers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.teamMember {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+}
+
+.role {
+  font-weight: 500;
+  min-width: 60px;
+}
+
+.playerName {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.youLabel {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Таймер */
+.timerSection {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-4);
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--border-radius-lg);
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.timer.timerWarning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+
+.timer.timerCritical {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  animation: pulse 0.5s ease-in-out infinite alternate;
+}
+
+.timerIcon {
+  font-size: 1.2rem;
+}
+
+.timerText {
+  font-size: 1.1rem;
+}
+
+/* Сообщения об ошибках */
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: linear-gradient(135deg, #fecaca 0%, #fee2e2 100%);
+  border: 2px solid #ef4444;
+  color: #dc2626;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--space-4);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+
+.errorIcon {
+  font-size: 1.1rem;
+}
+
+/* Текущая подсказка */
+.currentClue {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, rgba(217, 122, 108, 0.05) 100%);
+  border: 2px solid var(--color-primary);
+  padding: var(--space-4);
+  border-radius: var(--border-radius);
+  color: var(--color-text-primary);
+  font-size: 1.1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.guessesLeft {
+  margin-left: auto;
+  background: var(--color-primary);
+  color: white;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--border-radius-md);
+  font-weight: 600;
+}
+
+/* Игровое поле */
+.gameBoard {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  background: var(--color-background);
+  padding: 12px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+  max-height: 70vh;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card {
+  aspect-ratio: 1.6;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  text-align: center;
+  padding: 8px 6px;
+  height: 90px;
+}
+
+.card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 0 2px var(--color-primary);
+  z-index: 1;
+}
+
+.card:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.cardClickable {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, rgba(217, 122, 108, 0.1) 100%);
+}
+
+.cardClickable:hover {
+  border-color: var(--color-primary-hover);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Открытые карты */
+.cardRevealed {
+  border-width: 3px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.cardRed {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-color: #b91c1c;
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+}
+
+.cardBlue {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #1d4ed8;
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+}
+
+.cardNeutral {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  border-color: #4b5563;
+  color: white;
+  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+}
+
+.cardAssassin {
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+  border-color: #111827;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(220, 38, 38, 0.4);
+}
+
+/* Подсказки для капитанов - яркие и четкие цвета */
+.cardRedHint {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-color: #b91c1c;
+  color: white;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+}
+
+.cardBlueHint {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #1d4ed8;
+  color: white;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 8px rgba(37, 99, 235, 0.4);
+}
+
+.cardNeutralHint {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  border-color: #4b5563;
+  color: white;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 8px rgba(107, 114, 128, 0.3);
+}
+
+.cardAssassinHint {
+  background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+  border-color: #111827;
+  color: white;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.5), 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.cardWord {
+  font-size: 0.9rem;
+  line-height: 1.1;
+  max-width: 100%;
+  word-wrap: break-word;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cardTypeIndicator {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+  font-size: 1.2rem;
+}
+
+/* Панель действий */
+.actionsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--color-surface);
+  padding: var(--space-3);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+
+
+.passButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-text-tertiary);
+  color: white;
+  border: none;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
+}
+
+.passButton:hover {
+  background: var(--color-text-secondary);
+  transform: translateY(-1px);
+}
+
+.turnInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+  background: var(--color-primary-light);
+  border-radius: var(--border-radius);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  text-align: center;
+}
+
+.captainHint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: linear-gradient(135deg, rgba(217, 122, 108, 0.2) 0%, rgba(217, 122, 108, 0.1) 100%);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--border-radius);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  align-self: flex-start;
+  box-shadow: 0 2px 8px rgba(217, 122, 108, 0.2);
+  animation: captainGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes captainGlow {
+  0% {
+    box-shadow: 0 2px 8px rgba(217, 122, 108, 0.2);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(217, 122, 108, 0.4);
+  }
+}
+
+/* История ходов */
+.gameHistory {
+  background: var(--color-surface);
+  padding: var(--space-2);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 1;
+  min-height: 0;
+}
+
+.gameHistory h4 {
+  margin: 0 0 var(--space-1) 0;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.historyEntry {
+  padding: var(--space-1);
+  background: var(--color-background);
+  border-radius: var(--border-radius-md);
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  border-left: 2px solid var(--color-border);
+}
+
+/* Окончание игры */
+.gameFinished {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-6);
+  background: var(--color-background);
+}
+
+.resultCard {
+  background: var(--color-surface);
+  padding: var(--space-8);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-xl);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  border: 3px solid var(--color-primary);
+}
+
+.resultIcon {
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
+  display: flex;
+  justify-content: center;
+}
+
+.resultTitle {
+  font-size: 2rem;
+  margin: 0 0 var(--space-3) 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+}
+
+.resultText {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-6) 0;
+}
+
+.returnButton {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: var(--space-4) var(--space-6);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.returnButton:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .gameContainer {
+    grid-template-columns: 200px 1fr 200px;
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+  
+  .teamChat {
+    font-size: 0.8rem;
+  }
+  
+  .teamChatHeader {
+    padding: var(--space-2);
+    font-size: 1rem;
+  }
+  
+  .teamChatMembers {
+    padding: var(--space-1);
+  }
+  
+  .teamChatMessages {
+    padding: var(--space-1);
+  }
+}
+
+@media (max-width: 768px) {
+  .gameContainer {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .teamChat {
+    grid-row: auto;
+    height: 150px;
+  }
+  
+  .teamChatRed {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  
+  .teamChatBlue {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  
+  .gameMainArea {
+    grid-column: 1;
+    grid-row: 3;
+    padding: 0;
+  }
+
+  .teamsInfo {
+    display: none; /* Скрываем, так как информация есть в чатах */
+  }
+
+  .gameBoard {
+    gap: var(--space-1);
+    padding: var(--space-2);
+  }
+
+  .card {
+    font-size: 0.7rem;
+    padding: var(--space-1);
+    aspect-ratio: 1.2;
+  }
+
+  .cardWord {
+    font-size: 0.7rem;
+  }
+
+  .clueForm {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .clueInput {
+    min-width: unset;
+  }
+
+  .actionsPanel {
+    padding: var(--space-2);
+  }
+
+  .currentClue {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .guessesLeft {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+
+  .historyList {
+    max-height: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gameBoard {
+    gap: var(--space-1);
+    padding: var(--space-3);
+  }
+
+  .card {
+    font-size: 0.7rem;
+    aspect-ratio: 1.2;
+  }
+
+  .cardWord {
+    font-size: 0.7rem;
+    line-height: 1.1;
+  }
+
+  .teamHeader {
+    flex-direction: column;
+    gap: var(--space-2);
+    text-align: center;
+  }
+
+  .resultCard {
+    padding: var(--space-6);
+  }
+
+  .resultTitle {
+    font-size: 1.5rem;
+  }
+}
+
+/* Анимации */
+@keyframes cardReveal {
+  0% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(90deg);
+  }
+  100% {
+    transform: rotateY(0deg);
+  }
+}
+
+.cardRevealed {
+  animation: cardReveal 0.6s ease-in-out;
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: var(--shadow-md);
+  }
+  50% {
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+.currentTeam {
+  animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+

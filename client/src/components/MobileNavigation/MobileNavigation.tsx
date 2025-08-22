@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { Home, Gamepad2, BarChart3, User, Calendar, Gift, BookOpen } from 'lucide-react';
 import styles from './MobileNavigation.module.css';
-
 interface MobileNavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
-
 const MobileNavigation: React.FC<MobileNavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
     {
@@ -40,14 +38,12 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ activeTab, onTabCha
       icon: User
     }
   ];
-
   return (
     <div className={styles.mobileNav}>
       <div className={styles.navContainer}>
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
-          
           return (
             <button
               key={tab.id}
@@ -68,5 +64,4 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ activeTab, onTabCha
     </div>
   );
 };
-
 export default MobileNavigation;

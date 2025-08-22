@@ -12,7 +12,6 @@ import {
   Award
 } from 'lucide-react';
 import styles from './MobileInsights.module.css';
-
 const mockData = {
   harmonyScore: 87,
   previousScore: 82,
@@ -34,7 +33,6 @@ const mockData = {
     gaming: 15
   }
 };
-
 const PSYCHOLOGY_QUOTES = [
   {
     author: 'Джон Готтман',
@@ -55,24 +53,20 @@ const PSYCHOLOGY_QUOTES = [
     category: 'goals'
   }
 ];
-
 const MobileInsights: React.FC = () => {
   const [currentQuote, setCurrentQuote] = useState(PSYCHOLOGY_QUOTES[0]);
-
   const getRandomQuote = () => {
     const randomQuote = PSYCHOLOGY_QUOTES[Math.floor(Math.random() * PSYCHOLOGY_QUOTES.length)];
     setCurrentQuote(randomQuote);
   };
-
   return (
     <div className={styles.mobileInsights}>
-      {/* Header */}
+      {}
       <div className={styles.header}>
         <h1>Аналитика отношений 📊</h1>
         <p>Отслеживайте прогресс вашей пары</p>
       </div>
-
-      {/* Harmony Score */}
+      {}
       <div className={styles.harmonyCard}>
         <div className={styles.cardHeader}>
           <div className={styles.cardIcon}>
@@ -83,19 +77,16 @@ const MobileInsights: React.FC = () => {
             <p>Общая оценка отношений</p>
           </div>
         </div>
-        
         <div className={styles.scoreDisplay}>
           <div className={styles.scoreCircle}>
             <span className={styles.scoreNumber}>{mockData.harmonyScore}</span>
             <span className={styles.scoreMax}>/100</span>
           </div>
-          
           <div className={styles.scoreTrend}>
             <TrendingUp size={16} />
             <span>+{mockData.harmonyScore - mockData.previousScore} за месяц</span>
           </div>
         </div>
-
         <div className={styles.comparisonSection}>
           <div className={styles.rankDisplay}>
             <Target size={20} />
@@ -104,8 +95,7 @@ const MobileInsights: React.FC = () => {
           <p>Ваша гармония выше, чем у {100 - mockData.comparisons.harmonyRank}% других пар</p>
         </div>
       </div>
-
-      {/* Activities */}
+      {}
       <div className={styles.activitiesCard}>
         <div className={styles.cardHeader}>
           <div className={styles.cardIcon}>
@@ -115,7 +105,6 @@ const MobileInsights: React.FC = () => {
             <h3>Активности за месяц</h3>
           </div>
         </div>
-        
         <div className={styles.activitiesGrid}>
           <div className={styles.activityItem}>
             <div className={styles.activityIcon}>📅</div>
@@ -125,7 +114,6 @@ const MobileInsights: React.FC = () => {
               <span className={styles.activityRank}>Топ {mockData.comparisons.eventsRank}%</span>
             </div>
           </div>
-          
           <div className={styles.activityItem}>
             <div className={styles.activityIcon}>🎮</div>
             <div className={styles.activityContent}>
@@ -134,7 +122,6 @@ const MobileInsights: React.FC = () => {
               <span className={styles.activityRank}>Топ {mockData.comparisons.gamesRank}%</span>
             </div>
           </div>
-          
           <div className={styles.activityItem}>
             <div className={styles.activityIcon}>💬</div>
             <div className={styles.activityContent}>
@@ -143,7 +130,6 @@ const MobileInsights: React.FC = () => {
               <span className={styles.activityRank}>Топ {mockData.comparisons.messagesRank}%</span>
             </div>
           </div>
-          
           <div className={styles.activityItem}>
             <div className={styles.activityIcon}>📸</div>
             <div className={styles.activityContent}>
@@ -154,8 +140,7 @@ const MobileInsights: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Weekly Progress */}
+      {}
       <div className={styles.progressCard}>
         <div className={styles.cardHeader}>
           <div className={styles.cardIcon}>
@@ -166,7 +151,6 @@ const MobileInsights: React.FC = () => {
             <p>Ваши достижения</p>
           </div>
         </div>
-        
         <div className={styles.progressGrid}>
           <div className={styles.progressItem}>
             <span className={styles.progressNumber}>+{mockData.weeklyProgress.communication}%</span>
@@ -182,8 +166,7 @@ const MobileInsights: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Psychology Quote */}
+      {}
       <div className={styles.quoteCard}>
         <div className={styles.cardHeader}>
           <div className={styles.cardIcon}>
@@ -193,18 +176,15 @@ const MobileInsights: React.FC = () => {
             <h3>Совет от психолога</h3>
           </div>
         </div>
-        
         <div className={styles.quoteContent}>
           <blockquote className={styles.quote}>
             "{currentQuote.text}"
           </blockquote>
           <cite className={styles.quoteAuthor}>— {currentQuote.author}</cite>
-          
           <div className={styles.quoteAdvice}>
             <h4>💡 Практический совет:</h4>
             <p>{currentQuote.advice}</p>
           </div>
-          
           <button 
             className={styles.newQuoteButton}
             onClick={getRandomQuote}
@@ -213,8 +193,7 @@ const MobileInsights: React.FC = () => {
           </button>
         </div>
       </div>
-
-      {/* Recommendations */}
+      {}
       <div className={styles.recommendationsCard}>
         <div className={styles.cardHeader}>
           <div className={styles.cardIcon}>
@@ -225,7 +204,6 @@ const MobileInsights: React.FC = () => {
             <p>На основе ваших данных</p>
           </div>
         </div>
-        
         <div className={styles.recommendationsList}>
           <div className={styles.recommendationItem}>
             <div className={styles.recommendationIcon}>🎮</div>
@@ -234,7 +212,6 @@ const MobileInsights: React.FC = () => {
               <p>Вы в топ-{mockData.comparisons.gamesRank}% пар по играм. Попробуйте новые игры для разнообразия.</p>
             </div>
           </div>
-          
           <div className={styles.recommendationItem}>
             <div className={styles.recommendationIcon}>💬</div>
             <div className={styles.recommendationContent}>
@@ -242,7 +219,6 @@ const MobileInsights: React.FC = () => {
               <p>Ваше общение в топ-{mockData.comparisons.messagesRank}%. Попробуйте делиться эмоциями чаще.</p>
             </div>
           </div>
-          
           <div className={styles.recommendationItem}>
             <div className={styles.recommendationIcon}>📅</div>
             <div className={styles.recommendationContent}>
@@ -252,8 +228,7 @@ const MobileInsights: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Premium Upgrade */}
+      {}
       <div className={styles.premiumCard}>
         <div className={styles.premiumIcon}>
           <Crown size={32} />
@@ -267,5 +242,4 @@ const MobileInsights: React.FC = () => {
     </div>
   );
 };
-
 export default MobileInsights;

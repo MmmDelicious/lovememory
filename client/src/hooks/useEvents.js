@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { eventService } from '../services';
-
-// Тёплая палитра под общий дизайн (без холодных синих/зеленых)
 export const EVENT_TYPE_COLORS = {
   plan: '#D97A6C',        // основной тёплый терракотовый
   memory: '#C78986',      // тёплый пыльно-розовый
@@ -12,24 +10,14 @@ export const EVENT_TYPE_COLORS = {
   gift: '#E0B070',        // тёплое золото
   deadline: '#9C7CA5'    // приглушенный лиловый
 };
-
 const formatTime = (date) => new Date(date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-
 const formatEvent = (event, userId) => {
   if (!event) return null;
-  
-  // Filter out accidental date-labelled events like "7 июля"
   const title = (event.title || '').trim();
   const isDateLikeTitle = /^(\d{1,2})\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)$/i.test(title);
   if (isDateLikeTitle) return null;
-
-  // Улучшенная логика определения событий без времени
   const startDate = new Date(event.event_date);
   const endDate = event.end_date ? new Date(event.end_date) : null;
-  
-  // Событие считается allDay если:
-  // 1. Время начала 00:00 UTC
-  // 2. Время окончания 00:00 UTC (если есть) или отсутствует
   const isStartMidnight = startDate.getUTCHours() === 0 && 
                          startDate.getUTCMinutes() === 0 && 
                          startDate.getUTCSeconds() === 0;
@@ -37,9 +25,7 @@ const formatEvent = (event, userId) => {
                        (endDate.getUTCHours() === 0 && 
                         endDate.getUTCMinutes() === 0 && 
                         endDate.getUTCSeconds() === 0);
-  
   const hasTime = !isStartMidnight || !isEndMidnight;
-  
   let timeRange = null;
   if (event.event_date) {
     const startTime = formatTime(event.event_date);
@@ -50,19 +36,12 @@ const formatEvent = (event, userId) => {
       timeRange = startTime;
     }
   }
-
-  // Обработка конечной даты для FullCalendar
   let endForCalendar = event.end_date;
-  
-  // Если это событие на весь день и есть конечная дата
   if (!hasTime && endDate) {
-    // Для allDay событий FullCalendar использует exclusive end date
-    // Поэтому добавляем 1 день к конечной дате
     const exclusiveEndDate = new Date(endDate);
     exclusiveEndDate.setDate(exclusiveEndDate.getDate() + 1);
     endForCalendar = exclusiveEndDate.toISOString();
   }
-
   return {
     id: event.id,
     title: event.title,
@@ -82,13 +61,11 @@ const formatEvent = (event, userId) => {
     }
   };
 };
-
 export const useEvents = (userId) => {
   const [rawEvents, setRawEvents] = useState([]);
   const [formattedEvents, setFormattedEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const fetchEvents = useCallback(async () => {
     if (!userId) {
       setIsLoading(false);
@@ -108,39 +85,32 @@ export const useEvents = (userId) => {
       setIsLoading(false);
     }
   }, [userId]);
-
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
-
   const createEvent = async (eventData) => {
     const response = await eventService.createEvent(eventData);
     const newEvent = response.data;
     const formattedNewEvent = formatEvent(newEvent, userId);
-    
     setRawEvents(prev => [...prev, newEvent]);
     if (formattedNewEvent) {
       setFormattedEvents(prev => [...prev, formattedNewEvent]);
     }
   };
-
   const updateEvent = async (eventId, eventData) => {
     const response = await eventService.updateEvent(eventId, eventData);
     const updatedEvent = response.data;
     const formattedUpdatedEvent = formatEvent(updatedEvent, userId);
-
     setRawEvents(prev => prev.map(e => e.id === eventId ? updatedEvent : e));
     if (formattedUpdatedEvent) {
       setFormattedEvents(prev => prev.map(e => e.id === eventId ? formattedUpdatedEvent : e));
     }
   };
-
   const deleteEvent = async (eventId) => {
     await eventService.deleteEvent(eventId);
     setRawEvents(prev => prev.filter(e => e.id !== eventId));
     setFormattedEvents(prev => prev.filter(e => e.id !== eventId));
   };
-
   return { 
     events: formattedEvents, 
     isLoading, 

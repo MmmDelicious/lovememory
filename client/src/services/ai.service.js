@@ -1,5 +1,4 @@
 import api from './api';
-
 export const askAI = async (prompt, context) => {
   try {
     const response = await api.post('/ai/chat', { prompt, context });

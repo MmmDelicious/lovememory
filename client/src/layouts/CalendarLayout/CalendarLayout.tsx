@@ -1,11 +1,9 @@
 import React, { ReactNode } from 'react';
 import styles from './CalendarLayout.module.css';
-
 interface CalendarLayoutProps {
   sidebar: ReactNode;
   children: ReactNode;
 }
-
 const CalendarLayout: React.FC<CalendarLayoutProps> = ({ sidebar, children }) => {
   return (
     <div className={styles.plannerLayout}>
@@ -14,5 +12,5 @@ const CalendarLayout: React.FC<CalendarLayoutProps> = ({ sidebar, children }) =>
     </div>
   );
 };
-
 export default CalendarLayout;
+

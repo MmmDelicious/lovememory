@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
 const EventTemplate = sequelize.define('EventTemplate', {
   id: {
     type: DataTypes.UUID,
@@ -110,9 +109,8 @@ const EventTemplate = sequelize.define('EventTemplate', {
     }
   ]
 });
-
 EventTemplate.associate = (models) => {
   EventTemplate.belongsTo(models.User, { foreignKey: 'userId' });
 };
-
 module.exports = EventTemplate;
+

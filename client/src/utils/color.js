@@ -14,7 +14,6 @@ export const getHueFromHex = (hex) => {
     h = Math.round((h * 60 + 360) % 360);
     return h;
   };
-  
   export const darken = (hex, amt = 15) => {
     const c = hex.replace('#','');
     const num = parseInt(c.length === 3 ? c.split('').map(x=>x+x).join('') : c, 16);

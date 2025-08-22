@@ -1,21 +1,16 @@
 import React, { useState } from 'react';
 import Lottie from 'lottie-react';
 import styles from './StaticMascot.module.css';
-
 const StaticMascot = ({ message, animationData, bubbleKey, onAvatarClick }) => {
   const [isAnnoyed, setIsAnnoyed] = useState(false);
-
   const handleClick = () => {
     if (isAnnoyed) return;
-
     if (onAvatarClick) {
       onAvatarClick();
     }
-    
     setIsAnnoyed(true);
     setTimeout(() => setIsAnnoyed(false), 500);
   };
-
   return (
     <div className={styles.wrapper}>
       <div 
@@ -30,5 +25,4 @@ const StaticMascot = ({ message, animationData, bubbleKey, onAvatarClick }) => {
     </div>
   );
 };
-
 export default StaticMascot;

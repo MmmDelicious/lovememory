@@ -127,8 +127,17 @@ function initSocket(server, app) {
 
             if (room.status === 'waiting') {
                 // Для покера создаем игру объект, но не меняем статус комнаты на in_progress
-                // Для остальных игр ждем 2 игроков и сразу запускаем
-                const shouldCreateGame = room.gameType === 'poker' ? currentSockets.length >= 1 : currentSockets.length >= 2;
+                // Для остальных игр ждем нужное количество игроков и сразу запускаем
+                let requiredPlayers = 2;
+                if (room.gameType === 'poker') {
+                  requiredPlayers = 1;
+                } else if (room.gameType === 'codenames') {
+                  requiredPlayers = 4; // Codenames требует ровно 4 игрока (2v2)
+                } else if ((room.gameType === 'wordle' || room.gameType === 'quiz') && room.maxPlayers === 4) {
+                  requiredPlayers = 4; // Формат 2x2
+                }
+                
+                const shouldCreateGame = currentSockets.length >= requiredPlayers;
                 
                 if (shouldCreateGame) {
                     console.log(`[SERVER] Creating game in room ${roomId} with ${currentSockets.length} players`);
@@ -156,7 +165,8 @@ function initSocket(server, app) {
                         };
                     });
                     
-                    const game = GameManager.createGame(roomId, gameType, playerInfo, {
+                    // Подготавливаем опции игры
+                    const gameOptions = {
                       onStateChange: (gameInstance) => {
                         if (gameInstance.gameType === 'poker' || gameInstance.gameType === 'wordle') {
                           gameInstance.players.forEach(p => {
@@ -177,8 +187,16 @@ function initSocket(server, app) {
                         } catch (error) {
                           console.error(`[SERVER] Failed to start poker room ${roomId}:`, error);
                         }
-                      } : undefined
-                    });
+                      } : undefined,
+                      gameFormat: room.gameFormat || '1v1'
+                    };
+
+                    // Добавляем специфичные настройки игры
+                    if (room.gameSettings) {
+                      Object.assign(gameOptions, room.gameSettings);
+                    }
+
+                    const game = GameManager.createGame(roomId, gameType, playerInfo, gameOptions);
                     io.to(roomId).emit('game_start', { gameType, players: playerInfo, maxPlayers: room.maxPlayers });
 
                     // Для покера нужно добавить всех игроков, которые еще не в игре
@@ -206,6 +224,18 @@ function initSocket(server, app) {
                         game.players.forEach(player => {
                             const stateForPlayer = game.getStateForPlayer(player.id);
                             io.to(player.id).emit('game_update', stateForPlayer);
+                        });
+                    } else if (game.gameType === 'codenames') {
+                        // Для Codenames отправляем разные состояния капитанам и игрокам
+                        game.players.forEach(playerId => {
+                            const playerRole = game.getPlayerRole(playerId);
+                            let stateForPlayer;
+                            if (playerRole && playerRole.role === 'captain') {
+                                stateForPlayer = game.getCaptainState(playerId);
+                            } else {
+                                stateForPlayer = game.getState();
+                            }
+                            io.to(playerId).emit('game_update', stateForPlayer);
                         });
                     } else if (game.gameType === 'quiz') {
                         // Запускаем таймер для квиза
@@ -367,6 +397,19 @@ function initSocket(server, app) {
           game.players.forEach(player => {
               const stateForPlayer = game.getStateForPlayer(player.id);
               io.to(player.id).emit('game_update', stateForPlayer);
+          });
+        } else if (gameType === 'codenames') {
+          // Для Codenames отправляем разные состояния капитанам и игрокам
+          // Используем актуальное состояние после хода
+          game.players.forEach(playerId => {
+            const playerRole = game.getPlayerRole(playerId);
+            let stateForPlayer;
+            if (playerRole && playerRole.role === 'captain') {
+              stateForPlayer = game.getCaptainState(playerId);
+            } else {
+              stateForPlayer = game.getState();
+            }
+            io.to(playerId).emit('game_update', stateForPlayer);
           });
         } else {
           const newState = game.getState();
@@ -990,22 +1033,29 @@ function initSocket(server, app) {
 function startQuizTimerUpdates(io, roomId, game) {
   stopQuizTimerUpdates(roomId);
   const interval = setInterval(() => {
-    if (game.status !== 'in_progress') {
+    // Проверяем, что игра не была очищена
+    if (game.isCleanedUp || game.status !== 'in_progress') {
       stopQuizTimerUpdates(roomId);
       return;
     }
-    const gameState = game.getState();
-    if (gameState.currentQuestion) {
-      io.to(roomId).emit('game_update', gameState);
-      if (game.isTimeUp()) {
-        game.forceNextQuestion();
-        const newState = game.getState();
-        io.to(roomId).emit('game_update', newState);
-        if (newState.status === 'finished') {
-          handleQuizGameEnd(io, roomId, game);
-          stopQuizTimerUpdates(roomId);
+    
+    try {
+      const gameState = game.getState();
+      if (gameState.currentQuestion) {
+        io.to(roomId).emit('game_update', gameState);
+        if (game.isTimeUp()) {
+          game.forceNextQuestion();
+          const newState = game.getState();
+          io.to(roomId).emit('game_update', newState);
+          if (newState.status === 'finished') {
+            handleQuizGameEnd(io, roomId, game);
+            stopQuizTimerUpdates(roomId);
+          }
         }
       }
+    } catch (error) {
+      console.error(`[QUIZ] Error in timer update for room ${roomId}:`, error);
+      stopQuizTimerUpdates(roomId);
     }
   }, 1000);
   quizUpdateIntervals.set(roomId, interval);

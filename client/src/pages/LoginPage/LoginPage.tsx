@@ -7,12 +7,10 @@ import Button from '../../components/Button/Button';
 import StaticMascot from '../../components/StaticMascot/StaticMascot';
 import greetAnimation from '../../assets/greet.json';
 import styles from './LoginPage.module.css';
-
 const mascotConfig = {
   initialMessage: 'С возвращением! Ваши воспоминания ждут.',
   phrases: { error: ['Хм, что-то не так. Проверьте данные.'], idle: ['Задумались? Я подожду.'] }
 };
-
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,11 +18,9 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { mascotMessage, handleAvatarClick, handleInteraction, triggerError } = useInteractiveMascot(mascotConfig);
-
   useEffect(() => {
     if (isAuthenticated) navigate('/dashboard', { replace: true });
   }, [isAuthenticated, navigate]);
-
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('error') === 'google-auth-failed') {
@@ -32,7 +28,6 @@ const LoginPage: React.FC = () => {
       navigate('/login', { replace: true });
     }
   }, [location, navigate, triggerError]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return triggerError('Нужен и email, и пароль.');
@@ -43,11 +38,9 @@ const LoginPage: React.FC = () => {
       triggerError(err.response?.data?.message || 'Неверный email или пароль.');
     }
   };
-
   const handleGoogleSignIn = () => {
     window.open(`${import.meta.env.VITE_API_BASE_URL}/auth/google`, '_self');
   };
-
   return (
     <AuthLayout>
       <div className={styles.authBox}>
@@ -85,5 +78,5 @@ const LoginPage: React.FC = () => {
     </AuthLayout>
   );
 };
-
 export default LoginPage;
+

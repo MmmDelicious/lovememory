@@ -1,4 +1,3 @@
-// Статический импорт всех Lottie анимаций для уроков
 import BusinessAnimations from './Business Animations - Flat Concept.json';
 import CoupleSharing from './Couple sharing and caring love.json';
 import DeveloperDiscussing from './Developer discussing different options.json';
@@ -9,8 +8,6 @@ import OnlineSales from './Online Sales.json';
 import Relationship from './Relationship.json';
 import TargetEvaluation from './Target Evaluation.json';
 import WebsiteConstruction from './Website Construction.json';
-
-// Экспорт мапы анимаций по именам файлов
 export const lessonAnimations = {
   'Business Animations - Flat Concept.json': BusinessAnimations,
   'Couple sharing and caring love.json': CoupleSharing,
@@ -23,11 +20,8 @@ export const lessonAnimations = {
   'Target Evaluation.json': TargetEvaluation,
   'Website Construction.json': WebsiteConstruction,
 };
-
-// Функция для получения анимации по имени файла
 export const getLessonAnimation = (filename: string) => {
   return lessonAnimations[filename as keyof typeof lessonAnimations] || null;
 };
-
-// Экспорт по умолчанию
 export default lessonAnimations;
+

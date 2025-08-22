@@ -5,7 +5,6 @@ import pairService from './pair.service';
 import userService from './user.service';
 import gameService from './game.service';
 import * as aiService from './ai.service';
-
 export {
   api,
   authService,

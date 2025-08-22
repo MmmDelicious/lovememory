@@ -6,14 +6,12 @@ import Button from '../Button/Button';
 import UserDropdown from '../UserDropdown/UserDropdown';
 import styles from './Header.module.css';
 import coinIcon from '../../assets/coin.svg';
-
 interface AuthenticatedNavProps {
   coins: number;
   user: any;
   onLogout: () => void;
   onNavigate: (path: string) => void;
 }
-
 const AuthenticatedNav: React.FC<AuthenticatedNavProps> = ({ coins, user, onLogout, onNavigate }) => (
   <>
     <div className={styles.currencyDisplay}>
@@ -29,7 +27,6 @@ const AuthenticatedNav: React.FC<AuthenticatedNavProps> = ({ coins, user, onLogo
     <UserDropdown user={user} onLogout={onLogout} onNavigate={onNavigate} />
   </>
 );
-
 const GuestNav: React.FC = () => (
   <>
     <Link to="/login" className={styles.navLink}>Войти</Link>
@@ -38,16 +35,13 @@ const GuestNav: React.FC = () => (
     </Link>
   </>
 );
-
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const { coins } = useCurrency();
   const navigate = useNavigate();
-
   const handleNavigate = (path: string) => {
     navigate(path);
   };
-
   return (
     <header className={styles.header}>
       <div className={styles.logoWrapper}>
@@ -55,7 +49,6 @@ const Header: React.FC = () => {
           LoveMemory
         </Link>
       </div>
-
       <nav className={styles.nav}>
         {user ? (
           <AuthenticatedNav 
@@ -71,5 +64,5 @@ const Header: React.FC = () => {
     </header>
   );
 };
-
 export default Header;
+

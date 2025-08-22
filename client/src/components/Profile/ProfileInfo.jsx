@@ -1,7 +1,6 @@
 import React from 'react';
 import styles from './ProfileInfo.module.css';
 import { FaEnvelope, FaGift, FaMapMarkerAlt } from 'react-icons/fa';
-
 const ProfileInfo = ({ user, partner, partnerAvatar }) => {
   return (
     <div className={styles.infoWrapper}>
@@ -11,7 +10,6 @@ const ProfileInfo = ({ user, partner, partnerAvatar }) => {
         <div className={styles.contactItem}><FaGift /><span>{user.age ?? 'Возраст не указан'}</span></div>
         <div className={styles.contactItem}><FaMapMarkerAlt /><span>{user.city || 'Город не указан'}</span></div>
       </div>
-
       <div className={styles.tagsSection}>
         <h3 className={styles.sectionTitle}>Теги (в разработке)</h3>
         <div className={styles.tagsContainer}>
@@ -20,7 +18,6 @@ const ProfileInfo = ({ user, partner, partnerAvatar }) => {
           <div className={styles.tag}><span>хобби</span></div>
         </div>
       </div>
-
       {partner && (
         <div className={styles.partnerSection}>
           <img src={partnerAvatar} alt="Partner" className={styles.partnerAvatar} />
@@ -30,5 +27,4 @@ const ProfileInfo = ({ user, partner, partnerAvatar }) => {
     </div>
   );
 };
-
 export default ProfileInfo;

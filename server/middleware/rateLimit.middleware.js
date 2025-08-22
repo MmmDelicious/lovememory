@@ -1,6 +1,4 @@
 const rateLimit = require('express-rate-limit');
-
-// Базовый лимит для всех запросов
 const basicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 минут
   max: 1000, // максимум 1000 запросов за окно
@@ -11,8 +9,6 @@ const basicLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-
-// Строгий лимит для аутентификации
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 минут
   max: 5, // максимум 5 попыток аутентификации за окно
@@ -24,8 +20,6 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   skipSuccessfulRequests: true, // не считаем успешные запросы
 });
-
-// Лимит для загрузки файлов
 const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 час
   max: 10, // максимум 10 загрузок за час
@@ -36,8 +30,6 @@ const uploadLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-
-// Лимит для AI запросов
 const aiLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 час
   max: 50, // максимум 50 AI запросов за час
@@ -48,10 +40,10 @@ const aiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-
 module.exports = {
   basicLimiter,
   authLimiter,
   uploadLimiter,
   aiLimiter
 };
+

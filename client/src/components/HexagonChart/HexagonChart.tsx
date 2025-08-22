@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from './HexagonChart.module.css';
-
 interface HexagonChartProps {
   data: {
     label: string;
@@ -11,7 +10,6 @@ interface HexagonChartProps {
   title?: string;
   size?: number;
 }
-
 const HexagonChart: React.FC<HexagonChartProps> = ({ 
   data, 
   title = "Гексагональная диаграмма",
@@ -20,8 +18,6 @@ const HexagonChart: React.FC<HexagonChartProps> = ({
   const center = size / 2;
   const radius = (size * 0.35);
   const angleStep = (2 * Math.PI) / data.length;
-
-  // Генерируем точки для многоугольника
   const generatePolygonPoints = (values: number[]) => {
     return values.map((value, index) => {
       const angle = index * angleStep - Math.PI / 2; // Начинаем сверху
@@ -32,8 +28,6 @@ const HexagonChart: React.FC<HexagonChartProps> = ({
       return `${x},${y}`;
     }).join(' ');
   };
-
-  // Генерируем линии сетки
   const generateGridLines = () => {
     const gridLevels = [0.2, 0.4, 0.6, 0.8, 1.0];
     return gridLevels.map((level, levelIndex) => {
@@ -44,7 +38,6 @@ const HexagonChart: React.FC<HexagonChartProps> = ({
         const y = center + pointRadius * Math.sin(angle);
         return `${x},${y}`;
       }).join(' ');
-
       return (
         <polygon
           key={levelIndex}
@@ -57,14 +50,11 @@ const HexagonChart: React.FC<HexagonChartProps> = ({
       );
     });
   };
-
-  // Генерируем линии от центра к вершинам
   const generateRadialLines = () => {
     return data.map((_, index) => {
       const angle = index * angleStep - Math.PI / 2;
       const x = center + radius * Math.cos(angle);
       const y = center + radius * Math.sin(angle);
-      
       return (
         <line
           key={index}
@@ -79,15 +69,12 @@ const HexagonChart: React.FC<HexagonChartProps> = ({
       );
     });
   };
-
-  // Генерируем подписи
   const generateLabels = () => {
     return data.map((item, index) => {
       const angle = index * angleStep - Math.PI / 2;
       const labelRadius = radius * 1.15;
       const x = center + labelRadius * Math.cos(angle);
       const y = center + labelRadius * Math.sin(angle);
-      
       return (
         <g key={index}>
           <text
@@ -118,39 +105,34 @@ const HexagonChart: React.FC<HexagonChartProps> = ({
       );
     });
   };
-
   return (
     <div className={styles.hexagonChart}>
       {title && <h3 className={styles.title}>{title}</h3>}
       <div className={styles.chartContainer}>
         <svg width={size} height={size} className={styles.svg}>
-          {/* Фон */}
+          {}
           <defs>
             <radialGradient id="backgroundGradient" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stopColor="rgba(217, 122, 108, 0.05)" />
               <stop offset="100%" stopColor="rgba(217, 122, 108, 0.02)" />
             </radialGradient>
-            
             <linearGradient id="dataGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="rgba(217, 122, 108, 0.8)" />
               <stop offset="50%" stopColor="rgba(201, 106, 92, 0.6)" />
               <stop offset="100%" stopColor="rgba(234, 223, 216, 0.4)" />
             </linearGradient>
           </defs>
-
-          {/* Фоновая область */}
+          {}
           <circle
             cx={center}
             cy={center}
             r={radius}
             fill="url(#backgroundGradient)"
           />
-
-          {/* Сетка */}
+          {}
           {generateGridLines()}
           {generateRadialLines()}
-
-          {/* Данные */}
+          {}
           <polygon
             points={generatePolygonPoints(data.map(d => d.value))}
             fill="url(#dataGradient)"
@@ -159,15 +141,13 @@ const HexagonChart: React.FC<HexagonChartProps> = ({
             strokeLinejoin="round"
             className={styles.dataPolygon}
           />
-
-          {/* Точки данных */}
+          {}
           {data.map((item, index) => {
             const angle = index * angleStep - Math.PI / 2;
             const normalizedValue = item.value / 100;
             const pointRadius = radius * normalizedValue;
             const x = center + pointRadius * Math.cos(angle);
             const y = center + pointRadius * Math.sin(angle);
-            
             return (
               <circle
                 key={index}
@@ -181,13 +161,12 @@ const HexagonChart: React.FC<HexagonChartProps> = ({
               />
             );
           })}
-
-          {/* Подписи */}
+          {}
           {generateLabels()}
         </svg>
       </div>
     </div>
   );
 };
-
 export default HexagonChart;
+

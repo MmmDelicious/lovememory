@@ -1,17 +1,14 @@
 import React from 'react';
 import styles from './SearchAndFilter.module.css';
-
 interface FilterOption {
   id: string;
   label: string;
   icon: string;
 }
-
 interface CalendarFiltersProps {
   onFilterChange: (filterId: string) => void;
   activeFilter: string;
 }
-
 const CalendarFilters: React.FC<CalendarFiltersProps> = ({ onFilterChange, activeFilter }) => {
   const MAIN_FILTERS: FilterOption[] = [
     { id: 'all', label: 'Все', icon: '📅' },
@@ -19,7 +16,6 @@ const CalendarFilters: React.FC<CalendarFiltersProps> = ({ onFilterChange, activ
     { id: 'shared', label: 'Общие', icon: '🤝' },
     { id: 'partner', label: 'Партнёра', icon: '💑' }
   ];
-
   const ADDITIONAL_FILTERS: FilterOption[] = [
     { id: 'upcoming', label: 'Предстоящие', icon: '⏰' },
     { id: 'this_week', label: 'На этой неделе', icon: '📆' },
@@ -29,16 +25,13 @@ const CalendarFilters: React.FC<CalendarFiltersProps> = ({ onFilterChange, activ
     { id: 'memories', label: 'Воспоминания', icon: '💭' },
     { id: 'travel', label: 'Путешествия', icon: '✈️' }
   ];
-
   const handleContainerClick = (e: React.MouseEvent) => {
-    // Предотвращаем всплытие события клика до родительского контейнера
     e.stopPropagation();
   };
-
   return (
     <div className={styles.filtersContainer} onClick={handleContainerClick}>
       <div className={styles.filtersGrid}>
-        {/* Компактные основные фильтры */}
+        {}
         <div className={styles.compactFiltersRow}>
           {MAIN_FILTERS.map(filter => (
             <button
@@ -50,8 +43,7 @@ const CalendarFilters: React.FC<CalendarFiltersProps> = ({ onFilterChange, activ
               <span className={styles.filterLabel}>{filter.label}</span>
             </button>
           ))}
-          
-          {/* Дополнительные фильтры в виде селекта */}
+          {}
           <select 
             className={styles.additionalSelect}
             value={ADDITIONAL_FILTERS.some(f => f.id === activeFilter) ? activeFilter : ''}
@@ -69,5 +61,5 @@ const CalendarFilters: React.FC<CalendarFiltersProps> = ({ onFilterChange, activ
     </div>
   );
 };
-
 export default CalendarFilters;
+

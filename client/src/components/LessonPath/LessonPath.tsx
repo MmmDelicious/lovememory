@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Lock, Star, Trophy, Book, Heart } from 'lucide-react';
 import styles from './LessonPath.module.css';
-
 interface LessonPathProps {
   completedLessons: string[];
   currentLesson: string;
@@ -10,7 +9,6 @@ interface LessonPathProps {
   streakDays: number;
   onLessonSelect?: (lessonId: string) => void;
 }
-
 interface PathNode {
   id: string;
   type: 'completed' | 'current' | 'locked' | 'milestone';
@@ -19,7 +17,6 @@ interface PathNode {
   theme: string;
   difficulty: number;
 }
-
 const LessonPath: React.FC<LessonPathProps> = ({
   completedLessons,
   currentLesson,
@@ -29,31 +26,22 @@ const LessonPath: React.FC<LessonPathProps> = ({
 }) => {
   const [pathNodes, setPathNodes] = useState<PathNode[]>([]);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
-
   useEffect(() => {
     generatePath();
   }, [completedLessons, currentLesson, totalLessons]);
-
   const generatePath = () => {
     const nodes: PathNode[] = [];
     const pathWidth = 800;
     const pathHeight = 1200;
     const nodeCount = Math.min(totalLessons, 30); // Показываем до 30 уроков
-
-    // Генерируем извилистую дорогу
     for (let i = 0; i < nodeCount; i++) {
       const progress = i / (nodeCount - 1);
-      
-      // Создаем извилистый путь с синусоидой
       const baseY = progress * pathHeight;
       const amplitude = 200; // Амплитуда извилистости
       const frequency = 3; // Количество изгибов
       const offsetX = Math.sin(progress * frequency * Math.PI) * amplitude;
-      
       const x = pathWidth / 2 + offsetX;
       const y = baseY + 50;
-
-      // Определяем тип узла
       let type: PathNode['type'] = 'locked';
       if (completedLessons.includes(`lesson_${i + 1}`)) {
         type = 'completed';
@@ -62,11 +50,8 @@ const LessonPath: React.FC<LessonPathProps> = ({
       } else if (i % 10 === 9) { // Каждый 10-й урок - milestone
         type = 'milestone';
       }
-
-      // Определяем тему
       const themes = ['words_of_affirmation', 'quality_time', 'physical_touch', 'acts_of_service', 'receiving_gifts'];
       const theme = themes[i % themes.length];
-
       nodes.push({
         id: `lesson_${i + 1}`,
         type,
@@ -76,10 +61,8 @@ const LessonPath: React.FC<LessonPathProps> = ({
         difficulty: Math.floor(i / 5) + 1 // Сложность растет каждые 5 уроков
       });
     }
-
     setPathNodes(nodes);
   };
-
   const getNodeIcon = (node: PathNode) => {
     switch (node.type) {
       case 'completed':
@@ -92,7 +75,6 @@ const LessonPath: React.FC<LessonPathProps> = ({
         return <Lock size={20} />;
     }
   };
-
   const getThemeColor = (theme: string) => {
     const themeColors = {
       words_of_affirmation: '#4A7C59',
@@ -103,26 +85,22 @@ const LessonPath: React.FC<LessonPathProps> = ({
     };
     return themeColors[theme as keyof typeof themeColors] || '#4A7C59';
   };
-
   const drawPath = () => {
     let pathString = '';
     pathNodes.forEach((node, index) => {
       if (index === 0) {
         pathString += `M ${node.position.x} ${node.position.y}`;
       } else {
-        // Создаем плавные кривые между узлами
         const prevNode = pathNodes[index - 1];
         const cpx1 = prevNode.position.x;
         const cpy1 = prevNode.position.y + 40;
         const cpx2 = node.position.x;
         const cpy2 = node.position.y - 40;
-        
         pathString += ` C ${cpx1} ${cpy1}, ${cpx2} ${cpy2}, ${node.position.x} ${node.position.y}`;
       }
     });
     return pathString;
   };
-
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -150,7 +128,6 @@ const LessonPath: React.FC<LessonPathProps> = ({
           </div>
         </div>
       </div>
-
       <div className={styles.pathContainer}>
         <svg 
           width="800" 
@@ -158,7 +135,7 @@ const LessonPath: React.FC<LessonPathProps> = ({
           viewBox="0 0 800 1200"
           className={styles.pathSvg}
         >
-          {/* Фоновая дорога */}
+          {}
           <path
             d={drawPath()}
             fill="none"
@@ -167,8 +144,7 @@ const LessonPath: React.FC<LessonPathProps> = ({
             strokeLinecap="round"
             className={styles.roadBackground}
           />
-          
-          {/* Основная дорога */}
+          {}
           <path
             d={drawPath()}
             fill="none"
@@ -177,8 +153,7 @@ const LessonPath: React.FC<LessonPathProps> = ({
             strokeLinecap="round"
             className={styles.roadMain}
           />
-
-          {/* Прогресс дороги */}
+          {}
           <motion.path
             d={drawPath()}
             fill="none"
@@ -192,19 +167,17 @@ const LessonPath: React.FC<LessonPathProps> = ({
             }}
             transition={{ duration: 2, ease: "easeInOut" }}
           />
-
-          {/* Узлы уроков */}
+          {}
           {pathNodes.map((node, index) => (
             <g key={node.id}>
-              {/* Тень узла */}
+              {}
               <circle
                 cx={node.position.x + 2}
                 cy={node.position.y + 2}
                 r="20"
                 fill="rgba(0, 0, 0, 0.2)"
               />
-              
-              {/* Основной узел */}
+              {}
               <motion.circle
                 cx={node.position.x}
                 cy={node.position.y}
@@ -223,8 +196,7 @@ const LessonPath: React.FC<LessonPathProps> = ({
                 onClick={() => onLessonSelect?.(node.id)}
                 style={{ cursor: node.type !== 'locked' ? 'pointer' : 'default' }}
               />
-
-              {/* Центральная иконка */}
+              {}
               <foreignObject
                 x={node.position.x - 10}
                 y={node.position.y - 10}
@@ -236,8 +208,7 @@ const LessonPath: React.FC<LessonPathProps> = ({
                   {getNodeIcon(node)}
                 </div>
               </foreignObject>
-
-              {/* Номер урока */}
+              {}
               <text
                 x={node.position.x}
                 y={node.position.y + 35}
@@ -252,8 +223,7 @@ const LessonPath: React.FC<LessonPathProps> = ({
             </g>
           ))}
         </svg>
-
-        {/* Всплывающие подсказки */}
+        {}
         {hoveredNode && (
           <motion.div
             className={styles.tooltip}
@@ -264,7 +234,6 @@ const LessonPath: React.FC<LessonPathProps> = ({
             {(() => {
               const node = pathNodes.find(n => n.id === hoveredNode);
               if (!node) return null;
-              
               return (
                 <div>
                   <div className={styles.tooltipTitle}>{node.title}</div>
@@ -283,5 +252,5 @@ const LessonPath: React.FC<LessonPathProps> = ({
     </div>
   );
 };
-
 export default LessonPath;
+

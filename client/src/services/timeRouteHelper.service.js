@@ -6,27 +6,19 @@ class TimeRouteHelper {
       car: 30 // км/ч в городе
     };
   }
-
-  // Парсинг времени работы из OpenStreetMap формата
   parseOpeningHours(openingHours) {
     if (!openingHours) return null;
-    
     try {
-      // Обрабатываем простые форматы: "Mo-Su 09:00-21:00", "24/7", "Mo-Fr 10:00-20:00; Sa-Su 10:00-18:00"
       if (openingHours === '24/7') {
         return { isOpen24_7: true };
       }
-
-      // Парсим сложные расписания
       const schedules = openingHours.split(';').map(s => s.trim());
       const parsedSchedule = {};
-
       schedules.forEach(schedule => {
         const match = schedule.match(/([A-Za-z\-,]+)\s+(\d{1,2}:\d{2})\-(\d{1,2}:\d{2})/);
         if (match) {
           const [, days, openTime, closeTime] = match;
           const daysList = this.parseDays(days);
-          
           daysList.forEach(day => {
             parsedSchedule[day] = {
               open: openTime,
@@ -35,90 +27,62 @@ class TimeRouteHelper {
           });
         }
       });
-
       return Object.keys(parsedSchedule).length > 0 ? parsedSchedule : null;
     } catch (error) {
       console.warn('Failed to parse opening hours:', openingHours, error);
       return null;
     }
   }
-
-  // Парсинг дней недели
   parseDays(daysString) {
     const dayMap = {
       'Mo': 1, 'Tu': 2, 'We': 3, 'Th': 4, 'Fr': 5, 'Sa': 6, 'Su': 0
     };
-
     const days = [];
-    
     if (daysString.includes('-')) {
-      // Диапазон дней, например "Mo-Fr"
       const [start, end] = daysString.split('-');
       const startDay = dayMap[start];
       const endDay = dayMap[end];
-      
       for (let i = startDay; i <= endDay; i++) {
         days.push(i);
       }
-      
-      // Обработка случая Sa-Su (через неделю)
       if (startDay > endDay) {
         for (let i = startDay; i <= 6; i++) days.push(i);
         for (let i = 0; i <= endDay; i++) days.push(i);
       }
     } else if (daysString.includes(',')) {
-      // Отдельные дни, например "Sa,Su"
       daysString.split(',').forEach(day => {
         if (dayMap[day.trim()] !== undefined) {
           days.push(dayMap[day.trim()]);
         }
       });
     } else {
-      // Один день
       if (dayMap[daysString] !== undefined) {
         days.push(dayMap[daysString]);
       }
     }
-
     return days;
   }
-
-  // Проверка, открыто ли заведение в определенное время
   isOpenAt(schedule, dateTime) {
     if (!schedule) return true; // Если расписание неизвестно, считаем открытым
-    
     if (schedule.isOpen24_7) return true;
-
     const dayOfWeek = dateTime.getDay();
     const timeString = `${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}`;
-    
     const daySchedule = schedule[dayOfWeek];
     if (!daySchedule) return false;
-
     const openTime = daySchedule.open;
     const closeTime = daySchedule.close;
-    
-    // Простая проверка времени
     return timeString >= openTime && timeString <= closeTime;
   }
-
-  // Вычисление времени в пути между точками
   calculateTravelTime(distance, transportType = 'walking') {
     const speed = this.transportSpeed[transportType];
     return (distance / speed) * 60; // возвращаем в минутах
   }
-
-  // Оптимизация маршрута между несколькими точками
   optimizeRoute(places, startPoint) {
     if (places.length <= 1) return places;
-
-    // Простой жадный алгоритм для небольшого количества точек
     const optimized = [];
     let currentPoint = startPoint;
     let remainingPlaces = [...places];
-
     while (remainingPlaces.length > 0) {
-      // Находим ближайшую точку
       let nearestIndex = 0;
       let minDistance = this.calculateDistance(
         currentPoint.coordinates.lat, 
@@ -126,7 +90,6 @@ class TimeRouteHelper {
         remainingPlaces[0].coordinates.lat || remainingPlaces[0].coordinates.latitude,
         remainingPlaces[0].coordinates.lon || remainingPlaces[0].coordinates.longitude
       );
-
       for (let i = 1; i < remainingPlaces.length; i++) {
         const distance = this.calculateDistance(
           currentPoint.coordinates.lat, 
@@ -134,13 +97,11 @@ class TimeRouteHelper {
           remainingPlaces[i].coordinates.lat || remainingPlaces[i].coordinates.latitude,
           remainingPlaces[i].coordinates.lon || remainingPlaces[i].coordinates.longitude
         );
-        
         if (distance < minDistance) {
           minDistance = distance;
           nearestIndex = i;
         }
       }
-
       const nearestPlace = remainingPlaces.splice(nearestIndex, 1)[0];
       optimized.push(nearestPlace);
       currentPoint = {
@@ -150,11 +111,8 @@ class TimeRouteHelper {
         }
       };
     }
-
     return optimized;
   }
-
-  // Вычисление расстояния между координатами
   calculateDistance(lat1, lon1, lat2, lon2) {
     const R = 6371; // Радиус Земли в км
     const dLat = this.deg2rad(lat2 - lat1);
@@ -166,12 +124,9 @@ class TimeRouteHelper {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
   }
-
   deg2rad(deg) {
     return deg * (Math.PI/180);
   }
-
-  // Создание гибкого расписания свидания
   createFlexibleSchedule(activities, startTime, preferences = {}) {
     const {
       maxDuration = 6, // максимум 6 часов
@@ -179,32 +134,21 @@ class TimeRouteHelper {
       transportType = 'walking',
       bufferTime = 15 // минут между активностями
     } = preferences;
-
     if (activities.length === 0) return [];
-
     const schedule = [];
     let currentTime = new Date(startTime);
     let totalDuration = 0;
-
-    // Оптимизируем маршрут
     const userLocation = { coordinates: { lat: activities[0].coordinates.lat, lon: activities[0].coordinates.lon } };
     const optimizedActivities = this.optimizeRoute(activities, userLocation);
-
     for (let i = 0; i < optimizedActivities.length; i++) {
       const activity = optimizedActivities[i];
-      
-      // Проверяем, не превысили ли максимальное время
       if (totalDuration >= maxDuration * 60) break;
-
-      // Проверяем, открыто ли заведение
       const openingHours = this.parseOpeningHours(activity.openingHours);
       if (!this.isOpenAt(openingHours, currentTime)) {
         continue; // Пропускаем закрытые заведения
       }
-
       const activityDuration = this.getActivityDuration(activity);
       const endTime = new Date(currentTime.getTime() + activityDuration * 60000);
-
       schedule.push({
         time: this.formatTime(currentTime),
         endTime: this.formatTime(endTime),
@@ -217,11 +161,8 @@ class TimeRouteHelper {
         duration: activityDuration,
         cost: this.estimateActivityCost(activity)
       });
-
       currentTime = new Date(endTime.getTime() + bufferTime * 60000);
       totalDuration += activityDuration + bufferTime;
-
-      // Добавляем перерыв на еду если прошло много времени
       if (includeFood && totalDuration > 180 && i < optimizedActivities.length - 1) { // 3 часа
         const foodBreak = this.addFoodBreak(currentTime, optimizedActivities, i);
         if (foodBreak) {
@@ -231,16 +172,11 @@ class TimeRouteHelper {
         }
       }
     }
-
     return schedule;
   }
-
-  // Получение продолжительности активности
   getActivityDuration(activity) {
     const type = activity.type;
     const name = activity.name?.toLowerCase() || '';
-
-    // Базовые длительности по типам
     const baseDurations = {
       entertainment: 120, // 2 часа
       cultural: 90,       // 1.5 часа
@@ -249,17 +185,12 @@ class TimeRouteHelper {
       restaurant: 90,     // 1.5 часа
       cafe: 60           // 1 час
     };
-
-    // Специальные случаи
     if (name.includes('кино') || name.includes('cinema')) return 150; // 2.5 часа
     if (name.includes('музей') || name.includes('museum')) return 120; // 2 часа
     if (name.includes('парк') || name.includes('park')) return 90;     // 1.5 часа
     if (name.includes('кафе') || name.includes('coffee')) return 60;   // 1 час
-
     return baseDurations[type] || 90; // по умолчанию 1.5 часа
   }
-
-  // Генерация описания активности
   generateActivityDescription(activity) {
     const type = activity.type;
     const descriptions = {
@@ -270,11 +201,8 @@ class TimeRouteHelper {
       restaurant: `Время для приятного обеда/ужина`,
       cafe: `Перерыв на кофе и общение`
     };
-
     return descriptions[type] || `Время в ${activity.name}`;
   }
-
-  // Оценка стоимости активности
   estimateActivityCost(activity) {
     const type = activity.type;
     const baseCosts = {
@@ -285,28 +213,20 @@ class TimeRouteHelper {
       restaurant: 2500,    // обед/ужин на двоих
       cafe: 600           // кофе на двоих
     };
-
-    // Корректировки для конкретных заведений
     const name = activity.name?.toLowerCase() || '';
     let cost = baseCosts[type] || 500;
-
     if (name.includes('премиум') || name.includes('elite')) cost *= 2;
     if (name.includes('макдональдс') || name.includes('kfc')) cost = 400;
     if (name.includes('суши') || name.includes('sushi')) cost += 500;
-
     return cost;
   }
-
-  // Добавление перерыва на еду
   addFoodBreak(currentTime, activities, currentIndex) {
-    // Ищем ближайшее кафе или ресторан
     const nearbyFood = activities.slice(currentIndex + 1).find(activity => 
       activity.type === 'restaurant' || 
       activity.type === 'cafe' ||
       activity.name?.toLowerCase().includes('кафе') ||
       activity.name?.toLowerCase().includes('ресторан')
     );
-
     if (nearbyFood) {
       const endTime = new Date(currentTime.getTime() + 90 * 60000);
               return {
@@ -322,16 +242,11 @@ class TimeRouteHelper {
           cost: this.estimateActivityCost({ type: 'restaurant' })
         };
     }
-
     return null;
   }
-
-  // Форматирование времени
   formatTime(date) {
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   }
-
-  // Генерация вариантов продолжительности свидания
   generateDurationVariants() {
     return [
       { 
@@ -354,12 +269,9 @@ class TimeRouteHelper {
       }
     ];
   }
-
-  // Создание уличного маршрута с прогулкой
   createWalkingRoute(startPoint, endPoint, intermediatePoints = []) {
     const allPoints = [startPoint, ...intermediatePoints, endPoint];
     const route = [];
-
     for (let i = 0; i < allPoints.length - 1; i++) {
       const from = allPoints[i];
       const to = allPoints[i + 1];
@@ -368,7 +280,6 @@ class TimeRouteHelper {
         to.coordinates.lat, to.coordinates.lon
       );
       const walkingTime = this.calculateTravelTime(distance, 'walking');
-
       route.push({
         from: from.name,
         to: to.name,
@@ -377,9 +288,8 @@ class TimeRouteHelper {
         description: `Прогулка от ${from.name} до ${to.name}`
       });
     }
-
     return route;
   }
 }
-
 export default new TimeRouteHelper();
+

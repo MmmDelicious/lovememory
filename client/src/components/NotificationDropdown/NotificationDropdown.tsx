@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Check, X, Trash2 } from 'lucide-react';
 import styles from './NotificationDropdown.module.css';
-
 interface Notification {
   id: string;
   title: string;
@@ -10,12 +9,9 @@ interface Notification {
   isRead: boolean;
   createdAt: string;
 }
-
 interface NotificationDropdownProps {
   notifications?: Notification[];
 }
-
-// Mock уведомления для демонстрации
 const mockNotifications: Notification[] = [
   {
     id: '1',
@@ -42,46 +38,37 @@ const mockNotifications: Notification[] = [
     createdAt: '2 часа назад'
   }
 ];
-
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ 
   notifications = mockNotifications 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [notificationList, setNotificationList] = useState(notifications);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
   const unreadCount = notificationList.filter(n => !n.isRead).length;
-
-  // Закрытие при клике вне компонента
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
   const markAsRead = (id: string) => {
     setNotificationList(prev => 
       prev.map(n => n.id === id ? { ...n, isRead: true } : n)
     );
   };
-
   const markAllAsRead = () => {
     setNotificationList(prev => 
       prev.map(n => ({ ...n, isRead: true }))
     );
   };
-
   const removeNotification = (id: string) => {
     setNotificationList(prev => 
       prev.filter(n => n.id !== id)
     );
   };
-
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'success': return '✅';
@@ -90,7 +77,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
       default: return '📢';
     }
   };
-
   return (
     <div className={styles.notificationDropdown} ref={dropdownRef}>
       <button 
@@ -103,7 +89,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           <span className={styles.notificationBadge}>{unreadCount}</span>
         )}
       </button>
-
       {isOpen && (
         <div className={styles.dropdown}>
           <div className={styles.header}>
@@ -118,7 +103,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
               </button>
             )}
           </div>
-
           <div className={styles.notificationsList}>
             {notificationList.length === 0 ? (
               <div className={styles.emptyState}>
@@ -135,7 +119,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                   <div className={styles.notificationIcon}>
                     {getNotificationIcon(notification.type)}
                   </div>
-                  
                   <div className={styles.notificationContent}>
                     <div className={styles.notificationTitle}>
                       {notification.title}
@@ -147,7 +130,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
                       {notification.createdAt}
                     </div>
                   </div>
-
                   <button 
                     className={styles.removeButton}
                     onClick={(e) => {
@@ -161,7 +143,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
               ))
             )}
           </div>
-
           {notificationList.length > 0 && (
             <div className={styles.footer}>
               <button className={styles.clearAll}>
@@ -175,5 +156,5 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     </div>
   );
 };
-
 export default NotificationDropdown;
+

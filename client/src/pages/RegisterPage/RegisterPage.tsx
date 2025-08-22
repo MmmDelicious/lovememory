@@ -10,7 +10,6 @@ import GenderSelector from '../../components/GenderSelector/GenderSelector';
 import greetAnimation from '../../assets/greet.json';
 import styles from './RegisterPage.module.css';
 import loginStyles from '../LoginPage/LoginPage.module.css';
-
 interface MascotConfig {
   initialMessage: string;
   phrases: {
@@ -18,7 +17,6 @@ interface MascotConfig {
     idle: string[];
   };
 }
-
 const mascotConfig: MascotConfig = {
   initialMessage: 'Привет! Давайте создадим ваш уголок воспоминаний.',
   phrases: { 
@@ -26,7 +24,6 @@ const mascotConfig: MascotConfig = {
     idle: ['Не торопитесь, я подожду.'] 
   }
 };
-
 const RegisterPage: React.FC = () => {
   type FormDataShape = { firstName: string; email: string; password: string; gender: string; age: string; city: string };
   const [formData, setFormData] = useState<FormDataShape>({ 
@@ -37,33 +34,26 @@ const RegisterPage: React.FC = () => {
     age: '', 
     city: '' 
   });
-  
   const navigate = useNavigate();
   const { register, isAuthenticated } = (useAuth() as unknown as AuthContextType) || {} as AuthContextType;
   const { mascotMessage, handleAvatarClick, handleInteraction, triggerError } = useInteractiveMascot(mascotConfig);
-
   useEffect(() => {
     if (isAuthenticated) navigate('/dashboard', { replace: true });
   }, [isAuthenticated, navigate]);
-
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData((prev: FormDataShape) => ({ ...prev, [e.target.name]: e.target.value }));
     handleInteraction();
   };
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { firstName, email, password, gender, age, city } = formData;
-    
     if (!firstName) return triggerError('Как вас зовут?');
     if (!email) return triggerError('Без email никак, нужен для входа.');
     if (password.length < 6) return triggerError('Пароль должен быть надежным, минимум 6 символов.');
     if (!gender) return triggerError('Выберите ваш пол.');
-    
     const ageNum = parseInt(age, 10);
     if (!age || isNaN(ageNum) || ageNum < 18 || ageNum > 99) return triggerError('Укажите возраст от 18 до 99.');
     if (!city) return triggerError('Из какого вы города?');
-    
     try {
       const registerData: RegisterRequest = {
         email,
@@ -73,7 +63,6 @@ const RegisterPage: React.FC = () => {
         age: ageNum,
         city
       };
-      
       await register(registerData);
       navigate('/dashboard');
     } catch (err: any) {
@@ -81,19 +70,16 @@ const RegisterPage: React.FC = () => {
       triggerError(message);
     }
   };
-
   const handleGoogleSignIn = (): void => {
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
     if (apiBaseUrl) {
       window.open(`${apiBaseUrl}/auth/google`, '_self');
     }
   };
-
   const handleGenderChange = (gender: 'male' | 'female' | 'other'): void => {
     setFormData((prev: FormDataShape) => ({ ...prev, gender }));
     handleInteraction();
   };
-
   return (
     <AuthLayout>
       <div className={`${loginStyles.authBox} ${styles.registerBox}`}>
@@ -172,5 +158,4 @@ const RegisterPage: React.FC = () => {
     </AuthLayout>
   );
 };
-
 export default RegisterPage;

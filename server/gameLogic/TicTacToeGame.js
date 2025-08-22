@@ -12,36 +12,27 @@ class TicTacToeGame {
     this.isDraw = false;
     this.gameType = 'tic-tac-toe'; // Критически важное поле
   }
-
   getCurrentPlayerId() {
     return this.status === 'in_progress' ? this.currentPlayerId : null;
   }
-
   getState() {
     return {
-      // --- Стандартные поля состояния ---
       gameType: this.gameType,
       status: this.status,
       players: this.players,
       currentPlayerId: this.getCurrentPlayerId(),
       winner: this.winner,
       isDraw: this.isDraw,
-      
-      // --- Специфичные поля для крестиков-ноликов ---
       board: this.board,
       symbols: this.symbols,
     };
   }
-
   makeMove(playerId, moveIndex) {
     console.log(`[TIC-TAC-TOE] makeMove called: playerId=${playerId}, moveIndex=${moveIndex}`);
     console.log(`[TIC-TAC-TOE] Current state: status=${this.status}, currentPlayerId=${this.currentPlayerId}, board=`, this.board);
-    
-    // Проверяем валидность индекса
     if (moveIndex < 0 || moveIndex >= 9) {
       throw new Error('Invalid move position');
     }
-    
     if (this.status !== 'in_progress') {
       throw new Error('Game is already over');
     }
@@ -51,13 +42,10 @@ class TicTacToeGame {
     if (this.board[moveIndex] !== null) {
       throw new Error('Cell is already taken');
     }
-
     this.board[moveIndex] = this.symbols[playerId];
     console.log(`[TIC-TAC-TOE] Board after move:`, this.board);
-    
     const winnerSymbol = this._checkWinner();
     console.log(`[TIC-TAC-TOE] Winner symbol:`, winnerSymbol);
-
     if (winnerSymbol) {
       this.status = 'finished';
       if (winnerSymbol === 'draw') {
@@ -65,19 +53,15 @@ class TicTacToeGame {
         this.isDraw = true;
         console.log(`[TIC-TAC-TOE] Game ended in draw`);
       } else {
-        // Находим ID победителя по символу
         this.winner = Object.keys(this.symbols).find(id => this.symbols[id] === winnerSymbol);
         console.log(`[TIC-TAC-TOE] Game won by:`, this.winner);
       }
     } else {
-      // Переключаем ход
       this.currentPlayerId = this.players.find(id => id !== playerId);
       console.log(`[TIC-TAC-TOE] Next player:`, this.currentPlayerId);
     }
-
     return this.getState();
   }
-
   _checkWinner() {
     const winningCombinations = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -91,17 +75,12 @@ class TicTacToeGame {
         return this.board[a]; // Возвращает 'X' или 'O'
       }
     }
-    // Если нет победителя и нет пустых клеток - ничья
     const hasEmptyCells = this.board.includes(null);
     console.log(`[TIC-TAC-TOE] No winning combination found. Has empty cells: ${hasEmptyCells}`);
     return hasEmptyCells ? null : 'draw';
   }
-
-  // Очистка ресурсов при удалении игры
   cleanup() {
-    // Для крестиков-ноликов особой очистки не требуется
     console.log(`[TIC-TAC-TOE] Game cleanup completed`);
   }
 }
-
 module.exports = TicTacToeGame;

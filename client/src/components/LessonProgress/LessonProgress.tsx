@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import styles from './LessonProgress.module.css';
-
 interface LessonProgressProps {
   progress?: any;
   loading?: boolean;
 }
-
 const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = false }) => {
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
-
   const themeNames = {
     words_of_affirmation: 'Слова поддержки',
     acts_of_service: 'Дела заботы',
@@ -19,7 +16,6 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
     heat_boosters: 'Разжигание страсти',
     attachment_healing: 'Исцеление привязанности'
   };
-
   const themeEmojis = {
     words_of_affirmation: '💬',
     acts_of_service: '🤲',
@@ -29,7 +25,6 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
     heat_boosters: '🔥',
     attachment_healing: '💚'
   };
-
   const themeColors = {
     words_of_affirmation: '#4CAF50',
     acts_of_service: '#FF9800',
@@ -39,7 +34,6 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
     heat_boosters: '#F44336',
     attachment_healing: '#00BCD4'
   };
-
   if (loading) {
     return (
       <div className={styles.container}>
@@ -50,7 +44,6 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
       </div>
     );
   }
-
   if (!progress) {
     return (
       <div className={styles.container}>
@@ -61,12 +54,10 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
       </div>
     );
   }
-
   const { pair, user, partner, themes } = progress;
-
   return (
     <div className={styles.container}>
-      {/* Общая статистика */}
+      {}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -98,8 +89,7 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
           </div>
         </div>
       </motion.div>
-
-      {/* Прогресс по темам */}
+      {}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -115,7 +105,6 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
             const percentage = themeData?.percentage || 0;
             const completed = themeData?.user || 0;
             const total = themeData?.total || 0;
-
             return (
               <motion.div
                 key={themeKey}
@@ -129,7 +118,6 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
                   <span className={styles.themeEmoji}>{emoji}</span>
                   <h3 className={styles.themeName}>{themeName}</h3>
                 </div>
-                
                 <div className={styles.progressBar}>
                   <motion.div
                     className={styles.progressFill}
@@ -139,7 +127,6 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
                     style={{ backgroundColor: color }}
                   />
                 </div>
-                
                 <div className={styles.progressText}>
                   <span className={styles.progressNumbers}>
                     {completed}/{total}
@@ -148,7 +135,6 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
                     {percentage}%
                   </span>
                 </div>
-
                 {selectedTheme === themeKey && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
@@ -176,8 +162,7 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
           })}
         </div>
       </motion.div>
-
-      {/* Индивидуальная статистика */}
+      {}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -210,7 +195,6 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
               </div>
             </div>
           </div>
-
           <div className={styles.playerStats}>
             <h3>💕 Статистика партнера</h3>
             <div className={styles.playerCard}>
@@ -234,8 +218,7 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
           </div>
         </div>
       </motion.div>
-
-      {/* Метрики отношений */}
+      {}
       {pair?.relationshipMetrics && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -257,7 +240,6 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
                 {Math.round(pair.relationshipMetrics.heat_score || 0)}%
               </span>
             </div>
-            
             <div className={styles.metricCard}>
               <span className={styles.metricLabel}>Стадия отношений</span>
               <span className={styles.stageValue}>
@@ -267,7 +249,6 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
                 {pair.relationshipMetrics.relationship_stage === 'mature' && '🌲 Зрелые'}
               </span>
             </div>
-
             <div className={styles.metricCard}>
               <span className={styles.metricLabel}>Основной язык любви</span>
               <span className={styles.languageValue}>
@@ -282,5 +263,5 @@ const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = fal
     </div>
   );
 };
-
 export default LessonProgress;
+

@@ -25,20 +25,21 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
 }) => {
   const [feedback, setFeedback] = useState('');
   const [isCompleting, setIsCompleting] = useState(false);
-  const [animationData, setAnimationData] = useState(null);
+  const [animationData, setAnimationData] = useState<any>(null);
   const [startTime] = useState(Date.now());
 
   // Загружаем анимацию Lottie
   useEffect(() => {
-    if (lesson?.Lesson?.animation_file) {
-      const animation = getLessonAnimation(lesson.Lesson.animation_file);
+    const animationFile = lesson?.Lesson?.animation_file || lesson?.animation_file;
+    if (animationFile) {
+      const animation = getLessonAnimation(animationFile);
       if (animation) {
         setAnimationData(animation);
       } else {
-        console.error('Animation not found:', lesson.Lesson.animation_file);
+        console.error('Animation not found:', animationFile);
       }
     }
-  }, [lesson?.Lesson?.animation_file]);
+  }, [lesson?.Lesson?.animation_file, lesson?.animation_file]);
 
   const handleComplete = async () => {
     if (!lesson) return;
@@ -107,14 +108,14 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
             transition={{ delay: 0.2 }}
             className={styles.title}
           >
-            {lesson.Lesson.title}
+            {lesson?.Lesson?.title || lesson?.title || 'Загрузка...'}
           </motion.h2>
           
           <div className={styles.rewardBadge}>
             <Coins size={16} className={styles.coinIcon} />
-            <span>{lesson.Lesson.base_coins_reward}</span>
-            {lesson.streak_bonus && lesson.streak_bonus > 0 && (
-              <span className={styles.streakBonus}>+{lesson.streak_bonus}</span>
+            <span>{lesson?.Lesson?.base_coins_reward || lesson?.base_coins_reward || 0}</span>
+            {(lesson?.streak_bonus || lesson?.Lesson?.streak_bonus) && ((lesson?.streak_bonus && lesson.streak_bonus > 0) || (lesson?.Lesson?.streak_bonus && lesson.Lesson.streak_bonus > 0)) && (
+              <span className={styles.streakBonus}>+{lesson?.streak_bonus || lesson?.Lesson?.streak_bonus}</span>
             )}
           </div>
         </div>
@@ -127,7 +128,7 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
           className={styles.content}
         >
           <p className={styles.description}>
-            {lesson.Lesson.text}
+            {lesson?.Lesson?.text || lesson?.text || 'Описание урока...'}
           </p>
         </motion.div>
 
@@ -156,7 +157,7 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
               exit={{ opacity: 0, height: 0 }}
               className={styles.interactiveSection}
             >
-              {lesson.Lesson.interactive_type === 'chat' && (
+              {(lesson?.Lesson?.interactive_type || lesson?.interactive_type) === 'chat' && (
                 <div className={styles.chatInput}>
                   <textarea
                     value={feedback}
@@ -168,7 +169,7 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
                 </div>
               )}
 
-              {lesson.Lesson.interactive_type === 'prompt' && (
+              {(lesson?.Lesson?.interactive_type || lesson?.interactive_type) === 'prompt' && (
                 <div className={styles.promptInput}>
                   <textarea
                     value={feedback}
@@ -180,7 +181,7 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
                 </div>
               )}
 
-              {lesson.Lesson.interactive_type === 'photo' && (
+              {(lesson?.Lesson?.interactive_type || lesson?.interactive_type) === 'photo' && (
                 <div className={styles.photoInput}>
                   <input
                     type="file"
@@ -217,7 +218,7 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
                   <>
                     <span>✨ Выполнить урок</span>
                     <span className={styles.reward}>
-                      +{lesson.Lesson.base_coins_reward} <Coins size={16} />
+                      +{lesson?.Lesson?.base_coins_reward || lesson?.base_coins_reward || 0} <Coins size={16} />
                     </span>
                   </>
                 )}
@@ -246,7 +247,7 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
 
         {/* Теги урока */}
         <div className={styles.tags}>
-          {lesson.Lesson.tags?.map((tag: string, index: number) => (
+          {(lesson?.Lesson?.tags || lesson?.tags || []).map((tag: string, index: number) => (
             <span key={index} className={styles.tag}>
               #{tag}
             </span>

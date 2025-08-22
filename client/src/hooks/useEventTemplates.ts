@@ -1,18 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import eventTemplateService from '../services/eventTemplate.service';
 import { EventTemplateData } from '../components/EventTemplateModal/EventTemplateModal';
-
 export const useEventTemplates = (userId?: string) => {
   const [templates, setTemplates] = useState<EventTemplateData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const fetchTemplates = useCallback(async () => {
     if (!userId) {
       setIsLoading(false);
       return;
     }
-
     try {
       setIsLoading(true);
       const response = await eventTemplateService.getTemplates();
@@ -25,11 +22,9 @@ export const useEventTemplates = (userId?: string) => {
       setIsLoading(false);
     }
   }, [userId]);
-
   useEffect(() => {
     fetchTemplates();
   }, [fetchTemplates]);
-
   const createTemplate = async (templateData: Omit<EventTemplateData, 'id'>) => {
     try {
       const response = await eventTemplateService.createTemplate(templateData);
@@ -40,7 +35,6 @@ export const useEventTemplates = (userId?: string) => {
       throw new Error(err.response?.data?.error || 'Ошибка при создании шаблона');
     }
   };
-
   const updateTemplate = async (templateId: string, templateData: Partial<EventTemplateData>) => {
     try {
       const response = await eventTemplateService.updateTemplate(templateId, templateData);
@@ -53,7 +47,6 @@ export const useEventTemplates = (userId?: string) => {
       throw new Error(err.response?.data?.error || 'Ошибка при обновлении шаблона');
     }
   };
-
   const deleteTemplate = async (templateId: string) => {
     try {
       await eventTemplateService.deleteTemplate(templateId);
@@ -62,7 +55,6 @@ export const useEventTemplates = (userId?: string) => {
       throw new Error(err.response?.data?.error || 'Ошибка при удалении шаблона');
     }
   };
-
   const duplicateTemplate = async (templateId: string, newName: string) => {
     try {
       const response = await eventTemplateService.duplicateTemplate(templateId, newName);
@@ -73,11 +65,9 @@ export const useEventTemplates = (userId?: string) => {
       throw new Error(err.response?.data?.error || 'Ошибка при дублировании шаблона');
     }
   };
-
   const incrementUsage = async (templateId: string) => {
     try {
       await eventTemplateService.incrementUsage(templateId);
-      // Optionally update the template in the state to reflect the new usage count
       setTemplates(prev => prev.map(template => 
         template.id === templateId 
           ? { ...template, usage_count: (template.usage_count || 0) + 1 }
@@ -85,10 +75,8 @@ export const useEventTemplates = (userId?: string) => {
       ));
     } catch (err: any) {
       console.error('Error incrementing template usage:', err);
-      // Non-critical error, don't throw
     }
   };
-
   const getPopularTemplates = async (limit: number = 5) => {
     try {
       const response = await eventTemplateService.getPopularTemplates(limit);
@@ -98,7 +86,6 @@ export const useEventTemplates = (userId?: string) => {
       return [];
     }
   };
-
   const searchTemplates = async (query: string) => {
     try {
       const response = await eventTemplateService.searchTemplates(query);
@@ -108,7 +95,6 @@ export const useEventTemplates = (userId?: string) => {
       return [];
     }
   };
-
   return {
     templates,
     isLoading,
@@ -123,3 +109,4 @@ export const useEventTemplates = (userId?: string) => {
     refetch: fetchTemplates
   };
 };
+
