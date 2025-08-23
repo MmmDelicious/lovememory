@@ -7,14 +7,22 @@ export interface User {
     email: string;
     first_name?: string;
     last_name?: string;
+    display_name?: string; // Отображаемое имя
+    locale?: string; // Локаль пользователя (ru, en, etc.)
+    email_verified: boolean; // Подтверждена ли почта
     bio?: string;
     avatarUrl?: string;
+    googleId?: string; // Google ID для OAuth
     gender?: 'male' | 'female' | 'other';
     age?: number;
     city?: string;
     role: 'user' | 'admin';
     coins: number;
+    total_login_days: number; // Общее количество дней логина
     telegram_chat_id?: string;
+    preferences?: Record<string, any>; // Настройки пользователя
+    createdAt: Date | string;
+    updatedAt: Date | string;
   }
   
   export interface AuthData {

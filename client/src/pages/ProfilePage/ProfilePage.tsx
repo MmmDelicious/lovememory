@@ -82,7 +82,7 @@ const ProfilePage: React.FC = () => {
               className={styles.profileAvatar} 
             />
             <h1 className={styles.profileName}>
-              {user.first_name || 'Пользователь'} {user.last_name || ''}
+              {user.display_name || user.first_name || 'Пользователь'} {user.last_name || ''}
             </h1>
             <p className={styles.profileBio}>
               {user.bio || 'Участник LoveMemory ❤️'}

@@ -22,6 +22,7 @@ const AuthenticatedNav: React.FC<AuthenticatedNavProps> = ({ coins, user, onLogo
       <Link to="/dashboard" className={styles.navLink}>Календарь</Link>
       <Link to="/profile" className={styles.navLink}>Профиль</Link>
       <Link to="/games" className={styles.navLink}>Игры</Link>
+      <Link to="/tournaments" className={styles.navLink}>Турниры</Link>
       <Link to="/insights" className={styles.navLink}>Аналитика</Link>
     </div>
     <UserDropdown user={user} onLogout={onLogout} onNavigate={onNavigate} />

@@ -11,6 +11,7 @@ import DayDetailPage from './pages/DayDetailPage/DayDetailPage';
 import ProfilePage from './pages/ProfilePage/ProfilePage';
 import GamesPage from './pages/GamesPage/GamesPage';
 import LessonsPage from './pages/LessonsPage/LessonsPage';
+import { TournamentsPage } from './pages/TournamentsPage';
 
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
 import InsightsPage from './pages/InsightsPage/InsightsPage';
@@ -19,8 +20,7 @@ import GameRoomPage from './pages/GameRoomPage/GameRoomPage';
 import PokerPage from './pages/PokerPage/PokerPage';
 import ErrorPage from './pages/ErrorPage/ErrorPage';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
-import ErrorTest from './components/ErrorTest/ErrorTest';
-import ErrorDemo from './components/ErrorDemo/ErrorDemo';
+
 import AuthCallbackPage from './pages/AuthCallbackPage/AuthCallbackPage';
 
 const AppRoutes: React.FC = () => {
@@ -54,6 +54,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/games" element={<GamesPage />} />
           <Route path="/games/:gameType" element={<GameLobbyPage />} />
+          <Route path="/games/tournaments" element={<TournamentsPage />} />
           <Route path="/lessons" element={<LessonsPage />} />
           <Route path="/day/:date" element={<DayDetailPage />} />
         </Route>
@@ -64,8 +65,7 @@ const AppRoutes: React.FC = () => {
         </Route>
         
         <Route path="/error" element={<ErrorPage />} />
-        <Route path="/error-test" element={<ErrorTest />} />
-        <Route path="/error-demo" element={<ErrorDemo />} />
+
         
         <Route path="/login" element={<Navigate to="/dashboard" />} />
         <Route path="/register" element={<Navigate to="/dashboard" />} />

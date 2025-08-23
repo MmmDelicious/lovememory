@@ -4,6 +4,9 @@ import eventService from './event.service';
 import pairService from './pair.service';
 import userService from './user.service';
 import gameService from './game.service';
+import tournamentService from './tournament.service';
+import sessionService from './session.service';
+import mediaService from './media.service';
 import * as aiService from './ai.service';
 export {
   api,
@@ -12,5 +15,8 @@ export {
   pairService,
   userService,
   gameService,
+  tournamentService,
+  sessionService,
+  mediaService,
   aiService
 };

@@ -5,7 +5,7 @@ const ProfileHeader = ({ user, avatar }) => {
   return (
     <div className={styles.profileHeader}>
       <img src={avatar} alt="User Avatar" className={styles.avatar} />
-      <h1 className={styles.name}>{user.first_name || 'Пользователь'} {user.last_name}</h1>
+      <h1 className={styles.name}>{user.display_name || user.first_name || 'Пользователь'} {user.last_name}</h1>
       <p className={styles.bio}>{user.bio || 'Участник LoveMemory'}</p>
       <div className={styles.stats}>
         <div className={styles.stars}>

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 import styles from './BaseModal.module.css';
+
 interface BaseModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -11,6 +12,7 @@ interface BaseModalProps {
   closeOnOverlayClick?: boolean;
   className?: string;
 }
+
 const BaseModal: React.FC<BaseModalProps> = ({
   isOpen,
   onClose,
@@ -23,30 +25,37 @@ const BaseModal: React.FC<BaseModalProps> = ({
 }) => {
   useEffect(() => {
     if (!isOpen) return;
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
       }
     };
+
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
+
     return () => {
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
   if (!isOpen) return null;
+
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && closeOnOverlayClick) {
       onClose();
     }
   };
+
   return (
     <div className={styles.overlay} onClick={handleOverlayClick}>
       <div className={`${styles.modal} ${styles[maxWidth]} ${className}`}>
@@ -71,5 +80,6 @@ const BaseModal: React.FC<BaseModalProps> = ({
     </div>
   );
 };
+
 export default BaseModal;
 

@@ -3,8 +3,10 @@ import { useAIMascot } from '../../context/AIMascotContext';
 import styles from './AIToggleButton.module.css';
 import mascotIcon from '../../assets/AI.json';
 import Lottie from 'lottie-react';
+
 const AIToggleButton = () => {
   const { toggleAIMascot } = useAIMascot();
+
   return (
     <button 
       className={styles.toggleButton} 
@@ -17,4 +19,5 @@ const AIToggleButton = () => {
     </button>
   );
 };
+
 export default AIToggleButton;

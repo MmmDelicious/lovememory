@@ -1,0 +1,377 @@
+/* TournamentList - Redesigned with App Color Scheme */
+
+.tournamentList {
+  padding: var(--space-6);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-6);
+  gap: var(--space-5);
+}
+
+.titleSection h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-3) 0;
+  font-family: var(--font-family-heading);
+}
+
+.statsRow {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  font-family: var(--font-family-body);
+}
+
+.statItem svg {
+  color: var(--color-primary);
+}
+
+.createBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: var(--font-family-body);
+  box-shadow: var(--shadow-sm);
+}
+
+.createBtn:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.controls {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  align-items: center;
+}
+
+.searchWrapper {
+  flex: 1;
+  position: relative;
+  max-width: 400px;
+}
+
+.searchWrapper svg {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+}
+
+.searchInput {
+  width: 100%;
+  padding: var(--space-3) var(--space-3) var(--space-3) 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease;
+  font-family: var(--font-family-body);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.filterBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-family: var(--font-family-body);
+}
+
+.filterBtn:hover,
+.filterBtn.active {
+  background: var(--color-secondary);
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
+}
+
+.filtersPanel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-6);
+  display: flex;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 140px;
+}
+
+.filterGroup label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-family-body);
+}
+
+.filterGroup select {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-family: var(--font-family-body);
+  cursor: pointer;
+}
+
+.filterGroup select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.filterGroup input[type="checkbox"] {
+  accent-color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+.tournamentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: var(--space-6);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16) var(--space-5);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--space-4);
+  color: var(--color-primary);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16) var(--space-5);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.error svg {
+  color: var(--color-error);
+  margin-bottom: var(--space-4);
+}
+
+.error h3 {
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2) 0;
+  font-size: 1.25rem;
+  font-family: var(--font-family-heading);
+}
+
+.error p {
+  margin: 0 0 var(--space-5) 0;
+  font-size: 0.875rem;
+  font-family: var(--font-family-body);
+}
+
+.retryBtn {
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-family: var(--font-family-body);
+}
+
+.retryBtn:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.emptyState {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16) var(--space-5);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.emptyState svg {
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--space-4);
+}
+
+.emptyState h3 {
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2) 0;
+  font-size: 1.25rem;
+  font-family: var(--font-family-heading);
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 0.875rem;
+  font-family: var(--font-family-body);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tournamentList {
+    padding: var(--space-4);
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+  
+  .createBtn {
+    align-self: flex-start;
+  }
+  
+  .statsRow {
+    gap: var(--space-3);
+  }
+  
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .searchWrapper {
+    max-width: none;
+  }
+  
+  .filtersPanel {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .filterGroup {
+    min-width: auto;
+  }
+  
+  .tournamentGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .statsRow {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  .titleSection h2 {
+    font-size: 1.5rem;
+  }
+  
+  .tournamentList {
+    padding: var(--space-3);
+  }
+  
+  .filtersPanel {
+    padding: var(--space-4);
+  }
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+  .searchInput,
+  .filterBtn,
+  .filtersPanel {
+    border-width: 2px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .createBtn,
+  .filterBtn,
+  .retryBtn {
+    transition: none;
+  }
+  
+  .createBtn:hover,
+  .retryBtn:hover {
+    transform: none;
+  }
+  
+  .spinner {
+    animation: none;
+  }
+}

@@ -1,0 +1,295 @@
+.sessionList {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color, #e1e5e9);
+}
+
+.title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary, #2d3748);
+}
+
+.headerActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.createButton {
+  background: var(--primary-color, #3182ce);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.createButton:hover {
+  background: var(--primary-dark, #2c5282);
+  transform: translateY(-1px);
+}
+
+.refreshButton {
+  background: var(--background-light, #f8fafc);
+  border: 1px solid var(--border-color, #e1e5e9);
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background: var(--background-hover, #e2e8f0);
+}
+
+.refreshButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--text-secondary, #718096);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-color, #e1e5e9);
+  border-top: 3px solid var(--primary-color, #3182ce);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--error-color, #dc2626);
+  gap: 12px;
+}
+
+.retryButton {
+  background: var(--error-color, #dc2626);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.retryButton:hover {
+  background: var(--error-dark, #b91c1c);
+}
+
+.filterTabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.filterTab {
+  background: var(--background-light, #f8fafc);
+  border: 1px solid var(--border-color, #e1e5e9);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.filterTab:hover {
+  background: var(--background-hover, #e2e8f0);
+}
+
+.filterTab.active {
+  background: var(--primary-color, #3182ce);
+  color: white;
+  border-color: var(--primary-color, #3182ce);
+}
+
+.sessionsContainer {
+  min-height: 300px;
+}
+
+.sessionCards {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Gap is handled by SessionCard margin */
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.empty h3 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary, #2d3748);
+}
+
+.empty p {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  color: var(--text-secondary, #718096);
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+.emptyActionButton {
+  background: var(--primary-color, #3182ce);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emptyActionButton:hover {
+  background: var(--primary-dark, #2c5282);
+  transform: translateY(-1px);
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light, #f1f5f9);
+}
+
+.loadMoreButton {
+  background: var(--background-light, #f8fafc);
+  border: 1px solid var(--border-color, #e1e5e9);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  color: var(--text-secondary, #718096);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.loadMoreButton:hover {
+  background: var(--background-hover, #e2e8f0);
+  color: var(--text-primary, #2d3748);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .title {
+    font-size: 20px;
+  }
+  
+  .headerActions {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+  
+  .createButton {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .filterTabs {
+    justify-content: flex-start;
+    margin-bottom: 16px;
+  }
+  
+  .filterTab {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  
+  .empty {
+    padding: 40px 16px;
+  }
+  
+  .emptyIcon {
+    font-size: 48px;
+  }
+  
+  .empty h3 {
+    font-size: 18px;
+  }
+  
+  .empty p {
+    font-size: 13px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .sessionList {
+    --background-light: #2d3748;
+    --background-hover: #4a5568;
+    --border-color: #4a5568;
+    --border-light: #2d3748;
+    --text-primary: #f7fafc;
+    --text-secondary: #a0aec0;
+    --primary-color: #63b3ed;
+    --primary-dark: #3182ce;
+    --error-color: #fc8181;
+    --error-dark: #e53e3e;
+  }
+}

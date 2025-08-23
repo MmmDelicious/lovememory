@@ -25,7 +25,8 @@ import {
   X,
   BarChart3,
   Gift,
-  BookOpen
+  BookOpen,
+  Trophy
 } from 'lucide-react';
 import styles from './MainLayout.module.css';
 import { useAuth } from '../../context/AuthContext';
@@ -62,6 +63,7 @@ const MainLayout: React.FC = () => {
       label: 'Игры',
       active: location.pathname.startsWith('/games')
     },
+
     {
       path: '/lessons',
       icon: <BookOpen size={20} />,
@@ -97,6 +99,7 @@ const MainLayout: React.FC = () => {
           return <MobileDashboard />;
         case '/games':
           return <MobileGames />;
+
         case '/shop':
           return <Outlet />;
         case '/insights':

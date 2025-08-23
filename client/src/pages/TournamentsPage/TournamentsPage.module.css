@@ -1,0 +1,375 @@
+/* TournamentsPage - Redesigned with App Color Scheme */
+
+.tournamentsPage {
+  min-height: 100vh;
+  background: var(--color-background);
+  padding: var(--space-6);
+}
+
+.pageHeader {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-8);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-light);
+}
+
+.headerContent h1 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: clamp(1.75rem, 3vw, 2rem);
+  font-weight: 700;
+  font-family: var(--font-family-heading);
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: 0 0 var(--space-6) 0;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  font-family: var(--font-family-body);
+}
+
+.statsCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.statCard {
+  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-primary-light) 100%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-5);
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.statNumber {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--space-1);
+  font-family: var(--font-family-heading);
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-family-body);
+}
+
+.tabNavigation {
+  display: flex;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-1);
+  margin-bottom: var(--space-6);
+  gap: var(--space-1);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tabNavigation::-webkit-scrollbar {
+  display: none;
+}
+
+.tabButton {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  min-width: fit-content;
+  font-family: var(--font-family-body);
+}
+
+.tabButton:hover {
+  background: var(--color-secondary);
+  color: var(--color-text-primary);
+}
+
+.tabButton.active {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.contentContainer {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-8);
+  border: 1px solid var(--color-border-light);
+}
+
+.tabContent {
+  padding: var(--space-8);
+}
+
+.sectionHeader {
+  margin-bottom: var(--space-8);
+  text-align: center;
+}
+
+.sectionHeader h2 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+}
+
+.sectionHeader p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  font-family: var(--font-family-body);
+}
+
+.myTournamentsSection,
+.participationsSection {
+  margin-bottom: var(--space-10);
+}
+
+.myTournamentsSection h3,
+.participationsSection h3 {
+  margin: 0 0 var(--space-5) 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--color-border);
+  font-family: var(--font-family-heading);
+}
+
+.quickActions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-5);
+}
+
+.actionCard {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+}
+
+.actionCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
+}
+
+.actionIcon {
+  font-size: 3rem;
+  flex-shrink: 0;
+}
+
+.actionContent {
+  flex: 1;
+}
+
+.actionContent h3 {
+  margin: 0 0 var(--space-1) 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-heading);
+}
+
+.actionContent p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  font-family: var(--font-family-body);
+}
+
+.actionButton {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  font-family: var(--font-family-body);
+}
+
+.actionButton:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .statsCards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .quickActions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .tournamentsPage {
+    padding: var(--space-4);
+  }
+  
+  .pageHeader {
+    padding: var(--space-6) var(--space-5);
+  }
+  
+  .headerContent h1 {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.875rem;
+  }
+  
+  .statsCards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
+  
+  .statCard {
+    padding: var(--space-4) var(--space-3);
+  }
+  
+  .statNumber {
+    font-size: 1.5rem;
+  }
+  
+  .statLabel {
+    font-size: 0.625rem;
+  }
+  
+  .tabNavigation {
+    padding: var(--space-1);
+    gap: var(--space-1);
+  }
+  
+  .tabButton {
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.75rem;
+  }
+  
+  .tabContent {
+    padding: var(--space-6) var(--space-5);
+  }
+  
+  .sectionHeader h2 {
+    font-size: 1.25rem;
+  }
+  
+  .sectionHeader p {
+    font-size: 0.875rem;
+  }
+  
+  .actionCard {
+    padding: var(--space-5);
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .actionIcon {
+    font-size: 2.25rem;
+  }
+  
+  .actionButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .statsCards {
+    grid-template-columns: 1fr;
+  }
+  
+  .tabNavigation {
+    flex-direction: column;
+  }
+  
+  .tabButton {
+    text-align: center;
+  }
+  
+  .pageHeader {
+    padding: var(--space-5) var(--space-4);
+  }
+  
+  .tabContent {
+    padding: var(--space-5) var(--space-4);
+  }
+}
+
+/* Dark theme support */
+:root[data-theme='dark'] .tournamentsPage {
+  /* Uses dark theme variables from index.css */
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+  .statCard,
+  .actionCard,
+  .contentContainer,
+  .pageHeader {
+    border-width: 2px;
+  }
+  
+  .tabButton.active {
+    border: 2px solid white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .statCard,
+  .actionCard,
+  .tabButton,
+  .actionButton {
+    transition: none;
+  }
+  
+  .statCard:hover,
+  .actionCard:hover,
+  .actionButton:hover {
+    transform: none;
+  }
+}

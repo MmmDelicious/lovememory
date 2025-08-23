@@ -5,6 +5,7 @@ import AIToggleButton from '../AIToggleButton/AIToggleButton';
 import FreeRoamMascot from '../FreeRoamMascot/FreeRoamMascot';
 import DateGeneratorModal from '../DateGeneratorModal/DateGeneratorModal';
 import { useAuth } from '../../context/AuthContext';
+
 const AIChatInterface = () => {
   const { 
     isChatOpen, 
@@ -18,16 +19,20 @@ const AIChatInterface = () => {
     isDateGeneratorOpen,
     closeDateGenerator
   } = useAIMascot();
+  
   const { user } = useAuth();
+
   if (!user) {
     return null;
   }
+
   const aiInterfaceContainerStyle = {
     position: 'fixed',
     bottom: '30px',
     right: '30px',
     zIndex: 10000
   };
+
   const handleContextMenuAction = (actionId) => {
     switch (actionId) {
       case 'chat':
@@ -48,7 +53,7 @@ const AIChatInterface = () => {
       case 'mood':
         sendMessageToAI('Подними мне настроение! Расскажи что-нибудь позитивное', 'mood');
         break;
-            case 'generateDate':
+      case 'generateDate':
         sendMessageToAI('Сгенерируй идеальное свидание для нас!', 'generateDate');
         break;
       case 'hide':
@@ -58,9 +63,11 @@ const AIChatInterface = () => {
         break;
     }
   };
+
   const handleEventCreated = (event) => {
-    console.log('Date event created:', event);
+    // Event created successfully
   };
+
   return (
     <>
       {isAIVisible && (
@@ -76,7 +83,6 @@ const AIChatInterface = () => {
         <AIToggleButton />
         {isChatOpen && <AIChat />}
       </div>
-      {}
       <DateGeneratorModal
         isOpen={isDateGeneratorOpen}
         onClose={closeDateGenerator}
@@ -85,4 +91,5 @@ const AIChatInterface = () => {
     </>
   );
 };
+
 export default AIChatInterface;
