@@ -1,88 +1,84 @@
+import { useUser } from '../store/hooks';
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../context/AuthContext';
-import io from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
+
 interface Gift {
   id: string;
-  giftType: string;
-  message: string;
-  photoPath?: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  senderId: string;
   senderName: string;
+  message?: string;
   createdAt: string;
+  giftType: string; // Добавляем giftType для совместимости с GiftDisplay
 }
+
 export const useGifts = () => {
   const [receivedGift, setReceivedGift] = useState<Gift | null>(null);
   const [isGiftVisible, setIsGiftVisible] = useState(false);
-  const { user, token } = useAuth();
+  const user = useUser();
   const socketRef = useRef<any>(null);
+
   useEffect(() => {
     if (!user) return;
+    
+    // Временно используем пустой токен, так как в Redux User нет token
+    const token = ''; // TODO: Добавить token в Redux User или использовать другой способ
+    
     const socket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:5000', {
       auth: {
         token: token
       },
       transports: ['websocket', 'polling']
     });
+
     socketRef.current = socket;
+
     socket.on('gift_received', (gift: Gift) => {
-      console.log('Gift received:', gift);
       setReceivedGift(gift);
       setIsGiftVisible(true);
     });
-    socket.on('connect', () => {
-      console.log('Connected to gift socket');
-    });
-    socket.on('disconnect', () => {
-      console.log('Disconnected from gift socket');
-    });
-    socket.on('connect_error', (error) => {
-      console.error('Gift socket connection error:', error);
-    });
+
     return () => {
-      socket.disconnect();
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
     };
   }, [user]);
+
   const closeGift = () => {
     setIsGiftVisible(false);
-    setTimeout(() => {
-      setReceivedGift(null);
-    }, 300);
+    setReceivedGift(null);
   };
-  const checkForUnviewedGifts = async () => {
+
+  const fetchUnviewedGifts = async () => {
+    if (!user) return;
+    
     try {
       const response = await fetch('/api/gifts/unviewed', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${user.token || ''}`
         }
       });
+      
       if (response.ok) {
         const gifts = await response.json();
         if (gifts.length > 0) {
-          const latestGift = gifts[0];
-          setReceivedGift({
-            id: latestGift.id,
-            giftType: latestGift.giftType,
-            message: latestGift.message,
-            photoPath: latestGift.photoPath,
-            senderName: latestGift.sender?.first_name || 'Ваш партнер',
-            createdAt: latestGift.createdAt
-          });
+          setReceivedGift(gifts[0]);
           setIsGiftVisible(true);
         }
       }
     } catch (error) {
-      console.error('Error checking for unviewed gifts:', error);
+      console.error('Ошибка при загрузке подарков:', error);
     }
   };
-  useEffect(() => {
-    if (user) {
-      checkForUnviewedGifts();
-    }
-  }, [user]);
+
   return {
     receivedGift,
     isGiftVisible,
     closeGift,
-    checkForUnviewedGifts
+    fetchUnviewedGifts
   };
 };
 

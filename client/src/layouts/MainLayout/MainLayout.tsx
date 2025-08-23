@@ -29,16 +29,25 @@ import {
   Trophy
 } from 'lucide-react';
 import styles from './MainLayout.module.css';
-import { useAuth } from '../../context/AuthContext';
-import { useCurrency } from '../../context/CurrencyContext';
+import { useUser, useCoins, useAuthActions, useCurrencyActions } from '../../store/hooks';
 const MainLayout: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
-  const { user, logout } = useAuth();
-  const { coins } = useCurrency();
+  const user = useUser();
+  const coins = useCoins();
   const { receivedGift, isGiftVisible, closeGift } = useGifts();
+  const { logout: logoutUser } = useAuthActions();
+  const { resetCurrency } = useCurrencyActions();
   const navigate = useNavigate();
+  
+  const handleLogout = () => {
+    console.log('🚪 Выполняем выход из системы');
+    logoutUser(); // Очищаем Redux auth
+    resetCurrency(); // Очищаем Redux currency
+    navigate('/login'); // Перенаправляем на страницу входа
+  };
+  
   const handleNavigate = (path: string) => {
     navigate(path);
   };
@@ -155,7 +164,7 @@ const MainLayout: React.FC = () => {
               {}
               <NotificationDropdown />
               {}
-              <UserDropdown user={user} onLogout={logout} onNavigate={handleNavigate} />
+              <UserDropdown user={user} onLogout={handleLogout} onNavigate={handleNavigate} />
               {}
               <button 
                 className={styles.mobileMenuButton}

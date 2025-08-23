@@ -1,16 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BookOpen, TrendingUp, Map, Lightbulb, User } from 'lucide-react';
+import { Calendar, Map, BookOpen, BarChart3, ToggleLeft, ToggleRight, Users, User } from 'lucide-react';
 import DailyLesson from '../../components/DailyLesson/DailyLesson';
+import TodayTab from '../../components/TodayTab/TodayTab';
 import LessonProgress from '../../components/LessonProgress/LessonProgress';
 import LessonPath from '../../components/LessonPath/LessonPath';
 import PsychologyTips from '../../components/PsychologyTips/PsychologyTips';
+import InsightsTab from '../../components/InsightsTab/InsightsTab';
 import { lessonService } from '../../services/lesson.service';
 import styles from './LessonsPage.module.css';
 const LessonsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'daily' | 'progress' | 'path' | 'psychology'>('daily');
-  const [dailyLesson, setDailyLesson] = useState(null);
+  // New tab structure: Today, Path, Topics, Insights
+  const [activeTab, setActiveTab] = useState<'today' | 'path' | 'topics' | 'insights'>('today');
+  
+  // Partner mode toggle
+  const [viewMode, setViewMode] = useState<'my' | 'pair'>('my');
+  
+  // Data states
+  const [todayLesson, setTodayLesson] = useState(null);
   const [progress, setProgress] = useState(null);
+  const [topics, setTopics] = useState(null);
+  const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -18,21 +28,40 @@ const LessonsPage: React.FC = () => {
     loadData();
   }, [refreshKey]);
   const loadData = async () => {
-    console.log('🎯 LessonsPage: Loading data for tab:', activeTab);
+    console.log('🎯 LessonsPage: Loading data for tab:', activeTab, 'viewMode:', viewMode);
     try {
       setLoading(true);
       setError(null);
-      if (activeTab === 'daily') {
-        console.log('📚 LessonsPage: Fetching daily lesson...');
+      
+      // Load data based on active tab
+      if (activeTab === 'today') {
+        console.log('📅 LessonsPage: Fetching today\'s lesson...');
         const lesson = await lessonService.getTodaysLesson();
-        console.log('✅ LessonsPage: Daily lesson loaded:', lesson);
-        setDailyLesson(lesson);
-      } else if (activeTab === 'progress' || activeTab === 'path') {
+        console.log('✅ LessonsPage: Today lesson loaded:', lesson);
+        setTodayLesson(lesson);
+      } 
+      
+      if (activeTab === 'path' || activeTab === 'insights') {
         console.log('📊 LessonsPage: Fetching progress...');
         const progressData = await lessonService.getProgress();
         console.log('✅ LessonsPage: Progress loaded:', progressData);
         setProgress(progressData);
       }
+      
+      if (activeTab === 'topics') {
+        console.log('📚 LessonsPage: Fetching topics...');
+        // TODO: Implement getTopics service method
+        const topicsData = null; // await lessonService.getTopics();
+        setTopics(topicsData);
+      }
+      
+      if (activeTab === 'insights') {
+        console.log('💡 LessonsPage: Fetching insights...');
+        // TODO: Implement getInsights service method
+        const insightsData = null; // await lessonService.getInsights();
+        setInsights(insightsData);
+      }
+      
     } catch (err: any) {
       console.error('❌ LessonsPage: Error loading data:', err);
       setError(err.message || 'Произошла ошибка при загрузке данных');
@@ -44,11 +73,11 @@ const LessonsPage: React.FC = () => {
     if (!loading) {
       loadData();
     }
-  }, [activeTab]);
+  }, [activeTab, viewMode]);
   const handleCompleteLesson = async (feedback: string) => {
     try {
-      if (!dailyLesson?.Lesson?.id) return;
-      await lessonService.completeLesson(dailyLesson.Lesson.id, feedback);
+      if (!todayLesson?.Lesson?.id) return;
+      await lessonService.completeLesson(todayLesson.Lesson.id, feedback);
       setRefreshKey(prev => prev + 1);
     } catch (err: any) {
       setError(err.message || 'Не удалось выполнить урок');
@@ -63,19 +92,46 @@ const LessonsPage: React.FC = () => {
     visible: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20 }
   };
+  // New tab structure with updated icons and labels
   const tabs = [
-    { id: 'daily', label: 'Урок дня', icon: BookOpen },
-    { id: 'progress', label: 'Прогресс', icon: TrendingUp },
+    { id: 'today', label: 'Today', icon: Calendar },
     { id: 'path', label: 'Путь', icon: Map },
-    { id: 'psychology', label: 'Советы', icon: Lightbulb }
+    { id: 'topics', label: 'Темы', icon: BookOpen },
+    { id: 'insights', label: 'Insights', icon: BarChart3 }
   ];
   return (
     <div className={styles.container}>
       {}
-      <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <h1 className={styles.heroTitle}>Уроки</h1>
-          <p className={styles.heroSubtitle}>Развивайте отношения каждый день</p>
+      {/* Compact header with partner mode toggle only */}
+      <section className={styles.compactHeader}>
+        <div className={styles.headerContent}>
+          <motion.div 
+            className={styles.viewModeToggle}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <span className={styles.toggleLabel}>
+              {viewMode === 'my' ? 'Мой прогресс' : 'Прогресс пары'}
+            </span>
+            <button
+              className={styles.toggleButton}
+              onClick={() => setViewMode(viewMode === 'my' ? 'pair' : 'my')}
+              aria-label={`Переключить на ${viewMode === 'my' ? 'прогресс пары' : 'мой прогресс'}`}
+            >
+              {viewMode === 'my' ? (
+                <>
+                  <User size={16} />
+                  <ToggleLeft size={24} className={styles.toggleIcon} />
+                </>
+              ) : (
+                <>
+                  <Users size={16} />
+                  <ToggleRight size={24} className={styles.toggleIcon} />
+                </>
+              )}
+            </button>
+          </motion.div>
         </div>
       </section>
       {}
@@ -108,36 +164,46 @@ const LessonsPage: React.FC = () => {
       {}
       <div className={styles.content}>
         <AnimatePresence mode="wait">
-          {activeTab === 'daily' && (
+          {activeTab === 'today' && (
             <motion.div
-              key="daily"
+              key="today"
               variants={contentVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
               transition={{ duration: 0.3 }}
             >
-              <DailyLesson
-                lesson={dailyLesson?.Lesson}
+              <TodayTab
+                lesson={todayLesson?.Lesson}
                 onComplete={handleCompleteLesson}
                 loading={loading}
-                completionStatus={dailyLesson?.completionStatus}
+                completionStatus={todayLesson?.completionStatus}
+                viewMode={viewMode}
+                streakDays={progress?.streakDays || 3}
+                lessonsCompleted={progress?.completedLessons?.length || 12}
+                coinsEarned={progress?.totalCoins || 450}
               />
             </motion.div>
           )}
-          {activeTab === 'progress' && (
+          {activeTab === 'topics' && (
             <motion.div
-              key="progress"
+              key="topics"
               variants={contentVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
               transition={{ duration: 0.3 }}
             >
-              <LessonProgress
-                progress={progress}
-                loading={loading}
-              />
+              <div className={styles.placeholderContent}>
+                <h3>🚧 Topics Tab - В разработке</h3>
+                <p>Здесь будет навигация по темам уроков с drill-down функциональностью</p>
+                <div className={styles.placeholderFeatures}>
+                  <div>📚 Темы уроков</div>
+                  <div>🎯 Drill-down по урокам</div>
+                  <div>📈 Прогресс по каждой теме</div>
+                  <div>💡 Рекомендации</div>
+                </div>
+              </div>
             </motion.div>
           )}
           {activeTab === 'path' && (
@@ -154,26 +220,26 @@ const LessonsPage: React.FC = () => {
                 currentLesson={progress?.currentLesson || 'lesson_1'}
                 totalLessons={progress?.totalLessons || 30}
                 streakDays={progress?.streakDays || 0}
+                viewMode={viewMode}
                 onLessonSelect={(lessonId) => {
                   console.log('Selected lesson:', lessonId);
+                  // TODO: Navigate to lesson or open lesson modal
                 }}
               />
             </motion.div>
           )}
-          {activeTab === 'psychology' && (
+          {activeTab === 'insights' && (
             <motion.div
-              key="psychology"
+              key="insights"
               variants={contentVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
               transition={{ duration: 0.3 }}
             >
-              <PsychologyTips
-                userPreferences={{
-                  focusAreas: ['communication', 'intimacy'],
-                  relationshipStage: 'developing'
-                }}
+              <InsightsTab
+                viewMode={viewMode}
+                loading={loading}
               />
             </motion.div>
           )}

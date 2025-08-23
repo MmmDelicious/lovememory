@@ -1,8 +1,7 @@
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import React, { useState } from 'react';
+import { useAuthActions } from '../../store/hooks';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import { useInteractiveMascot } from '../../hooks/useInteractiveMascot';
-import { RegisterRequest, AuthContextType } from '../../../types/auth';
 import AuthLayout from '../../layouts/AuthLayout/AuthLayout';
 import Button from '../../components/Button/Button';
 import StaticMascot from '../../components/StaticMascot/StaticMascot';
@@ -25,49 +24,48 @@ const mascotConfig: MascotConfig = {
   }
 };
 const RegisterPage: React.FC = () => {
-  type FormDataShape = { firstName: string; email: string; password: string; gender: string; age: string; city: string };
-  const [formData, setFormData] = useState<FormDataShape>({ 
-    firstName: '', 
-    email: '', 
-    password: '', 
-    gender: '', 
-    age: '', 
-    city: '' 
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    gender: 'male' as 'male' | 'female' | 'other',
+    city: ''
   });
+  
+  const { registerUser } = useAuthActions();
   const navigate = useNavigate();
-  const { register, isAuthenticated } = (useAuth() as unknown as AuthContextType) || {} as AuthContextType;
   const { mascotMessage, handleAvatarClick, handleInteraction, triggerError } = useInteractiveMascot(mascotConfig);
-  useEffect(() => {
-    if (isAuthenticated) navigate('/dashboard', { replace: true });
-  }, [isAuthenticated, navigate]);
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev: FormDataShape) => ({ ...prev, [e.target.name]: e.target.value }));
+  
+  React.useEffect(() => {
+    // TODO: Проверять isAuthenticated из Redux state
+    // const isAuthenticated = useIsAuthenticated();
+    // if (isAuthenticated) navigate('/dashboard', { replace: true });
+  }, [navigate]);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     handleInteraction();
   };
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { firstName, email, password, gender, age, city } = formData;
-    if (!firstName) return triggerError('Как вас зовут?');
-    if (!email) return triggerError('Без email никак, нужен для входа.');
-    if (password.length < 6) return triggerError('Пароль должен быть надежным, минимум 6 символов.');
-    if (!gender) return triggerError('Выберите ваш пол.');
-    const ageNum = parseInt(age, 10);
-    if (!age || isNaN(ageNum) || ageNum < 18 || ageNum > 99) return triggerError('Укажите возраст от 18 до 99.');
-    if (!city) return triggerError('Из какого вы города?');
+    if (formData.password !== formData.confirmPassword) {
+      return triggerError('Пароли не совпадают');
+    }
+    
     try {
-      const registerData: RegisterRequest = {
-        email,
-        password,
-        first_name: firstName,
-        gender: gender as 'male' | 'female' | 'other',
-        age: ageNum,
-        city
-      };
-      await register(registerData);
+      await registerUser({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        first_name: formData.name,
+        gender: formData.gender,
+        city: formData.city
+      });
       navigate('/dashboard');
     } catch (err: any) {
-      const message = err?.response?.data?.message || err?.message || 'Что-то пошло не так.';
-      triggerError(message);
+      triggerError(err.response?.data?.message || 'Ошибка регистрации');
     }
   };
   const handleGoogleSignIn = (): void => {
@@ -77,7 +75,7 @@ const RegisterPage: React.FC = () => {
     }
   };
   const handleGenderChange = (gender: 'male' | 'female' | 'other'): void => {
-    setFormData((prev: FormDataShape) => ({ ...prev, gender }));
+    setFormData((prev) => ({ ...prev, gender }));
     handleInteraction();
   };
   return (
@@ -96,11 +94,11 @@ const RegisterPage: React.FC = () => {
         <form onSubmit={handleSubmit} className={loginStyles.form} noValidate>
           <div className={styles.formGrid}>
             <input 
-              name="firstName" 
+              name="name" 
               type="text" 
               placeholder="Ваше имя" 
               className={loginStyles.input} 
-              value={formData.firstName} 
+              value={formData.name} 
               onChange={handleInputChange} 
             />
             <input 
@@ -119,20 +117,20 @@ const RegisterPage: React.FC = () => {
               value={formData.password} 
               onChange={handleInputChange} 
             />
+            <input 
+              name="confirmPassword" 
+              type="password" 
+              placeholder="Подтвердите пароль" 
+              className={loginStyles.input} 
+              value={formData.confirmPassword} 
+              onChange={handleInputChange} 
+            />
             <div className={styles.gridSpanFull}>
               <GenderSelector 
                 selectedGender={formData.gender} 
                 onGenderChange={handleGenderChange}
               />
             </div>
-            <input 
-              name="age" 
-              type="number" 
-              placeholder="Возраст" 
-              className={loginStyles.input} 
-              value={formData.age} 
-              onChange={handleInputChange} 
-            />
             <input 
               name="city" 
               type="text" 

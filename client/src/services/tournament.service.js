@@ -96,6 +96,42 @@ const getTournamentHistory = async (limit = 20, offset = 0) => {
   return response.data;
 };
 
+// Получить состояние турнира (лобби)
+const getTournamentLobby = async (tournamentId) => {
+  const response = await api.get(`/tournaments/${tournamentId}/lobby`);
+  return response.data;
+};
+
+// Получить матчи турнира
+const getTournamentMatches = async (tournamentId, options = {}) => {
+  const response = await api.get(`/tournaments/${tournamentId}/matches`, { params: options });
+  return response.data;
+};
+
+// Получить матч по ID
+const getMatchById = async (tournamentId, matchId) => {
+  const response = await api.get(`/tournaments/${tournamentId}/matches/${matchId}`);
+  return response.data;
+};
+
+// Участник готов к матчу
+const setMatchReady = async (tournamentId, matchId) => {
+  const response = await api.post(`/tournaments/${tournamentId}/matches/${matchId}/ready`);
+  return response.data;
+};
+
+// Начать матч
+const startMatch = async (tournamentId, matchId) => {
+  const response = await api.post(`/tournaments/${tournamentId}/matches/${matchId}/start`);
+  return response.data;
+};
+
+// Завершить матч
+const completeMatch = async (tournamentId, matchId, winnerId) => {
+  const response = await api.post(`/tournaments/${tournamentId}/matches/${matchId}/complete`, { winnerId });
+  return response.data;
+};
+
 const tournamentService = {
   getActiveTournaments,
   getTournamentById,
@@ -112,6 +148,12 @@ const tournamentService = {
   updateTournament,
   getTournamentStats,
   getTournamentHistory,
+  getTournamentLobby,
+  getTournamentMatches,
+  getMatchById,
+  setMatchReady,
+  startMatch,
+  completeMatch,
 };
 
 export default tournamentService;

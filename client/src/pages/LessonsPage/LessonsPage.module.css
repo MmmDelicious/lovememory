@@ -77,6 +77,93 @@
 .heroContent {
   max-width: var(--lessons-width-content);
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--lessons-space-8);
+}
+
+.heroMain {
+  flex: 1;
+  text-align: left;
+}
+
+/* Compact Header - Убираем лишние заголовки */
+.compactHeader {
+  position: relative;
+  padding: var(--lessons-space-2) var(--lessons-space-6) var(--lessons-space-2);
+  z-index: 1;
+}
+
+.headerContent {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--lessons-space-4);
+}
+
+.headerMain {
+  flex: 1;
+  text-align: left;
+}
+
+.pageTitle {
+  font-family: var(--lessons-font-heading);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  color: var(--lessons-text-primary);
+  margin: 0 0 var(--lessons-space-1);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.pageSubtitle {
+  font-family: var(--lessons-font-body);
+  font-size: 0.875rem;
+  color: var(--lessons-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Partner Mode Toggle */
+.viewModeToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--lessons-space-3);
+  flex-shrink: 0;
+}
+
+.toggleLabel {
+  font-family: var(--lessons-font-body);
+  font-size: 0.875rem;
+  color: var(--lessons-text-secondary);
+  font-weight: 500;
+}
+
+.toggleButton {
+  display: flex;
+  align-items: center;
+  gap: var(--lessons-space-2);
+  padding: var(--lessons-space-2) var(--lessons-space-3);
+  background: var(--lessons-surface);
+  border: 1px solid var(--lessons-border);
+  border-radius: var(--lessons-radius-lg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--lessons-text-secondary);
+  font-size: 0.875rem;
+}
+
+.toggleButton:hover {
+  background: var(--lessons-surface-soft);
+  border-color: var(--lessons-primary);
+  color: var(--lessons-primary);
+}
+
+.toggleIcon {
+  color: var(--lessons-primary);
 }
 
 .heroTitle {
@@ -107,8 +194,8 @@
 .tabsContainer {
   display: flex;
   justify-content: center;
-  margin-bottom: var(--lessons-space-6);
-  padding: var(--lessons-space-5) var(--lessons-space-6);
+  margin-bottom: var(--lessons-space-4);
+  padding: var(--lessons-space-2) var(--lessons-space-6);
   background: var(--lessons-background);
 }
 
@@ -167,11 +254,11 @@
    ============================== */
 .content {
   position: relative;
-  min-height: 500px; /* Fixed height to prevent footer jumping */
+  min-height: 400px;
   width: 100%;
-  max-width: var(--lessons-width-content);
+  max-width: none; /* Убираем ограничение ширины */
   margin: 0 auto;
-  padding: 0 var(--lessons-space-6) var(--lessons-space-10);
+  padding: 0 var(--lessons-space-4) var(--lessons-space-6); /* Меньше отступы */
 }
 
 /* ==============================
@@ -368,5 +455,100 @@
     --lessons-border-light: #333333;
     --lessons-text-secondary: #000000;
     --lessons-text-muted: #333333;
+  }
+}
+
+/* ==============================
+   New Component Styles
+   ============================== */
+
+/* Topics Tab Placeholder */
+.placeholderContent {
+  background: var(--lessons-surface);
+  border: 1px solid var(--lessons-border);
+  border-radius: var(--lessons-radius-xl);
+  padding: var(--lessons-space-12);
+  text-align: center;
+  margin: var(--lessons-space-6) 0;
+}
+
+.placeholderContent h3 {
+  font-family: var(--lessons-font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--lessons-text-primary);
+  margin: 0 0 var(--lessons-space-4);
+}
+
+.placeholderContent p {
+  font-family: var(--lessons-font-body);
+  font-size: 1rem;
+  color: var(--lessons-text-secondary);
+  margin: 0 0 var(--lessons-space-6);
+  line-height: 1.6;
+}
+
+.placeholderFeatures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--lessons-space-4);
+  margin-top: var(--lessons-space-6);
+}
+
+.placeholderFeatures > div {
+  background: var(--lessons-primary-soft);
+  padding: var(--lessons-space-4);
+  border-radius: var(--lessons-radius-md);
+  font-family: var(--lessons-font-body);
+  font-size: 0.875rem;
+  color: var(--lessons-text-secondary);
+  font-weight: 500;
+}
+
+/* Insights Tab Layout */
+.insightsContainer {
+  margin: var(--lessons-space-6) 0;
+}
+
+.insightsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--lessons-space-8);
+}
+
+.analyticsSection,
+.tipsSection {
+  background: var(--lessons-surface);
+  border-radius: var(--lessons-radius-xl);
+  padding: var(--lessons-space-6);
+  border: 1px solid var(--lessons-border-light);
+}
+
+/* Mobile adjustments for compact header */
+@media (max-width: 768px) {
+  .compactHeader {
+    padding: var(--lessons-space-1) var(--lessons-space-4) var(--lessons-space-1);
+  }
+  
+  .headerContent {
+    justify-content: center;
+  }
+  
+  .viewModeToggle {
+    justify-content: center;
+  }
+  
+  .insightsGrid {
+    gap: var(--lessons-space-6);
+  }
+  
+  .placeholderFeatures {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .insightsGrid {
+    grid-template-columns: 1fr 1fr;
   }
 }

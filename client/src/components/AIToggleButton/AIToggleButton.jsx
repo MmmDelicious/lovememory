@@ -1,16 +1,20 @@
 import React from 'react';
-import { useAIMascot } from '../../context/AIMascotContext';
+import { useAIMascot, useMascotActions } from '../../store/hooks';
 import styles from './AIToggleButton.module.css';
 import mascotIcon from '../../assets/AI.json';
 import Lottie from 'lottie-react';
 
 const AIToggleButton = () => {
-  const { toggleAIMascot } = useAIMascot();
+  // Получаем состояние из Redux вместо Context
+  const { isVisible } = useAIMascot();
+  
+  // Получаем действия из Redux
+  const { toggleAI } = useMascotActions();
 
   return (
     <button 
-      className={styles.toggleButton} 
-      onClick={toggleAIMascot}
+      className={`${styles.toggleButton} ${isVisible ? styles.active : ''}`}
+      onClick={toggleAI}
       aria-label="Toggle AI Assistant"
     >
       <div className={styles.lottieIcon}>

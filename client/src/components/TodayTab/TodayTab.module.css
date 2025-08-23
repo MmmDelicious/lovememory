@@ -1,0 +1,773 @@
+/* Today Tab Component Styles - Based on Design Mockup */
+
+.container {
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+}
+
+/* Stats Section */
+.statsSection {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 100px;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Main Lesson Card */
+.mainLessonCard {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #F3F4F6;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.lessonContent {
+  display: grid;
+  grid-template-columns: 1fr 350px 280px;
+  gap: 2rem;
+  align-items: center;
+  width: 100%;
+}
+
+.lessonInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+/* Встроенная статистика */
+.inlineStats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.statNumber {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #FF6B5A;
+  line-height: 1;
+}
+
+.statText {
+  font-size: 0.75rem;
+  color: #64748B;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lessonBadge {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lessonTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.lessonDescription {
+  font-size: 1rem;
+  color: #6B7280;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.lessonMeta {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.metaItem svg {
+  color: #F59E0B;
+}
+
+.startButton {
+  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 1rem 2.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 90, 0.3);
+  align-self: flex-start;
+}
+
+.startButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 90, 0.4);
+}
+
+.startButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Action Buttons */
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.scheduleButton {
+  background: transparent;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scheduleButton:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+/* Share Section */
+.shareSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.shareLabel {
+  font-size: 0.875rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+.shareRewards {
+  display: flex;
+  gap: 1rem;
+}
+
+.rewardItem {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.rewardItem svg {
+  color: #FF6B5A;
+}
+
+/* Avatars */
+.avatars {
+  display: flex;
+  align-items: center;
+  gap: -0.5rem;
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+}
+
+.avatar:nth-child(2) {
+  margin-left: -8px;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+}
+
+/* Lesson Visual - Анимация по центру */
+.lessonVisual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Lottie Animation - Нормальный размер */
+.animationContainer {
+  position: relative;
+  width: 350px;
+  height: 350px;
+  background: linear-gradient(135deg, #FEF3F2 0%, #FDF2F8 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(255, 107, 90, 0.15);
+}
+
+.lottieAnimation {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 350px;
+  max-height: 350px;
+}
+
+/* Animation Placeholder */
+.animationPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholderContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.placeholderEmoji {
+  font-size: 4rem;
+  animation: pulse 2s infinite;
+}
+
+.placeholderText {
+  font-size: 0.875rem;
+  color: #6B7280;
+  font-weight: 500;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Steps Section - Полный редизайн */
+.stepsSection {
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  border: none;
+  border-radius: 20px;
+  padding: 1.5rem;
+  width: 280px;
+  min-width: 280px;
+  align-self: flex-start;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.stepsSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FF6B5A 0%, #FF8A75 50%, #F59E0B 100%);
+}
+
+.stepsTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1E293B;
+  margin: 0 0 1.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stepsTitle::before {
+  content: "📋";
+  font-size: 1.25rem;
+}
+
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.stepItem:hover {
+  border-color: #FF6B5A;
+  box-shadow: 0 2px 8px rgba(255, 107, 90, 0.1);
+}
+
+.stepCheckbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #CBD5E1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: white;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.stepCheckbox.completed {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border-color: #10B981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.stepTitle {
+  font-size: 0.9rem;
+  color: #475569;
+  font-weight: 500;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.stepItem.completed .stepTitle {
+  color: #64748B;
+  text-decoration: line-through;
+}
+
+.markCompleteButton {
+  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.875rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(255, 107, 90, 0.25);
+}
+
+.markCompleteButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 90, 0.35);
+}
+
+.markCompleteButton:active {
+  transform: translateY(0);
+}
+
+.illustrationContainer {
+  position: relative;
+  width: 300px;
+  height: 300px;
+}
+
+.illustration {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #FEF3F2 0%, #FDF2F8 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.couple {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.person1, .person2 {
+  position: absolute;
+  width: 60px;
+  height: 80px;
+  border-radius: 30px 30px 20px 20px;
+}
+
+.person1 {
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  left: 40px;
+  top: 40px;
+  z-index: 2;
+}
+
+.person2 {
+  background: linear-gradient(135deg, #D2691E 0%, #CD853F 100%);
+  right: 40px;
+  top: 50px;
+  z-index: 1;
+}
+
+.book {
+  position: absolute;
+  width: 40px;
+  height: 30px;
+  background: #FF6B5A;
+  border-radius: 4px;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+.progressIndicator {
+  text-align: center;
+}
+
+.progressText {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.progressBar {
+  width: 120px;
+  height: 8px;
+  background: #F3F4F6;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #10B981 0%, #059669 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* Recommendations Section */
+.recommendationsSection {
+  margin-top: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 1rem 0;
+}
+
+.recommendationsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.recommendationCard {
+  background: white;
+  border: 1px solid #F3F4F6;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.recommendationCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #E5E7EB;
+}
+
+.recIcon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #FEF3F2 0%, #FDF2F8 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FF6B5A;
+}
+
+.recContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.recTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.recDescription {
+  font-size: 0.75rem;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.3;
+  display: none; /* Hide on compact layout */
+}
+
+.recDuration {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  font-weight: 500;
+}
+
+.recButton {
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: auto;
+}
+
+.recButton:hover {
+  background: #FF6B5A;
+  border-color: #FF6B5A;
+  color: white;
+}
+
+/* Invite Section */
+.inviteSection {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.inviteButton {
+  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(255, 107, 90, 0.3);
+}
+
+.inviteButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 90, 0.4);
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #F3F4F6;
+  border-top: 3px solid #FF6B5A;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .recommendationsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .lessonContent {
+    grid-template-columns: 1fr 280px 240px;
+    gap: 1.5rem;
+  }
+  
+  .animationContainer {
+    width: 280px;
+    height: 280px;
+  }
+  
+  .stepsSection {
+    width: 240px;
+    min-width: 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .statsSection {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .statCard {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+    min-width: 150px;
+  }
+
+  .mainLessonCard {
+    padding: 1.5rem;
+  }
+
+  .lessonContent {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .lessonTitle {
+    font-size: 1.5rem;
+  }
+
+  .animationContainer {
+    width: 220px;
+    height: 220px;
+  }
+
+  .stepsSection {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .recommendationsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .recommendationCard {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .lessonTitle {
+    font-size: 1.5rem;
+  }
+
+  .lessonDescription {
+    font-size: 1rem;
+  }
+
+  .startButton {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    align-self: stretch;
+    text-align: center;
+  }
+
+  .animationContainer,
+  .illustrationContainer {
+    width: 200px;
+    height: 200px;
+  }
+
+  .lottieAnimation {
+    width: 180px;
+    height: 180px;
+  }
+
+  .stepsSection {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .startButton,
+  .scheduleButton {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -2,21 +2,30 @@ import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import LottieMascot from '../LottieMascot/LottieMascot';
 import InterceptedMascot from '../InterceptedMascot/InterceptedMascot';
-import { useEventMascot } from '../../context/EventMascotContext';
-import { useAIMascot } from '../../context/AIMascotContext';
+import { useEventMascotData, useEventMascotActions } from '../../store/hooks';
+import { useInterceptedMascot } from '../../store/hooks';
+
 const GlobalMascot = () => {
-  const { mascot, hideMascot } = useEventMascot();
-  const { interceptedMascot } = useAIMascot();
+  // Получаем данные из Redux вместо Context
+  const mascot = useEventMascotData();
+  const interceptedMascot = useInterceptedMascot();
+  
+  // Получаем действия из Redux
+  const { hideMascot } = useEventMascotActions();
+  
   const location = useLocation();
+
   useEffect(() => {
     hideMascot();
   }, [location.pathname, hideMascot]);
+
   const handleActionClick = (startDismiss) => {
     if (mascot?.onActionClick) {
       mascot.onActionClick();
     }
     startDismiss();
   };
+
   return (
     <>
       {interceptedMascot && <InterceptedMascot {...interceptedMascot} />}
@@ -30,4 +39,5 @@ const GlobalMascot = () => {
     </>
   );
 };
+
 export default GlobalMascot;

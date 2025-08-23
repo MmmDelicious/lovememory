@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Coins, DollarSign, RefreshCw } from 'lucide-react';
-import { useCurrency } from '../../context/CurrencyContext';
+import { useCoins } from '../../store/hooks';
 import styles from './PokerModal.module.css';
 interface PokerModalProps {
   isOpen: boolean;
@@ -20,7 +20,7 @@ const PokerModal: React.FC<PokerModalProps> = ({
   roomName,
   currentStack = 0
 }) => {
-  const { coins } = useCurrency();
+  const coins = useCoins();
   const [amount, setAmount] = useState(Math.min(maxAmount, coins, 200));
   const actualMax = Math.min(maxAmount, coins);
   const minAmount = Math.min(50, actualMax);

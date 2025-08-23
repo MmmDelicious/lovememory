@@ -1,25 +1,29 @@
 import React, { useState } from 'react';
-import { useAIMascot } from '../../context/AIMascotContext';
-import { useAuth } from '../../context/AuthContext';
+import { useAIMascot, useMascotActions, useUser } from '../../store/hooks';
 import styles from './AIChat.module.css';
 
 const MAX_PROMPT_LENGTH = 500;
 
 const AIChat = () => {
-  const { sendMessageToAI, isAILoading, setGlobalMascotMessage } = useAIMascot();
-  const { user, partner } = useAuth();
+  // Получаем состояние из Redux вместо Context
+  const { isLoading } = useAIMascot();
+  
+  // Получаем действия из Redux
+  const { sendMessageToAI, setMessage } = useMascotActions();
+  
+  const user = useUser();
   const [inputValue, setInputValue] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const trimmedValue = inputValue.trim();
     
-    if (!trimmedValue || isAILoading) {
+    if (!trimmedValue || isLoading) {
       return;
     }
     
     if (trimmedValue.length > MAX_PROMPT_LENGTH) {
-      setGlobalMascotMessage('Сэр, это слишком длинное сообщение. Пожалуйста, будьте лаконичнее.');
+      setMessage('Сэр, это слишком длинное сообщение. Пожалуйста, будьте лаконичнее.');
       return;
     }
 
@@ -30,10 +34,10 @@ const AIChat = () => {
         city: user.city,
         coins: user.coins,
       },
-      partner: partner ? {
-        name: partner.name,
-        gender: partner.gender,
-        city: partner.city,
+      partner: user.partner ? {
+        name: user.partner.name,
+        gender: user.partner.gender,
+        city: user.partner.city,
       } : null
     };
 
@@ -49,11 +53,11 @@ const AIChat = () => {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="Спросите что-нибудь, сэр..."
-          disabled={isAILoading}
+          disabled={isLoading}
           maxLength={MAX_PROMPT_LENGTH + 1}
           autoFocus
         />
-        <button type="submit" disabled={isAILoading}>
+        <button type="submit" disabled={isLoading}>
           ➤
         </button>
       </form>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useUser } from '../../store/hooks';
 import { tournamentService } from '../../services';
 import { Tournament, TournamentStats, TournamentFilters } from '../../types/models';
 import TournamentCard from './TournamentCard';
@@ -35,7 +35,7 @@ const TournamentList: React.FC<TournamentListProps> = ({
   showCreateButton = true,
   customFilters = {}
 }) => {
-  const { user } = useAuth();
+  const user = useUser();
   const [tournaments, setTournaments] = useState<TournamentWithStats[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

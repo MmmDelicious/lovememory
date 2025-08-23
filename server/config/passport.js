@@ -1,6 +1,26 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const JwtStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
 const User = require('../models/User');
+
+// JWT Strategy для аутентификации токенов
+passport.use(new JwtStrategy({
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET,
+}, async (payload, done) => {
+  try {
+    console.log('🔍 JWT Strategy: payload:', payload);
+    const user = await User.findByPk(payload.userId);
+    if (user) {
+      return done(null, payload); // Возвращаем payload, а не user
+    }
+    return done(null, false);
+  } catch (error) {
+    return done(error, false);
+  }
+}));
+
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,

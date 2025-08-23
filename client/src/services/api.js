@@ -4,16 +4,13 @@ const api = axios.create({
 });
 api.interceptors.request.use(
   (config) => {
-    const storedData = localStorage.getItem('auth');
-    if (storedData) {
-      try {
-        const userData = JSON.parse(storedData);
-        if (userData && userData.token) {
-          config.headers['Authorization'] = `Bearer ${userData.token}`;
-        }
-      } catch (e) {
-        console.error("Could not parse auth data from localStorage", e);
-      }
+    // Ищем токен в правильном месте (Redux использует 'authToken')
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+      console.log('🔑 API: Добавляем токен в заголовок:', token.substring(0, 20) + '...');
+    } else {
+      console.log('❌ API: Токен не найден в localStorage');
     }
     return config;
   },

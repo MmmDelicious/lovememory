@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
+import { useUser, useAuthLoading } from './store/hooks';
 
 import MainLayout from './layouts/MainLayout/MainLayout';
 import GameLayout from './layouts/GameLayout/GameLayout';
@@ -12,6 +12,7 @@ import ProfilePage from './pages/ProfilePage/ProfilePage';
 import GamesPage from './pages/GamesPage/GamesPage';
 import LessonsPage from './pages/LessonsPage/LessonsPage';
 import { TournamentsPage } from './pages/TournamentsPage';
+import { TournamentPage } from './pages/TournamentPage/TournamentPage';
 
 import GameLobbyPage from './pages/GameLobbyPage/GameLobbyPage';
 import InsightsPage from './pages/InsightsPage/InsightsPage';
@@ -24,10 +25,29 @@ import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import AuthCallbackPage from './pages/AuthCallbackPage/AuthCallbackPage';
 
 const AppRoutes: React.FC = () => {
-  const { user, isLoading } = useAuth();
+  const user = useUser();
+  const isLoading = useAuthLoading();
 
   if (isLoading) {
-    return null;
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        background: 'var(--color-background, #f5f5f5)',
+        fontSize: '18px',
+        color: 'var(--color-text, #333)'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ 
+            marginBottom: '16px',
+            fontSize: '48px'
+          }}>💕</div>
+          <div>Загрузка LoveMemory...</div>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
@@ -55,6 +75,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/games" element={<GamesPage />} />
           <Route path="/games/:gameType" element={<GameLobbyPage />} />
           <Route path="/games/tournaments" element={<TournamentsPage />} />
+          <Route path="/tournaments/:id" element={<TournamentPage />} />
           <Route path="/lessons" element={<LessonsPage />} />
           <Route path="/day/:date" element={<DayDetailPage />} />
         </Route>

@@ -46,6 +46,28 @@ export interface TournamentStats {
   estimatedDuration?: number; // minutes
 }
 
+export interface TournamentMatch {
+  id: string;
+  tournament_id: string;
+  round: number;
+  position: number;
+  participant1_id?: string;
+  participant2_id?: string;
+  winner_id?: string;
+  status: 'pending' | 'waiting' | 'active' | 'completed';
+  game_room_id?: string;
+  metadata: Record<string, any>;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  
+  // Ассоциации
+  Tournament?: Tournament;
+  Participant1?: GameParticipant;
+  Participant2?: GameParticipant;
+  Winner?: GameParticipant;
+  GameRoom?: GameRoom;
+}
+
 // ===== MEDIA DERIVATIVE TYPES =====
 
 export interface MediaDerivative {

@@ -7,7 +7,7 @@ import type { EventDropArg, EventClickArg, EventContentArg } from '@fullcalendar
 import Sidebar from '../Sidebar/Sidebar';
 import StoryViewer from '../StoryViewer/StoryViewer';
 import { FaChevronLeft, FaChevronRight, FaFilter, FaListUl, FaPlus } from 'react-icons/fa';
-import { useEventMascot } from '../../context/EventMascotContext';
+import { useEventMascotActions } from '../../store/hooks';
 import { toast } from '../../context/ToastContext';
 import styles from './Calendar.module.css';
 import CalendarFilters from './SearchAndFilter';
@@ -125,7 +125,7 @@ const Calendar: React.FC<CalendarProps> = ({
   const [storyDate, setStoryDate] = useState<string>('');
   const [memoryStoryData, setMemoryStoryData] = useState<any>(null);
   
-  const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useEventMascot();
+  const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useEventMascotActions();
   
   const TYPE_LABELS: Record<string, string> = {
     plan: 'План',
@@ -143,45 +143,92 @@ const Calendar: React.FC<CalendarProps> = ({
       .sort(([, c1], [, c2]) => getHueFromHex(c1) - getHueFromHex(c2));
   }, []);
 
+  // ВРЕМЕННО ОТКЛЮЧЕНО: useEffect(() => {
+  //   const draggables: any[] = [];
+  //   
+  //   const createDraggable = (container: HTMLElement) => {
+  //     try {
+  //       return new Draggable(container, {
+  //         itemSelector: '.js-template-item',
+  //         eventData: (el) => ({
+  //           title: el.getAttribute('data-title') || 'Событие',
+  //           extendedProps: {
+  //             eventType: el.getAttribute('data-type') || 'plan',
+  //             isOwner: true,
+  //             isShared: el.getAttribute('data-is-shared') === 'true',
+  //             templateId: el.getAttribute('data-template-id'),
+  //             description: el.getAttribute('data-description') || '',
+  //           },
+  //           backgroundColor: el.getAttribute('data-color') || '#D97A6C',
+  //           borderColor: el.getAttribute('data-color') || '#D97A6C',
+  //           duration: el.getAttribute('data-duration') || null,
+  //           allDay: el.getAttribute('data-is-all-day') === 'true',
+  //         }),
+  //       });
+  //     } catch (error) {
+  //       console.warn('Ошибка при создании Draggable:', error);
+  //       return null;
+  //     }
+  //   };
+  //   
+  //   // Создаем Draggable только если контейнеры существуют
+  //   if (templateContainerRef.current) {
+  //     const draggable = createDraggable(templateContainerRef.current);
+  //     if (draggable) {
+  //       draggables.push(draggable);
+  //     }
+  //   }
+  //   
+  //   if (customTemplatesRef.current) {
+  //     const draggable = createDraggable(customTemplatesRef.current);
+  //     if (draggable) {
+  //       draggables.push(draggable);
+  //     }
+  //   }
+  //   
+  //   // Очистка при размонтировании
+  //   return () => {
+  //     // Останавливаем mascot loop
+  //     stopMascotLoop();
+  //     clearMascotTargets();
+  //     
+  //     // Очищаем Draggable
+  //     draggables.forEach(draggable => {
+  //       if (draggable && typeof draggable.destroy === 'function') {
+  //       try {
+  //         draggable.destroy();
+  //       } catch (error) {
+  //         console.warn('Ошибка при уничтожении Draggable:', error);
+  //       }
+  //     }
+  //     
+  //     // Очищаем массив
+  //     draggables.length = 0;
+  //     
+  //     // Очищаем refs
+  //     if (calendarRef.current) {
+  //       try {
+  //         // Calendar API не имеет метода destroy, просто очищаем ref
+  //         calendarRef.current = null;
+  //       } catch (error) {
+  //         console.warn('Ошибка при очистке Calendar ref:', error);
+  //       }
+  //     }
+  //   };
+  // }, [stopMascotLoop, clearMascotTargets]); // Добавляем зависимости
+
+  // Дополнительная очистка при размонтировании компонента
   useEffect(() => {
-    const draggables: any[] = [];
-    
-    const createDraggable = (container: HTMLElement) => {
-      return new Draggable(container, {
-        itemSelector: '.js-template-item',
-        eventData: (el) => ({
-          title: el.getAttribute('data-title') || 'Событие',
-          extendedProps: {
-            eventType: el.getAttribute('data-type') || 'plan',
-            isOwner: true,
-            isShared: el.getAttribute('data-is-shared') === 'true',
-            templateId: el.getAttribute('data-template-id'),
-            description: el.getAttribute('data-description') || '',
-          },
-          backgroundColor: el.getAttribute('data-color') || '#D97A6C',
-          borderColor: el.getAttribute('data-color') || '#D97A6C',
-          duration: el.getAttribute('data-duration') || null,
-          allDay: el.getAttribute('data-is-all-day') === 'true',
-        }),
-      });
-    };
-    
-    if (templateContainerRef.current) {
-      draggables.push(createDraggable(templateContainerRef.current));
-    }
-    
-    if (customTemplatesRef.current) {
-      draggables.push(createDraggable(customTemplatesRef.current));
-    }
-    
     return () => {
-      draggables.forEach(draggable => {
-        if (draggable.destroy) {
-          draggable.destroy();
-        }
-      });
+      // Останавливаем mascot loop при размонтировании
+      stopMascotLoop();
+      clearMascotTargets();
+      
+      // В React 19 НЕ очищаем refs вручную - это может вызвать ошибки
+      // React сам очистит refs при размонтировании
+      console.log('🧹 Calendar: компонент размонтируется, очищаем mascot');
     };
-  }, [customTemplates]);
+  }, [stopMascotLoop, clearMascotTargets]);
 
   const updateMascotTargets = useCallback(() => {
     const calendarApi = calendarRef.current?.getApi();
@@ -192,24 +239,27 @@ const Calendar: React.FC<CalendarProps> = ({
     
     const calendarEl = (calendarApi as any).el as HTMLElement;
     const dayCells = calendarEl.querySelectorAll('[data-date]');
-    const cellMap = new Map<string, HTMLElement>();
+    const cellMap = new Map<string, string>(); // Map<date, elementId>
     
     dayCells.forEach((cell: any) => {
       const element = cell as HTMLElement;
       const date = element.getAttribute('data-date');
       if (date) {
-        cellMap.set(date, element);
+        // Создаем уникальный ID для ячейки
+        const elementId = `calendar-cell-${date}`;
+        element.id = elementId;
+        cellMap.set(date, elementId);
       }
     });
     
     const allEvents = calendarApi.getEvents();
     const targets = allEvents.reduce<any[]>((acc, event) => {
-      const dayCell = cellMap.get(event.startStr.split('T')[0]);
-      if (dayCell) {
+      const elementId = cellMap.get(event.startStr.split('T')[0]);
+      if (elementId) {
         acc.push({
           page: 'dashboard',
           data: { event: event.extendedProps.rawEvent },
-          element: dayCell,
+          elementId: elementId, // Используем ID вместо DOM элемента
           containerRef: calendarContainerRef,
           onActionClick: () => handleEventClick({ event } as EventClickArg),
         });
@@ -220,30 +270,30 @@ const Calendar: React.FC<CalendarProps> = ({
     registerMascotTargets(targets);
   }, [events, registerMascotTargets]);
 
-  useEffect(() => {
-    updateMascotTargets();
-    startMascotLoop();
-    
-    const calendarApi = calendarRef.current?.getApi();
-    if (calendarApi) {
-      const handleDatesSet = (arg: any) => {
-        updateMascotTargets();
-        setCurrentDate(arg.view.currentStart);
-        setCurrentTitle(arg.view?.title || '');
-        setCurrentView(arg.view?.type || 'dayGridMonth');
-      };
-      calendarApi.on('datesSet', handleDatesSet);
-    }
-    
-    return () => {
-      stopMascotLoop();
-      clearMascotTargets();
-      const api = calendarRef.current?.getApi();
-      if (api) {
-        (api as any).off('datesSet');
-      }
-    };
-  }, [updateMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets]);
+  // ВРЕМЕННО ОТКЛЮЧЕНО: useEffect(() => {
+  //   updateMascotTargets();
+  //   startMascotLoop();
+  //   
+  //   const calendarApi = calendarRef.current?.getApi();
+  //   if (calendarApi) {
+  //     const handleDatesSet = (arg: any) => {
+  //       updateMascotTargets();
+  //       setCurrentDate(arg.view.currentStart);
+  //       setCurrentTitle(arg.view?.title || '');
+  //       setCurrentView(arg.view?.type || 'dayGridMonth');
+  //     };
+  //     calendarApi.on('datesSet', handleDatesSet);
+  //   }
+  //   
+  //   return () => {
+  //     stopMascotLoop();
+  //     clearMascotTargets();
+  //     const api = calendarRef.current?.getApi();
+  //     if (api) {
+  //       (api as any).off('datesSet');
+  //     }
+  //   };
+  // }, [updateMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets]);
 
   const handleInteraction = <T extends any[]>(handler: (...args: T) => void) => (...args: T) => {
     hideMascot();

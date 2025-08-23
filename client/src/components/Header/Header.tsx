@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useCurrency } from '../../context/CurrencyContext';
+import { useUser, useAuthActions } from '../../store/hooks';
 import Button from '../Button/Button';
 import UserDropdown from '../UserDropdown/UserDropdown';
 import styles from './Header.module.css';
@@ -37,8 +36,8 @@ const GuestNav: React.FC = () => (
   </>
 );
 const Header: React.FC = () => {
-  const { user, logout } = useAuth();
-  const { coins } = useCurrency();
+  const user = useUser();
+  const { logout } = useAuthActions();
   const navigate = useNavigate();
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -53,7 +52,7 @@ const Header: React.FC = () => {
       <nav className={styles.nav}>
         {user ? (
           <AuthenticatedNav 
-            coins={coins} 
+            coins={user.coins || 0} 
             user={user}
             onLogout={logout} 
             onNavigate={handleNavigate}

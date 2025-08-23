@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, Clock, CheckCircle } from 'lucide-react';
 import Lottie from 'lottie-react';
 import { getLessonAnimation } from '../../assets/lessons';
+import { useDevice } from '../../hooks/useDevice';
 import styles from './DailyLesson.module.css';
 
 import type { Lesson } from '../../../types/common';
@@ -15,18 +16,44 @@ interface DailyLessonProps {
     userCompleted: boolean;
     partnerCompleted: boolean;
   };
+  viewMode?: 'my' | 'pair';
 }
 
 const DailyLesson: React.FC<DailyLessonProps> = ({
   lesson,
   onComplete,
   loading = false,
-  completionStatus
+  completionStatus,
+  viewMode = 'my'
 }) => {
   const [feedback, setFeedback] = useState('');
   const [isCompleting, setIsCompleting] = useState(false);
   const [animationData, setAnimationData] = useState<any>(null);
   const [startTime] = useState(Date.now());
+  const { isMobile } = useDevice();
+  
+  // Определяем размер анимации в зависимости от размера экрана
+  const getAnimationSize = () => {
+    const screenWidth = window.innerWidth;
+    if (screenWidth <= 480) {
+      return { width: '150px', height: '150px' };
+    } else if (screenWidth <= 768) {
+      return { width: '180px', height: '180px' };
+    }
+    return { width: '240px', height: '240px' };
+  };
+  
+  const [animationSize, setAnimationSize] = useState(getAnimationSize());
+  
+  // Обновляем размер анимации при изменении размера экрана
+  useEffect(() => {
+    const handleResize = () => {
+      setAnimationSize(getAnimationSize());
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Загружаем анимацию Lottie
   useEffect(() => {
@@ -95,6 +122,12 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
               animationData={animationData}
               loop={true}
               autoplay={true}
+              width={parseInt(animationSize.width)}
+              height={parseInt(animationSize.height)}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%'
+              }}
               className={styles.animation}
             />
           </div>

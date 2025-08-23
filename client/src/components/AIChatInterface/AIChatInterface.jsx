@@ -1,26 +1,19 @@
 import React from 'react';
-import { useAIMascot } from '../../context/AIMascotContext';
+import { useAIMascot, useMascotActions, useGlobalMascot, useUser } from '../../store/hooks';
 import AIChat from '../AIChat/AIChat';
 import AIToggleButton from '../AIToggleButton/AIToggleButton';
 import FreeRoamMascot from '../FreeRoamMascot/FreeRoamMascot';
 import DateGeneratorModal from '../DateGeneratorModal/DateGeneratorModal';
-import { useAuth } from '../../context/AuthContext';
 
 const AIChatInterface = () => {
-  const { 
-    isChatOpen, 
-    toggleChat, 
-    isAIVisible, 
-    globalMascot, 
-    globalMascotAnimation,
-    isAILoading,
-    sendMessageToAI,
-    toggleAIMascot,
-    isDateGeneratorOpen,
-    closeDateGenerator
-  } = useAIMascot();
+  // Получаем состояние из Redux вместо Context
+  const { isVisible, isChatOpen, isLoading } = useAIMascot();
+  const globalMascot = useGlobalMascot();
   
-  const { user } = useAuth();
+  // Получаем действия из Redux
+  const { toggleAI, toggleChat, sendMessageToAI, closeDateGenerator } = useMascotActions();
+  
+  const user = useUser();
 
   if (!user) {
     return null;
@@ -57,7 +50,7 @@ const AIChatInterface = () => {
         sendMessageToAI('Сгенерируй идеальное свидание для нас!', 'generateDate');
         break;
       case 'hide':
-        toggleAIMascot();
+        toggleAI();
         break;
       default:
         break;
@@ -70,12 +63,12 @@ const AIChatInterface = () => {
 
   return (
     <>
-      {isAIVisible && (
+      {isVisible && (
         <FreeRoamMascot 
           state={globalMascot} 
-          animationData={globalMascotAnimation}
+          animationData={globalMascot.animationData}
           onClick={toggleChat}
-          isAILoading={isAILoading}
+          isAILoading={isLoading}
           onContextMenuAction={handleContextMenuAction}
         />
       )}
@@ -84,7 +77,7 @@ const AIChatInterface = () => {
         {isChatOpen && <AIChat />}
       </div>
       <DateGeneratorModal
-        isOpen={isDateGeneratorOpen}
+        isOpen={false} // Временно, пока не мигрируем DateGenerator
         onClose={closeDateGenerator}
         onEventCreated={handleEventCreated}
       />

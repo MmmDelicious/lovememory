@@ -6,7 +6,7 @@ import globalMascotAnimation from '../assets/AI.json';
 import { askAI } from '../services/ai.service';
 import { MASCOT_CONFIG } from '../config/mascot.config.js';
 import smartMascotService from '../services/smartMascot.service';
-import { useAuth } from './AuthContext';
+import { useUser } from '../store/hooks';
 const MascotContext = createContext();
 export const useMascot = () => useContext(MascotContext);
 const generateMessage = (page, data, user = null, partner = null) => {
@@ -33,7 +33,7 @@ const generateMessage = (page, data, user = null, partner = null) => {
   return data?.message || smartMascotService.generateContextualMessage();
 };
 export const MascotProvider = ({ children }) => {
-  const { user } = useAuth();
+  const user = useUser();
   const [mascot, setMascot] = useState(null);
   const [mascotTargets, setMascotTargets] = useState([]);
   const [isLoopActive, setIsLoopActive] = useState(false);

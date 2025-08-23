@@ -48,4 +48,22 @@ router.get('/:id/participants', tournamentController.getTournamentParticipants);
 // GET /tournaments/:id/stats - получить статистику турнира
 router.get('/:id/stats', tournamentController.getTournamentStats);
 
+// GET /tournaments/:id/lobby - получить лобби турнира (состояние)
+router.get('/:id/lobby', tournamentController.getTournamentLobby);
+
+// GET /tournaments/:id/matches - получить матчи турнира
+router.get('/:id/matches', tournamentController.getTournamentMatches);
+
+// GET /tournaments/:id/matches/:matchId - получить матч по ID
+router.get('/:id/matches/:matchId', tournamentController.getMatchById);
+
+// POST /tournaments/:id/matches/:matchId/ready - участник готов к матчу
+router.post('/:id/matches/:matchId/ready', tournamentController.setMatchReady);
+
+// POST /tournaments/:id/matches/:matchId/start - начать матч
+router.post('/:id/matches/:matchId/start', tournamentController.startMatch);
+
+// POST /tournaments/:id/matches/:matchId/complete - завершить матч
+router.post('/:id/matches/:matchId/complete', tournamentController.completeMatch);
+
 module.exports = router;

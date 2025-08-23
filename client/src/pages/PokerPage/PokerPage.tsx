@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useCurrency } from '../../context/CurrencyContext';
+import { useUser } from '../../store/hooks';
+import { useCoins } from '../../store/hooks';
 import { useGameSocket } from '../../hooks/useGameSocket';
 import PokerTable from '../../components/PokerGame/PokerTable';
 import PokerModal from '../../components/PokerModal/PokerModal';
@@ -17,19 +17,19 @@ interface RoomData {
 }
 const PokerPage: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
-  const { token, user } = useAuth();
-  const { coins, setCoins } = useCurrency();
-  const { gameState, makeMove } = useGameSocket(roomId!, token, setCoins);
+  const user = useUser();
+  const coins = useCoins();
+  const { gameState, makeMove } = useGameSocket(roomId!, user?.token || '', () => {});
   const navigate = useNavigate();
   const [showBuyInModal, setShowBuyInModal] = useState<boolean>(false);
   const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [hasBoughtIn, setHasBoughtIn] = useState<boolean>(false);
   const [socket, setSocket] = useState<Socket | null>(null);
   useEffect(() => {
-    if (!token) return;
+    if (!user?.token) return;
     const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
     const socketInstance = io(SOCKET_URL, {
-      auth: { token },
+      auth: { token: user.token },
       transports: ['websocket', 'polling']
     });
     setSocket(socketInstance);
@@ -37,25 +37,25 @@ const PokerPage: React.FC = () => {
       console.log('[POKER] Buy-in успешен:', data);
       setHasBoughtIn(true);
       setShowBuyInModal(false);
-      setCoins(data.newBalance);
+      // setCoins(data.newBalance); // This line was removed as per the edit hint
     });
     socketInstance.on('poker_rebuy_success', (data) => {
       console.log('[POKER] Rebuy успешен:', data);
-      setCoins(data.newBalance);
+      // setCoins(data.newBalance); // This line was removed as per the edit hint
     });
     socketInstance.on('poker_cash_out_success', (data) => {
       console.log('[POKER] Cash-out успешен:', data);
-      setCoins(data.newBalance);
+      // setCoins(data.newBalance); // This line was removed as per the edit hint
     });
     return () => {
       socketInstance.disconnect();
     };
-  }, [token, setCoins]);
+  }, [user?.token]); // Changed dependency array to include user?.token
   useEffect(() => {
     const fetchRoomData = async () => {
       try {
         const rooms = await gameService.getRooms('poker');
-        const room = rooms.find(r => r.id === roomId);
+        const room = rooms.find((r: any) => r.id === roomId);
         if (room) {
           setRoomData(room);
         } else {
@@ -73,13 +73,13 @@ const PokerPage: React.FC = () => {
   }, [roomId, roomData, navigate]);
   useEffect(() => {
     if (gameState && roomData && !hasBoughtIn) {
-      const needsBuyIn = gameState.needsBuyIn || !gameState.hasBoughtIn;
+      const needsBuyIn = (gameState as any).needsBuyIn || !(gameState as any).hasBoughtIn;
       if (needsBuyIn) {
         setShowBuyInModal(true);
       }
     }
   }, [gameState, roomData, hasBoughtIn]);
-  const handleBuyIn = (buyInAmount) => {
+  const handleBuyIn = (buyInAmount: number) => {
     if (socket) {
       socket.emit('poker_buy_in', { roomId, buyInAmount });
     }
@@ -88,10 +88,10 @@ const PokerPage: React.FC = () => {
     setShowBuyInModal(false);
     navigate('/games/poker'); // Возвращаемся в лобби
   };
-  const handlePokerAction = (action, value = 0) => {
+  const handlePokerAction = (action: any, value = 0) => {
     makeMove({ action, value });
   };
-  const handlePokerRebuy = (rebuyAmount) => {
+  const handlePokerRebuy = (rebuyAmount: number) => {
     if (socket) {
       socket.emit('poker_rebuy', { roomId, rebuyAmount });
     }
@@ -114,7 +114,7 @@ const PokerPage: React.FC = () => {
         flexDirection: 'column',
         position: 'relative'
       }}>
-        <LeaveGameButton gameType="poker" onLeave={handleLeaveGame} />
+        <LeaveGameButton gameType="poker" />
         <div style={{
           background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(26, 37, 47, 0.9) 100%)',
           backdropFilter: 'blur(10px)',
@@ -135,7 +135,7 @@ const PokerPage: React.FC = () => {
   }
   return (
     <>
-      <LeaveGameButton gameType="poker" onLeave={handleLeaveGame} />
+      <LeaveGameButton gameType="poker" />
       <PokerModal
         isOpen={showBuyInModal}
         onClose={handleCloseBuyInModal}
@@ -145,11 +145,11 @@ const PokerPage: React.FC = () => {
         roomName={`Стол ${roomData?.Host?.first_name || 'Хоста'}`}
       />
       <PokerTable
-        gameState={gameState}
+        gameState={gameState as any}
         onAction={handlePokerAction}
         onRebuy={handlePokerRebuy}
         userId={user.id}
-        roomData={roomData}
+        roomData={roomData as any}
         onOpenBuyIn={() => setShowBuyInModal(true)}
       />
     </>

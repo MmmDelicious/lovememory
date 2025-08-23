@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Heart } from 'lucide-react';
 import LottiePlayer from 'react-lottie-player';
-import { useAuth } from '../../context/AuthContext';
+import { useUser } from '../../store/hooks';
 import styles from './GiftDisplay.module.css';
 import guitarAnimation from '../../assets/guitar.json';
 import runningCharacterAnimation from '../../assets/running-character.json';
@@ -17,7 +17,7 @@ interface GiftDisplayProps {
   onClose: () => void;
 }
 const GiftDisplay: React.FC<GiftDisplayProps> = ({ gift, onClose }) => {
-  const { token } = useAuth();
+  const user = useUser();
   const [isVisible, setIsVisible] = useState(false);
   const [animationData, setAnimationData] = useState(null);
   useEffect(() => {
@@ -42,7 +42,7 @@ const GiftDisplay: React.FC<GiftDisplayProps> = ({ gift, onClose }) => {
       await fetch(`/api/gifts/${gift.id}/viewed`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${user.token}`
         }
       });
     } catch (error) {

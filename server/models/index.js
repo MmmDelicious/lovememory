@@ -15,6 +15,7 @@ const Insight = require('./Insight');
 const NotificationToken = require('./NotificationToken');
 const Achievement = require('./Achievement');
 const Tournament = require('./Tournament');
+const TournamentMatch = require('./TournamentMatch');
 const MediaDerivative = require('./MediaDerivative');
 const Session = require('./Session');
 const RelationshipMetrics = require('./RelationshipMetrics');
@@ -39,6 +40,7 @@ const models = {
   NotificationToken,
   Achievement,
   Tournament,
+  TournamentMatch,
   MediaDerivative,
   Session,
   RelationshipMetrics,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Gift, Heart, Star, Sparkles, Send, Camera, Type, X } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useCurrency } from '../../context/CurrencyContext';
+import { useUser } from '../../store/hooks';
+import { useCoins, useCurrencyActions } from '../../store/hooks';
 import LottiePlayer from 'react-lottie-player';
 import styles from './ShopPage.module.css';
 import { toast } from '../../context/ToastContext';
@@ -26,8 +26,9 @@ interface VirtualGift {
   isDelivered: boolean;
 }
 const ShopPage: React.FC = () => {
-  const { user, token } = useAuth();
-  const { coins, setCoins, refreshCoins } = useCurrency();
+  const user = useUser();
+  const coins = useCoins();
+  const { setCoins, refreshCoins } = useCurrencyActions();
   const [selectedGift, setSelectedGift] = useState<GiftOption | null>(null);
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const [giftMessage, setGiftMessage] = useState('');
@@ -69,7 +70,7 @@ const ShopPage: React.FC = () => {
         female: `Дорогой! Бегу к тебе со всей любовью! 🏃‍♀️💫`
       }
     };
-    const defaultMsg = messages[giftType as keyof typeof messages]?.[userGender] || 
+    const defaultMsg = messages[giftType as keyof typeof messages]?.[userGender as 'male' | 'female'] || 
                      'Специально для тебя подготовил(а) этот подарок! 💝';
     return `${defaultMsg}\n\nДля тебя приготовил(а): ${senderName}`;
   };
@@ -107,7 +108,7 @@ const ShopPage: React.FC = () => {
       const response = await fetch('/api/gifts/send', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${user.token}`
         },
         body: formData
       });

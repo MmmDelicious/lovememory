@@ -7,6 +7,7 @@ interface LessonPathProps {
   currentLesson: string;
   totalLessons: number;
   streakDays: number;
+  viewMode?: 'my' | 'pair';
   onLessonSelect?: (lessonId: string) => void;
 }
 interface PathNode {
@@ -22,6 +23,7 @@ const LessonPath: React.FC<LessonPathProps> = ({
   currentLesson,
   totalLessons,
   streakDays,
+  viewMode = 'my',
   onLessonSelect
 }) => {
   const [pathNodes, setPathNodes] = useState<PathNode[]>([]);

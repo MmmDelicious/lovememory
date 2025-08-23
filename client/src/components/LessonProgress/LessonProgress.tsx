@@ -4,8 +4,9 @@ import styles from './LessonProgress.module.css';
 interface LessonProgressProps {
   progress?: any;
   loading?: boolean;
+  viewMode?: 'my' | 'pair';
 }
-const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = false }) => {
+const LessonProgress: React.FC<LessonProgressProps> = ({ progress, loading = false, viewMode = 'my' }) => {
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const themeNames = {
     words_of_affirmation: 'Слова поддержки',

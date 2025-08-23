@@ -7,6 +7,7 @@ interface UserData {
   email: string;
   avatarUrl?: string;
   gender?: 'male' | 'female' | 'other';
+  partner?: any; // Добавляем информацию о паре
 }
 interface UserDropdownProps {
   user: UserData;
@@ -55,6 +56,12 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout, onNavigate 
           <div className={styles.userInfo}>
             <div className={styles.userName}>{displayName}</div>
             <div className={styles.userEmail}>{user.email}</div>
+            {user.partner && (
+              <div className={styles.userPartner}>
+                <Heart size={14} />
+                <span>Пара: {user.partner.name || user.partner.email}</span>
+              </div>
+            )}
           </div>
           <div className={styles.divider} />
           <button 

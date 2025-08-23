@@ -1,90 +1,77 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useUser } from '../../store/hooks';
+import styles from './DashboardPage.module.css';
+import Calendar from '../../components/Calendar/Calendar';
 import { useEvents } from '../../hooks/useEvents';
 import { useEventTemplates } from '../../hooks/useEventTemplates';
-import { useErrorHandler } from '../../hooks/useErrorHandler';
-import Calendar from '../../components/Calendar/Calendar';
-import EventTemplateModal, { EventTemplateData } from '../../components/EventTemplateModal/EventTemplateModal';
-import styles from './DashboardPage.module.css';
+
 const DashboardPage: React.FC = () => {
-  const { user } = useAuth();
-  const { handleError } = useErrorHandler();
-  const {
-    events,
-    isLoading,
-    error,
-    createEvent,
-    updateEvent,
-    deleteEvent
-  } = useEvents(user?.id);
-  const {
-    templates,
-    isLoading: templatesLoading,
-    createTemplate,
-    updateTemplate,
-    deleteTemplate,
-    incrementUsage,
-    duplicateTemplate
-  } = useEventTemplates(user?.id);
-  const [isTemplateModalOpen, setTemplateModalOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<EventTemplateData | null>(null);
+  const user = useUser();
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Восстанавливаем загрузку событий и шаблонов
+  const { events, isLoading: areEventsLoading, createEvent, updateEvent, deleteEvent } = useEvents(user?.id);
+  const { templates, isLoading: areTemplatesLoading, createTemplate, updateTemplate, deleteTemplate, duplicateTemplate } = useEventTemplates(user?.id);
+
+  console.log('🔍 DashboardPage: user из Redux:', user);
+  console.log('📅 DashboardPage: события:', events);
+  console.log('📋 DashboardPage: шаблоны:', templates);
+
   useEffect(() => {
-    if (error) {
-      handleError(error, 'Ошибка при загрузке календаря');
+    // Ждем загрузки событий и шаблонов
+    if (!areEventsLoading && !areTemplatesLoading) {
+      setIsLoading(false);
     }
-  }, [error, handleError]);
-  const handleCreateTemplate = () => {
-    setEditingTemplate(null);
-    setTemplateModalOpen(true);
-  };
-  const handleEditTemplate = (template: EventTemplateData) => {
-    setEditingTemplate(template);
-    setTemplateModalOpen(true);
-  };
-  const handleDeleteTemplate = async (templateId: string) => {
-    if (window.confirm('Удалить этот шаблон?')) {
-      await deleteTemplate(templateId);
-    }
-  };
-  const handleDuplicateTemplate = async (template: EventTemplateData) => {
-    await duplicateTemplate(template.id!);
-  };
-  const handleSaveTemplate = async (templateData: EventTemplateData) => {
-    try {
-      if (editingTemplate?.id) {
-        await updateTemplate(editingTemplate.id, templateData);
-      } else {
-        await createTemplate(templateData);
-      }
-    } catch (error) {
-      console.error('Ошибка при сохранении шаблона:', error);
-      throw error;
-    }
-  };
-  if (isLoading) {
+  }, [areEventsLoading, areTemplatesLoading]);
+
+  if (isLoading || areEventsLoading || areTemplatesLoading) {
     return <div className={styles.loader}>Загрузка календаря...</div>;
   }
+
+  if (!user) {
+    console.log('❌ DashboardPage: пользователь не найден!');
+    return <div className={styles.loader}>Пользователь не найден...</div>;
+  }
+
+  console.log('✅ DashboardPage: отображаем календарь для пользователя:', user.id);
+
+  // Создаем обертки для совместимости с Calendar
+  const handleCreateTemplate = () => {
+    // TODO: Открыть модальное окно создания шаблона
+    console.log('Создание шаблона');
+  };
+
+  const handleEditTemplate = (template: any) => {
+    // TODO: Открыть модальное окно редактирования шаблона
+    console.log('Редактирование шаблона:', template);
+  };
+
+  const handleDeleteTemplate = (template: any) => {
+    // TODO: Удалить шаблон
+    console.log('Удаление шаблона:', template);
+  };
+
+  const handleDuplicateTemplate = (template: any) => {
+    // TODO: Дублировать шаблон
+    console.log('Дублирование шаблона:', template);
+  };
+
   return (
     <>
       <Calendar
-        events={events}
+        events={events || []}
         userId={user?.id || ''}
         onCreateEvent={createEvent}
         onUpdateEvent={updateEvent}
         onDeleteEvent={deleteEvent}
-        customTemplates={templates}
+        customTemplates={templates || []}
         onCreateTemplate={handleCreateTemplate}
         onEditTemplate={handleEditTemplate}
         onDeleteTemplate={handleDeleteTemplate}
         onDuplicateTemplate={handleDuplicateTemplate}
       />
-      <EventTemplateModal
-        isOpen={isTemplateModalOpen}
-        onClose={() => setTemplateModalOpen(false)}
-        onSave={handleSaveTemplate}
-        editingTemplate={editingTemplate}
-      />
     </>
   );
 };
+
 export default DashboardPage;

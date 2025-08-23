@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import PlayingCard from '../PlayingCard/PlayingCard';
 import Button from '../Button/Button';
-import { useCurrency } from '../../context/CurrencyContext';
+import { useCoins } from '../../store/hooks';
 import PokerModal from '../PokerModal/PokerModal';
 import styles from './PokerTable.module.css';
 import Player from './Player/Player';
@@ -23,7 +23,7 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
   const [showRebuyModal, setShowRebuyModal] = useState(false);
   const [winnerAnimation, setWinnerAnimation] = useState(null);
   const [turnTimer, setTurnTimer] = useState(30);
-  const { coins } = useCurrency();
+  const coins = useCoins();
   const { 
     players = [], 
     communityCards = [], 

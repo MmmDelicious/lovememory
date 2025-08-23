@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import styles from './InsightsPage.module.css';
 import userService from '../../services/user.service';
-import { useAuth } from '../../context/AuthContext';
+import { useUser } from '../../store/hooks';
 import LoveLanguageAnalysis from '../../components/LoveLanguageAnalysis/LoveLanguageAnalysis';
 import PremiumModal from '../../components/PremiumModal/PremiumModal';
 import relationshipGraphService from '../../services/relationshipGraph.service';
@@ -51,7 +51,7 @@ interface ProfileStats {
   daysSinceRegistration: number;
 }
 const InsightsPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useUser();
   const [activeTab, setActiveTab] = useState<'overview' | 'charts' | 'graph' | 'insights'>('overview');
   const [timeFilter, setTimeFilter] = useState<'week' | 'month' | 'year'>('month');
   const [animatedScore, setAnimatedScore] = useState(0);

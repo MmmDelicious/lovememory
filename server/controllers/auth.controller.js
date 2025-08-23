@@ -22,11 +22,23 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    console.log('🔍 Login attempt for:', email);
+    
     const { user } = await authService.login({ email, password });
+    console.log('✅ Auth service returned user:', user);
+    
     const fullUser = await userService.getProfile(user.id);
+    console.log('✅ User service returned profile:', fullUser);
+    
     const token = generateToken(fullUser);
+    console.log('🔑 Generated token:', token.substring(0, 20) + '...');
+    
+    const response = { token, user: fullUser };
+    console.log('📤 Sending response:', { token: token.substring(0, 20) + '...', user: fullUser.id });
+    
     sendAuthResponse(res, fullUser, token);
   } catch (error) {
+    console.error('💥 Login error:', error);
     next(error);
   }
 };
@@ -50,9 +62,27 @@ const googleCallback = async (req, res, next) => {
     next(error);
   }
 };
+
+const getMe = async (req, res, next) => {
+  try {
+    console.log('🔍 getMe вызван, req.user:', req.user);
+    console.log('🔍 req.user.userId:', req.user?.userId);
+    
+    // req.user уже доступен благодаря passport.authenticate('jwt')
+    const fullUser = await userService.getProfile(req.user.userId);
+    console.log('✅ Получили профиль пользователя:', fullUser);
+    
+    res.json(fullUser);
+  } catch (error) {
+    console.error('💥 Ошибка в getMe:', error);
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
   logout,
   googleCallback,
+  getMe,
 };

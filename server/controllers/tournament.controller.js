@@ -1,4 +1,4 @@
-const { Tournament, GameParticipant, Transaction, User } = require('../models');
+const { Tournament, GameParticipant, Transaction, User, TournamentMatch } = require('../models');
 const { Op } = require('sequelize');
 
 class TournamentController {
@@ -447,6 +447,243 @@ class TournamentController {
         data: tournament,
         message: 'Tournament updated successfully' 
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Получить матчи турнира
+  async getTournamentMatches(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { round, status } = req.query;
+
+      const tournament = await Tournament.findByPk(id);
+      if (!tournament) {
+        return res.status(404).json({ error: 'Tournament not found' });
+      }
+
+      const options = {};
+      if (round) options.round = parseInt(round);
+      if (status) options.status = status;
+
+      const matches = await TournamentMatch.getMatchesByTournament(id, options);
+      
+      res.status(200).json({ data: matches });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Получить состояние турнира (лобби)
+  async getTournamentLobby(req, res, next) {
+    try {
+      const { id } = req.params;
+
+      const tournament = await Tournament.findByPk(id);
+      if (!tournament) {
+        return res.status(404).json({ error: 'Tournament not found' });
+      }
+
+      const state = await tournament.getTournamentState();
+      
+      res.status(200).json({ data: state });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Участник готов к матчу
+  async setMatchReady(req, res, next) {
+    try {
+      const { tournamentId, matchId } = req.params;
+      const userId = req.user.id;
+
+      const tournament = await Tournament.findByPk(tournamentId);
+      if (!tournament) {
+        return res.status(404).json({ error: 'Tournament not found' });
+      }
+
+      const match = await TournamentMatch.findByPk(matchId);
+      if (!match || match.tournament_id !== tournamentId) {
+        return res.status(404).json({ error: 'Match not found' });
+      }
+
+      // Проверяем, что пользователь является участником матча
+      const participant = await GameParticipant.findOne({
+        where: { 
+          tournament_id: tournamentId,
+          user_id: userId 
+        }
+      });
+
+      if (!participant) {
+        return res.status(403).json({ error: 'Not a tournament participant' });
+      }
+
+      if (match.participant1_id !== participant.id && match.participant2_id !== participant.id) {
+        return res.status(403).json({ error: 'Not a match participant' });
+      }
+
+      await match.setReady(participant.id);
+      
+      res.status(200).json({ 
+        message: 'Ready status set successfully',
+        match: match.getMatchInfo()
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Начать матч
+  async startMatch(req, res, next) {
+    try {
+      const { tournamentId, matchId } = req.params;
+      const userId = req.user.id;
+
+      const tournament = await Tournament.findByPk(tournamentId);
+      if (!tournament) {
+        return res.status(404).json({ error: 'Tournament not found' });
+      }
+
+      const match = await TournamentMatch.findByPk(matchId);
+      if (!match || match.tournament_id !== tournamentId) {
+        return res.status(404).json({ error: 'Match not found' });
+      }
+
+      // Проверяем права (только участники матча или создатель турнира)
+      const participant = await GameParticipant.findOne({
+        where: { 
+          tournament_id: tournamentId,
+          user_id: userId 
+        }
+      });
+
+      const isCreator = tournament.creator_id === userId;
+      const isParticipant = participant && 
+        (match.participant1_id === participant.id || match.participant2_id === participant.id);
+
+      if (!isCreator && !isParticipant) {
+        return res.status(403).json({ error: 'Not authorized to start match' });
+      }
+
+      await match.startMatch();
+      
+      res.status(200).json({ 
+        message: 'Match started successfully',
+        match: match.getMatchInfo()
+      });
+    } catch (error) {
+      if (error.message.includes('not ready')) {
+        return res.status(400).json({ error: error.message });
+      }
+      next(error);
+    }
+  }
+
+  // Завершить матч и продвинуть победителя
+  async completeMatch(req, res, next) {
+    try {
+      const { tournamentId, matchId } = req.params;
+      const { winnerId } = req.body;
+      const userId = req.user.id;
+
+      const tournament = await Tournament.findByPk(tournamentId);
+      if (!tournament) {
+        return res.status(404).json({ error: 'Tournament not found' });
+      }
+
+      const match = await TournamentMatch.findByPk(matchId);
+      if (!match || match.tournament_id !== tournamentId) {
+        return res.status(404).json({ error: 'Match not found' });
+      }
+
+      // Проверяем права (только участники матча или создатель турнира)
+      const participant = await GameParticipant.findOne({
+        where: { 
+          tournament_id: tournamentId,
+          user_id: userId 
+        }
+      });
+
+      const isCreator = tournament.creator_id === userId;
+      const isParticipant = participant && 
+        (match.participant1_id === participant.id || match.participant2_id === participant.id);
+
+      if (!isCreator && !isParticipant) {
+        return res.status(403).json({ error: 'Not authorized to complete match' });
+      }
+
+      // Проверяем, что winnerId действительно участник матча
+      if (match.participant1_id !== winnerId && match.participant2_id !== winnerId) {
+        return res.status(400).json({ error: 'Winner must be a match participant' });
+      }
+
+      const result = await tournament.advanceWinner(matchId, winnerId);
+      
+      res.status(200).json({ 
+        message: 'Match completed successfully',
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Получить матч по ID
+  async getMatchById(req, res, next) {
+    try {
+      const { tournamentId, matchId } = req.params;
+
+      const tournament = await Tournament.findByPk(tournamentId);
+      if (!tournament) {
+        return res.status(404).json({ error: 'Tournament not found' });
+      }
+
+      const match = await TournamentMatch.findByPk(matchId, {
+        include: [
+          {
+            model: GameParticipant,
+            as: 'Participant1',
+            include: [
+              {
+                model: User,
+                as: 'User',
+                attributes: ['id', 'display_name', 'first_name', 'avatarUrl']
+              }
+            ]
+          },
+          {
+            model: GameParticipant,
+            as: 'Participant2',
+            include: [
+              {
+                model: User,
+                as: 'User',
+                attributes: ['id', 'display_name', 'first_name', 'avatarUrl']
+              }
+            ]
+          },
+          {
+            model: GameParticipant,
+            as: 'Winner',
+            include: [
+              {
+                model: User,
+                as: 'User',
+                attributes: ['id', 'display_name', 'first_name', 'avatarUrl']
+              }
+            ]
+          }
+        ]
+      });
+
+      if (!match || match.tournament_id !== tournamentId) {
+        return res.status(404).json({ error: 'Match not found' });
+      }
+
+      res.status(200).json({ data: match.getMatchInfo() });
     } catch (error) {
       next(error);
     }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useAuth } from '../context/AuthContext';
+import { useUser } from '../store/hooks';
 import gameService from '../services/game.service';
 import type { GameRoom, UseGameLobbyReturn } from '../../types/game.types';
 const SOCKET_URL =
@@ -12,7 +12,8 @@ export const useGameLobby = (gameType: string): UseGameLobbyReturn => {
   const [rooms, setRooms] = useState<GameRoom[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useAuth();
+  const user = useUser();
+  const token = user?.token;
   const fetchRooms = useCallback(async () => {
     if (!gameType) return;
     try {
