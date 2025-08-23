@@ -56,10 +56,6 @@ class CodenamesGame {
     this.gameHistory = [];
     this.revealed = new Set(); // Открытые карты
     this.generateBoard();
-    console.log('[Codenames] Game created with players:', this.players);
-    console.log('[Codenames] Teams:', this.teams);
-    console.log('[Codenames] Starting team:', this.startingTeam);
-    console.log('[Codenames] Card distribution:', this.cardCounts);
   }
   setupTeams() {
     if (this.players.length !== 4) {
@@ -69,10 +65,6 @@ class CodenamesGame {
     this.teams.team1.player = this.players[1];
     this.teams.team2.captain = this.players[2];
     this.teams.team2.player = this.players[3];
-    console.log('[Codenames] Teams set up:', {
-      team1: { captain: this.teams.team1.captain, player: this.teams.team1.player },
-      team2: { captain: this.teams.team2.captain, player: this.teams.team2.player }
-    });
   }
   getTurnTimeLimit() {
     const difficulty = this.settings.difficulty || 'normal';
@@ -142,7 +134,6 @@ class CodenamesGame {
       type: shuffledTypes[index],
       revealed: false
     }));
-    console.log('[Codenames] Board generated with', this.board.length, 'cards');
   }
   getCurrentPlayerId() {
     if (this.currentPhase === 'giving_clue') {
@@ -163,7 +154,6 @@ class CodenamesGame {
     return null;
   }
   giveClue(playerId, clueWord, clueNumber) {
-    console.log(`[Codenames] Player ${playerId} giving clue: "${clueWord}" for ${clueNumber} cards`);
     const playerRole = this.getPlayerRole(playerId);
     if (!playerRole || playerRole.team !== this.currentTeam || playerRole.role !== 'captain') {
       throw new Error('Только капитан текущей команды может давать подсказки');
@@ -172,7 +162,6 @@ class CodenamesGame {
       throw new Error('Сейчас не время давать подсказки');
     }
     if (this.isTimeUp()) {
-      console.log(`[Codenames] Time up for clue, auto-ending turn`);
       this.endTurn();
       throw new Error('Время на ход истекло');
     }
@@ -207,11 +196,9 @@ class CodenamesGame {
       number: this.currentClueNumber,
       timestamp: new Date().toISOString()
     });
-    console.log(`[Codenames] Clue set: "${this.currentClue}" for ${this.currentClueNumber} cards`);
     return this.getState();
   }
   makeGuess(playerId, cardId) {
-    console.log(`[Codenames] Player ${playerId} guessing card ${cardId}`);
     const playerRole = this.getPlayerRole(playerId);
     if (!playerRole || playerRole.team !== this.currentTeam || playerRole.role !== 'player') {
       throw new Error('Только игрок текущей команды может отгадывать');
@@ -241,30 +228,24 @@ class CodenamesGame {
       cardType: card.type,
       timestamp: new Date().toISOString()
     });
-    console.log(`[Codenames] Card revealed: ${card.word} (${card.type})`);
     const currentTeamColor = this.teams[this.currentTeam].color;
     if (card.type === this.cardTypes.ASSASSIN) {
       this.winner = this.currentTeam === 'team1' ? 'team2' : 'team1';
       this.status = 'finished';
-      console.log(`[Codenames] Game over! Team hit assassin. Winner: ${this.winner}`);
     } else if (card.type === currentTeamColor) {
       this.canPass = true;
-      console.log(`[Codenames] Correct guess! Guesses left: ${this.guessesLeft}`);
       if (this.checkWinCondition()) {
         this.winner = this.currentTeam;
         this.status = 'finished';
-        console.log(`[Codenames] Game won by ${this.winner}!`);
       } else if (this.guessesLeft === 0) {
         this.endTurn();
       }
     } else {
-      console.log(`[Codenames] Wrong guess! Turn ends.`);
       this.endTurn();
     }
     return this.getState();
   }
   passTurn(playerId) {
-    console.log(`[Codenames] Player ${playerId} passing turn`);
     const playerRole = this.getPlayerRole(playerId);
     if (!playerRole || playerRole.team !== this.currentTeam || playerRole.role !== 'player') {
       throw new Error('Только игрок текущей команды может пропустить ход');
@@ -282,7 +263,6 @@ class CodenamesGame {
     return this.getState();
   }
   endTurn() {
-    console.log(`[Codenames] Ending turn for ${this.currentTeam}`);
     this.currentTeam = this.currentTeam === 'team1' ? 'team2' : 'team1';
     this.currentPhase = 'giving_clue';
     this.currentClue = null;
@@ -290,13 +270,11 @@ class CodenamesGame {
     this.guessesLeft = 0;
     this.canPass = false;
     this.turnStartTime = Date.now();
-    console.log(`[Codenames] Turn switched to ${this.currentTeam}`);
   }
   checkWinCondition() {
     const currentTeamColor = this.teams[this.currentTeam].color;
     const teamCards = this.board.filter(card => card.type === currentTeamColor);
     const revealedTeamCards = teamCards.filter(card => card.revealed);
-    console.log(`[Codenames] Team ${this.currentTeam} revealed ${revealedTeamCards.length}/${teamCards.length} cards`);
     return revealedTeamCards.length === teamCards.length;
   }
   getState() {
@@ -358,7 +336,6 @@ class CodenamesGame {
     return state;
   }
   makeMove(playerId, move) {
-    console.log(`[Codenames] makeMove called by ${playerId} with move:`, move);
     try {
       switch (move.type) {
         case 'give_clue':
@@ -371,13 +348,11 @@ class CodenamesGame {
           throw new Error('Неизвестный тип хода');
       }
     } catch (error) {
-      console.error(`[Codenames] Error in makeMove:`, error.message);
       return { error: error.message };
     }
   }
   forceEndTurn() {
     if (this.status !== 'in_progress') return;
-    console.log(`[Codenames] Force ending turn due to timeout for ${this.currentTeam}`);
     this.gameHistory.push({
       type: 'timeout',
       team: this.currentTeam,
@@ -399,7 +374,6 @@ class CodenamesGame {
     return null;
   }
   cleanup() {
-    console.log('[Codenames] Cleaning up game resources');
     this.board = null;
     this.words = null;
     this.gameHistory = null;

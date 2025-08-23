@@ -161,29 +161,23 @@ class QuizGame {
   }
   startQuestionTimer() {
     if (this.isCleanedUp) {
-      console.log(`[QUIZ] Cannot start timer - game is cleaned up`);
       return;
     }
-    console.log(`[QUIZ] Starting server timer for question ${this.currentQuestionIndex + 1}`);
     if (this.serverTimer) {
       clearTimeout(this.serverTimer);
       this.serverTimer = null;
     }
     this.serverTimer = setTimeout(() => {
       if (this.isCleanedUp) {
-        console.log(`[QUIZ] Timer callback ignored - game is cleaned up`);
         return;
       }
-      console.log(`[QUIZ] Server timer expired for question ${this.currentQuestionIndex + 1}`);
       this.forceNextQuestion();
     }, this.questionTimeLimit);
   }
   forceNextQuestion() {
-    console.log(`[QUIZ] Force moving to next question due to timeout`);
     this.nextQuestion();
   }
   makeMove(playerId, answerIndex) {
-    console.log(`[QUIZ] makeMove called: playerId=${playerId}, answerIndex=${answerIndex}`);
     if (this.status !== 'in_progress') {
       throw new Error('Game is already over');
     }
@@ -201,30 +195,18 @@ class QuizGame {
     }
     this.playerAnswers[playerId][this.currentQuestionIndex] = answerIndex;
     const currentQuestion = this.questions[this.currentQuestionIndex];
-    console.log(`[QUIZ] Current question index: ${this.currentQuestionIndex}`);
-    console.log(`[QUIZ] Player ${playerId} answered ${answerIndex} (type: ${typeof answerIndex}), correct is ${currentQuestion.correctAnswer} (type: ${typeof currentQuestion.correctAnswer})`);
-    console.log(`[QUIZ] Question: ${currentQuestion.question}`);
-    console.log(`[QUIZ] Options: ${JSON.stringify(currentQuestion.options)}`);
-    console.log(`[QUIZ] Correct option: ${currentQuestion.options[currentQuestion.correctAnswer]}`);
-    console.log(`[QUIZ] Selected option: ${currentQuestion.options[answerIndex]}`);
     const playerAnswer = parseInt(answerIndex);
     const correctAnswer = parseInt(currentQuestion.correctAnswer);
-    console.log(`[QUIZ] Comparing: ${playerAnswer} === ${correctAnswer}`);
     if (playerAnswer === correctAnswer) {
       this.scores[playerId]++;
-      console.log(`[QUIZ] ✅ CORRECT ANSWER! Score now: ${this.scores[playerId]}`);
       if (this.gameFormat === '2v2') {
         this.updateTeamScore(playerId, 1);
       }
-    } else {
-      console.log(`[QUIZ] ❌ WRONG ANSWER! Player chose: ${currentQuestion.options[answerIndex]}, correct was: ${currentQuestion.options[correctAnswer]}`);
     }
     const answeredPlayers = Object.keys(this.playerAnswers).filter(
       id => this.playerAnswers[id][this.currentQuestionIndex] !== undefined
     );
-    console.log(`[QUIZ] Players who answered: ${answeredPlayers.length}/${this.players.length}`);
     if (answeredPlayers.length === this.players.length) {
-      console.log(`[QUIZ] All players answered, moving to next question`);
       if (this.serverTimer) {
         clearTimeout(this.serverTimer);
         this.serverTimer = null;
@@ -234,37 +216,21 @@ class QuizGame {
     return this.getState();
   }
   nextQuestion() {
-    console.log(`[QUIZ] ===== NEXT QUESTION LOGIC =====`);
-    console.log(`[QUIZ] Moving from question ${this.currentQuestionIndex + 1} to ${this.currentQuestionIndex + 2}`);
-    console.log(`[QUIZ] Current index before increment: ${this.currentQuestionIndex}`);
     this.currentQuestionIndex++;
-    console.log(`[QUIZ] Current index after increment: ${this.currentQuestionIndex}`);
-    console.log(`[QUIZ] Total questions: ${this.totalQuestions}`);
-    console.log(`[QUIZ] Should end game? ${this.currentQuestionIndex >= this.totalQuestions}`);
     this.currentQuestionStartTime = Date.now();
     if (this.currentQuestionIndex >= this.totalQuestions) {
-      console.log(`[QUIZ] Game finished! Question ${this.currentQuestionIndex} >= ${this.totalQuestions}`);
-      console.log(`[QUIZ] Calling endGame()...`);
       this.endGame();
     } else {
-      console.log(`[QUIZ] Next question ready: ${this.currentQuestionIndex + 1}/${this.totalQuestions}`);
       this.startQuestionTimer();
     }
-    console.log(`[QUIZ] ===== NEXT QUESTION LOGIC COMPLETE =====`);
   }
   endGame() {
-    console.log(`[QUIZ] ===== ENDING GAME =====`);
-    console.log(`[QUIZ] Current question index: ${this.currentQuestionIndex}`);
-    console.log(`[QUIZ] Total questions: ${this.totalQuestions}`);
-    console.log(`[QUIZ] Game status before: ${this.status}`);
     this.status = 'finished';
     if (this.serverTimer) {
       clearTimeout(this.serverTimer);
       this.serverTimer = null;
-      console.log(`[QUIZ] Server timer cleared`);
     }
     if (this.gameFormat === '2v2') {
-      console.log(`[QUIZ] Team scores: team1 = ${this.teamScores.team1}, team2 = ${this.teamScores.team2}`);
       if (this.teamScores.team1 > this.teamScores.team2) {
         this.winner = 'team1';
       } else if (this.teamScores.team2 > this.teamScores.team1) {
@@ -273,11 +239,9 @@ class QuizGame {
         this.winner = 'draw';
         this.isDraw = true;
       }
-      console.log(`[QUIZ] Game ended. Team scores: ${this.teamScores.team1} vs ${this.teamScores.team2}. Winner: ${this.winner}`);
     } else {
       const player1Score = this.scores[this.players[0]];
       const player2Score = this.scores[this.players[1]];
-      console.log(`[QUIZ] Player scores: ${this.players[0]} = ${player1Score}, ${this.players[1]} = ${player2Score}`);
       if (player1Score > player2Score) {
         this.winner = this.players[0];
       } else if (player2Score > player1Score) {
@@ -286,10 +250,7 @@ class QuizGame {
         this.winner = 'draw';
         this.isDraw = true;
       }
-      console.log(`[QUIZ] Game ended. Scores: ${player1Score} vs ${player2Score}. Winner: ${this.winner}`);
     }
-    console.log(`[QUIZ] Final game status: ${this.status}`);
-    console.log(`[QUIZ] ===== GAME END COMPLETE =====`);
   }
   getState() {
     if (this.isCleanedUp) {
@@ -326,7 +287,6 @@ class QuizGame {
   }
   cleanup() {
     if (this.isCleanedUp) {
-      console.log(`[QUIZ] Game already cleaned up`);
       return;
     }
     this.isCleanedUp = true;
@@ -338,7 +298,6 @@ class QuizGame {
     this.scores = null;
     this.playerAnswers = null;
     this.questions = null;
-    console.log(`[QUIZ] Game cleanup completed`);
   }
 }
 module.exports = QuizGame;

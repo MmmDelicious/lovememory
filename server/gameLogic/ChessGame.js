@@ -60,7 +60,6 @@ class ChessGame {
     return state;
   }
   cleanup() {
-    console.log(`[CHESS] Game cleanup completed`);
   }
   makeMove(playerId, move) {
     if (this.game.isGameOver()) {

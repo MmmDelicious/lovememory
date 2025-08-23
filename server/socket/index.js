@@ -42,17 +42,14 @@ function initSocket(server, app) {
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) {
-      console.log('[SOCKET] Authentication failed: No token provided');
       return next(new Error('Authentication error: No token provided.'));
     }
     
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
-        console.log('[SOCKET] Authentication failed: Invalid token', err.message);
         return next(new Error('Authentication error: Invalid token.'));
       }
       
-      console.log('[SOCKET] Authentication successful for user:', decoded.userId);
       socket.user = { id: decoded.userId, email: decoded.email };
       socket.join(socket.user.id);
       next();
@@ -60,11 +57,9 @@ function initSocket(server, app) {
   });
 
   io.on('connection', (socket) => {
-    console.log(`[SERVER] User connected: ${socket.user.id} with socket ID ${socket.id}`);
     const userRooms = new Set();
 
     socket.on('join_room', async (roomId) => {
-        console.log(`[SERVER] User ${socket.user.id} trying to join room ${roomId}`);
         try {
             const room = await GameRoom.findByPk(roomId);
             if (!room) {
@@ -74,7 +69,6 @@ function initSocket(server, app) {
 
             const allSocketsInRoom = await io.in(roomId).fetchSockets();
             const isRoomFull = allSocketsInRoom.length >= room.maxPlayers;
-            console.log(`[SERVER] Room ${roomId} has ${allSocketsInRoom.length}/${room.maxPlayers} players, full: ${isRoomFull}`);
 
             if (isRoomFull) {
                 socket.emit('error', 'Комната уже заполнена.');
@@ -91,12 +85,10 @@ function initSocket(server, app) {
                 }
                 // Отправляем обновленный баланс клиенту
                 socket.emit('update_coins', betResult.newBalance);
-                console.log(`[SERVER] Зарезервирована ставка ${room.bet} монет для игрока ${socket.user.id}`);
             }
 
             await socket.join(roomId);
             userRooms.add(roomId);
-            console.log(`[SERVER] User ${socket.user.id} successfully joined room ${roomId}`);
             
             // Отправляем информацию о комнате клиенту
             socket.emit('room_info', {
@@ -121,7 +113,6 @@ function initSocket(server, app) {
                     avatarUrl: u?.avatarUrl || null,
                 };
             });
-            console.log(`[SERVER] Room ${roomId} now has ${currentSockets.length} players:`, playerInfo.map(p => p.name));
 
             io.to(roomId).emit('player_list_update', playerInfo);
 
@@ -140,8 +131,6 @@ function initSocket(server, app) {
                 const shouldCreateGame = currentSockets.length >= requiredPlayers;
                 
                 if (shouldCreateGame) {
-                    console.log(`[SERVER] Creating game in room ${roomId} with ${currentSockets.length} players`);
-                    
                     // Для покера НЕ меняем статус комнаты - оставляем waiting
                     if (room.gameType !== 'poker') {
                         await gameService.startGame(roomId);
@@ -183,9 +172,8 @@ function initSocket(server, app) {
                         try {
                           await gameService.startGame(roomId);
                           io.emit('room_list_updated');
-                          console.log(`[SERVER] Poker room ${roomId} status changed to in_progress`);
                         } catch (error) {
-                          console.error(`[SERVER] Failed to start poker room ${roomId}:`, error);
+                          // Silent error handling
                         }
                       } : undefined,
                       gameFormat: room.gameFormat || '1v1'
@@ -212,7 +200,6 @@ function initSocket(server, app) {
                                     gender: user ? user.gender : 'male'
                                 };
                                 game.addPlayer(newPlayerInfo);
-                                console.log(`[SERVER] Added player ${newPlayerInfo.name} to existing poker game`);
                             }
                         });
 
@@ -248,7 +235,6 @@ function initSocket(server, app) {
                     }
                 }
             } else if (room.status === 'in_progress') {
-                console.log(`[SERVER] User ${socket.user.id} joining in-progress game in room ${roomId}`);
                 const game = GameManager.getGame(roomId);
                 if (game && game.gameType === 'poker') {
                     const user = await User.findByPk(socket.user.id, { attributes: ['id', 'email', 'gender', 'first_name'] });
@@ -262,11 +248,9 @@ function initSocket(server, app) {
                     const existingPlayer = game.players.find(p => p.id === socket.user.id);
                     if (existingPlayer) {
                         // Игрок переподключается
-                        console.log(`[SERVER] Player ${socket.user.id} reconnected to existing game`);
                     } else {
                         // Новый игрок присоединяется как наблюдатель (без buy-in)
                         game.addPlayer(newPlayerInfo);
-                        console.log(`[SERVER] Player ${socket.user.id} joined as observer (needs buy-in)`);
                     }
                     
                     game.players.forEach(player => {
@@ -307,7 +291,6 @@ function initSocket(server, app) {
               });
             } else if (room.status === 'in_progress') {
               // Игра была в процессе, но GameManager сбросился при перезагрузке сервера
-              console.log(`[SERVER] Recovering game for room ${roomId} after server restart`);
               
               const socketsInRoom = await io.in(roomId).fetchSockets();
                 if (socketsInRoom.length >= 2) {
@@ -374,16 +357,13 @@ function initSocket(server, app) {
 
     socket.on('make_move', async (data) => {
       const { roomId, move } = data;
-      console.log(`[SOCKET] make_move received: roomId=${roomId}, move=`, move);
       const game = GameManager.getGame(roomId);
       if (!game) {
-        console.log(`[SOCKET] Game not found for roomId: ${roomId}`);
         return;
       }
       
       try {
         const gameType = game.gameType;
-        console.log(`[SOCKET] Making move for game type: ${gameType}, player: ${socket.user.id}`);
         
         const moveResult = game.makeMove(socket.user.id, move);
 
@@ -430,7 +410,6 @@ function initSocket(server, app) {
               const currentGame = GameManager.getGame(roomId);
               
               if (!currentGame) {
-                console.log(`[POKER] Game ${roomId} not found, skipping new hand check`);
                 return;
               }
               
@@ -438,14 +417,10 @@ function initSocket(server, app) {
               const activePlayers = currentGame.players.filter(p => p.hasBoughtIn);
               const playersWithMoney = activePlayers.filter(p => p.stack > 0);
               
-              console.log(`[POKER] Checking for new hand: ${activePlayers.length} total players, ${playersWithMoney.length} with money`);
-              console.log(`[POKER] Players status:`, activePlayers.map(p => `${p.name}: stack=${p.stack}, hasBoughtIn=${p.hasBoughtIn}`));
-              
               // Если есть хотя бы 2 активных игрока (независимо от стека), продолжаем игру
               if (activePlayers.length >= 2) {
                 // Если есть игроки с деньгами, начинаем новую раздачу
                 if (playersWithMoney.length >= 2) {
-                  console.log(`[POKER] Starting new hand with players:`, playersWithMoney.map(p => `${p.name}(${p.stack})`));
                   currentGame.startNewHand();
                   
                   // Отправляем состояние всем игрокам сразу
@@ -461,7 +436,6 @@ function initSocket(server, app) {
                   });
                 } else {
                   // Если игроков с деньгами меньше 2, но есть активные игроки - ждем rebuy
-                  console.log(`[POKER] Waiting for rebuy: only ${playersWithMoney.length} players with money, but ${activePlayers.length} active players`);
                   currentGame.status = 'waiting'; // Переводим игру в режим ожидания rebuy
                   
                   // Отправляем состояние всем игрокам
@@ -477,7 +451,6 @@ function initSocket(server, app) {
                 }
               } else {
                 // Если активных игроков меньше 2, завершаем сессию
-                console.log(`[POKER] Not enough active players (${activePlayers.length}), finalizing session`);
                 const room = await GameRoom.findByPk(roomId);
                 if (room) {
                     const updatedUsers = await gameService.finalizePokerSession(roomId, currentGame.players, room.bet);
@@ -610,8 +583,6 @@ function initSocket(server, app) {
         socket.emit('update_coins', user.coins);
         socket.emit('rebuy_success', { newStack: player.stack });
 
-        console.log(`[SERVER] User ${socket.user.id} rebought ${rebuyAmount} coins. New stack: ${player.stack}`);
-
       } catch (error) {
         console.error(`[SERVER] [ERROR] in 'rebuy':`, error.message);
         socket.emit('error', error.message);
@@ -662,7 +633,6 @@ function initSocket(server, app) {
           newBalance: buyInResult.newBalance 
         });
 
-        console.log(`[POKER] User ${socket.user.id} buy-in ${buyInAmount} монет в комнату ${roomId}`);
       } catch (error) {
         console.error(`[POKER] Ошибка buy-in:`, error);
         socket.emit('error', 'Ошибка обработки buy-in');
@@ -721,16 +691,12 @@ function initSocket(server, app) {
           newStack: player.stack,
           newBalance: rebuyResult.newBalance 
         });
-
-        console.log(`[POKER] User ${socket.user.id} rebuy ${rebuyAmount} монет в комнате ${roomId}`);
         
         // Проверяем, можно ли начать новую раздачу после rebuy
         if (game.status === 'waiting') {
           const playersWithMoney = game.players.filter(p => p.hasBoughtIn && p.stack > 0);
-          console.log(`[POKER] After rebuy: ${playersWithMoney.length} players with money`);
           
           if (playersWithMoney.length >= 2) {
-            console.log(`[POKER] Starting new hand after rebuy with players:`, playersWithMoney.map(p => `${p.name}(${p.stack})`));
             game.startNewHand();
             
             // Отправляем обновленное состояние всем игрокам
@@ -786,7 +752,6 @@ function initSocket(server, app) {
               cashOutAmount, 
               newBalance: cashOutResult.newBalance 
             });
-            console.log(`[POKER] User ${socket.user.id} cash-out ${cashOutAmount} монет из комнаты ${roomId}`);
           } else {
             console.error(`[POKER] Ошибка cash-out:`, cashOutResult.reason);
           }
@@ -799,7 +764,6 @@ function initSocket(server, app) {
     const handleLeaveOrDisconnect = async (roomId) => {
       if (!roomId || !userRooms.has(roomId)) return;
       
-      console.log(`[SERVER] User ${socket.user.id} processing leave/disconnect for room ${roomId}`);
       const game = GameManager.getGame(roomId);
       const room = await GameRoom.findByPk(roomId);
 

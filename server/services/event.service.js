@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Event, Media, User, Pair } = require('../models');
+const { Event, Media, User, Pair, ActivityLog } = require('../models');
 
 console.log('Models loaded:', { Event: !!Event, Media: !!Media, User: !!User, Pair: !!Pair });
 
@@ -35,6 +35,15 @@ class EventService {
 
   async createEvent(userId, eventData) {
     const { title, description, event_date, end_date, event_type, isShared, is_recurring, recurrence_rule } = eventData;
+    
+    // Находим активную пару пользователя для логирования
+    const activePair = await Pair.findOne({
+      where: {
+        status: 'active',
+        [Op.or]: [{ user1Id: userId }, { user2Id: userId }],
+      },
+    });
+
     const newEvent = await Event.create({
       title,
       description,
@@ -45,7 +54,19 @@ class EventService {
       is_recurring: is_recurring || false,
       recurrence_rule: recurrence_rule || null,
       userId: userId,
+      pair_id: activePair?.id || null, // Добавляем pair_id если есть активная пара
     });
+
+    // Логируем создание события
+    if (activePair) {
+      await ActivityLog.logEventCreated(activePair.id, userId, {
+        id: newEvent.id,
+        title: newEvent.title,
+        event_type: newEvent.event_type,
+        isShared: newEvent.isShared
+      });
+    }
+
     return Event.findByPk(newEvent.id, {
         include: [{ model: User, attributes: ['email', 'first_name'] }]
     });

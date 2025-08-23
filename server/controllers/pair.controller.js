@@ -2,14 +2,11 @@ const pairService = require('../services/pair.service');
 exports.getPairingStatus = async (req, res, next) => {
   try {
     if (!req.user || !req.user.id) {
-      console.error('getPairingStatus: req.user or req.user.id is undefined:', req.user);
       return res.status(401).json({ message: 'Пользователь не аутентифицирован' });
     }
-    console.log('getPairingStatus called with userId:', req.user.id);
     const status = await pairService.getPairingStatus(req.user.id);
     res.status(200).json(status);
   } catch (error) {
-    console.error('getPairingStatus error:', error);
     next(error);
   }
 };

@@ -21,12 +21,12 @@ class PairService {
         {
           model: User,
           as: 'Requester',
-          attributes: ['id', 'first_name', 'gender', 'city', 'email'],
+          attributes: ['id', 'first_name', 'display_name', 'gender', 'city', 'email'],
         },
         {
           model: User,
           as: 'Receiver',
-          attributes: ['id', 'first_name', 'gender', 'city', 'email'],
+          attributes: ['id', 'first_name', 'display_name', 'gender', 'city', 'email'],
         },
       ],
     });
@@ -44,7 +44,7 @@ class PairService {
         Receiver: activePair.Receiver,
         partner: {
           id: partnerData.id,
-          name: partnerData.first_name,
+          name: partnerData.display_name || partnerData.first_name, // Приоритет display_name
           gender: partnerData.gender,
           city: partnerData.city,
         },
@@ -61,12 +61,12 @@ class PairService {
         {
           model: User,
           as: 'Requester',
-          attributes: ['id', 'first_name', 'gender', 'city', 'email'],
+          attributes: ['id', 'first_name', 'display_name', 'gender', 'city', 'email'],
         },
         {
           model: User,
           as: 'Receiver',
-          attributes: ['id', 'first_name', 'gender', 'city', 'email'],
+          attributes: ['id', 'first_name', 'display_name', 'gender', 'city', 'email'],
         },
       ],
     });

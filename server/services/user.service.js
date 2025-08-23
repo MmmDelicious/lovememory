@@ -6,7 +6,7 @@ const path = require('path');
 class UserService {
   async getProfile(userId) {
     const user = await User.findByPk(userId, {
-      attributes: ['id', 'email', 'first_name', 'last_name', 'bio', 'avatarUrl', 'telegram_chat_id', 'coins', 'gender', 'age', 'city', 'role', 'last_active', 'streak_days', 'total_login_days', 'preferences']
+      attributes: ['id', 'email', 'first_name', 'last_name', 'display_name', 'locale', 'bio', 'avatarUrl', 'telegram_chat_id', 'coins', 'gender', 'age', 'city', 'role', 'last_active', 'streak_days', 'total_login_days', 'preferences']
     });
     if (!user) {
       const error = new Error('Пользователь не найден.');
@@ -25,7 +25,7 @@ class UserService {
   }
 
   async updateProfile(userId, updateData) {
-    const { first_name, last_name, bio, telegram_chat_id, gender, age, city, preferences } = updateData;
+    const { first_name, last_name, display_name, locale, bio, telegram_chat_id, gender, age, city, preferences } = updateData;
     const user = await User.findByPk(userId);
 
     if (!user) {
@@ -46,6 +46,8 @@ class UserService {
     // Обновляем поля профиля
     if (first_name !== undefined) user.first_name = first_name;
     if (last_name !== undefined) user.last_name = last_name;
+    if (display_name !== undefined) user.display_name = display_name;
+    if (locale !== undefined) user.locale = locale;
     if (bio !== undefined) user.bio = bio;
     if (telegram_chat_id !== undefined) user.telegram_chat_id = telegram_chat_id;
     if (gender !== undefined) user.gender = gender;

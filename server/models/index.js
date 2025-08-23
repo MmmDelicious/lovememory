@@ -4,24 +4,48 @@ const Event = require('./Event');
 const EventTemplate = require('./EventTemplate');
 const Media = require('./Media');
 const Pair = require('./Pair');
+const UserPair = require('./UserPair');
 const GameRoom = require('./GameRoom');
+const GameParticipant = require('./GameParticipant');
 const Gift = require('./Gift');
+const ShopItem = require('./ShopItem');
+const Transaction = require('./Transaction');
+const Consent = require('./Consent');
+const Insight = require('./Insight');
+const NotificationToken = require('./NotificationToken');
+const Achievement = require('./Achievement');
+const Tournament = require('./Tournament');
+const MediaDerivative = require('./MediaDerivative');
+const Session = require('./Session');
 const RelationshipMetrics = require('./RelationshipMetrics');
 const Lesson = require('./Lesson');
 const UserLessonProgress = require('./UserLessonProgress');
 const PairDailyLesson = require('./PairDailyLesson');
+const ActivityLog = require('./ActivityLog');
 const models = {
   User,
   Event,
   EventTemplate,
   Media,
   Pair,
+  UserPair,
   GameRoom,
+  GameParticipant,
   Gift,
+  ShopItem,
+  Transaction,
+  Consent,
+  Insight,
+  NotificationToken,
+  Achievement,
+  Tournament,
+  MediaDerivative,
+  Session,
   RelationshipMetrics,
   Lesson,
   UserLessonProgress,
   PairDailyLesson,
+  ActivityLog,
 };
 Object.keys(models).forEach(modelName => {
   if (models[modelName].associate) {

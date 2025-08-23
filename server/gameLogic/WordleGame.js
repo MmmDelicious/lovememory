@@ -96,18 +96,15 @@ class WordleGame {
   }
   generateNewWord() {
     this.targetWord = getRandomWord(this.language).toUpperCase();
-    console.log(`[WordleGame] Generated new word: "${this.targetWord}" for round ${this.currentRound}`);
     for (const playerId of this.players.map(p => p.id)) {
       this.playerGuesses[playerId] = [];
       this.playerResults[playerId] = [];
-      console.log(`[WordleGame] Cleared guesses/results for player ${playerId}`);
     }
   }
   makeMove(playerId, move) {
     return this.makeGuess(playerId, move);
   }
   makeGuess(playerId, guess) {
-    console.log(`[WordleGame] Player ${playerId} making guess: "${guess}"`);
     if (this.status !== 'in_progress') {
       throw new Error('Game is not in progress');
     }
@@ -115,14 +112,12 @@ class WordleGame {
       throw new Error('Player not in game');
     }
     const normalizedGuess = guess.toUpperCase();
-    console.log(`[WordleGame] Normalized guess: "${normalizedGuess}", Target word: "${this.targetWord}"`);
     if (normalizedGuess.length !== 5) {
       throw new Error('Word must be exactly 5 letters');
     }
     this.playerGuesses[playerId].push(normalizedGuess);
     const result = evaluateGuess(normalizedGuess, this.targetWord);
     this.playerResults[playerId].push(result);
-    console.log(`[WordleGame] Guess result for "${normalizedGuess}":`, result);
     const isCorrect = result.every(r => r === 'correct');
     if (isCorrect) {
       const attempts = this.playerGuesses[playerId].length;
@@ -153,19 +148,15 @@ class WordleGame {
       }
       return false;
     });
-    console.log(`[WordleGame] checkRoundEnd: allPlayersFinished = ${allPlayersFinished}`);
     if (allPlayersFinished) {
       this.nextRound();
     }
   }
   nextRound() {
-    console.log(`[WordleGame] nextRound: currentRound=${this.currentRound}, maxRounds=${this.maxRounds}`);
     if (this.currentRound >= this.maxRounds) {
-      console.log(`[WordleGame] Game ending - max rounds reached`);
       this.endGame();
     } else {
       this.currentRound++;
-      console.log(`[WordleGame] Moving to round ${this.currentRound}, generating new word`);
       this.generateNewWord();
     }
   }

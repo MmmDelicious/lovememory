@@ -40,6 +40,20 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  display_name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  locale: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: 'ru',
+  },
+  email_verified: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  },
   gender: {
     type: DataTypes.STRING,
     allowNull: true, // Allow null for Google users initially
@@ -122,6 +136,60 @@ User.associate = (models) => {
     foreignKey: 'user2Id',
     as: 'ReceivedPairRequests',
     onDelete: 'CASCADE',
+  });
+  // Новая ассоциация many-to-many через UserPair
+  User.hasMany(models.UserPair, {
+    foreignKey: 'user_id',
+    as: 'UserPairs',
+    onDelete: 'CASCADE',
+  });
+  // Ассоциация с участием в играх
+  User.hasMany(models.GameParticipant, {
+    foreignKey: 'user_id',
+    as: 'GameParticipations',
+    onDelete: 'CASCADE',
+  });
+  // Ассоциация с согласиями
+  User.hasOne(models.Consent, {
+    foreignKey: 'user_id',
+    as: 'Consent',
+    onDelete: 'CASCADE',
+  });
+  // Ассоциация с токенами уведомлений
+  User.hasMany(models.NotificationToken, {
+    foreignKey: 'user_id',
+    as: 'NotificationTokens',
+    onDelete: 'CASCADE',
+  });
+  // Ассоциация с транзакциями
+  User.hasMany(models.Transaction, {
+    foreignKey: 'user_id',
+    as: 'Transactions',
+    onDelete: 'SET NULL',
+  });
+  // Ассоциация с завершенными уроками (новая структура)
+  User.hasMany(models.UserLessonProgress, {
+    foreignKey: 'completed_by_user_id',
+    as: 'CompletedLessons',
+    onDelete: 'CASCADE',
+  });
+  // Ассоциация с достижениями
+  User.hasMany(models.Achievement, {
+    foreignKey: 'user_id',
+    as: 'Achievements',
+    onDelete: 'SET NULL',
+  });
+  // Ассоциация с турнирами (как создатель)
+  User.hasMany(models.Tournament, {
+    foreignKey: 'creator_id',
+    as: 'CreatedTournaments',
+    onDelete: 'SET NULL',
+  });
+  // Ассоциация с сессиями (как создатель)
+  User.hasMany(models.Session, {
+    foreignKey: 'created_by_user_id',
+    as: 'CreatedSessions',
+    onDelete: 'SET NULL',
   });
 };
 module.exports = User;

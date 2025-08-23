@@ -20,18 +20,14 @@ class GameManager {
         break;
       case 'chess':
         const chessPlayers = players.map(player => player.id || player);
-        console.log(`[GameManager] Creating chess game with players:`, chessPlayers);
         gameInstance = new ChessGame(chessPlayers);
         break;
       case 'poker':
-        console.log('[GameManager] Creating poker game with players:', players);
         const buyInCoins = players[0]?.buyInCoins || 100;
         const smallBlind = Math.max(1, Math.floor(buyInCoins * 0.05)); // 5% от бай-ина, минимум 1
         const bigBlind = Math.max(2, Math.floor(buyInCoins * 0.1));   // 10% от бай-ина, минимум 2
         const blinds = { small: smallBlind, big: bigBlind };
-        console.log(`[GameManager] Setting blinds: ${blinds.small}/${blinds.big} for buyIn: ${buyInCoins} coins`);
         gameInstance = new PokerGame(players, blinds, options);
-        console.log('[GameManager] Poker game created successfully');
         break;
       case 'quiz':
         const quizPlayers = players.map(player => player.id || player);
@@ -61,16 +57,13 @@ class GameManager {
         break;
       case 'codenames':
         if (players.length !== 4) {
-          console.error(`[GameManager] Codenames requires exactly 4 players, got ${players.length}`);
           throw new Error(`Codenames requires exactly 4 players, but got ${players.length}`);
         }
-        console.log(`[GameManager] Creating Codenames game with players:`, players.map(p => ({ id: p.id, name: p.name })));
         const codenamesSettings = {
           gameFormat: '2v2',
           ...options
         };
         gameInstance = new CodenamesGame(players, codenamesSettings);
-        console.log('[GameManager] Codenames game created successfully');
         break;
       default:
         throw new Error(`Unsupported game type: ${gameType}`);

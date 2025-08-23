@@ -58,10 +58,23 @@ const Event = sequelize.define('Event', {
   userId: {
     type: DataTypes.UUID,
     allowNull: false,
+  },
+  pair_id: {
+    type: DataTypes.UUID,
+    allowNull: true, // Nullable для обратной совместимости
+    references: {
+      model: 'Pairs',
+      key: 'id',
+    },
   }
 });
 Event.associate = (models) => {
   Event.belongsTo(models.User, { foreignKey: 'userId' });
+  Event.belongsTo(models.Pair, { 
+    foreignKey: 'pair_id', 
+    as: 'Pair',
+    onDelete: 'SET NULL'
+  });
   Event.hasMany(models.Media, { foreignKey: 'eventId', onDelete: 'CASCADE' });
 };
 module.exports = Event;

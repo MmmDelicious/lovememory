@@ -54,6 +54,8 @@ class AuthService {
       email,
       password_hash: password,
       first_name,
+      display_name: first_name, // По умолчанию display_name = first_name
+      locale: 'ru', // По умолчанию русская локаль
       gender,
       age: ageNum,
       city,
@@ -76,6 +78,8 @@ class AuthService {
         id: user.id,
         email: user.email,
         first_name: user.first_name,
+        display_name: user.display_name || user.first_name, // Приоритет display_name
+        locale: user.locale || 'ru',
         gender: user.gender,
         age: user.age,
         city: user.city,
@@ -119,6 +123,8 @@ class AuthService {
         id: user.id,
         email: user.email,
         first_name: user.first_name,
+        display_name: user.display_name || user.first_name, // Приоритет display_name
+        locale: user.locale || 'ru',
         gender: user.gender,
         age: user.age,
         city: user.city,

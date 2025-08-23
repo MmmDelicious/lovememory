@@ -22,8 +22,26 @@ const Media = sequelize.define('Media', {
     type: DataTypes.ENUM('image', 'video'),
     defaultValue: 'image',
   },
+  pair_id: {
+    type: DataTypes.UUID,
+    allowNull: true, // Nullable для обратной совместимости
+    references: {
+      model: 'Pairs',
+      key: 'id',
+    },
+  },
 });
 Media.associate = (models) => {
   Media.belongsTo(models.Event, { foreignKey: 'eventId' });
+  Media.belongsTo(models.Pair, { 
+    foreignKey: 'pair_id', 
+    as: 'Pair',
+    onDelete: 'SET NULL'
+  });
+  Media.hasMany(models.MediaDerivative, {
+    foreignKey: 'source_media_id',
+    as: 'Derivatives',
+    onDelete: 'CASCADE'
+  });
 };
 module.exports = Media;

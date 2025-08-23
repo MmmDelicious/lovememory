@@ -58,14 +58,11 @@ class PokerGame {
     this.currentShowdownIndex = 0;
     this.showdownResults = new Map();
     this.showdownTimeout = null;
-    console.log('[PokerGame] Game created, waiting for player buy-ins');
   }
   addPlayer(playerInfo) {
     if (this.players.find(p => p.id === playerInfo.id)) {
-      console.warn(`[PokerGame] Player ${playerInfo.name} is already in the game.`);
       return;
     }
-    console.log(`[PokerGame] Adding new player ${playerInfo.name}.`);
     this.players.push({
       id: playerInfo.id,
       name: playerInfo.name,
@@ -94,32 +91,18 @@ class PokerGame {
       const forcedBlind = Math.min(this.blinds.big, player.stack);
       player.stack -= forcedBlind;
       this.pot += forcedBlind;
-      console.log(`[PokerGame] Anti-abuse: ${player.name} paid forced blind ${forcedBlind}`);
     }
-    console.log(`[PokerGame] Player ${player.name} bought in for ${buyInAmount}`);
     const readyPlayers = this.players.filter(p => p.hasBoughtIn && p.stack > 0);
-    console.log(`[PokerGame] Ready players: ${readyPlayers.length}, Game status: ${this.status}`);
-    console.log(`[PokerGame] All players:`, this.players.map(p => ({ name: p.name, hasBoughtIn: p.hasBoughtIn, stack: p.stack })));
     if (readyPlayers.length >= 2 && this.status === 'waiting') {
-      console.log(`[PokerGame] Starting game with ${readyPlayers.length} players`);
       this.startNewHand();
       if (this.onGameStart) {
-        console.log(`[PokerGame] Calling onGameStart callback`);
         this.onGameStart();
-      } else {
-        console.log(`[PokerGame] No onGameStart callback available`);
       }
-    } else {
-      console.log(`[PokerGame] Not starting game: readyPlayers=${readyPlayers.length}, status=${this.status}`);
     }
     return true;
   }
   startNewHand() {
-    console.log('[PokerGame] ===== STARTING NEW HAND =====');
     this._clearTurnTimeout(); // Очищаем таймаут при начале новой раздачи
-    console.log('[PokerGame] Players before new hand setup:', this.players.map(p => 
-      `${p.name}: stack=${p.stack}, hasBoughtIn=${p.hasBoughtIn}, isWaiting=${p.isWaitingToPlay}`
-    ));
     this.showdownPhase = false;
     this.playersToShow.clear();
     this.showdownOrder = null;
@@ -129,7 +112,6 @@ class PokerGame {
     this.players.forEach(p => {
       if (p.isWaitingToPlay && p.hasBoughtIn) {
         p.isWaitingToPlay = false;
-        console.log(`[PokerGame] Player ${p.name} no longer waiting to play`);
       }
       p.hand = [];
       p.currentBet = 0;
@@ -139,22 +121,16 @@ class PokerGame {
       p.showCards = false;
     });
     const activePlayers = this.players.filter(p => p.inHand);
-    console.log(`[PokerGame] Active players for new hand: ${activePlayers.length}`, 
-      activePlayers.map(p => `${p.name}(${p.stack})`));
     if (activePlayers.length < 2) {
-      console.log('[PokerGame] Not enough active players to start a new hand.');
       if (activePlayers.length === 1) {
         const winner = activePlayers[0];
         const remainingPot = this.pot;
         winner.stack += remainingPot;
         this.pot = 0;
-        console.log(`[PokerGame] ${winner.name} wins the remaining pot: ${remainingPot}, new stack: ${winner.stack}`);
       }
       this.status = 'waiting'; // Возвращаемся в ожидание новых игроков
-      console.log('[PokerGame] Game status set to waiting for more players');
       return;
     }
-    console.log('[PokerGame] Starting new hand with sufficient players');
     this.status = 'in_progress';
     this.winnersInfo = null;
     this.deck = this._createDeck();
@@ -167,7 +143,6 @@ class PokerGame {
     while (!this.players[this.dealerPosition].inHand) {
       this.dealerPosition = (this.dealerPosition + 1) % this.players.length;
     }
-    console.log(`[PokerGame] New dealer position: ${this.dealerPosition} (${this.players[this.dealerPosition].name})`);
     this.currentPlayerIndex = 0;
     this.lastAction = null;
     this.lastRaiser = null;
@@ -175,7 +150,6 @@ class PokerGame {
     this._dealCards();
     this._postBlindsAndStartBetting();
     this._setTurnTimeout(); // Устанавливаем таймаут для первого игрока
-    console.log('[PokerGame] ===== NEW HAND STARTED SUCCESSFULLY =====');
   }
   makeMove(playerId, move) {
     const playerIndex = this.players.findIndex(p => p.id === playerId);
@@ -239,11 +213,9 @@ class PokerGame {
     if (action === ACTIONS.SHOW) {
       player.showCards = true;
       this.showdownResults.set(player.id, 'show');
-      console.log(`[PokerGame] Player ${player.name} chose to show cards`);
     } else if (action === ACTIONS.MUCK) {
       player.showCards = false;
       this.showdownResults.set(player.id, 'muck');
-      console.log(`[PokerGame] Player ${player.name} chose to muck cards`);
     }
     this.playersToShow.clear();
     this.currentShowdownIndex++;
@@ -263,7 +235,6 @@ class PokerGame {
       ...activePlayers.slice(aggressorIndex),
       ...activePlayers.slice(0, aggressorIndex)
     ];
-    console.log(`[PokerGame] Showdown order: aggressor=${aggressor.name}, order=${ordered.map(p => p.name)}`);
     return ordered;
   }
   _showNextPlayerCards() {
@@ -275,7 +246,6 @@ class PokerGame {
     if (this.currentShowdownIndex === 0) {
       currentPlayer.showCards = true;
       this.showdownResults.set(currentPlayer.id, 'show');
-      console.log(`[PokerGame] Aggressor ${currentPlayer.name} automatically shows cards`);
       this.currentShowdownIndex++;
       setTimeout(() => {
         this._showNextPlayerCards();
@@ -283,7 +253,6 @@ class PokerGame {
     } else {
       this.playersToShow.clear();
       this.playersToShow.add(currentPlayer.id);
-      console.log(`[PokerGame] Player ${currentPlayer.name} must decide: show or muck`);
       if (this.onStateChange) {
         this.onStateChange(this);
       }
@@ -303,7 +272,6 @@ class PokerGame {
   _handleShowdownTimeout() {
     if (!this.showdownPhase || this.currentShowdownIndex >= this.showdownOrder.length) return;
     const currentPlayer = this.showdownOrder[this.currentShowdownIndex];
-    console.log(`[PokerGame] Showdown timeout - auto-muck for ${currentPlayer.name}`);
     currentPlayer.showCards = false;
     this.showdownResults.set(currentPlayer.id, 'muck');
     this.playersToShow.clear();
@@ -311,13 +279,11 @@ class PokerGame {
     this._showNextPlayerCards();
   }
   _finalizeShowdown() {
-    console.log('[PokerGame] Finalizing showdown phase');
     this._clearShowdownTimeout();
     this.showdownPhase = false;
     this.showdownOrder = null;
     this.currentShowdownIndex = 0;
     this.playersToShow.clear();
-    console.log('[PokerGame] Showdown results:', Array.from(this.showdownResults.entries()));
     this._endHand();
   }
   handlePlayerLeave(playerId) {
@@ -345,9 +311,7 @@ class PokerGame {
     if (this.players.length < 2 && this.status === 'in_progress') this._endHand();
   }
   _advanceTurn() {
-    console.log(`[PokerGame] _advanceTurn called. Current index: ${this.currentPlayerIndex}, active players: ${this.players.filter(p => p.inHand).length}`);
     if (this.players.filter(p => p.inHand).length <= 1) {
-      console.log(`[PokerGame] Only 1 or fewer active players, ending hand`);
       return this._endHand();
     }
     const activePlayers = this.players.filter(p => p.inHand);
@@ -355,13 +319,11 @@ class PokerGame {
       const maxBet = Math.max(...this.players.map(p => p.currentBet));
       const allMatched = activePlayers.every(p => p.currentBet === maxBet);
       if (allMatched) {
-        console.log(`[PokerGame] All active players matched bets, ending betting round`);
         return this._endBettingRound();
       }
     }
     const oldIndex = this.currentPlayerIndex;
     this.currentPlayerIndex = this._getPlayerAfterIndex(this.currentPlayerIndex);
-    console.log(`[PokerGame] Advanced turn from index ${oldIndex} to ${this.currentPlayerIndex}`);
     this._setTurnTimeout();
   }
   _setTurnTimeout() {
@@ -375,19 +337,15 @@ class PokerGame {
   _handleTurnTimeout() {
     const currentPlayer = this.getCurrentPlayer();
     if (currentPlayer && currentPlayer.inHand) {
-      console.log(`[PokerGame] Player ${currentPlayer.name} timed out`);
       const allowed = this._getAllowedActions(currentPlayer);
       if (allowed.actions.includes('check')) {
         try {
           currentPlayer.hasActed = true;
           this.lastAction = 'check';
-          console.log(`[PokerGame] Auto-check for ${currentPlayer.name}`);
           this._advanceTurn();
         } catch (e) {
-          console.warn('[PokerGame] Auto-check failed, falling back to fold:', e);
           currentPlayer.inHand = false;
           currentPlayer.hasActed = true;
-          console.log(`[PokerGame] Auto-fold for ${currentPlayer.name}`);
           this._advanceTurn();
         }
       } else {
@@ -395,10 +353,8 @@ class PokerGame {
           currentPlayer.inHand = false;
           currentPlayer.hasActed = true;
           this.lastAction = 'fold';
-          console.log(`[PokerGame] Auto-fold for ${currentPlayer.name}`);
           this._advanceTurn();
         } catch (e) {
-          console.warn('[PokerGame] Auto-fold failed:', e);
           currentPlayer.inHand = false;
           currentPlayer.hasActed = true;
           this._advanceTurn();
@@ -408,7 +364,7 @@ class PokerGame {
         try { 
           this.onStateChange(this); 
         } catch (e) { 
-          console.warn('[PokerGame] onStateChange handler error:', e); 
+          // Silent error handling
         }
       }
     }
@@ -440,7 +396,6 @@ class PokerGame {
     this._setTurnTimeout(); // Устанавливаем таймаут для нового раунда
   }
   _startShowdown() {
-    console.log('[PokerGame] Starting showdown phase');
     this.showdownPhase = true;
     const activePlayers = this.players.filter(p => p.inHand);
     if (activePlayers.length === 1) {
@@ -450,7 +405,6 @@ class PokerGame {
     this.showdownOrder = this._determineShowdownOrder(activePlayers);
     this.currentShowdownIndex = 0;
     this.showdownResults = new Map(); // Результаты вскрытия каждого игрока
-    console.log('[PokerGame] Showdown order:', this.showdownOrder.map(p => p.name));
     this._showNextPlayerCards();
     this._setShowdownTimeout();
     if (this.onStateChange) {
@@ -458,24 +412,12 @@ class PokerGame {
     }
   }
   _endHand() {
-    console.log('[PokerGame] ===== ENDING HAND =====');
     this._clearTurnTimeout(); // Очищаем таймаут
     this._collectBets();
-    console.log(`[PokerGame] Pot before determining winners: ${this.pot}`);
-    console.log('[PokerGame] Players in hand:', this.players.filter(p => p.inHand).map(p => 
-      `${p.name}: stack=${p.stack}, currentBet=${p.currentBet}`
-    ));
     const winnersInfo = this._determineWinners();
-    console.log('[PokerGame] Winners determined:', winnersInfo.map(w => 
-      `${w.player.name}: ${w.handName}, pot=${w.pot}`
-    ));
     this._awardPot(winnersInfo);
-    console.log('[PokerGame] Final stacks after pot award:', this.players.map(p => 
-      `${p.name}: ${p.stack}`
-    ));
     this.status = 'finished';
     this.winnersInfo = winnersInfo;
-    console.log('[PokerGame] ===== HAND ENDED =====');
     setTimeout(() => {
       this._startNextHandIfPossible();
     }, 5000);
@@ -523,7 +465,6 @@ class PokerGame {
       const player = this.players.find(p => p.id === winnerInfo.player.id);
       if (player) {
         player.showCards = true;
-        console.log(`[PokerGame] Auto-showing cards for winner: ${player.name}`);
       }
     });
     this.sidePots.forEach(sidePot => {
@@ -572,7 +513,6 @@ class PokerGame {
         });
       }
     }
-    console.log(`[PokerGame] Created ${this.sidePots.length} side pots:`, this.sidePots);
   }
   _postBlindsAndStartBetting() {
     const smallBlindIndex = this._getPlayerAfterIndex(this.dealerPosition, false);
@@ -640,7 +580,6 @@ class PokerGame {
       }
       return index;
     } while (attempts < maxAttempts);
-    console.log(`[PokerGame] Warning: Could not find next player after index ${startIndex}, returning next index`);
     return (startIndex + 1) % this.players.length; 
   }
   _getAllowedActions(player) {
@@ -749,24 +688,19 @@ class PokerGame {
     return p ? (this._getAllowedActions(p).actions || []) : []; 
   }
   _startNextHandIfPossible() {
-    console.log('[PokerGame] Checking if next hand can be started...');
     this.players.forEach(p => {
       if (p.stack <= 0) {
         p.hasBoughtIn = false;
         p.isWaitingToPlay = true;
-        console.log(`[PokerGame] Player ${p.name} eliminated (stack: ${p.stack})`);
       }
     });
     const activePlayers = this.players.filter(p => p.hasBoughtIn && p.stack > 0);
-    console.log(`[PokerGame] Active players for next hand: ${activePlayers.length}`);
     if (activePlayers.length >= 2) {
-      console.log('[PokerGame] Starting next hand...');
       this.startNewHand();
       if (this.onStateChange) {
         this.onStateChange(this);
       }
     } else {
-      console.log('[PokerGame] Not enough players for next hand, waiting for buy-ins');
       this.status = 'waiting';
       if (this.onStateChange) {
         this.onStateChange(this);
@@ -784,7 +718,6 @@ class PokerGame {
     this.onStateChange = null;
     this.showdownOrder = null;
     this.showdownResults = null;
-    console.log(`[POKER] Game cleanup completed`); 
   }
 }
 module.exports = { PokerGame };

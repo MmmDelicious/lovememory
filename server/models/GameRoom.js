@@ -53,13 +53,49 @@ const GameRoom = sequelize.define('GameRoom', {
     allowNull: true,
     defaultValue: '1v1',
   },
-  gameSettings: {
+  settings: {
     type: DataTypes.JSON,
     allowNull: true,
     defaultValue: null,
+  },
+  state: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'waiting',
+  },
+  pair_id: {
+    type: DataTypes.UUID,
+    allowNull: true, // Nullable для обратной совместимости
+    references: {
+      model: 'Pairs',
+      key: 'id',
+    },
+  },
+  tournament_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'tournaments',
+      key: 'id',
+    },
   }
 });
 GameRoom.associate = (models) => {
   GameRoom.belongsTo(models.User, { as: 'Host', foreignKey: 'hostId' });
+  GameRoom.belongsTo(models.Pair, { 
+    foreignKey: 'pair_id', 
+    as: 'Pair',
+    onDelete: 'SET NULL'
+  });
+  GameRoom.hasMany(models.GameParticipant, {
+    foreignKey: 'game_room_id',
+    as: 'Participants',
+    onDelete: 'CASCADE'
+  });
+  GameRoom.belongsTo(models.Tournament, {
+    foreignKey: 'tournament_id',
+    as: 'Tournament',
+    onDelete: 'SET NULL'
+  });
 };
 module.exports = GameRoom;

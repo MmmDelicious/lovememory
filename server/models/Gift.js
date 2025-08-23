@@ -59,6 +59,22 @@ const Gift = sequelize.define('Gift', {
   viewedAt: {
     type: DataTypes.DATE,
     allowNull: true
+  },
+  recipient_pair_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'Pairs',
+      key: 'id',
+    },
+  },
+  shop_item_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'shop_items',
+      key: 'id',
+    },
   }
 }, {
   tableName: 'gifts',
@@ -86,6 +102,17 @@ Gift.associate = (models) => {
   Gift.belongsTo(models.User, {
     foreignKey: 'toUserId',
     as: 'recipient'
+  });
+  // Новые ассоциации для целевой схемы
+  Gift.belongsTo(models.Pair, {
+    foreignKey: 'recipient_pair_id',
+    as: 'RecipientPair',
+    onDelete: 'SET NULL'
+  });
+  Gift.belongsTo(models.ShopItem, {
+    foreignKey: 'shop_item_id',
+    as: 'ShopItem',
+    onDelete: 'SET NULL'
   });
 };
 module.exports = Gift;
