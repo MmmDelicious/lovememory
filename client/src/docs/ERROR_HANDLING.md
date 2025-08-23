@@ -21,12 +21,7 @@ src/
 │   ├── ErrorDisplay/
 │   │   ├── ErrorDisplay.jsx          # Основной компонент отображения ошибок
 │   │   └── ErrorDisplay.module.css   # Стили компонента
-│   ├── ErrorDemo/
-│   │   ├── ErrorDemo.jsx             # Демо-страница
-│   │   └── ErrorDemo.module.css      # Стили демо
-│   └── ErrorTest/
-│       ├── ErrorTest.jsx             # Тестовая страница
-│       └── ErrorTest.module.css      # Стили тестов
+
 ├── pages/
 │   └── ErrorPage/
 │       └── ErrorPage.jsx             # Страница ошибок
@@ -161,8 +156,7 @@ import ErrorDisplay from './components/ErrorDisplay/ErrorDisplay';
 
 Все стили находятся в CSS модулях и легко настраиваются:
 - `ErrorDisplay.module.css` - основные стили
-- `ErrorDemo.module.css` - стили демо-страницы
-- `ErrorTest.module.css` - стили тестовой страницы
+
 
 ## 🚨 Типы обрабатываемых ошибок
 

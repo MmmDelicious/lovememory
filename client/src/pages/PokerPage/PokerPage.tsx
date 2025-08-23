@@ -19,12 +19,22 @@ const PokerPage: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const user = useUser();
   const coins = useCoins();
-  const { gameState, makeMove } = useGameSocket(roomId!, user?.token || '', () => {});
+  // Убираем двойное подключение сокетов - оставляем только один!
+  // const { gameState, makeMove } = useGameSocket(roomId!, user?.token || '', () => {});
   const navigate = useNavigate();
   const [showBuyInModal, setShowBuyInModal] = useState<boolean>(false);
   const [roomData, setRoomData] = useState<RoomData | null>(null);
   const [hasBoughtIn, setHasBoughtIn] = useState<boolean>(false);
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [gameState, setGameState] = useState<any>(null);
+  
+  // Функция для отправки ходов (заменяет makeMove из useGameSocket)
+  const makeMove = (move: any) => {
+    if (socket) {
+      console.log('[POKER] Making move:', move);
+      socket.emit('make_move', move);
+    }
+  };
   useEffect(() => {
     if (!user?.token) return;
     const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
@@ -33,6 +43,28 @@ const PokerPage: React.FC = () => {
       transports: ['websocket', 'polling']
     });
     setSocket(socketInstance);
+    
+    // Подключаемся к комнате
+    socketInstance.on('connect', () => {
+      console.log('[POKER] Socket connected, joining room:', roomId);
+      socketInstance.emit('join_room', roomId);
+    });
+    
+    // Обработчики игрового состояния
+    socketInstance.on('game_state_update', (newGameState) => {
+      console.log('[POKER] Game state update:', newGameState);
+      setGameState(newGameState);
+    });
+    
+    socketInstance.on('room_info', (roomInfo: any) => {
+      console.log('[POKER] Room info:', roomInfo);
+      setGameState((prevState: any) => ({
+        ...prevState,
+        ...roomInfo
+      }));
+    });
+    
+    // Покер-специфичные события
     socketInstance.on('poker_buy_in_success', (data) => {
       console.log('[POKER] Buy-in успешен:', data);
       setHasBoughtIn(true);
@@ -50,7 +82,7 @@ const PokerPage: React.FC = () => {
     return () => {
       socketInstance.disconnect();
     };
-  }, [user?.token]); // Changed dependency array to include user?.token
+  }, [user?.token, roomId]); // Добавили roomId для пересоздания сокета при смене комнаты
   useEffect(() => {
     const fetchRoomData = async () => {
       try {

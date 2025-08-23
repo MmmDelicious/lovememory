@@ -7,7 +7,7 @@ export const LazyPokerPage = lazy(() => import('../pages/PokerPage/PokerPage'));
 export const LazyChessGameEnhanced = lazy(() => import('../components/ChessGame/ChessGameEnhanced'));
 export const LazyPokerTable = lazy(() => import('../components/PokerGame/PokerTable'));
 export const LazyDateGeneratorModal = lazy(() => import('../components/DateGeneratorModal/DateGeneratorModal'));
-export const LazyDebugDataViewer = lazy(() => import('../components/DebugDataViewer/DebugDataViewer'));
+
 
 // Компонент загрузчика
 export const ComponentLoader = () => (

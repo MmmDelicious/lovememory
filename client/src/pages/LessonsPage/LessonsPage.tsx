@@ -6,7 +6,7 @@ import TodayTab from '../../components/TodayTab/TodayTab';
 import LessonProgress from '../../components/LessonProgress/LessonProgress';
 import LessonPath from '../../components/LessonPath/LessonPath';
 import PsychologyTips from '../../components/PsychologyTips/PsychologyTips';
-import InsightsTab from '../../components/InsightsTab/InsightsTab';
+
 import { lessonService } from '../../services/lesson.service';
 import styles from './LessonsPage.module.css';
 const LessonsPage: React.FC = () => {
@@ -237,10 +237,19 @@ const LessonsPage: React.FC = () => {
               exit="exit"
               transition={{ duration: 0.3 }}
             >
-              <InsightsTab
-                viewMode={viewMode}
-                loading={loading}
-              />
+              <div className={styles.insightsRedirect}>
+                <div className={styles.redirectCard}>
+                  <div className={styles.redirectIcon}>📊</div>
+                  <h3>Аналитика обучения</h3>
+                  <p>Подробная аналитика ваших отношений доступна на отдельной странице</p>
+                  <button 
+                    className={styles.redirectButton}
+                    onClick={() => window.location.href = '/insights'}
+                  >
+                    Перейти к аналитике
+                  </button>
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

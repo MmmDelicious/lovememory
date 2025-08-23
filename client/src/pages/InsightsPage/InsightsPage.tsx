@@ -15,7 +15,14 @@ import {
   Lightbulb,
   Network,
   Zap,
-  Activity
+  Activity,
+  Shield,
+  Brain,
+  MessageCircle,
+  Camera,
+  BookOpen,
+  Gift,
+  Coffee
 } from 'lucide-react';
 import styles from './InsightsPage.module.css';
 import userService from '../../services/user.service';
@@ -24,6 +31,9 @@ import LoveLanguageAnalysis from '../../components/LoveLanguageAnalysis/LoveLang
 import PremiumModal from '../../components/PremiumModal/PremiumModal';
 import relationshipGraphService from '../../services/relationshipGraph.service';
 import HexagonChart from '../../components/HexagonChart/HexagonChart';
+import ExplainableRecommendation from '../../components/ExplainableRecommendation/ExplainableRecommendation';
+import PrivacyControls from '../../components/PrivacyControls/PrivacyControls';
+import QuickActions, { sampleQuickActions } from '../../components/QuickActions/QuickActions';
 const mockData = {
   harmonyScore: 87,
   previousScore: 82,
@@ -52,7 +62,8 @@ interface ProfileStats {
 }
 const InsightsPage: React.FC = () => {
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState<'overview' | 'charts' | 'graph' | 'insights'>('overview');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'graph' | 'tips'>('analytics');
+  const [analyticsView, setAnalyticsView] = useState<'overview' | 'detailed'>('overview');
   const [timeFilter, setTimeFilter] = useState<'week' | 'month' | 'year'>('month');
   const [animatedScore, setAnimatedScore] = useState(0);
   const [currentQuote, setCurrentQuote] = useState(PSYCHOLOGY_QUOTES[0]);
@@ -62,7 +73,16 @@ const InsightsPage: React.FC = () => {
   const [draggedNode, setDraggedNode] = useState<string | null>(null);
   const [hoveredConnection, setHoveredConnection] = useState<number | null>(null);
   const [isPremiumModalOpen, setIsPremiumModalOpen] = useState(false);
+  const [isPrivacyControlsOpen, setIsPrivacyControlsOpen] = useState(false);
   const [graphData, setGraphData] = useState<any>(null);
+  const [privacySettings, setPrivacySettings] = useState({
+    messages: true,
+    photos: true,
+    events: true,
+    activities: true,
+    location: true,
+    gameHistory: true
+  });
   useEffect(() => {
     if (!stats) return;
     const harmonyScore = Math.min(100, Math.max(30, 
@@ -127,7 +147,15 @@ const InsightsPage: React.FC = () => {
       setIsPremiumModalOpen(true);
     }
   };
-  const renderOverview = () => {
+  const renderAnalytics = () => {
+    if (analyticsView === 'overview') {
+      return renderOverviewContent();
+    } else {
+      return renderChartsContent();
+    }
+  };
+
+  const renderOverviewContent = () => {
     if (!stats || !userData) {
       return (
         <div className={styles.loadingState}>
@@ -283,7 +311,7 @@ const InsightsPage: React.FC = () => {
       </div>
     );
   };
-  const renderCharts = () => {
+  const renderChartsContent = () => {
     if (!stats) {
       return (
         <div className={styles.chartsGrid}>
@@ -592,9 +620,118 @@ const InsightsPage: React.FC = () => {
       </div>
     );
   };
-  const renderInsights = () => {
+  const renderTips = () => {
+    // Sample recommendations with explainable AI
+    const recommendations = [
+      {
+        title: "Планируйте совместное время",
+        description: "На основе анализа ваших данных, регулярное планирование совместных активностей укрепит ваши отношения.",
+        reasoning: "Анализ показывает, что ваши самые счастливые периоды совпадают с запланированными совместными событиями. За последний месяц вы провели на 30% больше времени вместе в дни с запланированными активностями.",
+        confidence: 87,
+        dataSources: [
+          {
+            type: 'events' as const,
+            description: 'Календарные события и их влияние на настроение',
+            weight: 45,
+            icon: Calendar,
+            color: '#3b82f6'
+          },
+          {
+            type: 'messages' as const,
+            description: 'Тональность сообщений после совместных событий',
+            weight: 30,
+            icon: MessageCircle,
+            color: '#10b981'
+          },
+          {
+            type: 'photos' as const,
+            description: 'Частота совместных фотографий',
+            weight: 25,
+            icon: Camera,
+            color: '#f59e0b'
+          }
+        ],
+        action: {
+          type: 'book' as const,
+          label: 'Запланировать событие',
+          handler: () => console.log('Planning event...')
+        }
+      },
+      {
+        title: "Изучите языки любви",
+        description: "Персональный урок поможет лучше понимать потребности друг друга в выражении любви.",
+        reasoning: "Ваш профиль показывает разные предпочтения в способах выражения любви. Понимание языков любви может улучшить эмоциональную связь на 40%.",
+        confidence: 73,
+        dataSources: [
+          {
+            type: 'profile' as const,
+            description: 'Результаты тестов личности',
+            weight: 50,
+            icon: Brain,
+            color: '#8b5cf6'
+          },
+          {
+            type: 'activities' as const,
+            description: 'Предпочтения в совместных активностях',
+            weight: 35,
+            icon: Heart,
+            color: '#ec4899'
+          },
+          {
+            type: 'messages' as const,
+            description: 'Стиль общения в сообщениях',
+            weight: 15,
+            icon: MessageCircle,
+            color: '#10b981'
+          }
+        ],
+        action: {
+          type: 'lesson' as const,
+          label: 'Начать урок',
+          handler: () => console.log('Starting lesson...')
+        }
+      }
+    ];
+
     return (
-      <div className={styles.insightsGrid}>
+      <div className={styles.tipsContainer}>
+        {/* AI Recommendations Section */}
+        <div className={styles.recommendationsSection}>
+          <div className={styles.sectionHeader}>
+            <Brain size={28} />
+            <div>
+              <h3>AI Рекомендации</h3>
+              <p>Персонализированные советы на основе анализа ваших данных</p>
+            </div>
+          </div>
+          
+          <div className={styles.recommendationsList}>
+            {recommendations.map((rec, index) => (
+              <ExplainableRecommendation
+                key={index}
+                title={rec.title}
+                description={rec.description}
+                reasoning={rec.reasoning}
+                confidence={rec.confidence}
+                dataSources={rec.dataSources}
+                action={rec.action}
+                onDismiss={() => console.log('Dismissed recommendation')}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Quick Actions Section */}
+        <div className={styles.quickActionsSection}>
+          <QuickActions 
+            recommendations={sampleQuickActions}
+            title="Быстрые действия"
+            subtitle="Готовые решения для улучшения отношений"
+            maxVisible={3}
+          />
+        </div>
+
+        {/* Psychology Section */}
         <div className={styles.psychologySection}>
           <div className={styles.cardHeader}>
             <div className={styles.cardIcon}>
@@ -610,6 +747,8 @@ const InsightsPage: React.FC = () => {
             <div className={styles.quoteAuthor}>— {currentQuote.author}</div>
           </div>
         </div>
+
+        {/* Weekly Progress */}
         <div className={styles.weeklyReport}>
           <div className={styles.cardHeader}>
             <div className={styles.cardIcon}>
@@ -635,6 +774,8 @@ const InsightsPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Love Languages Analysis */}
         <div className={styles.loveLanguageSection}>
           <div className={styles.modernCard}>
             <div className={styles.cardHeader}>
@@ -679,24 +820,34 @@ const InsightsPage: React.FC = () => {
               Отслеживайте прогресс ваших отношений
             </p>
           </div>
-          {user?.role !== 'premium' as any && (
+          <div className={styles.headerActions}>
             <button 
-              className={styles.upgradeSection}
-              onClick={handlePremiumClick}
+              className={styles.privacyButton}
+              onClick={() => setIsPrivacyControlsOpen(true)}
+              title="Настройки приватности"
             >
-              <Crown size={20} />
-              <span>Премиум аналитика</span>
+              <Shield size={20} />
+              <span>Приватность</span>
             </button>
-          )}
+            
+            {user?.role !== 'premium' as any && (
+              <button 
+                className={styles.upgradeSection}
+                onClick={handlePremiumClick}
+              >
+                <Crown size={20} />
+                <span>Премиум аналитика</span>
+              </button>
+            )}
+          </div>
         </div>
       </header>
       <nav className={styles.navigation}>
         <div className={styles.tabs}>
           {[
-            { id: 'overview', label: 'Обзор', icon: BarChart3 },
-            { id: 'charts', label: 'Графики', icon: PieChart },
-            { id: 'graph', label: 'Граф', icon: Network },
-            { id: 'insights', label: 'Советы', icon: Star }
+            { id: 'analytics', label: 'Аналитика', icon: BarChart3, description: 'Обзор и детали' },
+            { id: 'graph', label: 'Связи', icon: Network, description: 'Граф отношений' },
+            { id: 'tips', label: 'Советы', icon: Brain, description: 'AI рекомендации' }
           ].map(tab => (
             <button
               key={tab.id}
@@ -708,6 +859,26 @@ const InsightsPage: React.FC = () => {
             </button>
           ))}
         </div>
+        
+        {/* Analytics View Toggle */}
+        {activeTab === 'analytics' && (
+          <div className={styles.analyticsToggle}>
+            <button
+              className={`${styles.toggleButton} ${analyticsView === 'overview' ? styles.toggleActive : ''}`}
+              onClick={() => setAnalyticsView('overview')}
+            >
+              <BarChart3 size={16} />
+              <span>Обзор</span>
+            </button>
+            <button
+              className={`${styles.toggleButton} ${analyticsView === 'detailed' ? styles.toggleActive : ''}`}
+              onClick={() => setAnalyticsView('detailed')}
+            >
+              <PieChart size={16} />
+              <span>Детали</span>
+            </button>
+          </div>
+        )}
         <div className={styles.filters}>
           <div className={styles.timeFilter}>
             <Filter size={16} />
@@ -724,15 +895,25 @@ const InsightsPage: React.FC = () => {
         </div>
       </nav>
       <main className={styles.mainContent}>
-        {activeTab === 'overview' && renderOverview()}
-        {activeTab === 'charts' && renderCharts()}
+        {activeTab === 'analytics' && renderAnalytics()}
         {activeTab === 'graph' && renderGraph()}
-        {activeTab === 'insights' && renderInsights()}
+        {activeTab === 'tips' && renderTips()}
       </main>
       <PremiumModal 
         isOpen={isPremiumModalOpen}
         onClose={() => setIsPremiumModalOpen(false)}
         onUpgrade={handlePremiumUpgrade}
+      />
+      
+      <PrivacyControls
+        isOpen={isPrivacyControlsOpen}
+        onClose={() => setIsPrivacyControlsOpen(false)}
+        onSave={(settings) => {
+          setPrivacySettings(settings);
+          setIsPrivacyControlsOpen(false);
+          console.log('Privacy settings updated:', settings);
+        }}
+        currentSettings={privacySettings}
       />
     </div>
   );
