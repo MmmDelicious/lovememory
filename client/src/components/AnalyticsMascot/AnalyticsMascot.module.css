@@ -1,0 +1,282 @@
+/* Analytics Mascot - Premium AI Assistant */
+
+.mascotContainer {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 100;
+  animation: slideInFromRight 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mascotWrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.lottieContainer {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border-radius: 50%;
+  padding: 8px;
+  box-shadow: 
+    0 8px 32px rgba(16, 185, 129, 0.3),
+    0 4px 16px rgba(0, 0, 0, 0.1);
+  animation: float 3s ease-in-out infinite;
+}
+
+.lottieAnimation {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.premiumBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.speechBubble {
+  position: relative;
+  background: white;
+  border: 1px solid #F3F4F6;
+  border-radius: 20px;
+  padding: 1.5rem;
+  max-width: 320px;
+  min-width: 250px;
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  animation: bubbleAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.welcomeBubble {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  border: 2px solid rgba(16, 185, 129, 0.2);
+}
+
+.regularBubble {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.closeButton {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(100, 116, 139, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: rgba(100, 116, 139, 0.2);
+  color: #334155;
+  transform: scale(1.1);
+}
+
+.messageHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.messageIcon {
+  color: #10B981;
+  width: 18px;
+  height: 18px;
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+.mascotTitle {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #334155;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.messageText {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #475569;
+  font-weight: 500;
+}
+
+.progressDots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  transition: all 0.3s ease;
+}
+
+.activeDot {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  transform: scale(1.2);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+}
+
+.completedDot {
+  background: #10b981;
+  transform: scale(1.1);
+}
+
+.bubbleTail {
+  position: absolute;
+  top: 1.5rem;
+  right: -12px;
+  width: 0;
+  height: 0;
+  border: 12px solid transparent;
+  border-left: 12px solid white;
+  filter: drop-shadow(2px 0 4px rgba(0, 0, 0, 0.1));
+}
+
+.welcomeBubble .bubbleTail {
+  border-left-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Animations */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+  }
+  to {
+    box-shadow: 0 2px 16px rgba(16, 185, 129, 0.7);
+  }
+}
+
+@keyframes bubbleAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mascotContainer {
+    top: 1rem;
+    right: 1rem;
+  }
+  
+  .speechBubble {
+    max-width: 280px;
+    min-width: 220px;
+    padding: 1rem;
+  }
+  
+  .lottieContainer {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .messageText {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mascotContainer {
+    top: 0.5rem;
+    right: 0.5rem;
+    left: 0.5rem;
+  }
+  
+  .mascotWrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .speechBubble {
+    max-width: 100%;
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .bubbleTail {
+    top: -12px;
+    right: 50%;
+    transform: translateX(50%) rotate(-90deg);
+    border-left-color: transparent;
+    border-bottom: 12px solid white;
+  }
+  
+  .welcomeBubble .bubbleTail {
+    border-bottom-color: rgba(255, 255, 255, 0.95);
+  }
+}

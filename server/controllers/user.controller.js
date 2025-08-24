@@ -1,4 +1,6 @@
 const userService = require('../services/user.service');
+const activityService = require('../services/activity.service');
+const { ActivityLog } = require('../models');
 exports.getProfile = async (req, res, next) => {
   try {
     const user = await userService.getProfile(req.user.id);
@@ -10,6 +12,16 @@ exports.getProfile = async (req, res, next) => {
 exports.updateProfile = async (req, res, next) => {
   try {
     const updatedUser = await userService.updateProfile(req.user.id, req.body);
+    
+    // Логируем обновление профиля
+    const changedFields = Object.keys(req.body);
+    for (const field of changedFields) {
+      await activityService.logProfileUpdated(req.user.id, {
+        field,
+        newValue: req.body[field]
+      });
+    }
+    
     res.status(200).json(updatedUser);
   } catch (error) {
     next(error);
@@ -72,5 +84,20 @@ exports.saveFCMToken = async (req, res, next) => {
   } catch (error) {
     console.error('Save FCM token error:', error);
     res.status(500).json({ message: 'Ошибка при сохранении FCM токена' });
+  }
+};
+
+// Получение активностей пользователя для аналитики
+exports.getUserActivities = async (req, res, next) => {
+  try {
+    const { days = 30 } = req.query;
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - parseInt(days));
+    
+    const activities = await activityService.getUserActivities(req.user.id, startDate);
+    res.status(200).json(activities);
+  } catch (error) {
+    console.error('Error fetching user activities:', error);
+    next(error);
   }
 };

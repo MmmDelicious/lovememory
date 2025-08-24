@@ -1,5 +1,5 @@
 import React from 'react';
-import { Crown, X, Star, Check } from 'lucide-react';
+import { Crown, X, Star, Check, Sparkles, Brain, TrendingUp, Shield, Zap } from 'lucide-react';
 import styles from './PremiumModal.module.css';
 import Button from '../Button/Button';
 interface PremiumModalProps {
@@ -11,34 +11,35 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onUpgrade 
   if (!isOpen) return null;
   const premiumFeatures = [
     {
-      icon: '📊',
-      title: 'Детальная аналитика',
-      description: 'Полные отчеты по активности и прогрессу отношений'
+      icon: <Brain size={20} />,
+      title: 'Персональный AI Аналитик',
+      description: 'Умная модель анализирует ваши отношения 24/7 и дает персональные рекомендации',
+      highlight: true
     },
     {
-      icon: '📈',
-      title: 'Графики прогресса',
-      description: 'Визуализация динамики развития ваших отношений'
+      icon: <TrendingUp size={20} />,
+      title: 'Продвинутая аналитика',
+      description: 'Глубокие инсайты, графики совместимости и детальная статистика отношений'
     },
     {
-      icon: '🎯',
-      title: 'Персональные рекомендации',
-      description: 'ИИ-советы для улучшения отношений'
+      icon: <Sparkles size={20} />,
+      title: 'Интерактивные графы',
+      description: 'Визуализация связей в отношениях с возможностью детального анализа'
     },
     {
-      icon: '🔮',
-      title: 'Предсказания совместимости',
-      description: 'Анализ совместимости на основе ваших данных'
+      icon: <Zap size={20} />,
+      title: 'Прогнозы и рекомендации',
+      description: 'Предсказания развития отношений и персональные советы для укрепления связи'
     },
     {
-      icon: '📝',
-      title: 'Подробные отчеты',
-      description: 'Ежемесячные отчеты о состоянии отношений'
+      icon: <Shield size={20} />,
+      title: 'Приватность и безопасность',
+      description: 'Полный контроль над данными с расширенными настройками приватности'
     },
     {
-      icon: '⭐',
-      title: 'Приоритетная поддержка',
-      description: 'Быстрая помощь и новые функции в первую очередь'
+      icon: <Star size={20} />,
+      title: 'Эксклюзивный контент',
+      description: 'Доступ к премиум урокам, играм и материалам для развития отношений'
     }
   ];
   return (
@@ -49,15 +50,19 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, onUpgrade 
         </button>
         <div className={styles.header}>
           <div className={styles.iconWrapper}>
-            <Crown size={32} />
+            <Brain size={32} />
+            <div className={styles.aiGlow}></div>
           </div>
-          <h2>Премиум аналитика</h2>
-          <p>Получите доступ к расширенным возможностям анализа ваших отношений</p>
+          <h2>LoveMemory Premium</h2>
+          <p>Персональный AI-аналитик для ваших отношений с продвинутой аналитикой и эксклюзивными функциями</p>
         </div>
         <div className={styles.features}>
           {premiumFeatures.map((feature, index) => (
-            <div key={index} className={styles.feature}>
-              <div className={styles.featureIcon}>{feature.icon}</div>
+            <div key={index} className={`${styles.feature} ${feature.highlight ? styles.highlightFeature : ''}`}>
+              <div className={styles.featureIcon}>
+                {feature.icon}
+                {feature.highlight && <div className={styles.featureGlow}></div>}
+              </div>
               <div className={styles.featureContent}>
                 <h4>{feature.title}</h4>
                 <p>{feature.description}</p>

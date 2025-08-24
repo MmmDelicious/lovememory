@@ -1,5 +1,6 @@
 const gameService = require('../services/game.service');
 const GameManager = require('../gameLogic/GameManager');
+const activityService = require('../services/activity.service');
 class GameController {
   async getRooms(req, res, next) {
     try {

@@ -1,4 +1,5 @@
 const eventService = require('../services/event.service');
+const activityService = require('../services/activity.service');
 exports.getEvents = async (req, res, next) => {
   try {
     const events = await eventService.getEventsForUser(req.user.id);
@@ -10,6 +11,16 @@ exports.getEvents = async (req, res, next) => {
 exports.createEvent = async (req, res, next) => {
   try {
     const newEvent = await eventService.createEvent(req.user.id, req.body);
+    
+    // Логируем создание события
+    await activityService.logEventCreated(req.user.id, {
+      eventId: newEvent.id,
+      title: newEvent.title,
+      type: newEvent.event_type,
+      scheduled_at: newEvent.event_date,
+      pairId: newEvent.pair_id
+    });
+    
     res.status(201).json(newEvent);
   } catch (error) {
     next(error);
@@ -37,6 +48,23 @@ exports.uploadFile = async (req, res, next) => {
   try {
     const { id } = req.params;
     const newMedia = await eventService.addMediaToEvent(id, req.user.id, req.file);
+    
+    // Логируем загрузку медиа
+    await activityService.logMediaShared(req.user.id, {
+      size_MB: req.file.size / (1024 * 1024),
+      type: req.file.mimetype.startsWith('image/') ? 'photo' : 'video',
+      mediaId: newMedia.id,
+      eventId: id
+    });
+    
+    // Логируем создание воспоминания
+    await activityService.logMemoryCreated(req.user.id, {
+      memoryId: newMedia.id,
+      media_count: 1,
+      is_shared: true,
+      eventId: id
+    });
+    
     res.status(201).json(newMedia);
   } catch (error) {
     next(error);

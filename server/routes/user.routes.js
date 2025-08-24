@@ -24,4 +24,7 @@ router.get('/search', authMiddleware, userController.searchUsers);
 // Сохранение FCM токена
 router.post('/fcm-token', authMiddleware, userController.saveFCMToken);
 
+// Получение активностей пользователя для аналитики
+router.get('/activities', authMiddleware, userController.getUserActivities);
+
 module.exports = router;

@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Map, BookOpen, BarChart3, ToggleLeft, ToggleRight, Users, User } from 'lucide-react';
+import { Calendar, BookOpen, BarChart3, ToggleLeft, ToggleRight, Users, User } from 'lucide-react';
 import DailyLesson from '../../components/DailyLesson/DailyLesson';
 import TodayTab from '../../components/TodayTab/TodayTab';
 import LessonProgress from '../../components/LessonProgress/LessonProgress';
-import LessonPath from '../../components/LessonPath/LessonPath';
 import PsychologyTips from '../../components/PsychologyTips/PsychologyTips';
+import ThemesTab from '../../components/ThemesTab/ThemesTab';
 
 import { lessonService } from '../../services/lesson.service';
 import styles from './LessonsPage.module.css';
 const LessonsPage: React.FC = () => {
-  // New tab structure: Today, Path, Topics, Insights
-  const [activeTab, setActiveTab] = useState<'today' | 'path' | 'topics' | 'insights'>('today');
+  // New tab structure: Today, Topics, Insights
+  const [activeTab, setActiveTab] = useState<'today' | 'topics' | 'insights'>('today');
   
   // Partner mode toggle
   const [viewMode, setViewMode] = useState<'my' | 'pair'>('my');
@@ -41,7 +41,7 @@ const LessonsPage: React.FC = () => {
         setTodayLesson(lesson);
       } 
       
-      if (activeTab === 'path' || activeTab === 'insights') {
+      if (activeTab === 'insights') {
         console.log('📊 LessonsPage: Fetching progress...');
         const progressData = await lessonService.getProgress();
         console.log('✅ LessonsPage: Progress loaded:', progressData);
@@ -49,10 +49,8 @@ const LessonsPage: React.FC = () => {
       }
       
       if (activeTab === 'topics') {
-        console.log('📚 LessonsPage: Fetching topics...');
-        // TODO: Implement getTopics service method
-        const topicsData = null; // await lessonService.getTopics();
-        setTopics(topicsData);
+        console.log('📚 LessonsPage: Topics tab loaded');
+        // ThemesTab component handles its own data
       }
       
       if (activeTab === 'insights') {
@@ -95,7 +93,6 @@ const LessonsPage: React.FC = () => {
   // New tab structure with updated icons and labels
   const tabs = [
     { id: 'today', label: 'Today', icon: Calendar },
-    { id: 'path', label: 'Путь', icon: Map },
     { id: 'topics', label: 'Темы', icon: BookOpen },
     { id: 'insights', label: 'Insights', icon: BarChart3 }
   ];
@@ -194,40 +191,15 @@ const LessonsPage: React.FC = () => {
               exit="exit"
               transition={{ duration: 0.3 }}
             >
-              <div className={styles.placeholderContent}>
-                <h3>🚧 Topics Tab - В разработке</h3>
-                <p>Здесь будет навигация по темам уроков с drill-down функциональностью</p>
-                <div className={styles.placeholderFeatures}>
-                  <div>📚 Темы уроков</div>
-                  <div>🎯 Drill-down по урокам</div>
-                  <div>📈 Прогресс по каждой теме</div>
-                  <div>💡 Рекомендации</div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-          {activeTab === 'path' && (
-            <motion.div
-              key="path"
-              variants={contentVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              transition={{ duration: 0.3 }}
-            >
-              <LessonPath
-                completedLessons={progress?.completedLessons || []}
-                currentLesson={progress?.currentLesson || 'lesson_1'}
-                totalLessons={progress?.totalLessons || 30}
-                streakDays={progress?.streakDays || 0}
-                viewMode={viewMode}
-                onLessonSelect={(lessonId) => {
-                  console.log('Selected lesson:', lessonId);
-                  // TODO: Navigate to lesson or open lesson modal
+              <ThemesTab
+                onThemeSelect={(themeId) => {
+                  console.log('Selected theme:', themeId);
+                  // TODO: Navigate to theme lessons or open theme modal
                 }}
               />
             </motion.div>
           )}
+
           {activeTab === 'insights' && (
             <motion.div
               key="insights"

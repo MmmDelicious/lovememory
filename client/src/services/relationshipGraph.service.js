@@ -93,10 +93,10 @@ class RelationshipGraphService {
   analyzeUserStats(stats) {
     const analysis = {
       communication: Math.min(100, Math.max(40, 
-        stats.events * 8 + stats.gamesPlayed * 5 + 50
+        stats.events * 10 + stats.memories * 3 + 50
       )),
       trust: Math.min(100, Math.max(45, 
-        stats.gamesPlayed * 6 + stats.daysSinceRegistration * 0.5 + 55
+        stats.memories * 8 + stats.daysSinceRegistration * 0.5 + 55
       )),
       shared_time: Math.min(100, Math.max(35, 
         stats.events * 6 + stats.memories * 3 + 40
@@ -105,19 +105,19 @@ class RelationshipGraphService {
         stats.memories * 12 + stats.events * 2 + 45
       )),
       support: Math.min(100, Math.max(40, 
-        stats.gamesPlayed * 4 + stats.events * 3 + 50
+        stats.memories * 6 + stats.events * 4 + 50
       )),
       future_plans: Math.min(100, Math.max(30, 
         stats.events * 5 + stats.daysSinceRegistration * 0.8 + 35
       )),
       conflict_resolution: Math.min(100, Math.max(35, 
-        stats.gamesPlayed * 3 + stats.daysSinceRegistration * 0.6 + 45
+        stats.events * 4 + stats.daysSinceRegistration * 0.6 + 45
       )),
       personal_growth: Math.min(100, Math.max(40, 
         stats.events * 4 + stats.memories * 2 + 50
       )),
       fun_together: Math.min(100, Math.max(45, 
-        stats.gamesPlayed * 8 + stats.events * 4 + 60
+        stats.memories * 5 + stats.events * 6 + 60
       ))
     };
     analysis.couple = Math.min(100, Math.max(60,

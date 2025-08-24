@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const authService = require('../services/auth.service');
 const userService = require('../services/user.service');
+const activityService = require('../services/activity.service');
 const generateToken = (user) => {
   return jwt.sign({ userId: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
     expiresIn: '24h',
@@ -13,6 +14,10 @@ const register = async (req, res, next) => {
   try {
     const { user } = await authService.register(req.body);
     const fullUser = await userService.getProfile(user.id);
+    
+    // Логируем регистрацию пользователя
+    await activityService.logUserLogin(fullUser.id, {});
+    
     const token = generateToken(fullUser);
     sendAuthResponse(res, fullUser, token);
   } catch (error) {
@@ -29,6 +34,9 @@ const login = async (req, res, next) => {
     
     const fullUser = await userService.getProfile(user.id);
     console.log('✅ User service returned profile:', fullUser);
+    
+    // Логируем вход пользователя
+    await activityService.logUserLogin(fullUser.id, {});
     
     const token = generateToken(fullUser);
     console.log('🔑 Generated token:', token.substring(0, 20) + '...');
@@ -53,6 +61,10 @@ const logout = (req, res, next) => {
 const googleCallback = async (req, res, next) => {
   try {
     const fullUser = await userService.getProfile(req.user.id);
+    
+    // Логируем вход через Google OAuth
+    await activityService.logUserLogin(fullUser.id, {});
+    
     const token = generateToken(fullUser);
     const tokenParam = encodeURIComponent(token);
     const userParam = encodeURIComponent(JSON.stringify(fullUser));
