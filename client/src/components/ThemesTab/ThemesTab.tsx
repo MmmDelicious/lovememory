@@ -1,18 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
 import { ChevronRight, Filter } from 'lucide-react';
 import styles from './ThemesTab.module.css';
-
-// Импорт лоти анимаций
-import loveAnimation from '../../assets/lessons/Love.json';
-import relationshipAnimation from '../../assets/lessons/Relationship.json';
-import coupleAnimation from '../../assets/lessons/Couple sharing and caring love.json';
-import businessAnimation from '../../assets/lessons/Business Animations - Flat Concept.json';
-import targetAnimation from '../../assets/lessons/Target Evaluation.json';
-import marketAnimation from '../../assets/lessons/Market Research.json';
-import onlineSalesAnimation from '../../assets/lessons/Online Sales.json';
-import websiteAnimation from '../../assets/lessons/Website Construction.json';
+import { themes as lessonThemes, getLessonAnimation } from '../../assets/lessons';
 
 interface Theme {
   id: string;
@@ -33,88 +24,54 @@ const ThemesTab: React.FC<ThemesTabProps> = ({ onThemeSelect }) => {
   const [filter, setFilter] = useState<'all' | 'popular' | 'new' | 'recommended'>('all');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
-  const themes: Theme[] = [
-    {
-      id: 'trust',
-      title: 'Доверие и честность',
-      description: 'Как строить прозрачность, избегать недомолвок, обсуждать трудные темы',
-      color: '#FADADD', // розовый пастельный
-      animation: businessAnimation,
-      totalLessons: 12,
-      completedLessons: 3,
-      category: 'popular'
-    },
-    {
-      id: 'intimacy',
-      title: 'Интимность и сексуальность',
-      description: 'Понимание желаний, уважение границ, развитие близости',
-      color: '#E6E0FF', // светло-лавандовый
-      animation: coupleAnimation,
-      totalLessons: 15,
-      completedLessons: 0,
-      category: 'recommended'
-    },
-    {
-      id: 'emotional',
-      title: 'Эмоциональная связь',
-      description: 'Умение слушать, выражать чувства, поддержка в трудные периоды',
-      color: '#DFF6FF', // небесно-голубой
-      animation: loveAnimation,
-      totalLessons: 18,
-      completedLessons: 7,
-      category: 'popular'
-    },
-    {
-      id: 'conflicts',
-      title: 'Конфликты и их решение',
-      description: 'Конструктивные ссоры, техника "я-высказываний", нахождение компромисса',
-      color: '#FFF2E5', // мягкий бежевый
-      animation: targetAnimation,
-      totalLessons: 14,
-      completedLessons: 5,
-      category: 'new'
-    },
-    {
-      id: 'quality_time',
-      title: 'Совместное время',
-      description: 'Как создавать ритуалы, планировать свидания, наполнять отношения радостью',
-      color: '#E0F7F4', // мятный
-      animation: relationshipAnimation,
-      totalLessons: 10,
-      completedLessons: 8,
-      category: 'popular'
-    },
-    {
-      id: 'future',
-      title: 'Будущее и цели',
-      description: 'Разговоры о мечтах, планирование детей, финансов и долгосрочного пути',
-      color: '#F0E6FF', // светло-фиолетовый
-      animation: marketAnimation,
-      totalLessons: 16,
-      completedLessons: 2,
-      category: 'recommended'
-    },
-    {
-      id: 'care',
-      title: 'Забота и поддержка',
-      description: 'Малые действия каждый день: забота о здоровье, внимание, помощь',
-      color: '#E8F5E8', // светло-зеленый
-      animation: onlineSalesAnimation,
-      totalLessons: 11,
-      completedLessons: 6,
-      category: 'new'
-    },
-    {
-      id: 'fun',
-      title: 'Веселье и креативность',
-      description: 'Игры, совместные хобби, необычные активности, юмор в паре',
-      color: '#FFF0E6', // светло-персиковый
-      animation: websiteAnimation,
-      totalLessons: 13,
-      completedLessons: 4,
-      category: 'popular'
-    }
-  ];
+  // Маппинг для цветов и категорий тем
+  const themeColors = {
+    words_of_affirmation: '#FADADD', // розовый
+    physical_touch: '#E6E0FF', // лавандовый
+    quality_time: '#DFF6FF', // голубой
+    acts_of_service: '#E8F5E8', // зеленый
+    receiving_gifts: '#FFF0E6', // персиковый
+    attachment_healing: '#F0E6FF', // фиолетовый
+    heat_boosters: '#FFE6E6', // красноватый
+    creative_time: '#E0F7F4' // мятный
+  };
+
+  const themeCategories = {
+    words_of_affirmation: 'popular',
+    physical_touch: 'popular',
+    quality_time: 'popular',
+    acts_of_service: 'new',
+    receiving_gifts: 'new',
+    attachment_healing: 'recommended',
+    heat_boosters: 'recommended',
+    creative_time: 'new'
+  };
+
+  // Маппинг анимаций для разных тем
+  const themeAnimations = {
+    words_of_affirmation: 'Love.json',
+    physical_touch: 'Couple sharing and caring love.json',
+    quality_time: 'Lover People Sitting on Garden Banch.json',
+    acts_of_service: 'Business Animations - Flat Concept.json',
+    receiving_gifts: 'Market Research.json',
+    attachment_healing: 'Relationship.json',
+    heat_boosters: 'Love.json',
+    creative_time: 'Developer discussing different options.json'
+  };
+
+  // Генерируем случайные завершенные уроки только один раз
+  const themes: Theme[] = useMemo(() => 
+    Object.entries(lessonThemes).map(([key, theme]) => ({
+      id: key,
+      title: theme.name,
+      description: theme.description,
+      color: themeColors[key as keyof typeof themeColors] || '#DFF6FF',
+      animation: getLessonAnimation(themeAnimations[key as keyof typeof themeAnimations] || 'Love.json'),
+      totalLessons: theme.count,
+      completedLessons: Math.floor(Math.random() * theme.count), // TODO: заменить на реальные данные из API
+      category: (themeCategories[key as keyof typeof themeCategories] || 'new') as 'popular' | 'new' | 'recommended'
+    })), [lessonThemes]
+  );
 
   const filteredThemes = themes.filter(theme => {
     if (filter === 'all') return true;
@@ -129,6 +86,11 @@ const ThemesTab: React.FC<ThemesTabProps> = ({ onThemeSelect }) => {
     if (onThemeSelect) {
       onThemeSelect(themeId);
     }
+  };
+
+  const handleOpenButtonClick = (e: React.MouseEvent, themeId: string) => {
+    e.stopPropagation(); // Предотвращаем всплытие события
+    handleThemeClick(themeId);
   };
 
   return (
@@ -220,6 +182,7 @@ const ThemesTab: React.FC<ThemesTabProps> = ({ onThemeSelect }) => {
                 className={styles.openButton}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={(e) => handleOpenButtonClick(e, theme.id)}
               >
                 Открыть
                 <ChevronRight size={16} className={styles.buttonIcon} />

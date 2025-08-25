@@ -4,6 +4,7 @@ const { PokerGame } = require('./PokerGame');
 const QuizGame = require('./QuizGame');
 const WordleGame = require('./WordleGame');
 const CodenamesGame = require('./CodenamesGame');
+const MemoryGame = require('./MemoryGame');
 class GameManager {
   constructor() {
     this.games = new Map();
@@ -64,6 +65,20 @@ class GameManager {
           ...options
         };
         gameInstance = new CodenamesGame(players, codenamesSettings);
+        break;
+      case 'memory':
+        console.log(`[GAME_MANAGER] Creating memory game for room ${roomId} with ${players.length} players`);
+        const memorySettings = {
+          difficulty: options.difficulty || 'easy',
+          onStateChange: options.onStateChange
+        };
+        gameInstance = new MemoryGame(roomId, memorySettings, options.onStateChange);
+        for (const player of players) {
+          const playerId = player.id || player;
+          const playerName = player.name || player.email || playerId;
+          console.log(`[GAME_MANAGER] Adding player ${playerId} (${playerName}) to memory game`);
+          gameInstance.addPlayer(playerId, playerName);
+        }
         break;
       default:
         throw new Error(`Unsupported game type: ${gameType}`);

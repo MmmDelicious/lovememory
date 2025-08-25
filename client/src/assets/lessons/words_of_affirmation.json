@@ -1,0 +1,317 @@
+[
+  {
+    "id": "lesson_001",
+    "title": "Благодарность за честность",
+    "text": "Перед сном скажите партнеру спасибо за то, что сегодня он был честен с вами в какой-то мелочи.",
+    "source": "Исследования парных отношений",
+    "tags": ["доверие", "честность"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["low_heat"],
+      "relationship_stage": ["developing", "established"],
+      "attachment_style": ["anxious", "secure"],
+      "gap_days": [0, 1]
+    },
+    "effect": {"words": 4, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 1},
+    "theme": "words_of_affirmation",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 10
+  },
+  {
+    "id": "lesson_005",
+    "title": "Извинение и благодарность",
+    "text": "Извинитесь перед партнером за любую мелочь (например, за то, что перебили разговор) и скажите спасибо за то, что он вас выслушал.",
+    "source": "Готман, 2017",
+    "tags": ["честность", "конфликт", "извинение"],
+    "triggers": {
+      "love_language": ["words", "acts"],
+      "context": ["low_heat"],
+      "relationship_stage": ["developing", "established"],
+      "attachment_style": ["anxious"],
+      "gap_days": [0, 0]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": -1},
+    "theme": "words_of_affirmation",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 12
+  },
+  {
+    "id": "lesson_010",
+    "title": "Ежедневная благодарность",
+    "text": "Каждый вечер говорите партнеру «спасибо» за конкретный поступок: исследования показывают, что пары, регулярно выражающие благодарность, более удовлетворены отношениями.",
+    "source": "Illinois News Bureau, Barton 2022",
+    "tags": ["благодарность", "доверие", "статистика"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure", "anxious"],
+      "gap_days": [1, 1]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 1},
+    "theme": "words_of_affirmation",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 5,
+    "animation_file": "Love.json",
+    "base_coins_reward": 12
+  },
+  {
+    "id": "lesson_011",
+    "title": "Комплимент внешности",
+    "text": "Скажите партнеру, что вам особенно нравится во внешности или стиле партнёра.",
+    "source": "Книга «Язык любви», Чепмен",
+    "tags": ["интимность", "комплимент", "сексуальность"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["high_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["anxious", "secure"],
+      "gap_days": [0, 1]
+    },
+    "effect": {"words": 4, "acts": 0, "gifts": 0, "time": 0, "touch": 2, "heat": 2},
+    "theme": "words_of_affirmation",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 10
+  },
+  {
+    "id": "lesson_013",
+    "title": "Откровенный разговор о сексе",
+    "text": "Обсудите свои желания и предпочтения в сексе без стеснения – исследования показывают, что 64% людей считают сексуальную жизнь важной для счастья, но только 38% довольны ею, так что откровенность поможет улучшить близость.",
+    "source": "American Sexual Health Association",
+    "tags": ["сексуальность", "разговор", "статистика"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["high_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["anxious"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 2},
+    "theme": "words_of_affirmation",
+    "interactive_type": "chat",
+    "difficulty_level": 3,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 18
+  },
+  {
+    "id": "lesson_015",
+    "title": "Флирт по смс",
+    "text": "Отправьте партнеру игривое или флиртующее сообщение в течение дня.",
+    "source": "Психология коммуникаций",
+    "tags": ["флирт", "сообщения", "интимность"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["high_heat"],
+      "relationship_stage": ["new", "developing"],
+      "attachment_style": ["avoidant", "secure"],
+      "gap_days": [1, 3]
+    },
+    "effect": {"words": 2, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 2},
+    "theme": "words_of_affirmation",
+    "interactive_type": "chat",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 12
+  },
+  {
+    "id": "lesson_017",
+    "title": "Благодарность после",
+    "text": "После близости скажите партнеру, что вам особенно понравилось — искренне поблагодарите его.",
+    "source": "Исследование благодарности в парах",
+    "tags": ["благодарность", "сексуальность", "доверие"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["high_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure", "anxious"],
+      "gap_days": [0, "more"]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 2, "heat": 2},
+    "theme": "words_of_affirmation",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_019",
+    "title": "Послеинтимный разговор",
+    "text": "После близости уделите 2 минуты, чтобы поделиться, что вам больше всего понравилось.",
+    "source": "Книга семейной психологии",
+    "tags": ["разговор", "сексуальность", "доверие"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["high_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [0, "more"]
+    },
+    "effect": {"words": 2, "acts": 0, "gifts": 0, "time": 0, "touch": 2, "heat": 2},
+    "theme": "words_of_affirmation",
+    "interactive_type": "chat",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_022",
+    "title": "Список благодарностей",
+    "text": "Напишите 3 вещи, за которые вы благодарны партнеру, и поделитесь ими вечером.",
+    "source": "Illinois News Bureau, Barton 2022",
+    "tags": ["благодарность", "эмоции", "статистика"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure", "anxious"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 1},
+    "theme": "words_of_affirmation",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 12
+  },
+  {
+    "id": "lesson_024",
+    "title": "Записка с признанием",
+    "text": "Оставьте партнеру записку с коротким признанием или теплым словом на видном месте.",
+    "source": "Исследования малых жестов",
+    "tags": ["записка", "тепло", "сюрприз"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [0, "more"]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 0},
+    "theme": "words_of_affirmation",
+    "interactive_type": "photo",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 10
+  },
+  {
+    "id": "lesson_027",
+    "title": "Комплимент характеру",
+    "text": "Перед зеркалом скажите партнеру комплимент про его характер (не внешность).",
+    "source": "Психология самооценки",
+    "tags": ["комплимент", "самооценка", "эмоции"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [0, 1]
+    },
+    "effect": {"words": 4, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 1},
+    "theme": "words_of_affirmation",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 3,
+    "animation_file": "Love.json",
+    "base_coins_reward": 12
+  },
+  {
+    "id": "lesson_039",
+    "title": "Шутка дня",
+    "text": "Рассказывайте друг другу смешную шутку раз в день.",
+    "source": "Искусство юмора",
+    "tags": ["юмор", "шутка", "радость"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["fun"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [0, 1]
+    },
+    "effect": {"words": 1, "acts": 0, "gifts": 0, "time": 1, "touch": 0, "heat": 0},
+    "theme": "words_of_affirmation",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 5,
+    "animation_file": "Love.json",
+    "base_coins_reward": 10
+  },
+  {
+    "id": "lesson_047",
+    "title": "Любые слова любви",
+    "text": "Скажите партнеру, что вы его любите, и найдите время для объятий: исследование показывает, что слова поддержки и совместное время сильно связаны с любовью и удовлетворенностью отношениями.",
+    "source": "Flicker & Sancier-Barbosa 2025",
+    "tags": ["слова_любви", "время", "статистика"],
+    "triggers": {
+      "love_language": ["words", "time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [0, "more"]
+    },
+    "effect": {"words": 4, "acts": 0, "gifts": 0, "time": 3, "touch": 0, "heat": 2},
+    "theme": "words_of_affirmation",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 12
+  },
+  {
+    "id": "lesson_58",
+    "title": "Урок 58: Секрет дня",
+    "text": "Расскажите партнёру маленький секрет или смешной факт о себе, которого он/она ещё не знает.",
+    "source": "Практики укрепления доверия (Gottman Institute, адаптация)",
+    "tags": ["доверие", "открытость", "секрет"],
+    "triggers": {
+      "love_language": ["words", "time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["developing", "established"],
+      "attachment_style": ["secure", "anxious"],
+      "gap_days": [2, 5]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 1, "touch": 0, "heat": 1},
+    "theme": "words_of_affirmation",
+    "interactive_type": "chat",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 20
+  },
+  {
+    "id": "lesson_61",
+    "title": "Урок 61: Один неожиданный комплимент",
+    "text": "Скажите партнёру комплимент не о внешности, а о его/её поступках или характере.",
+    "source": "Gottman Institute (адаптация)",
+    "tags": ["комплимент", "поддержка", "эмоции"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["low_heat"],
+      "relationship_stage": ["new", "developing", "established", "mature"],
+      "attachment_style": ["secure", "anxious"],
+      "gap_days": [1, 3]
+    },
+    "effect": {"words": 4, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 1},
+    "theme": "words_of_affirmation",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  }
+]

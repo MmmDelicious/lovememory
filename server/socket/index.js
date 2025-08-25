@@ -162,6 +162,9 @@ function initSocket(server, app) {
                             const stateForPlayer = gameInstance.getStateForPlayer(p.id);
                             io.to(p.id).emit('game_update', stateForPlayer);
                           });
+                        } else if (gameInstance.gameType === 'memory') {
+                          const newState = gameInstance.getGameState();
+                          io.to(roomId).emit('game_update', newState);
                         } else {
                           const newState = gameInstance.getState();
                           io.to(roomId).emit('game_update', newState);
@@ -224,6 +227,10 @@ function initSocket(server, app) {
                             }
                             io.to(playerId).emit('game_update', stateForPlayer);
                         });
+                    } else if (game.gameType === 'memory') {
+                        // Для мемори отправляем состояние всем игрокам
+                        const initialState = game.getGameState();
+                        io.to(roomId).emit('game_update', initialState);
                     } else if (game.gameType === 'quiz') {
                         // Запускаем таймер для квиза
                         startQuizTimerUpdates(io, roomId, game);
@@ -355,17 +362,49 @@ function initSocket(server, app) {
       }
     });
 
-    socket.on('make_move', async (data) => {
-      const { roomId, move } = data;
+    socket.on('player_ready', async (data) => {
+      const { roomId } = data;
       const game = GameManager.getGame(roomId);
       if (!game) {
         return;
       }
       
       try {
+        if (game.gameType === 'memory' && typeof game.setPlayerReady === 'function') {
+          game.setPlayerReady(socket.user.id);
+          const newState = game.getGameState();
+          io.to(roomId).emit('game_update', newState);
+        }
+      } catch (error) {
+        console.error(`[SERVER] [ERROR] in 'player_ready':`, error.message);
+        socket.emit('error', error.message);
+      }
+    });
+
+    socket.on('make_move', async (data) => {
+      const { roomId, move } = data;
+      const game = GameManager.getGame(roomId);
+      if (!game) {
+        socket.emit('move_error', { error: 'Игра не найдена' });
+        return;
+      }
+      
+      try {
         const gameType = game.gameType;
         
-        const moveResult = game.makeMove(socket.user.id, move);
+        let moveResult;
+        if (gameType === 'memory') {
+          // Для мемори используем flipCard
+          try {
+            moveResult = game.flipCard(socket.user.id, move);
+          } catch (error) {
+            console.error(`[MEMORY] Error in flipCard:`, error.message);
+            socket.emit('move_error', { error: error.message });
+            return;
+          }
+        } else {
+          moveResult = game.makeMove(socket.user.id, move);
+        }
 
         // Отправляем результат хода игроку
         if (moveResult && moveResult.error) {
@@ -391,16 +430,69 @@ function initSocket(server, app) {
             }
             io.to(playerId).emit('game_update', stateForPlayer);
           });
-        } else {
+        } else if (gameType === 'memory') {
+          // Для мемори отправляем обновленное состояние всем игрокам
+          try {
+            const newState = game.getGameState();
+            if (newState.status === 'error') {
+              console.error(`[MEMORY] Game state error:`, newState.error);
+              socket.emit('move_error', { error: newState.error || 'Ошибка состояния игры' });
+              return;
+            }
+            io.to(roomId).emit('game_update', newState);
+          } catch (error) {
+            console.error(`[MEMORY] Error getting game state:`, error.message);
+            socket.emit('move_error', { error: 'Ошибка получения состояния игры' });
+            return;
+          }
+        } else if (gameType === 'quiz') {
           const newState = game.getState();
           io.to(roomId).emit('game_update', newState);
-          if (gameType === 'quiz' && newState.status === 'finished') {
+          if (newState.status === 'finished') {
             handleQuizGameEnd(io, roomId, game);
           }
+        } else {
+          // Для остальных игр
+          const newState = game.getState();
+          io.to(roomId).emit('game_update', newState);
         }
         
         if (game.status === 'finished') {
-          if (gameType === 'poker') {
+          if (gameType === 'memory') {
+            // Для мемори отправляем финальное состояние
+            try {
+              const finalState = game.getGameState();
+              if (finalState.status === 'error') {
+                console.error(`[MEMORY] Final state error:`, finalState.error);
+                return;
+              }
+              io.to(roomId).emit('game_end', finalState);
+              
+              // Используем экономическую систему для завершения игры
+              const room = await GameRoom.findByPk(roomId);
+              if (room && economyService.getEconomyType(room.gameType) === 'standard') {
+                const winnerId = finalState.winner?.id;
+                const playerIds = game.players.map(p => p.id);
+                
+                const economyResult = await economyService.finalizeStandardGame(roomId, winnerId, playerIds, false);
+                if (economyResult.success) {
+                  // Отправляем обновленные балансы всем игрокам
+                  Object.keys(economyResult.results.playerResults || {}).forEach(playerId => {
+                    const playerResult = economyResult.results.playerResults[playerId];
+                    io.to(playerId).emit('update_coins', playerResult.newBalance);
+                  });
+                  io.emit('room_list_updated');
+                }
+              }
+              
+              // Удаляем игру через некоторое время
+              setTimeout(() => {
+                GameManager.removeGame(roomId);
+              }, 5000);
+            } catch (error) {
+              console.error(`[MEMORY] Error handling game end:`, error.message);
+            }
+          } else if (gameType === 'poker') {
             // Для покера отправляем персонализированное финальное состояние (с yourHand)
             game.players.forEach(player => {
               const finalStateForPlayer = game.getStateForPlayer(player.id);
@@ -462,8 +554,35 @@ function initSocket(server, app) {
                 io.emit('room_list_updated');
               }
             }, 4000); // 4 секунды для просмотра результатов раздачи
-          } else {
-            const finalState = game.getState();
+                  } else if (gameType === 'memory') {
+                    const finalState = game.getGameState();
+                    
+                    // Используем экономическую систему для завершения игры
+                    const room = await GameRoom.findByPk(roomId);
+                    if (room && economyService.getEconomyType(room.gameType) === 'standard') {
+                      const winnerId = finalState.winner?.id;
+                      const playerIds = game.players.map(p => p.id);
+                      
+                      const economyResult = await economyService.finalizeStandardGame(roomId, winnerId, playerIds, false);
+                      if (economyResult.success) {
+                        // Отправляем обновленные балансы всем игрокам
+                        Object.keys(economyResult.results.playerResults || {}).forEach(playerId => {
+                          const playerResult = economyResult.results.playerResults[playerId];
+                          io.to(playerId).emit('update_coins', playerResult.newBalance);
+                        });
+                        io.emit('room_list_updated');
+                      }
+                    }
+                    
+                    // Отправляем финальное состояние
+                    io.to(roomId).emit('game_end', finalState);
+                    
+                    // Удаляем игру через некоторое время
+                    setTimeout(() => {
+                      GameManager.removeGame(roomId);
+                    }, 5000);
+                  } else {
+                    const finalState = game.getState();
             
             // Используем новую экономическую систему для завершения игры
             const room = await GameRoom.findByPk(roomId);
@@ -758,6 +877,7 @@ function initSocket(server, app) {
         }
       } catch (error) {
         console.error(`[POKER] Ошибка cash-out:`, error);
+        socket.emit('error', 'Ошибка обработки cash-out');
       }
     });
 

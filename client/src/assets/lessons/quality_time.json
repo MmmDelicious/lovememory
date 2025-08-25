@@ -1,0 +1,380 @@
+[
+  {
+    "id": "lesson_003",
+    "title": "Игра «Правда или ложь»",
+    "text": "Играйте в двоих: по очереди называйте два правдивых факта о себе и одну ложь, другой должен угадать.",
+    "source": "Книга детско-родительских игр",
+    "tags": ["доверие", "развлечение", "игра"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["new", "developing"],
+      "attachment_style": ["secure", "anxious"],
+      "gap_days": [0, 1]
+    },
+    "effect": {"words": 1, "acts": 0, "gifts": 0, "time": 3, "touch": 0, "heat": 0},
+    "theme": "quality_time",
+    "interactive_type": "quiz",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 12
+  },
+  {
+    "id": "lesson_004",
+    "title": "Смотрите партнёру в глаза",
+    "text": "Проведите минуту, глядя друг другу в глаза и улыбаясь (удерживайте зрительный контакт, не разговаривая).",
+    "source": "Метод терапии семейных пар",
+    "tags": ["близость", "контакт", "доверие"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["new", "developing", "established"],
+      "attachment_style": ["avoidant", "secure"],
+      "gap_days": [0, 1]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 3, "touch": 0, "heat": 0},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 10
+  },
+  {
+    "id": "lesson_007",
+    "title": "Вечер без телефонов",
+    "text": "Один вечер в неделю проведите вместе без телефонов и телевизора — просто пообщайтесь при свете свечей или за совместной игрой.",
+    "source": "Gottman Institute",
+    "tags": ["время_вместе", "общение", "доверие"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure", "anxious"],
+      "gap_days": [7, 7]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 5, "touch": 0, "heat": 1},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 1,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  },
+  {
+    "id": "lesson_014",
+    "title": "Романтический ужин",
+    "text": "Организуйте дома романтический ужин со свечами и любимой музыкой.",
+    "source": "Исследования отношений",
+    "tags": ["романтика", "вечер", "секс"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["high_heat"],
+      "relationship_stage": ["developing", "established"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, 7]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 4, "touch": 0, "heat": 3},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 1,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  },
+  {
+    "id": "lesson_020",
+    "title": "Регулярное свидание",
+    "text": "Планируйте еженедельное свидание без детей/гостей: пары с регулярными свиданиями отмечают большую удовлетворенность отношениями.",
+    "source": "National Marriage Project, 2023",
+    "tags": ["свидание", "статистика", "интимность"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["high_heat"],
+      "relationship_stage": ["developing", "established"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, 7]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 4, "touch": 0, "heat": 3},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 1,
+    "animation_file": "Love.json",
+    "base_coins_reward": 18
+  },
+  {
+    "id": "lesson_023",
+    "title": "Вечерний чек-ин",
+    "text": "Каждый вечер задавайте партнеру вопрос «Как прошел твой день? Что ты чувствовал?» и внимательно слушайте ответ.",
+    "source": "Психология общения",
+    "tags": ["общение", "поддержка", "эмоции"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure", "anxious"],
+      "gap_days": [1, 1]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 3, "touch": 0, "heat": 0},
+    "theme": "quality_time",
+    "interactive_type": "chat",
+    "difficulty_level": 2,
+    "required_streak": 7,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  },
+  {
+    "id": "lesson_025",
+    "title": "Глубокий вопрос",
+    "text": "Задайте друг другу глубокий вопрос (например, о мечте или детстве) и внимательно обсудите ответ.",
+    "source": "Техника укрепления связи",
+    "tags": ["вопрос", "глубина", "эмоции"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 2, "acts": 0, "gifts": 0, "time": 2, "touch": 0, "heat": 0},
+    "theme": "quality_time",
+    "interactive_type": "chat",
+    "difficulty_level": 3,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 16
+  },
+  {
+    "id": "lesson_026",
+    "title": "Банка воспоминаний",
+    "text": "Вместе сделайте «банку воспоминаний»: каждый напишите приятное воспоминание и положите в банку, потом перечитывайте.",
+    "source": "Совместное творчество",
+    "tags": ["воспоминания", "эмоции", "сюрприз"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [0, "more"]
+    },
+    "effect": {"words": 2, "acts": 0, "gifts": 0, "time": 2, "touch": 0, "heat": 0},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 3,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_028",
+    "title": "Хобби по двоим",
+    "text": "Проведите вечер, занимаясь общим хобби или совместным проектом (ремонт, сад, готовка).",
+    "source": "Исследование совместных дел",
+    "tags": ["хобби", "совместные_дела", "время_вместе"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, 14]
+    },
+    "effect": {"words": 0, "acts": 2, "gifts": 0, "time": 3, "touch": 0, "heat": 1},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 3,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 16
+  },
+  {
+    "id": "lesson_032",
+    "title": "Настольная игра",
+    "text": "Организуйте вечер настольных игр или пазла.",
+    "source": "Идеи для досуга",
+    "tags": ["игра", "веселье", "развлечение"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, 14]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 3, "touch": 0, "heat": 1},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 12
+  },
+  {
+    "id": "lesson_033",
+    "title": "Караоке дома",
+    "text": "Устройте дома караоке-вечеринку вдвоем.",
+    "source": "Веселые домашние занятия",
+    "tags": ["караоке", "музыка", "творчество"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["fun"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [14, 30]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 3, "touch": 0, "heat": 1},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 3,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_034",
+    "title": "Неожиданный пикник",
+    "text": "Сделайте неожиданный пикник (в гостиной или на улице), прихватив из дома еду и пледы.",
+    "source": "Гид по сюрпризам",
+    "tags": ["сюрприз", "пикник", "романтика"],
+    "triggers": {
+      "love_language": ["acts", "time"],
+      "context": ["high_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [14, "more"]
+    },
+    "effect": {"words": 0, "acts": 2, "gifts": 0, "time": 4, "touch": 0, "heat": 2},
+    "theme": "quality_time",
+    "interactive_type": "choice",
+    "difficulty_level": 3,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 16
+  },
+  {
+    "id": "lesson_035",
+    "title": "Танец дома",
+    "text": "Включите любимую песню и потанцуйте вместе, как в детстве.",
+    "source": "Игры дома",
+    "tags": ["музыка", "танец", "веселье"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["fun"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, 7]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 2, "touch": 3, "heat": 2},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_043",
+    "title": "Краше меня нет! (викторина)",
+    "text": "Проведите небольшую викторину друг о друге: задайте 5 вопросов, проверьте, насколько хорошо вы знаете партнера.",
+    "source": "Игры на узнавание",
+    "tags": ["викторина", "познать_лучше", "веселье"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["fun"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 1},
+    "theme": "quality_time",
+    "interactive_type": "quiz",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_045",
+    "title": "Отпуск вместе",
+    "text": "Планируйте хотя бы короткий совместный отпуск: после поездки пары отмечают повышение страсти и удовлетворённости отношениями.",
+    "source": "Psychology Today, Coffey 2024",
+    "tags": ["путешествие", "отпуск", "статистика"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["any"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [180, "more"]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 5, "touch": 0, "heat": 4},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 5,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 20
+  },
+  {
+    "id": "lesson_046",
+    "title": "Еженедельное свидание",
+    "text": "Назначьте еженедельное свидание. По данным исследования, 84% мужчин и 83% женщин, устраивающих регулярные свидания, очень довольны своими отношениями.",
+    "source": "National Marriage Project 2023",
+    "tags": ["свидание", "статистика", "время_вместе"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, 7]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 3, "touch": 0, "heat": 2},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 1,
+    "animation_file": "Love.json",
+    "base_coins_reward": 18
+  },
+  {
+    "id": "lesson_055",
+    "title": "Пижамная вечеринка вдвоем",
+    "text": "Наденьте пижамы, включите фильм и устройте уютную ночь вместе.",
+    "source": "Идеи свиданий",
+    "tags": ["фильм", "пижама", "уют"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["high_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [14, 14]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 4, "touch": 3, "heat": 3},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_60",
+    "title": "Урок 60: Совместное планирование",
+    "text": "Выберите маленькую цель на неделю (например, совместная прогулка или готовка) и договоритесь её выполнить.",
+    "source": "Harvard Study on Adult Development (адаптация)",
+    "tags": ["будущее", "цели", "совместность"],
+    "triggers": {
+      "love_language": ["acts", "time"],
+      "context": ["low_heat"],
+      "relationship_stage": ["developing", "established", "mature"],
+      "attachment_style": ["secure", "anxious"],
+      "gap_days": [3, 7]
+    },
+    "effect": {"words": 1, "acts": 3, "gifts": 0, "time": 3, "touch": 0, "heat": 1},
+    "theme": "quality_time",
+    "interactive_type": "choice",
+    "difficulty_level": 2,
+    "required_streak": 1,
+    "animation_file": "Love.json",
+    "base_coins_reward": 20
+  }
+]

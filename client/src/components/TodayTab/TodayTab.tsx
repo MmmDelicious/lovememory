@@ -127,26 +127,45 @@ const TodayTab: React.FC<TodayTabProps> = ({
 
   const handleStart = async () => {
     setIsStarting(true);
-    // Simulate lesson start
+    
+    // Показываем шаги урока
+    setShowSteps(true);
+    
     setTimeout(() => {
       setIsStarting(false);
-      // Navigate to lesson or trigger lesson modal
     }, 1000);
   };
 
   const handleRecommendationAction = (recommendationId: string) => {
     console.log('Starting recommendation:', recommendationId);
-    // TODO: Implement recommendation action
+    
+    // Простое уведомление для пользователя
+    alert(`Начинаем рекомендацию: ${recommendations.find(r => r.id === recommendationId)?.title}`);
+    
+    // В реальном приложении здесь был бы переход к конкретному уроку или активности
   };
 
   const handleSchedule = () => {
     console.log('Scheduling lesson with partner');
-    // TODO: Implement schedule functionality
+    
+    // Простое уведомление
+    alert('Функция планирования будет доступна в следующем обновлении!');
   };
 
   const handleShare = () => {
     console.log('Sharing lesson');
-    // TODO: Implement share functionality
+    
+    // Простое уведомление
+    if (navigator.share) {
+      navigator.share({
+        title: 'Урок дня - LoveMemory',
+        text: lesson?.title || 'Запомните короткое стихотворение',
+        url: window.location.href
+      });
+    } else {
+      alert('Ссылка скопирована в буфер обмена!');
+      navigator.clipboard.writeText(window.location.href);
+    }
   };
 
   const toggleStep = (stepId: string) => {
@@ -251,6 +270,11 @@ const TodayTab: React.FC<TodayTabProps> = ({
               <button className={styles.scheduleButton} onClick={handleSchedule}>
                 Запланировать
               </button>
+              
+              <button className={styles.shareButton} onClick={handleShare}>
+                <Share2 size={16} />
+                Поделиться
+              </button>
             </div>
 
             <div className={styles.shareSection}>
@@ -290,31 +314,33 @@ const TodayTab: React.FC<TodayTabProps> = ({
             
          
           </div>
-             {/* Steps Section */}
-             <div className={styles.stepsSection}>
-              <h3 className={styles.stepsTitle}>Шаги</h3>
-              <div className={styles.stepsList}>
-                {steps.map((step) => (
-                  <div 
-                    key={step.id} 
-                    className={`${styles.stepItem} ${step.completed ? styles.completed : ''}`}
-                    onClick={() => toggleStep(step.id)}
-                  >
-                    <div className={`${styles.stepCheckbox} ${step.completed ? styles.completed : ''}`}>
-                      {step.completed && '✓'}
+             {/* Steps Section - показывается только после нажатия "Начать" */}
+             {showSteps && (
+               <div className={styles.stepsSection}>
+                <h3 className={styles.stepsTitle}>Шаги</h3>
+                <div className={styles.stepsList}>
+                  {steps.map((step) => (
+                    <div 
+                      key={step.id} 
+                      className={`${styles.stepItem} ${step.completed ? styles.completed : ''}`}
+                      onClick={() => toggleStep(step.id)}
+                    >
+                      <div className={`${styles.stepCheckbox} ${step.completed ? styles.completed : ''}`}>
+                        {step.completed && '✓'}
+                      </div>
+                      <span className={styles.stepTitle}>{step.title}</span>
                     </div>
-                    <span className={styles.stepTitle}>{step.title}</span>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                
+                <button 
+                  className={styles.markCompleteButton}
+                  onClick={handleMarkComplete}
+                >
+                  {steps.every(step => step.completed) ? 'Завершить урок' : 'Отметить как завершенное'}
+                </button>
               </div>
-              
-              <button 
-                className={styles.markCompleteButton}
-                onClick={handleMarkComplete}
-              >
-                {steps.every(step => step.completed) ? 'Завершить урок' : 'Отметить как завершенное'}
-              </button>
-            </div>
+             )}
         </div>
       </motion.div>
 

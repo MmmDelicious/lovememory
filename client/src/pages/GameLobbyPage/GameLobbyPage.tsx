@@ -28,6 +28,7 @@ const GAME_DISPLAY_NAMES: Record<string, string> = {
   'poker': 'Покер',
   'quiz': 'Квиз',
   'codenames': 'Codenames',
+  'memory': 'Мемори',
 };
 const GAME_DESCRIPTIONS: Record<string, string> = {
   'tic-tac-toe': 'Классическая игра для двоих',
@@ -35,6 +36,7 @@ const GAME_DESCRIPTIONS: Record<string, string> = {
   'poker': 'Карточная игра на удачу и мастерство',
   'quiz': 'Проверьте свои знания вместе',
   'codenames': 'Командная игра на ассоциации (2x2)',
+  'memory': 'Тренируйте память вместе',
 };
 const GameLobbyPage: React.FC<GameLobbyPageProps> = ({ gameType: gameTypeProp }) => {
   const { gameType: gameTypeParam } = useParams<{ gameType: string }>();

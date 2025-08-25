@@ -1,0 +1,65 @@
+[
+  {
+    "id": "lesson_051",
+    "title": "Маленький подарок",
+    "text": "Без особого повода подарите партнеру маленький символичный подарок (цветок, записка, сладость).",
+    "source": "Искусство неожиданных подарков",
+    "tags": ["подарок", "сюрприз", "радость"],
+    "triggers": {
+      "love_language": ["gifts"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 4, "time": 0, "touch": 0, "heat": 1},
+    "theme": "receiving_gifts",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  },
+  {
+    "id": "lesson_052",
+    "title": "Самодельная открытка",
+    "text": "Сделайте партнеру открытку или небольшой рисунок своими руками и подарите его.",
+    "source": "Рукодельный праздник",
+    "tags": ["подарок", "творчество", "креатив"],
+    "triggers": {
+      "love_language": ["gifts"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 4, "time": 0, "touch": 0, "heat": 1},
+    "theme": "receiving_gifts",
+    "interactive_type": "prompt",
+    "difficulty_level": 3,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 18
+  },
+  {
+    "id": "lesson_053",
+    "title": "Сладкий сюрприз",
+    "text": "Купите партнеру его любимое лакомство и оставьте без слов на столе.",
+    "source": "Приятные мелочи",
+    "tags": ["десерт", "подарок", "радость"],
+    "triggers": {
+      "love_language": ["gifts"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 4, "time": 0, "touch": 0, "heat": 1},
+    "theme": "receiving_gifts",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  }
+]

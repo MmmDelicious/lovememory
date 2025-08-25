@@ -8,6 +8,7 @@ import ChessGame from '../../components/ChessGame/ChessGame';
 import ChessGameEnhanced from '../../components/ChessGame/ChessGameEnhanced';
 import WordleGame from '../../components/WordleGame/WordleGame';
 import CodenamesGame from '../../components/CodenamesGame/CodenamesGame';
+import MemoryGameComponent from '../../components/MemoryGame/MemoryGameComponent';
 import styles from './GameRoomPage.module.css';
 import victoryAnimation from '../../assets/victory.json';
 import defeatAnimation from '../../assets/defeat.json';
@@ -53,6 +54,9 @@ const GameRoomPage = () => {
       } else {
         return "Ход оппонента";
       }
+    }
+    if (gameState.gameType === 'memory') {
+      return gameState.currentPlayerId === user.id ? "Ваш ход - выберите карту" : "Ход соперника";
     }
     return gameState.currentPlayerId === user.id ? "Ваш ход" : "Ход соперника";
   };
@@ -132,6 +136,13 @@ const GameRoomPage = () => {
                />;
       case 'codenames':
         return <CodenamesGame 
+                  gameState={gameState} 
+                  user={user} 
+                  makeMove={makeMove} 
+                  handleReturnToLobby={handleReturnToLobby} 
+               />;
+      case 'memory':
+        return <MemoryGameComponent 
                   gameState={gameState} 
                   user={user} 
                   makeMove={makeMove} 

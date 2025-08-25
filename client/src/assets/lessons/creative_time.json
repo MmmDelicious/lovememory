@@ -1,0 +1,107 @@
+[
+  {
+    "id": "lesson_036",
+    "title": "Фотосессия с шутками",
+    "text": "Сделайте совместную фотосессию: можно в костюмах или с забавными гримасами.",
+    "source": "Семейный альбом",
+    "tags": ["фото", "шутки", "креатив"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["fun"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [30, "more"]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 3, "touch": 0, "heat": 1},
+    "theme": "quality_time",
+    "interactive_type": "photo",
+    "difficulty_level": 3,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  },
+  {
+    "id": "lesson_037",
+    "title": "Совместное рисование",
+    "text": "Нарисуйте вместе картину или рисунок (можете даже двумя руками на одном листе).",
+    "source": "Творческая терапия",
+    "tags": ["рисование", "творчество", "веселье"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["fun"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [14, "more"]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 3, "touch": 0, "heat": 1},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_040",
+    "title": "Переодевание",
+    "text": "Переоденьтесь друг для друга в смешные наряды и устройте мини-показ.",
+    "source": "Настроение для веселья",
+    "tags": ["развлечение", "костюмы", "смеяться"],
+    "triggers": {
+      "love_language": ["touch", "time"],
+      "context": ["fun"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [14, "more"]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 2, "touch": 2, "heat": 1},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 3,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_041",
+    "title": "Фантазия-свидание",
+    "text": "Представьте самое сумасшедшее свидание и попробуйте частично его воплотить.",
+    "source": "Игры воображения",
+    "tags": ["фантазия", "креатив", "авантюра"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["fun"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [30, "more"]
+    },
+    "effect": {"words": 0, "acts": 1, "gifts": 0, "time": 3, "touch": 0, "heat": 3},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 4,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  },
+  {
+    "id": "lesson_042",
+    "title": "Портреты друг друга",
+    "text": "Нарисуйте забавные портреты друг друга без претензии на мастерство.",
+    "source": "Творческие игры для пар",
+    "tags": ["рисование", "арт", "веселье"],
+    "triggers": {
+      "love_language": ["time"],
+      "context": ["fun"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [14, "more"]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 3, "touch": 0, "heat": 1},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 12
+  }
+]

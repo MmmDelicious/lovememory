@@ -15,7 +15,7 @@ export const useGameSocket = (
 ): UseGameSocketReturn => {
   const navigate = useNavigate();
   const socketRef = useRef<Socket | null>(null);
-  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [gameState, setGameState] = useState<any>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   useEffect(() => {
     if (!token || !roomId) return;
@@ -41,13 +41,13 @@ export const useGameSocket = (
       }
       console.log("Не удалось подключиться к игре. Попробуйте обновить страницу.");
     });
-    const handleStateUpdate = (newGameState: GameState) => {
+    const handleStateUpdate = (newGameState: any) => {
       console.log('[CLIENT] Received game state update:', newGameState);
       setGameState(newGameState);
     };
     const handleRoomInfo = (roomInfo: any) => {
       console.log('[CLIENT] Received room info:', roomInfo);
-      setGameState(prevState => ({
+      setGameState((prevState: any) => ({
         ...prevState,
         gameType: roomInfo.gameType,
         status: roomInfo.status || prevState?.status || 'waiting',
@@ -59,7 +59,7 @@ export const useGameSocket = (
     };
     const handlePlayerListUpdate = (players: any[]) => {
       console.log('[CLIENT] Received player list update:', players);
-      setGameState(prevState => {
+      setGameState((prevState: any) => {
         if (!prevState) {
           return { 
             players: players.map(p => p.id), 
@@ -68,13 +68,13 @@ export const useGameSocket = (
             currentPlayerId: null,
             winner: null,
             isDraw: false
-          } as GameState;
+          } as any;
         }
         return { 
           ...prevState, 
           players: players.map(p => p.id),
           gameType: prevState.gameType !== 'unknown' ? prevState.gameType : 'unknown'
-        };
+        } as any;
       });
     };
     socket.on('room_info', handleRoomInfo);
@@ -93,6 +93,12 @@ export const useGameSocket = (
       console.error('[SOCKET] Error received:', errorMessage);
       toast.error(errorMessage, 'Ошибка игры');
     });
+
+    socket.on('move_error', (data: { error: string }) => {
+      console.error('[SOCKET] Move error received:', data.error);
+      toast.error(data.error, 'Ошибка хода');
+    });
+
     return () => {
       console.log('[SOCKET] Cleaning up socket connection.');
       socket.off('player_list_update');
@@ -103,6 +109,7 @@ export const useGameSocket = (
       socket.off('rebuy_opportunity');
       socket.off('update_coins');
       socket.off('error');
+      socket.off('move_error');
       socket.disconnect();
     };
   }, [roomId, token, navigate, setCoinsCallback]);

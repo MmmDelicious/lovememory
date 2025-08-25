@@ -1,0 +1,191 @@
+[
+  {
+    "id": "lesson_012",
+    "title": "Нежный массаж",
+    "text": "Подарите партнеру расслабляющий массаж плеч или спины при свечах.",
+    "source": "Практика чувственных отношений",
+    "tags": ["касание", "близость", "интимность"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["high_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [0, 1]
+    },
+    "effect": {"words": 0, "acts": 2, "gifts": 0, "time": 0, "touch": 5, "heat": 3},
+    "theme": "physical_touch",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_016",
+    "title": "Объятия без слов",
+    "text": "Обнимитесь с партнером на 2 минуты, смотря друг другу в глаза и молча улыбаясь.",
+    "source": "Gottman Institute",
+    "tags": ["объятия", "близость", "интимность"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["high_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["insecure", "secure"],
+      "gap_days": [0, 1]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 2, "touch": 5, "heat": 3},
+    "theme": "physical_touch",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 10
+  },
+  {
+    "id": "lesson_031",
+    "title": "Объятия без слов",
+    "text": "Без слов обнимите партнера на минуту, поддержите его тепло.",
+    "source": "Исследование объятий",
+    "tags": ["эмпатия", "близость", "объятия"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [0, 1]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 1, "touch": 3, "heat": 1},
+    "theme": "physical_touch",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 10
+  },
+  {
+    "id": "lesson_035_touch",
+    "title": "Танец дома",
+    "text": "Включите любимую песню и потанцуйте вместе, как в детстве.",
+    "source": "Игры дома",
+    "tags": ["музыка", "танец", "веселье"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["fun"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, 7]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 2, "touch": 3, "heat": 2},
+    "theme": "quality_time",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_048",
+    "title": "Утренний поцелуй",
+    "text": "Каждое утро, прежде чем встать с постели, разбудите партнера нежным поцелуем.",
+    "source": "Ритуалы романтики",
+    "tags": ["поцелуй", "утро", "близость"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure", "avoidant"],
+      "gap_days": [1, 1]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 1, "touch": 4, "heat": 1},
+    "theme": "physical_touch",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 7,
+    "animation_file": "Love.json",
+    "base_coins_reward": 10
+  },
+  {
+    "id": "lesson_049",
+    "title": "За руку",
+    "text": "При прогулке держитесь за руки пару минут (просто идите рядом и соприкасаетесь руками).",
+    "source": "Романтические привычки",
+    "tags": ["прогулка", "руки", "контакт"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [1, 1]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 1, "touch": 3, "heat": 1},
+    "theme": "physical_touch",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 1,
+    "animation_file": "Love.json",
+    "base_coins_reward": 10
+  },
+  {
+    "id": "lesson_050",
+    "title": "Нежные прикосновения",
+    "text": "В течение дня несколько раз гладьте плечо или спину партнера без особого повода.",
+    "source": "Эмоциональное прикосновение",
+    "tags": ["касание", "тепло", "поддержка"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [0, "more"]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 1, "touch": 3, "heat": 1},
+    "theme": "physical_touch",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 10
+  },
+  {
+    "id": "lesson_056",
+    "title": "Танец-сюрприз",
+    "text": "Устроить неожиданный танец: включите музыку и потанцуйте внезапно для партнера.",
+    "source": "Танцевальная терапия",
+    "tags": ["танец", "веселье", "сюрприз"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["high_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, 7]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 2, "touch": 3, "heat": 3},
+    "theme": "physical_touch",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 12
+  },
+  {
+    "id": "lesson_59",
+    "title": "Урок 59: 10 секунд касания",
+    "text": "Обнимите или держите друг друга за руки хотя бы 10 секунд подряд.",
+    "source": "Исследования окситоцина (UCLA, адаптация)",
+    "tags": ["телесность", "окситоцин", "сближение"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["low_heat", "high_heat"],
+      "relationship_stage": ["new", "developing", "established"],
+      "attachment_style": ["secure", "avoidant"],
+      "gap_days": [1, 2]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 1, "touch": 4, "heat": 2},
+    "theme": "physical_touch",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  }
+]

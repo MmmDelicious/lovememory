@@ -1,0 +1,107 @@
+[
+  {
+    "id": "lesson_002",
+    "title": "Обмен секретами",
+    "text": "Расскажите друг другу что-то личное или уязвимое, чего обычно не говорите.",
+    "source": "Практика семейной терапии",
+    "tags": ["уязвимость", "доверие"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["low_heat"],
+      "relationship_stage": ["new", "developing"],
+      "attachment_style": ["avoidant", "anxious"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 0},
+    "theme": "attachment_healing",
+    "interactive_type": "chat",
+    "difficulty_level": 3,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  },
+  {
+    "id": "lesson_008",
+    "title": "Обмен глубиной",
+    "text": "Расскажите друг другу о небольшом страхе или проблеме, которая вас беспокоит, и поддержите партнера в ответ.",
+    "source": "Бартон, 2022",
+    "tags": ["эмоции", "доверие", "поддержка"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure", "anxious", "avoidant"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 0},
+    "theme": "attachment_healing",
+    "interactive_type": "chat",
+    "difficulty_level": 3,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 18
+  },
+  {
+    "id": "lesson_021",
+    "title": "Меры предосторожности",
+    "text": "Откровенно обсудите любые опасения или страхи, связанные с интимностью, чтобы вместе найти решение.",
+    "source": "Практика секс-терапии",
+    "tags": ["сексуальные_проблемы", "доверие", "разговор"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["anxious", "avoidant"],
+      "gap_days": [0, "more"]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": -2},
+    "theme": "attachment_healing",
+    "interactive_type": "chat",
+    "difficulty_level": 4,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 20
+  },
+  {
+    "id": "lesson_029",
+    "title": "Прощение",
+    "text": "Обсудите давнюю обиду и простите друг друга — это снимет эмоциональное напряжение.",
+    "source": "Межличностная терапия",
+    "tags": ["прощение", "эмоции", "снятие_напряжения"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["avoidant", "secure"],
+      "gap_days": [0, "more"]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": -2},
+    "theme": "attachment_healing",
+    "interactive_type": "chat",
+    "difficulty_level": 4,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 20
+  },
+  {
+    "id": "lesson_62",
+    "title": "Урок 62: Маленькая честность",
+    "text": "Признайтесь партнёру в чём-то бытовом (например, что забыли купить хлеб), и обсудите это с лёгкостью.",
+    "source": "Общая психология отношений",
+    "tags": ["честность", "открытость", "юмор"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["low_heat"],
+      "relationship_stage": ["developing", "established"],
+      "attachment_style": ["secure", "anxious"],
+      "gap_days": [1, 4]
+    },
+    "effect": {"words": 2, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 1},
+    "theme": "attachment_healing",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  }
+]

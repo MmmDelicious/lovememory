@@ -191,6 +191,27 @@
   border-color: #D1D5DB;
 }
 
+.shareButton {
+  background: transparent;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shareButton:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+  color: #FF6B5A;
+}
+
 /* Share Section */
 .shareSection {
   display: flex;

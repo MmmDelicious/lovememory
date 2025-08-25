@@ -1,0 +1,495 @@
+/* Memory Game - Простой и элегантный дизайн */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-body);
+}
+
+/* ===== WAITING SCREEN ===== */
+.waitingScreen {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.waitingScreen h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.waitingScreen p {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 40px;
+}
+
+.playerList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 350px;
+  margin: 0 auto;
+}
+
+.playerItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--color-surface);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--color-border);
+}
+
+.playerName {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  font-size: 1rem;
+}
+
+.playerStatus {
+  font-size: 0.9rem;
+  color: var(--color-success);
+  padding: 4px 12px;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 16px;
+  font-weight: 500;
+}
+
+/* ===== ERROR SCREEN ===== */
+.errorScreen {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-error);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.errorScreen h2 {
+  margin: 0 0 20px 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-error);
+}
+
+.errorScreen p {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 40px;
+  padding: 16px;
+  background: rgba(244, 67, 54, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(244, 67, 54, 0.2);
+}
+
+/* ===== GAME HEADER ===== */
+.gameHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 24px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border);
+}
+
+.gameInfo h2 {
+  margin: 0 0 12px 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.difficulty {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  padding: 6px 12px;
+  background: var(--color-primary-light);
+  border-radius: 20px;
+  display: inline-block;
+  border: 1px solid var(--color-border);
+  font-weight: 500;
+}
+
+.gameStats {
+  text-align: right;
+}
+
+.stat {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.progressBar {
+  width: 200px;
+  height: 8px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+/* ===== PLAYER STATUS ===== */
+.playerStatus {
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border);
+}
+
+.currentPlayer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.statusLabel {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.playerName {
+  font-size: 1.2rem;
+  font-weight: 600;
+  padding: 8px 20px;
+  background: var(--color-secondary);
+  border-radius: 24px;
+  transition: all 0.2s ease;
+  color: var(--color-text-primary);
+}
+
+.playerName.active {
+  background: var(--color-primary);
+  color: white;
+  transform: scale(1.02);
+}
+
+.turnInfo {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: var(--color-primary-light);
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* ===== GAME BOARD ===== */
+.gameBoard {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border);
+}
+
+.cardsGrid {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  align-items: center;
+  padding: 16px;
+}
+
+/* ===== PLAYER SCORES ===== */
+.playerScores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.playerScore {
+  padding: 20px;
+  background: var(--color-surface);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border);
+  transition: all 0.2s ease;
+}
+
+.playerScore:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+}
+
+.playerInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.playerName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.playerStatus {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  padding: 4px 8px;
+  background: var(--color-secondary);
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.scoreInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-primary-light);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.score, .moves {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.score::before {
+  content: '🏆';
+  font-size: 1.1rem;
+}
+
+.moves::before {
+  content: '👆';
+  font-size: 1.1rem;
+}
+
+/* ===== GAME OVER SCREEN ===== */
+.gameOver {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.gameOverContent {
+  background: var(--color-surface);
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--color-border);
+}
+
+.gameOverContent h2 {
+  margin: 0 0 24px 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.winner {
+  margin: 24px 0;
+  padding: 20px;
+  background: var(--color-primary-light);
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+}
+
+.winnerLabel {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.winnerName {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--color-primary);
+}
+
+.winnerScore {
+  display: block;
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* ===== BUTTONS ===== */
+.actions {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.returnButton {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: var(--font-family-body);
+}
+
+.returnButton:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.returnButton:active {
+  transform: translateY(0);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .gameHeader {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .gameInfo h2 {
+    font-size: 1.6rem;
+  }
+  
+  .gameStats {
+    text-align: center;
+  }
+  
+  .progressBar {
+    width: 180px;
+  }
+  
+  .cardsGrid {
+    gap: 6px;
+    padding: 12px;
+  }
+  
+  .playerScores {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .gameOverContent {
+    padding: 32px 20px;
+    margin: 20px;
+  }
+  
+  .gameOverContent h2 {
+    font-size: 1.8rem;
+  }
+  
+  .waitingScreen {
+    padding: 50px 20px;
+  }
+  
+  .waitingScreen h2 {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .gameHeader h2 {
+    font-size: 1.4rem;
+  }
+  
+  .difficulty {
+    font-size: 0.8rem;
+  }
+  
+  .progressBar {
+    width: 150px;
+  }
+  
+  .cardsGrid {
+    gap: 4px;
+    padding: 8px;
+  }
+  
+  .playerScore {
+    padding: 16px;
+  }
+  
+  .gameOverContent {
+    padding: 24px 16px;
+  }
+  
+  .gameOverContent h2 {
+    font-size: 1.6rem;
+  }
+  
+  .winnerName {
+    font-size: 1.3rem;
+  }
+}

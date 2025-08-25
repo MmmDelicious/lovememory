@@ -1,0 +1,107 @@
+[
+  {
+    "id": "lesson_006",
+    "title": "Домашний сюрприз",
+    "text": "Поручите себе важное дело: сделайте небольшой сюрприз партнёру (например, уберите комнату или купите кофе), чтобы укрепить доверие.",
+    "source": "Практикум семейной психологии",
+    "tags": ["действие", "поддержка", "доверие"],
+    "triggers": {
+      "love_language": ["acts"],
+      "context": ["low_heat"],
+      "relationship_stage": ["developing", "established"],
+      "attachment_style": ["secure"],
+      "gap_days": [1, 3]
+    },
+    "effect": {"words": 0, "acts": 4, "gifts": 0, "time": 0, "touch": 0, "heat": 1},
+    "theme": "acts_of_service",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  },
+  {
+    "id": "lesson_009",
+    "title": "Доверие к пространству",
+    "text": "Демонстрируйте доверие: не проверяйте телефон партнера без его разрешения и уважайте личное пространство друг друга.",
+    "source": "Психология отношений",
+    "tags": ["личное_пространство", "уважение", "доверие"],
+    "triggers": {
+      "love_language": ["acts"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["avoidant", "secure"],
+      "gap_days": [0, "more"]
+    },
+    "effect": {"words": 0, "acts": 2, "gifts": 0, "time": 0, "touch": 0, "heat": 0},
+    "theme": "acts_of_service",
+    "interactive_type": "prompt",
+    "difficulty_level": 1,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 10
+  },
+  {
+    "id": "lesson_030",
+    "title": "Вещь поддержки",
+    "text": "Спросите партнера, чем вы можете ему помочь прямо сейчас, и предложите свою помощь.",
+    "source": "Психология поддержки",
+    "tags": ["поддержка", "внимание", "помощь"],
+    "triggers": {
+      "love_language": ["acts"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 0, "acts": 3, "gifts": 0, "time": 0, "touch": 0, "heat": 1},
+    "theme": "acts_of_service",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_038",
+    "title": "Питомец-проект",
+    "text": "Купите новое растение или игрушку для совместного питомца и ухаживайте за ними.",
+    "source": "Домашние животные",
+    "tags": ["забота", "совместно", "радость"],
+    "triggers": {
+      "love_language": ["acts"],
+      "context": ["any"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 0, "acts": 3, "gifts": 0, "time": 2, "touch": 0, "heat": 0},
+    "theme": "acts_of_service",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 13
+  },
+  {
+    "id": "lesson_044",
+    "title": "Совместный спорт",
+    "text": "Сделайте совместную зарядку или небольшой пробежкой на свежем воздухе: упражнения вдвоем поднимают настроение и укрепляют отношения.",
+    "source": "Psychology Today, Emamzadeh 2021",
+    "tags": ["спорт", "здоровье", "статистика"],
+    "triggers": {
+      "love_language": ["time", "acts"],
+      "context": ["low_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure"],
+      "gap_days": [1, "more"]
+    },
+    "effect": {"words": 0, "acts": 3, "gifts": 0, "time": 3, "touch": 0, "heat": 2},
+    "theme": "acts_of_service",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 15
+  }
+]

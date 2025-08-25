@@ -1,0 +1,65 @@
+[
+  {
+    "id": "lesson_018",
+    "title": "Эксперимент в постели",
+    "text": "Предложите партнеру попробовать что-то новое в сексе (например, новую позу или игру).",
+    "source": "Практический секс-гид",
+    "tags": ["сексуальность", "эксперимент", "увлечение"],
+    "triggers": {
+      "love_language": ["touch"],
+      "context": ["high_heat"],
+      "relationship_stage": ["developing"],
+      "attachment_style": ["secure"],
+      "gap_days": [7, "more"]
+    },
+    "effect": {"words": 0, "acts": 0, "gifts": 0, "time": 1, "touch": 4, "heat": 5},
+    "theme": "heat_boosters",
+    "interactive_type": "prompt",
+    "difficulty_level": 4,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 20
+  },
+  {
+    "id": "lesson_054",
+    "title": "Флиртующий звонок",
+    "text": "Позвоните партнеру днем с флиртом в голосе: расскажите, что сейчас думаете о его привлекательности.",
+    "source": "Язык флирта",
+    "tags": ["флирт", "разговор", "интимность"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["high_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["secure", "anxious"],
+      "gap_days": [1, 3]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 3},
+    "theme": "heat_boosters",
+    "interactive_type": "chat",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 14
+  },
+  {
+    "id": "lesson_057",
+    "title": "Сексуальное одобрение",
+    "text": "Скажите партнеру фразу вроде «Ты сегодня особенно сексуален(на)» и приободрите.",
+    "source": "Поддержка в постели",
+    "tags": ["сексуальность", "одобрение", "комплимент"],
+    "triggers": {
+      "love_language": ["words"],
+      "context": ["high_heat"],
+      "relationship_stage": ["all"],
+      "attachment_style": ["anxious", "secure"],
+      "gap_days": [0, 1]
+    },
+    "effect": {"words": 3, "acts": 0, "gifts": 0, "time": 0, "touch": 0, "heat": 3},
+    "theme": "heat_boosters",
+    "interactive_type": "prompt",
+    "difficulty_level": 2,
+    "required_streak": 0,
+    "animation_file": "Love.json",
+    "base_coins_reward": 12
+  }
+]

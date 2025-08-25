@@ -99,8 +99,8 @@ const LessonsPage: React.FC = () => {
   return (
     <div className={styles.container}>
       {}
-      {/* Compact header with partner mode toggle only */}
-      <section className={styles.compactHeader}>
+      {/* Header with progress toggle and tabs side by side */}
+      <section className={styles.headerRow}>
         <div className={styles.headerContent}>
           <motion.div 
             className={styles.viewModeToggle}
@@ -129,35 +129,33 @@ const LessonsPage: React.FC = () => {
               )}
             </button>
           </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className={styles.tabsInline}
+          >
+            {tabs.map((tab, index) => {
+              const Icon = tab.icon;
+              return (
+                <motion.button
+                  key={tab.id}
+                  variants={tabVariants}
+                  animate={activeTab === tab.id ? 'active' : 'inactive'}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`${styles.tab} ${activeTab === tab.id ? styles.active : ''}`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Icon size={20} className={styles.tabIcon} />
+                  <span>{tab.label}</span>
+                </motion.button>
+              );
+            })}
+          </motion.div>
         </div>
       </section>
-      {}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className={styles.tabsContainer}
-      >
-        <div className={styles.tabs}>
-          {tabs.map((tab, index) => {
-            const Icon = tab.icon;
-            return (
-              <motion.button
-                key={tab.id}
-                variants={tabVariants}
-                animate={activeTab === tab.id ? 'active' : 'inactive'}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`${styles.tab} ${activeTab === tab.id ? styles.active : ''}`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Icon size={20} className={styles.tabIcon} />
-                <span>{tab.label}</span>
-              </motion.button>
-            );
-          })}
-        </div>
-      </motion.div>
       {}
       <div className={styles.content}>
         <AnimatePresence mode="wait">
