@@ -23,6 +23,10 @@ const Lesson = require('./Lesson');
 const UserLessonProgress = require('./UserLessonProgress');
 const PairDailyLesson = require('./PairDailyLesson');
 const ActivityLog = require('./ActivityLog');
+
+// TypeScript модели пока отключены - будут подключены после компиляции
+let RelationshipProfile = null;
+console.log('📝 RelationshipProfile (TS model) temporarily disabled - will be enabled after TS compilation');
 const models = {
   User,
   Event,
@@ -49,6 +53,11 @@ const models = {
   PairDailyLesson,
   ActivityLog,
 };
+
+// Добавляем TS модели если они загрузились (пока отключено)
+// if (RelationshipProfile) {
+//   models.RelationshipProfile = RelationshipProfile;
+// }
 Object.keys(models).forEach(modelName => {
   if (models[modelName].associate) {
     models[modelName].associate(models);

@@ -10,6 +10,7 @@ const gameRoutes = require('./game.routes');
 const tournamentRoutes = require('./tournament.routes');
 const sessionRoutes = require('./session.routes');
 const aiRoutes = require('./ai.routes');
+const intelligenceRoutes = require('./intelligence.routes');
 const giftRoutes = require('./gift.routes');
 const lessonRoutes = require('./lesson.routes');
 
@@ -26,6 +27,7 @@ router.use('/games', gameRoutes);
 router.use('/tournaments', tournamentRoutes);
 router.use('/sessions', sessionRoutes);
 router.use('/ai', aiRoutes);
+router.use('/intelligence', intelligenceRoutes);
 router.use('/gifts', giftRoutes);
 router.use('/lessons', lessonRoutes);
 

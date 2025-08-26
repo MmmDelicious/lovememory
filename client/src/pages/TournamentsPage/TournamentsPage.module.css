@@ -1,375 +1,549 @@
-/* TournamentsPage - Redesigned with App Color Scheme */
-
-.tournamentsPage {
+/* Tournaments Page - Beautiful & Elegant Design */
+.page {
   min-height: 100vh;
   background: var(--color-background);
-  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
 }
 
-.pageHeader {
-  background: var(--color-surface);
-  border-radius: var(--border-radius-lg);
-  padding: var(--space-8);
-  margin-bottom: var(--space-6);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-border-light);
+/* Hero Section */
+.hero {
+  position: relative;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 50%, #B45309 100%);
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
-.headerContent h1 {
-  margin: 0 0 var(--space-2) 0;
-  font-size: clamp(1.75rem, 3vw, 2rem);
-  font-weight: 700;
+.heroBackground {
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+}
+
+.heroPattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  background-size: 80px 80px, 120px 120px, 200px 200px;
+  animation: float 25s ease-in-out infinite;
+}
+
+.heroContent {
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  z-index: 2;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  flex: 1;
+}
+
+.iconWrapper {
+  position: relative;
+}
+
+.titleIcon {
+  color: white;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  position: relative;
+  z-index: 2;
+}
+
+.iconGlow {
+  position: absolute;
+  inset: -12px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 1;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.titleContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.title {
   font-family: var(--font-family-heading);
-  color: var(--color-text-primary);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: white;
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   line-height: 1.2;
 }
 
 .subtitle {
-  margin: 0 0 var(--space-6) 0;
-  font-size: 1rem;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-  font-family: var(--font-family-body);
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  line-height: 1.4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.statsCards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--space-4);
-  margin-top: var(--space-6);
+.createButton {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-4) var(--space-5);
+  color: white;
+  font-family: var(--font-family-body);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.createButton:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Stats Section */
+.statsSection {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+  z-index: 2;
+  flex-wrap: wrap;
 }
 
 .statCard {
-  background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-primary-light) 100%);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
-  padding: var(--space-5);
-  text-align: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 160px;
+  transition: all 0.3s ease;
 }
 
 .statCard:hover {
+  background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--color-primary);
+}
+
+.statIcon {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .statNumber {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin-bottom: var(--space-1);
   font-family: var(--font-family-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
 }
 
 .statLabel {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-family: var(--font-family-body);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1;
+  margin-top: 2px;
 }
 
-.tabNavigation {
-  display: flex;
+/* Navigation */
+.navigation {
   background: var(--color-surface);
-  border-radius: var(--border-radius-md);
-  padding: var(--space-1);
-  margin-bottom: var(--space-6);
-  gap: var(--space-1);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--color-border);
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-5) var(--space-6);
+  flex-shrink: 0;
 }
 
-.tabNavigation::-webkit-scrollbar {
-  display: none;
+.tabsContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  gap: var(--space-3);
 }
 
-.tabButton {
-  flex: 1;
-  padding: var(--space-3) var(--space-4);
-  border: none;
-  border-radius: var(--border-radius);
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.navButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
   background: transparent;
+  border: none;
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  transition: all 0.3s ease;
   color: var(--color-text-secondary);
-  white-space: nowrap;
-  min-width: fit-content;
   font-family: var(--font-family-body);
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.tabButton:hover {
+.navButton:hover {
   background: var(--color-secondary);
   color: var(--color-text-primary);
+  transform: translateY(-1px);
 }
 
-.tabButton.active {
-  background: var(--color-primary);
+.navButton.active {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   color: white;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 16px rgba(217, 122, 108, 0.3);
 }
 
-.contentContainer {
-  background: var(--color-surface);
-  border-radius: var(--border-radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-md);
-  margin-bottom: var(--space-8);
-  border: 1px solid var(--color-border-light);
+.navButton.active:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(217, 122, 108, 0.4);
 }
 
 .tabContent {
-  padding: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
 }
 
-.sectionHeader {
-  margin-bottom: var(--space-8);
-  text-align: center;
-}
-
-.sectionHeader h2 {
-  margin: 0 0 var(--space-2) 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  font-family: var(--font-family-heading);
-}
-
-.sectionHeader p {
-  margin: 0;
+.tabLabel {
   font-size: 1rem;
-  color: var(--color-text-secondary);
-  line-height: 1.5;
-  font-family: var(--font-family-body);
+  font-weight: 600;
+  line-height: 1;
 }
 
-.myTournamentsSection,
-.participationsSection {
-  margin-bottom: var(--space-10);
+.tabDescription {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  line-height: 1;
 }
 
-.myTournamentsSection h3,
-.participationsSection h3 {
-  margin: 0 0 var(--space-5) 0;
+.activeIndicator {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  border-radius: var(--border-radius-lg);
+  z-index: -1;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6);
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* My Tournaments */
+.myTournaments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.mySection {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-xl);
+  border: 1px solid var(--color-border);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-md);
+}
+
+.mySection h3 {
+  font-family: var(--font-family-heading);
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  padding-bottom: var(--space-2);
-  border-bottom: 2px solid var(--color-border);
-  font-family: var(--font-family-heading);
+  margin: 0 0 var(--space-5) 0;
+  padding-bottom: var(--space-3);
+  border-bottom: 2px solid var(--color-border-light);
+  position: relative;
 }
 
-.quickActions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-5);
+.mySection h3::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
+  border-radius: 1px;
 }
 
-.actionCard {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-lg);
-  padding: var(--space-6);
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(74, 63, 61, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-sm);
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-6);
 }
 
-.actionCard:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--color-primary);
+.modal {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-xl);
+  padding: var(--space-8);
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
 }
 
-.actionIcon {
-  font-size: 3rem;
-  flex-shrink: 0;
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #F59E0B 0%, #D97706 50%, #B45309 100%);
 }
 
-.actionContent {
-  flex: 1;
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
-.actionContent h3 {
-  margin: 0 0 var(--space-1) 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
+.modalIcon {
+  color: #F59E0B;
+}
+
+.modal h2 {
   font-family: var(--font-family-heading);
-}
-
-.actionContent p {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
   margin: 0;
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  line-height: 1.4;
-  font-family: var(--font-family-body);
 }
 
-.actionButton {
-  background: var(--color-primary);
+.modal p {
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-6) 0;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.closeButton {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
   color: white;
   border: none;
-  border-radius: var(--border-radius);
-  padding: var(--space-2) var(--space-4);
-  font-size: 0.875rem;
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-4) var(--space-6);
+  font-family: var(--font-family-body);
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-  font-family: var(--font-family-body);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
 }
 
-.actionButton:hover {
-  background: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
+.closeButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.4);
 }
 
-/* Responsive design */
-@media (max-width: 1024px) {
-  .statsCards {
-    grid-template-columns: repeat(3, 1fr);
+/* Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-0.5deg);
+  }
+}
+
+@keyframes glow {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .statsSection {
+    gap: var(--space-4);
   }
   
-  .quickActions {
-    grid-template-columns: 1fr;
+  .statCard {
+    min-width: 140px;
+    padding: var(--space-3) var(--space-4);
+  }
+  
+  .statNumber {
+    font-size: 1.25rem;
   }
 }
 
 @media (max-width: 768px) {
-  .tournamentsPage {
-    padding: var(--space-4);
+  .hero {
+    padding: var(--space-6) var(--space-4) var(--space-5);
   }
   
-  .pageHeader {
-    padding: var(--space-6) var(--space-5);
-  }
-  
-  .headerContent h1 {
-    font-size: 1.5rem;
-  }
-  
-  .subtitle {
-    font-size: 0.875rem;
-  }
-  
-  .statsCards {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-3);
-  }
-  
-  .statCard {
-    padding: var(--space-4) var(--space-3);
-  }
-  
-  .statNumber {
-    font-size: 1.5rem;
-  }
-  
-  .statLabel {
-    font-size: 0.625rem;
-  }
-  
-  .tabNavigation {
-    padding: var(--space-1);
-    gap: var(--space-1);
-  }
-  
-  .tabButton {
-    padding: var(--space-2) var(--space-3);
-    font-size: 0.75rem;
-  }
-  
-  .tabContent {
-    padding: var(--space-6) var(--space-5);
-  }
-  
-  .sectionHeader h2 {
-    font-size: 1.25rem;
-  }
-  
-  .sectionHeader p {
-    font-size: 0.875rem;
-  }
-  
-  .actionCard {
-    padding: var(--space-5);
+  .heroContent {
     flex-direction: column;
+    gap: var(--space-4);
     text-align: center;
   }
   
-  .actionIcon {
-    font-size: 2.25rem;
+  .titleSection {
+    flex-direction: column;
+    gap: var(--space-3);
   }
   
-  .actionButton {
-    width: 100%;
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .statsSection {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+    justify-content: center;
+  }
+  
+  .statCard {
+    min-width: 130px;
+    padding: var(--space-3);
+  }
+  
+  .navigation {
+    padding: var(--space-4);
+  }
+  
+  .tabsContainer {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  
+  .navButton {
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+  }
+  
+  .content {
+    padding: var(--space-4);
+  }
+  
+  .myTournaments {
+    gap: var(--space-6);
+  }
+  
+  .mySection {
+    padding: var(--space-4);
   }
 }
 
 @media (max-width: 480px) {
-  .statsCards {
-    grid-template-columns: 1fr;
+  .hero {
+    padding: var(--space-5) var(--space-3) var(--space-4);
   }
   
-  .tabNavigation {
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .statsSection {
     flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
   }
   
-  .tabButton {
-    text-align: center;
+  .statCard {
+    width: 100%;
+    max-width: 240px;
+    justify-content: center;
   }
   
-  .pageHeader {
-    padding: var(--space-5) var(--space-4);
+  .content {
+    padding: var(--space-3);
   }
   
-  .tabContent {
-    padding: var(--space-5) var(--space-4);
+  .modal {
+    padding: var(--space-6);
+    margin: var(--space-4);
+  }
+  
+  .modal h2 {
+    font-size: 1.25rem;
+  }
+  
+  .modalHeader {
+    flex-direction: column;
+    gap: var(--space-2);
   }
 }
 
-/* Dark theme support */
-:root[data-theme='dark'] .tournamentsPage {
-  /* Uses dark theme variables from index.css */
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .hero {
+    background: linear-gradient(135deg, #92400E 0%, #78350F 50%, #451A03 100%);
+  }
 }
 
 /* High contrast support */
 @media (prefers-contrast: high) {
-  .statCard,
-  .actionCard,
-  .contentContainer,
-  .pageHeader {
+  .navButton.active {
+    background: var(--color-text-primary);
+    color: var(--color-background);
+  }
+  
+  .statCard {
     border-width: 2px;
-  }
-  
-  .tabButton.active {
-    border: 2px solid white;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .statCard,
-  .actionCard,
-  .tabButton,
-  .actionButton {
-    transition: none;
-  }
-  
-  .statCard:hover,
-  .actionCard:hover,
-  .actionButton:hover {
-    transform: none;
   }
 }
