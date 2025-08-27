@@ -14,6 +14,8 @@ const { startBot, startCronJobs } = require('./services/telegram.service');
 const { initSocket } = require('./socket');
 const errorHandler = require('./middleware/errorHandler.middleware');
 const apiRouter = require('./routes');
+const queueService = require('./services/queue.service');
+const { checkRedisHealth } = require('./config/redis');
 require('./config/passport');
 
 const app = express();
@@ -91,6 +93,20 @@ const startServer = async () => {
     console.log('All models were synchronized successfully.');
     
     await gameService.cleanupOrphanedRooms(io);
+
+    // Инициализируем систему очередей (опционально)
+    try {
+      const redisHealthy = await checkRedisHealth();
+      if (redisHealthy) {
+        await queueService.initialize();
+        console.log('✅ Queue service initialized successfully');
+      } else {
+        console.log('⚠️ Redis not available - queue service disabled');
+      }
+    } catch (error) {
+      console.log('⚠️ Queue service initialization failed:', error.message);
+      console.log('📝 Server will continue without background jobs');
+    }
 
     server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
     

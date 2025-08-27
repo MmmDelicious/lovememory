@@ -108,7 +108,12 @@ class AIOrchestrator implements IAIOrchestrator {
     const lowerPrompt = prompt.toLowerCase();
 
     // Простые правила для начала, позже можно заменить на ML
-    if (lowerPrompt.includes('свидание') || lowerPrompt.includes('дейт') || lowerPrompt.includes('встреча')) {
+    if (lowerPrompt.includes('свидание') || 
+        lowerPrompt.includes('дейт') || 
+        lowerPrompt.includes('встреча') ||
+        lowerPrompt.includes('создай') ||
+        lowerPrompt.includes('сгенерируй') ||
+        lowerPrompt.includes('умное')) {
       return 'GENERATE_DATE';
     }
     
@@ -151,40 +156,71 @@ class AIOrchestrator implements IAIOrchestrator {
    * Обработка генерации свиданий
    */
   private async handleDateGeneration(context: UserContext): Promise<AIResponse> {
-    console.log('💕 Generating date options...');
+    console.log('💕 Generating date options with real DateGenerationService...');
     
-    // Пока заглушка, позже подключим DateGenerationService
-    const dateOptions = [
-      {
-        id: 'date_1',
-        title: 'Романтический вечер в городе',
-        description: 'Прогулка по центру + ужин в уютном ресторане',
-        schedule: [
-          { time: '19:00', endTime: '20:30', activity: 'Прогулка по Арбату', description: 'Неспешная прогулка с беседами' },
-          { time: '21:00', endTime: '22:30', activity: 'Ужин в "Пушкин"', description: 'Романтический ужин при свечах' }
-        ],
-        estimatedCost: 3000,
-        duration: 3.5,
-        atmosphere: 'romantic' as const,
-        reasoning: 'Выбрал на основе ваших предпочтений к романтичным вечерам',
-        isRealData: false,
-        activitiesCount: 2
-      }
-    ];
-
-    return {
-      intent: 'GENERATE_DATE',
-      data: {
-        options: dateOptions,
-        reasoning: ['Анализирую ваши предпочтения...', 'Ищу подходящие места...', 'Готово!'],
-        metadata: {
-          generatedAt: new Date(),
-          usedRealData: false,
-          confidence: 0.8
+    try {
+      // Подключаем настоящий DateGenerationService
+      const dateService = require('./dateGeneration.service').default;
+      
+      const request = {
+        context: context,
+        preferences: {
+          atmosphere: 'romantic',
+          budget: 'medium',
+          duration: 3
         }
-      },
-      confidence: 0.8
-    };
+      };
+      
+      const result = await dateService.generate(request);
+      
+      return {
+        intent: 'GENERATE_DATE',
+        data: {
+          options: result.options,
+          reasoning: result.reasoning,
+          metadata: result.metadata
+        },
+        confidence: 0.9,
+        message: `Создал ${result.options.length} варианта свиданий с учетом вашего города и предпочтений! 💕`
+      };
+      
+    } catch (error) {
+      console.error('❌ Error in DateGenerationService:', error);
+      
+      // Fallback к простым вариантам
+      const fallbackOptions = [
+        {
+          id: 'fallback_1',
+          title: 'Романтический вечер',
+          description: 'Прогулка + ужин в уютном месте',
+          schedule: [
+            { time: '19:00', endTime: '20:30', activity: 'Прогулка по центру города', description: 'Неспешная прогулка и беседы' },
+            { time: '21:00', endTime: '22:30', activity: 'Ужин в ресторане', description: 'Романтический ужин' }
+          ],
+          estimatedCost: 2500,
+          duration: 3.5,
+          atmosphere: 'romantic' as const,
+          reasoning: 'Классический вариант для приятного вечера вдвоем',
+          isRealData: false,
+          activitiesCount: 2
+        }
+      ];
+
+      return {
+        intent: 'GENERATE_DATE',
+        data: {
+          options: fallbackOptions,
+          reasoning: ['Анализирую предпочтения...', 'Готовлю варианты...', 'Готово!'],
+          metadata: {
+            generatedAt: new Date(),
+            usedRealData: false,
+            confidence: 0.6
+          }
+        },
+        confidence: 0.6,
+        message: 'Подготовил варианты свиданий! Система умного поиска временно недоступна, но базовые идеи готовы 💕'
+      };
+    }
   }
 
   /**

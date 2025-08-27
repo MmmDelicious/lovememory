@@ -21,7 +21,8 @@ import {
   setAIVisible,
   setMobile,
   closeDateGenerator,
-  sendMessageToAI
+  setAILoading,
+  setAIResponse
 } from './slices/mascotSlice';
 import {
   showMascot,
@@ -163,7 +164,66 @@ export const useMascotActions = () => {
     setAIVisible: (visible: boolean) => dispatch(setAIVisible(visible)),
     setMobile: (isMobile: boolean) => dispatch(setMobile(isMobile)),
     closeDateGenerator: () => dispatch(closeDateGenerator()),
-    sendMessageToAI: (message: string, context?: string) => dispatch(sendMessageToAI({ message, context }))
+            sendMessageToAI: async (message: string, context?: any) => {
+          dispatch(setAILoading(true));
+          try {
+            const { askAI } = await import('../services/ai.service');
+            const response = await askAI(message, context);
+            
+            console.log('🎯 AI Response received:', response);
+            
+            // Проверяем если это генерация свиданий
+            if (response.intent === 'GENERATE_DATE' && response.data?.options) {
+              console.log('💕 Date generation detected, showing results...');
+              
+              // Импортируем компонент для отображения результатов
+              const { default: DateGenerationResult } = await import('../components/DateGenerationResult/DateGenerationResult');
+              
+              // Создаем и показываем модальное окно с результатами
+              const modalContainer = document.createElement('div');
+              document.body.appendChild(modalContainer);
+              
+              const { createRoot } = await import('react-dom/client');
+              const root = createRoot(modalContainer);
+              
+              const handleSelectDate = (option: any) => {
+                console.log('📅 Date option selected:', option);
+                // TODO: Интеграция с календарем
+                root.unmount();
+                document.body.removeChild(modalContainer);
+                dispatch(setAIResponse(`Отличный выбор! Свидание "${option.title}" можно добавить в календарь 📅`));
+              };
+              
+              const handleClose = () => {
+                root.unmount();
+                document.body.removeChild(modalContainer);
+                dispatch(setAIResponse('Хотите создать новые варианты свиданий? 💕'));
+              };
+              
+              // Используем React.createElement вместо JSX
+              const React = await import('react');
+              root.render(React.createElement(DateGenerationResult, {
+                options: response.data.options,
+                reasoning: response.data.reasoning || ['Анализирую ваши предпочтения...'],
+                onSelectDate: handleSelectDate,
+                onClose: handleClose
+              }));
+              
+              // Показываем краткий ответ в чате
+              dispatch(setAIResponse(response.text || response.message || `Создал ${response.data.options.length} вариантов свиданий! 💕`));
+              
+            } else {
+              // Обычный ответ
+              dispatch(setAIResponse(response.text || response.message || 'Не удалось получить ответ'));
+            }
+            
+          } catch (error) {
+            console.error('Failed to get AI response:', error);
+            dispatch(setAIResponse('Что-то пошло не так... Попробуйте еще раз.'));
+          } finally {
+            dispatch(setAILoading(false));
+          }
+        }
   }), [dispatch]);
 };
 

@@ -32,29 +32,44 @@ class PlacesService {
     const cacheKey = `city_${latitude}_${longitude}`;
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
+    
     try {
+      const apiKey = import.meta.env.VITE_YANDEX_API;
+      if (!apiKey) {
+        throw new Error('Yandex API key is not configured');
+      }
+
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
-        {
-          headers: {
-            'User-Agent': 'LoveMemory-DateGenerator/1.0'
-          }
-        }
+        `https://geocode-maps.yandex.ru/1.x/?apikey=${apiKey}&format=json&geocode=${longitude},${latitude}&results=1&kind=locality`
       );
-      if (!response.ok) throw new Error('Failed to get city');
+
+      if (!response.ok) {
+        throw new Error('Failed to get city from Yandex Geocoder');
+      }
+
       const data = await response.json();
-      const city = data.address?.city || data.address?.town || data.address?.village || 'Неизвестный город';
-      const country = data.address?.country || 'Неизвестная страна';
+      const geoObject = data.response?.GeoObjectCollection?.featureMember?.[0]?.GeoObject;
+
+      if (!geoObject) {
+        throw new Error('No location found for the given coordinates');
+      }
+
+      const city = geoObject.name || 'Неизвестный город';
+      const country = geoObject.metaDataProperty?.GeocoderMetaData?.Address?.country_code || 'Неизвестная страна';
+      const displayName = geoObject.metaDataProperty?.GeocoderMetaData?.text || '';
+
       const result = {
         city,
         country,
-        displayName: data.display_name,
+        displayName,
         coordinates: { latitude, longitude }
       };
+
       this.setCache(cacheKey, result);
       return result;
+
     } catch (error) {
-      console.error('Error getting city:', error);
+      console.error('Error getting city from Yandex:', error);
       throw error;
     }
   }

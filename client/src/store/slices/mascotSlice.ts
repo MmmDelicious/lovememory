@@ -93,11 +93,9 @@ const mascotSlice = createSlice({
       state.isDateGeneratorOpen = false;
     },
     
-    // Отправка сообщения AI
-    sendMessageToAI: (state, action: PayloadAction<{ message: string; context?: string }>) => {
-      // Здесь будет логика отправки сообщения AI
-      // Пока просто устанавливаем сообщение
-      state.globalMascot.message = action.payload.message;
+    // Отправка сообщения AI - используется thunk в hooks
+    setAIResponse: (state, action: PayloadAction<string>) => {
+      state.globalMascot.message = action.payload;
     },
     
     // Мобильное состояние
@@ -149,7 +147,7 @@ export const {
   clearInterceptedMascot,
   setDateGeneratorOpen,
   closeDateGenerator,
-  sendMessageToAI,
+  setAIResponse,
   setMobile,
   moveMascotToElement,
   resetMascot,

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@pbe/react-yandex-maps": "^1.2.5",
     "pokersolver": "^2.1.4",
     "react-icons": "^5.5.0"
   }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAIMascot, useMascotActions, useGlobalMascot, useUser } from '../../store/hooks';
+import { usePairing } from '../../hooks/usePairing';
 import AIChat from '../AIChat/AIChat';
 import AIToggleButton from '../AIToggleButton/AIToggleButton';
 import FreeRoamMascot from '../FreeRoamMascot/FreeRoamMascot';
@@ -14,6 +15,7 @@ const AIChatInterface = () => {
   const { toggleAI, toggleChat, sendMessageToAI, closeDateGenerator } = useMascotActions();
   
   const user = useUser();
+  const { pairing } = usePairing(user);
 
   if (!user) {
     return null;
@@ -26,28 +28,62 @@ const AIChatInterface = () => {
     zIndex: 10000
   };
 
+  // Создаем контекст один раз
+  const createContext = () => {
+    if (!user) return null;
+
+    const partner = pairing?.status === 'active' 
+      ? (pairing?.Requester?.id === user?.id ? pairing?.Receiver : pairing?.Requester)
+      : null;
+
+    return {
+      user: {
+        name: user?.first_name || user?.display_name || user?.name || user?.email || 'Пользователь',
+        full_name: `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || user?.display_name || user?.email || 'Пользователь',
+        gender: user?.gender || null,
+        city: user?.city || 'Не указан',
+        age: user?.age || null,
+        coins: user?.coins || 0,
+        email: user?.email || null
+      },
+      partner: partner ? {
+        name: partner?.first_name || partner?.display_name || partner?.name || partner?.email || 'Партнер',
+        full_name: `${partner?.first_name || ''} ${partner?.last_name || ''}`.trim() || partner?.display_name || partner?.email || 'Партнер',
+        gender: partner?.gender || null,
+        city: partner?.city || 'Не указан',
+        age: partner?.age || null
+      } : null,
+      relationship: {
+        status: pairing?.status || 'single',
+        duration: pairing?.created_at ? Math.floor((Date.now() - new Date(pairing.created_at).getTime()) / (1000 * 60 * 60 * 24)) : 0
+      }
+    };
+  };
+
   const handleContextMenuAction = (actionId) => {
+    const context = createContext();
+    
     switch (actionId) {
       case 'chat':
         toggleChat();
         break;
       case 'joke':
-        sendMessageToAI('Расскажи мне смешную шутку или анекдот', 'joke');
+        sendMessageToAI('Расскажи мне смешную шутку или анекдот', context);
         break;
       case 'dance':
-        sendMessageToAI('Потанцуй для меня! Покажи свои лучшие движения!', 'dance');
+        sendMessageToAI('Потанцуй для меня! Покажи свои лучшие движения!', context);
         break;
       case 'advice':
-        sendMessageToAI('Дай мне мудрый совет на сегодня', 'advice');
+        sendMessageToAI('Дай мне мудрый совет на сегодня', context);
         break;
       case 'weather':
-        sendMessageToAI('Расскажи мне о погоде и как лучше провести день', 'weather');
+        sendMessageToAI('Расскажи мне о погоде и как лучше провести день', context);
         break;
       case 'mood':
-        sendMessageToAI('Подними мне настроение! Расскажи что-нибудь позитивное', 'mood');
+        sendMessageToAI('Подними мне настроение! Расскажи что-нибудь позитивное', context);
         break;
       case 'generateDate':
-        sendMessageToAI('Сгенерируй идеальное свидание для нас!', 'generateDate');
+        sendMessageToAI('Создай умное свидание с реальными местами!', context);
         break;
       case 'hide':
         toggleAI();

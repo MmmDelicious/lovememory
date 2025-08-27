@@ -1,0 +1,1062 @@
+[
+    {
+    "question": "Какова формула для релятивистской энергии?",
+    "options": ["E = mc^2", "E = 1/2 mv^2", "E = mgh", "E = hf"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое теорема Гёделя о неполноте?",
+    "options": ["Любая достаточно мощная аксиоматическая система неполна", "Все системы полны", "Только арифметика неполна", "Геометрия неполна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил модель атома с квантовыми орбиталями?",
+    "options": ["Нильс Бор", "Эрнест Резерфорд", "Дж. Дж. Томсон", "Демокрит"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое эффект Комптона?",
+    "options": ["Рассеяние фотонов на электронах", "Фотоэффект", "Туннельный эффект", "Эффект Зеемана"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите дифференциальное уравнение: y'' + y = 0",
+    "options": ["y = A cos(x) + B sin(x)", "y = A e^x + B e^{-x}", "y = A x + B", "y = A e^{ix} + B e^{-ix}"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое CP-нарушение в физике частиц?",
+    "options": ["Нарушение симметрии заряда и четности", "Сохранение энергии", "Симметрия времени", "Инвариантность Лоренца"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите определитель матрицы [[1,2],[3,4]]",
+    "options": ["-2", "4", "5", "10"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Бытия и ничто'?",
+    "options": ["Жан-Поль Сартр", "Альбер Камю", "Фридрих Ницше", "Мартин Хайдеггер"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое гипотеза Римана?",
+    "options": ["Все нетривиальные нули дзета-функции имеют Re(s)=1/2", "Простые числа бесконечны", "Золотое сечение", "Теорема Ферма"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура бензола?",
+    "options": ["Циклическая с делокализованными электронами", "Линейная", "Тетраэдральная", "Плоская без делокализации"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое CRISPR-Cas9?",
+    "options": ["Система редактирования генов", "Вирус", "Антибиотик", "Вакцина"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: ∫ x e^x dx",
+    "options": ["x e^x - e^x + C", "e^x + C", "x^2 e^x / 2 + C", "e^x (x+1) + C"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл бозон Хиггса теоретически?",
+    "options": ["Питер Хиггс", "Франсуа Энглер", "Роберт Браут", "Все вышеперечисленные"],
+    "correctAnswer": 3
+    },
+    {
+    "question": "Что такое топологическая изоляция?",
+    "options": ["Материалы с защищенными поверхностными состояниями", "Теплоизоляция", "Электроизоляция", "Звукоизоляция"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите собственные значения матрицы [[2,1],[0,2]]",
+    "options": ["2,2", "1,2", "2,0", "1,1"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Критики чистого разума'?",
+    "options": ["Иммануил Кант", "Георг Гегель", "Артур Шопенгауэр", "Фридрих Ницше"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое P vs NP проблема?",
+    "options": ["Являются ли P и NP равными", "P всегда больше NP", "NP полиномиально", "P экспоненциально"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция Сузуки?",
+    "options": ["Кросс-сочетание бороновых кислот с галогенидами", "Гидрирование", "Окисление", "Редукция"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое эпигенетика?",
+    "options": ["Изменения экспрессии генов без изменения ДНК", "Мутации ДНК", "Репликация ДНК", "Транскрипция"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Laplace transform of sin(at)",
+    "options": ["a/(s^2 + a^2)", "s/(s^2 + a^2)", "1/(s^2 + a^2)", "a/s"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил теорию струн?",
+    "options": ["Габриэле Венециано", "Эдвард Виттен", "Брайан Грин", "Леонард Сасскинд"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое квантовая телепортация?",
+    "options": ["Передача квантового состояния", "Телепортация объектов", "Сверхсветовая скорость", "Классическая телепортация"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите ранг матрицы [[1,2,3],[4,5,6],[7,8,9]]",
+    "options": ["2", "3", "1", "0"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Феноменологии духа'?",
+    "options": ["Георг Гегель", "Карл Маркс", "Фридрих Энгельс", "Сёрен Кьеркегор"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое NAVIER-STOKES уравнения?",
+    "options": ["Уравнения движения вязкой жидкости", "Уравнения электромагнетизма", "Уравнения квантовой механики", "Уравнения гравитации"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова стереохимия SN2 реакции?",
+    "options": ["Инверсия конфигурации", "Ретенция", "Рацемизация", "Нет стереохимии"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое нейронная сеть?",
+    "options": ["Модель, вдохновленная мозгом", "Биологическая сеть", "Компьютерная сеть", "Социальная сеть"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Fourier series of f(x)=x on [-π,π]",
+    "options": ["2 ∑ (-1)^{k+1} sin(kx)/k", "∑ cos(kx)/k", "∑ sin(kx)/k^2", "x"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл темную энергию?",
+    "options": ["Сол Перлмуттер, Брайан Шмидт, Адам Рисс", "Эдвин Хаббл", "Вера Рубин", "Фриц Цвикки"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое эффект Холла?",
+    "options": ["Напряжение в магнитном поле", "Ток в вакууме", "Сопротивление", "Индукция"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите trace матрицы [[1,0],[0,1]]",
+    "options": ["2", "1", "0", "3"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'В поисках утраченного времени'?",
+    "options": ["Марсель Пруст", "Альбер Камю", "Жан-Поль Сартр", "Андре Мальро"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое halting problem?",
+    "options": ["Неразрешимая проблема остановки", "Разрешимая", "Полиномиальная", "Экспоненциальная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция Дильса-Альдера?",
+    "options": ["Циклоприсоединение", "Элиминация", "Субституция", "Аддиция"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое стволовые клетки?",
+    "options": ["Клетки, способные дифференцироваться", "Зрелые клетки", "Вирусы", "Бактерии"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: ∫ ln(x) dx",
+    "options": ["x ln(x) - x + C", "ln(x) + C", "x^2 ln(x)/2 + C", "1/x + C"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил M-теорию?",
+    "options": ["Эдвард Виттен", "Майкл Грин", "Джон Шварц", "Леонард Сасскинд"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое суперпозиция в квантовой механике?",
+    "options": ["Линейная комбинация состояний", "Единичное состояние", "Классическое состояние", "Измеренное состояние"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите eigenvalues of [[0,-1],[1,0]]",
+    "options": ["i, -i", "1, -1", "0,0", "1,1"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Улисс'?",
+    "options": ["Джеймс Джойс", "Вирджиния Вулф", "Ф. Скотт Фицджеральд", "Эрнест Хемингуэй"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Kolmogorov complexity?",
+    "options": ["Минимальная длина программы", "Максимальная", "Средняя", "Константная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура порфирина?",
+    "options": ["Тетрапиррольное кольцо", "Бензольное", "Циклопентадиен", "Фуран"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое апоптоз?",
+    "options": ["Программированная клеточная смерть", "Некроз", "Деление", "Рост"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Dirac delta function property ∫ δ(x) f(x) dx = f(0)",
+    "options": ["Да", "Нет", "Только для f(x)=1", "Только для x>0"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл гравитационные волны?",
+    "options": ["LIGO collaboration", "Эйнштейн", "Хокинг", "Пенроуз"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Josephson effect?",
+    "options": ["Туннелирование в сверхпроводниках", "Фотоэффект", "Термоэффект", "Магнитный эффект"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите inverse of [[1,1],[1,0]]",
+    "options": ["[[0,-1],[-1,1]]", "[[0,1],[1,1]]", "[[1, -1],[-1,0]]", "[[1,-1],[ -1,1]]"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Сто лет одиночества'?",
+    "options": ["Габриэль Гарсия Маркес", "Пабло Неруда", "Хорхе Луис Борхес", "Марио Варгас Льоса"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Church-Turing thesis?",
+    "options": ["Эффективно вычислимо = Turing machine", "Не вычислимо", "Полиномиально", "Экспоненциально"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция Wittig?",
+    "options": ["Синтез алкенов из карбонилов", "Гидролиз", "Окисление", "Редукция"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое теломераза?",
+    "options": ["Фермент, удлиняющий теломеры", "Укорачивающий", "Реплицирующий ДНК", "Транскрибирующий"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Poisson equation ∇^2 φ = -ρ/ε",
+    "options": ["Электростатика", "Магнитостатика", "Гидродинамика", "Термодинамика"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил landscape in string theory?",
+    "options": ["Леонард Сасскинд", "Эдвард Виттен", "Дэвид Гросс", "Хуан Малдасена"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое decoherence?",
+    "options": ["Потеря квантовой coherentности", "Увеличение", "Классическая coherentность", "Измерение"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Jordan form of [[2,1],[0,2]]",
+    "options": ["[[2,1],[0,2]]", "[[2,0],[0,2]]", "[[1,0],[0,1]]", "[[3,0],[0,1]]"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор '1984'?",
+    "options": ["Джордж Оруэлл", "Олдос Хаксли", "Рэй Брэдбери", "Филип К. Дик"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Busy beaver function?",
+    "options": ["Максимальное число шагов Turing machine", "Минимальное", "Среднее", "Константное"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура гемоглобина?",
+    "options": ["Тетрамер с гем-группами", "Мономер", "Димер", "Без гема"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое онкоген?",
+    "options": ["Ген, вызывающий рак", "Супрессор", "Репаративный ген", "Транскрипционный фактор"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Schrödinger equation iħ ∂ψ/∂t = H ψ",
+    "options": ["Квантовая механика", "Классическая", "Релятивистская", "Статистическая"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл AdS/CFT correspondence?",
+    "options": ["Хуан Малдасена", "Герард 'т Хooft", "Леонард Сасскинд", "Эдвард Виттен"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Aharonov-Bohm effect?",
+    "options": ["Фаза от магнитного потенциала", "От электрического", "От гравитационного", "От слабого"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите singular values of [[1,0],[0,2]]",
+    "options": ["1,2", "0,1", "2,2", "1,1"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Процесс'?",
+    "options": ["Франц Кафка", "Альбер Камю", "Жан-Поль Сартр", "Томас Манн"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Rice's theorem?",
+    "options": ["Неразрешимость свойств программ", "Разрешимость", "Полиномиальность", "Экспоненциальность"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция Grignard?",
+    "options": ["Аддиция к карбонилам", "Элиминация", "Субституция", "Окисление"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое микроРНК?",
+    "options": ["Регулятор генной экспрессии", "мРНК", "тРНК", "рРНК"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Klein-Gordon equation (∂^2 + m^2) φ = 0",
+    "options": ["Релятивистская скалярная частица", "Нерелятивистская", "Векторная", "Спиновая"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил anthropic principle?",
+    "options": ["Брендон Картер", "Мартин Рис", "Фрэнк Типлер", "Джон Барроу"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Casimir effect?",
+    "options": ["Притяжение пластин от вакуумных флуктуаций", "Отталкивание", "Электрическое", "Магнитное"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Hermitian conjugate of i σ_y",
+    "options": ["-i σ_y", "i σ_y", "σ_y", "-σ_y"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Волшебная гора'?",
+    "options": ["Томас Манн", "Герман Гессе", "Франц Кафка", "Роберт Музиль"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Post's correspondence problem?",
+    "options": ["Неразрешимая", "Разрешимая", "Полиномиальная", "Линейная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура ДНК-полимеразы?",
+    "options": ["Фермент с пальцами, ладонью, большим пальцем", "Простая цепь", "Димер", "Тример"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое p53 ген?",
+    "options": ["Супрессор опухолей", "Онкоген", "Репаративный", "Транскрипционный"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Dirac equation (i γ^μ ∂_μ - m) ψ = 0",
+    "options": ["Релятивистские фермионы", "Бозоны", "Скаляры", "Векторы"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл holographic principle?",
+    "options": ["Герард 'т Хooft", "Леонард Сасскинд", "Хуан Малдасена", "Стивен Хокинг"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Lamb shift?",
+    "options": ["Сдвиг уровней от QED", "От QCD", "От слабого", "От гравитации"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите commutator [x, p]",
+    "options": ["i ħ", "0", "-i ħ", "ħ"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Бледный огонь'?",
+    "options": ["Владимир Набоков", "Джозеф Конрад", "Генри Джеймс", "Джон Апдайк"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Knapsack problem?",
+    "options": ["NP-полная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция Heck?",
+    "options": ["Кросс-сочетание с алкенами", "С аддицией", "Элиминацией", "Субституцией"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое экзон?",
+    "options": ["Кодирующая часть гена", "Интрон", "Промотор", "Энхансер"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Maxwell's equations ∇·E = ρ/ε, etc.",
+    "options": ["Электродинамика", "Квантовая", "Релятивистская", "Статистическая"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил multiverse from inflation?",
+    "options": ["Андрей Линде", "Алан Гут", "Пол Стейнхардт", "Александр Виленкин"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Kondo effect?",
+    "options": ["Магнитные примеси в металлах", "Сверхпроводимость", "Ферромагнетизм", "Диамагнетизм"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Pauli matrices commutator [σ_x, σ_y]",
+    "options": ["2i σ_z", "0", "i σ_z", "2 σ_z"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Над пропастью во ржи'?",
+    "options": ["Дж. Д. Сэлинджер", "Ф. Скотт Фицджеральд", "Эрнест Хемингуэй", "Джон Стейнбек"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Traveling salesman problem?",
+    "options": ["NP-трудная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура рибозимов?",
+    "options": ["Каталитическая РНК", "Белок", "ДНК", "Липид"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое RAS ген?",
+    "options": ["Онкоген", "Супрессор", "Репаративный", "Транскрипционный"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Yang-Mills action S = ∫ Tr(F^2)",
+    "options": ["Неабелева калибровочная теория", "Абелева", "Скалярная", "Гравитационная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл black hole evaporation?",
+    "options": ["Стивен Хокинг", "Роджер Пенроуз", "Кип Торн", "Джон Уилер"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Meissner effect?",
+    "options": ["Вытеснение магнитного поля в сверхпроводниках", "Притяжение", "Электрическое", "Тепловое"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Bell inequality violation",
+    "options": ["Для entangled particles", "Для классических", "Для независимых", "Всегда"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Госпожа Бовари'?",
+    "options": ["Гюстав Флобер", "Эмиль Золя", "Виктор Гюго", "Оноре де Бальзак"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Subset sum problem?",
+    "options": ["NP-полная", "P", "Линейная", "Экспоненциальная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция Sharpless epoxidation?",
+    "options": ["Асимметричное эпоксидирование", "Симметричное", "Редукция", "Окисление без асимметрии"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое siRNA?",
+    "options": ["Интерференция РНК", "мРНК", "тРНК", "рРНК"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Einstein field equations G_μν = 8π T_μν",
+    "options": ["Общая относительность", "Специальная", "Квантовая гравитация", "Ньютоновская"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил ekpyrotic model?",
+    "options": ["Пол Стейнхардт, Нил Турок", "Алан Гут", "Андрей Линде", "Александр Виленкин"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Andreev reflection?",
+    "options": ["В сверхпроводниках на границе", "В нормальных металлах", "В изоляторах", "В полупроводниках"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Wigner function for coherent state",
+    "options": ["Gaussian", "Delta", "Uniform", "Exponential"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Тошнота'?",
+    "options": ["Жан-Поль Сартр", "Альбер Камю", "Симона де Бовуар", "Морис Мерло-Понти"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Graph isomorphism problem?",
+    "options": ["Неизвестно P или NP", "P", "NP-полная", "Экспоненциальная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура лигандов в металлокомплексах?",
+    "options": ["Донор-акцептор", "Ионные", "Ковалентные", "Ван-дер-Ваальс"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое пронуклеус?",
+    "options": ["Ядро после оплодотворения", "До оплодотворения", "В митозе", "В мейозе"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Navier-Stokes existence and smoothness",
+    "options": ["Открытая проблема", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл CMB anisotropy?",
+    "options": ["COBE team", "WMAP", "Planck", "Penzias and Wilson"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое fractional quantum Hall effect?",
+    "options": ["Квантовая жидкость с дробным зарядом", "Целым", "Классическая", "Тепловая"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Berry phase for spin in magnetic field",
+    "options": ["-m Ω", "0", "π", "2π"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Звук и ярость'?",
+    "options": ["Уильям Фолкнер", "Джон Стейнбек", "Эрнест Хемингуэй", "Ф. Скотт Фицджеральд"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Integer factoring?",
+    "options": ["Предполагается трудным", "Легким", "Полиномиальным", "Линейным"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция Sonogashira?",
+    "options": ["Сочетание алкинов с галогенидами", "Алкенов", "Алканов", "Аренов"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое сплайсинг?",
+    "options": ["Удаление интронов из пре-мРНК", "Добавление", "Транскрипция", "Трансляция"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Hodge conjecture",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил cyclic universe?",
+    "options": ["Роджер Пенроуз", "Стивен Хокинг", "Алан Гут", "Пол Стейнхардт"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Shubnikov-de Haas oscillations?",
+    "options": ["Магнитосопротивление в 2D", "В 3D", "В 1D", "В 0D"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Noether charge for time translation",
+    "options": ["Energy", "Momentum", "Angular momentum", "Charge"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Лолита'?",
+    "options": ["Владимир Набоков", "Дж. Д. Сэлинджер", "Трумэн Капоте", "Джек Керуак"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Discrete logarithm problem?",
+    "options": ["Трудный для криптографии", "Легкий", "Полиномиальный", "Линейный"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура ферроцен?",
+    "options": ["Сэндвич-комплекс", "Линейный", "Тетраэдральный", "Октаэдральный"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое CRISPR spacer?",
+    "options": ["Последовательность от вируса", "От бактерии", "Случайная", "Повторяющаяся"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Yang-Mills millennium problem",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл accelerating universe?",
+    "options": ["High-z Supernova Search Team", "COBE", "WMAP", "Planck"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое topological quantum computing?",
+    "options": ["Использование anyons", "Кубитов", "Гейтов", "Регистров"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Hawking temperature T = ħc^3 / (8π G M k)",
+    "options": ["Для черных дыр", "Для звезд", "Для планет", "Для атомов"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Чужак в чужой стране'?",
+    "options": ["Роберт Хайнлайн", "Айзек Азимов", "Филип К. Дик", "Артур Кларк"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Boolean satisfiability?",
+    "options": ["NP-полная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция metathesis?",
+    "options": ["Перестановка в алкенах", "Аддиция", "Элиминация", "Субституция"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое enhancer?",
+    "options": ["Регуляторная последовательность ДНК", "Кодирующая", "Интрон", "Экзон"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Birch and Swinnerton-Dyer conjecture",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил string gas cosmology?",
+    "options": ["Роберт Бранденбергер", "Алан Гут", "Андрей Линде", "Пол Стейнхардт"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое spin Hall effect?",
+    "options": ["Спин-ток без заряда", "Заряд без спина", "Магнитный", "Электрический"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Unruh temperature T = ħ a / (2π k c)",
+    "options": ["Для ускоренного наблюдателя", "Для покоящегося", "Для вращающегося", "Для падающего"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Дюна'?",
+    "options": ["Фрэнк Герберт", "Айзек Азимов", "Роберт Хайнлайн", "Артур Кларк"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Hamiltonian cycle problem?",
+    "options": ["NP-полная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура MOF?",
+    "options": ["Металлоорганические каркасы", "Органические", "Металлические", "Керамические"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое transposon?",
+    "options": ["Мобильный генетический элемент", "Стационарный", "Вирус", "Плазмида"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: P = NP?",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл neutrino oscillations?",
+    "options": ["Super-Kamiokande team", "SNO", "KamLAND", "Все"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Majorana fermion?",
+    "options": ["Своя античастица", "Не своя", "Бозон", "Скаляр"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Bekenstein bound S ≤ 2π E R / ħ c",
+    "options": ["Для энтропии", "Для энергии", "Для массы", "Для заряда"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Нейромант'?",
+    "options": ["Уильям Гибсон", "Нил Стивенсон", "Брюс Стерлинг", "Пат Кэдиган"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Vertex cover problem?",
+    "options": ["NP-полная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция Click chemistry?",
+    "options": ["Азид-алкиновое циклоприсоединение", "Аддиция", "Элиминация", "Субституция"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое lncRNA?",
+    "options": ["Длинная некодирующая РНК", "Кодирующая", "Короткая", "тРНК"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Collatz conjecture",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил loop quantum gravity?",
+    "options": ["Карло Ровелли, Ли Смолин", "Роджер Пенроуз", "Абэй Аштекар", "Все"],
+    "correctAnswer": 3
+    },
+    {
+    "question": "Что такое skyrmion?",
+    "options": ["Топологический солитон", "Частица", "Волна", "Поле"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Penrose process",
+    "options": ["Извлечение энергии из вращающейся черной дыры", "Из статической", "Из звезды", "Из планеты"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Солярис'?",
+    "options": ["Станислав Лем", "Аркадий и Борис Стругацкие", "Иван Ефремов", "Кир Булычев"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Set partition problem?",
+    "options": ["NP-полная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура dendrimer?",
+    "options": ["Разветвленный полимер", "Линейный", "Сетчатый", "Блок-сополимер"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое piRNA?",
+    "options": ["РНК против транспозонов", "мРНК", "тРНК", "рРНК"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Goldbach conjecture",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл Higgs mechanism independently?",
+    "options": ["Филип Андерсон", "Питер Хиггс", "Франсуа Энглер", "Роберт Браут"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Weyl semimetal?",
+    "options": ["Топологический материал с Weyl fermions", "Обычный металл", "Изолятор", "Сверхпроводник"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите Blandford-Znajek process",
+    "options": ["Извлечение энергии из магнитного поля черной дыры", "Из гравитационного", "Из электрического", "Из слабого"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Автостопом по галактике'?",
+    "options": ["Дуглас Адамс", "Терри Пратчетт", "Нил Гейман", "Джеймс Херберт"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Clique problem?",
+    "options": ["NP-полная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция Staudinger?",
+    "options": ["Синтез полимеров", "Мономеров", "Олигомеров", "Димеров"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое circRNA?",
+    "options": ["Кольцевая РНК", "Линейная", "Двойная", "Одиночная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Twin prime conjecture",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил causal dynamical triangulation?",
+    "options": ["Ренате Лолл", "Карло Ровелли", "Ли Смолин", "Абэй Аштекар"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Floquet time crystal?",
+    "options": ["Периодическая структура во времени", "В пространстве", "В энергии", "В массе"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите firewall paradox",
+    "options": ["Для черных дыр", "Для звезд", "Для планет", "Для атомов"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'О дивный новый мир'?",
+    "options": ["Олдос Хаксли", "Джордж Оруэлл", "Рэй Брэдбери", "Филип К. Дик"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Independent set problem?",
+    "options": ["NP-полная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура supramolecular chemistry?",
+    "options": ["Нековалентные взаимодействия", "Ковалентные", "Ионные", "Металлические"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое snoRNA?",
+    "options": ["Малая ядерная РНК для модификации", "мРНК", "тРНК", "рРНК"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Riemann hypothesis",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл GW150914?",
+    "options": ["LIGO", "Virgo", "KAGRA", "Все"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое axion?",
+    "options": ["Кандидат на темную материю", "Барион", "Лептон", "Глюон"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите ER=EPR conjecture",
+    "options": ["Червоточины = entanglement", "Не равно", "Энергия = масса", "Сила = масса*ускорение"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Фонд'?",
+    "options": ["Айзек Азимов", "Фрэнк Герберт", "Роберт Хайнлайн", "Артур Кларк"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Bin packing problem?",
+    "options": ["NP-трудная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция ROMP?",
+    "options": ["Кольцеоткрывающая метатезисная полимеризация", "Аддиционная", "Конденсационная", "Ступенчатая"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое vault RNA?",
+    "options": ["РНК в вольтах", "мРНК", "тРНК", "рРНК"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Navier-Stokes",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил emergent gravity?",
+    "options": ["Эрик Верлинде", "Герард 'т Хooft", "Леонард Сасскинд", "Хуан Малдасена"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Kitaev model?",
+    "options": ["Топологический спин-жидкость", "Классический", "Ферромагнитный", "Антиферромагнитный"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите AMPS firewall",
+    "options": ["Для черных дыр", "Для сетей", "Для компьютеров", "Для зданий"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Человек в высоком замке'?",
+    "options": ["Филип К. Дик", "Уильям Гибсон", "Нил Стивенсон", "Брюс Стерлинг"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Graph coloring problem?",
+    "options": ["NP-полная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура catenane?",
+    "options": ["Переплетенные кольца", "Линейные", "Разветвленные", "Сетчатые"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Y RNA?",
+    "options": ["РНК в репликации", "мРНК", "тРНК", "рРНК"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Hodge conjecture",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл sterile neutrinos hypothesis?",
+    "options": ["Бруно Понтекорво", "Раймонд Дэвис", "Масатоси Кошиба", "Артур Макдональд"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Chern insulator?",
+    "options": ["Топологический изолятор", "Обычный", "Металл", "Сверхпроводник"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите It from bit",
+    "options": ["Джон Уилер", "Стивен Хокинг", "Роджер Пенроуз", "Леонард Сасскинд"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Снежный крах'?",
+    "options": ["Нил Стивенсон", "Уильям Гибсон", "Брюс Стерлинг", "Пат Кэдиган"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Longest path problem?",
+    "options": ["NP-трудная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция RAFT?",
+    "options": ["Радикальная полимеризация с переносом", "Анионная", "Катионная", "Свободнорадикальная без контроля"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое telRNA?",
+    "options": ["РНК теломер", "мРНК", "тРНК", "рРНК"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Yang-Mills",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто предложил doubly special relativity?",
+    "options": ["Джованни Амелино-Камелия", "Ли Смолин", "Карло Ровелли", "Абэй Аштекар"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое moiré superlattice?",
+    "options": ["В графене", "В металлах", "В изоляторах", "В полупроводниках"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите quantum Darwinism",
+    "options": ["Войцех Зурек", "Эрвин Шрёдингер", "Вернер Гейзенберг", "Пол Дирак"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Американские боги'?",
+    "options": ["Нил Гейман", "Терри Пратчетт", "Дуглас Адамс", "Джеймс Херберт"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Steiner tree problem?",
+    "options": ["NP-полная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова структура rotaxane?",
+    "options": ["Кольцо на оси", "Переплетенные", "Разветвленные", "Сетчатые"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое scaRNA?",
+    "options": ["Малая Cajal body РНК", "мРНК", "тРНК", "рРНК"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: Birch and Swinnerton-Dyer",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто открыл fast radio bursts?",
+    "options": ["Duncan Lorimer", "Matthew Bailes", "David Narkevic", "Все"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Dirac semimetal?",
+    "options": ["Топологический материал", "Обычный", "Изолятор", "Сверхпроводник"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Найдите SYK model",
+    "options": ["Для holography", "Для классики", "Для квантовой", "Для статистики"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Кто автор 'Песнь льда и огня'?",
+    "options": ["Джордж Р. Р. Мартин", "Роберт Джордан", "Брэндон Сандерсон", "Патрик Ротфусс"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое Dominating set problem?",
+    "options": ["NP-полная", "P", "Линейная", "Квадратичная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Какова реакция ATRP?",
+    "options": ["Атомно-трансферная радикальная полимеризация", "Анионная", "Катионная", "Свободнорадикальная"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Что такое lincRNA?",
+    "options": ["Длинная интергенная некодирующая РНК", "Кодирующая", "Короткая", "тРНК"],
+    "correctAnswer": 0
+    },
+    {
+    "question": "Решите: P vs NP",
+    "options": ["Открытая", "Решена", "Неразрешима", "Тривиальна"],
+    "correctAnswer": 0
+    }
+    ]

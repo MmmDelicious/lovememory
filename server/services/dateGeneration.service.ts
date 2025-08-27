@@ -11,6 +11,23 @@ import {
 
 const aiService = require('./ai.service');
 
+interface YandexGeoObject {
+  GeoObject: {
+    Point: {
+      pos: string; // "37.622504 55.753215"
+    };
+    name: string;
+    description: string;
+    metaDataProperty: {
+      GeocoderMetaData: {
+        kind: string;
+        text: string;
+        precision: string;
+      }
+    }
+  }
+}
+
 interface PlaceData {
   name: string;
   address?: string;
@@ -133,37 +150,252 @@ class DateGenerationService implements IDateGenerationService {
   }
 
   /**
-   * Получение реальных мест через внешние API
+   * Получение реальных мест через Yandex Maps API
    */
   private async fetchRealPlaces(city: string, analysis: any): Promise<PlaceData[]> {
     try {
-      // Заглушка для реального API - можно подключить Google Places, Foursquare, etc.
-      console.log('🔍 Fetching real places (using static data for now)');
+      console.log(`🗺️ Fetching real places from Yandex Maps for ${city}`);
       
-      // Выбираем места на основе анализа предпочтений
-      let selectedPlaces: PlaceData[] = [];
-      
-      if (analysis.loveLanguage === 'quality_time') {
-        selectedPlaces = [...this.STATIC_PLACES.activities, ...this.STATIC_PLACES.cultural];
-      } else if (analysis.loveLanguage === 'physical_touch') {
-        selectedPlaces = [...this.STATIC_PLACES.activities.filter(p => p.type === 'park'), ...this.STATIC_PLACES.restaurants];
-      } else {
-        selectedPlaces = [...this.STATIC_PLACES.restaurants, ...this.STATIC_PLACES.activities];
+      const cityCoords = await this.getCityCoordinatesYandex(city);
+      if (!cityCoords) {
+        console.warn(`⚠️ Could not get coordinates for ${city}, using static data`);
+        return this.getStaticPlacesByPreferences(analysis);
       }
 
-      // Фильтруем по бюджету
-      if (analysis.budgetLevel === 'low') {
-        selectedPlaces = selectedPlaces.filter(p => (p.price_level || 3) <= 2);
-      } else if (analysis.budgetLevel === 'high') {
-        selectedPlaces = selectedPlaces.filter(p => (p.price_level || 3) >= 3);
+      const searchQueries = this.getSearchQueriesByPreferences(analysis);
+      
+      const allPlaces: PlaceData[] = [];
+      
+      for (const query of searchQueries) {
+        try {
+          const places = await this.searchPlacesYandex(cityCoords, query, city);
+          allPlaces.push(...places);
+        } catch (error) {
+          console.warn(`⚠️ Error searching for ${query}:`, error.message);
+        }
       }
 
-      return selectedPlaces.slice(0, 8); // Возвращаем топ-8
+      const filteredPlaces = this.filterPlacesByBudget(allPlaces, analysis.budgetLevel);
+      
+      console.log(`✅ Found ${filteredPlaces.length} real places in ${city}`);
+      return filteredPlaces.slice(0, 8);
 
     } catch (error) {
-      console.error('Error fetching real places:', error);
+      console.error('❌ Error fetching from Yandex Maps, using fallback:', error);
+      return this.getStaticPlacesByPreferences(analysis);
+    }
+  }
+
+  /**
+   * Получение координат города через Yandex Geocoding API
+   */
+  private async getCityCoordinatesYandex(city: string): Promise<{ lat: number; lng: number } | null> {
+    try {
+      const apiKey = process.env.YANDEX_API;
+      if (!apiKey) {
+        console.warn('⚠️ YANDEX_API not found in environment');
+        return null;
+      }
+
+      const geocodeUrl = `https://geocode-maps.yandex.ru/1.x/?apikey=${apiKey}&format=json&geocode=${encodeURIComponent(city)}&results=1`;
+      
+      const response = await axios.get(geocodeUrl);
+      const geoObjects = response.data?.response?.GeoObjectCollection?.featureMember;
+      
+      if (!geoObjects || geoObjects.length === 0) {
+        return null;
+      }
+
+      const point = geoObjects[0].GeoObject.Point.pos;
+      const [lng, lat] = point.split(' ').map(Number);
+      
+      return { lat, lng };
+
+    } catch (error) {
+      console.error('Error geocoding city with Yandex:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Поиск мест через Yandex Places API (Geosearch)
+   */
+  private async searchPlacesYandex(coords: { lat: number; lng: number }, query: string, city: string): Promise<PlaceData[]> {
+    try {
+      const apiKey = process.env.YANDEX_API;
+      if (!apiKey) return [];
+
+      const text = `${query} ${city}`;
+      const searchUrl = `https://search-maps.yandex.ru/v1/?apikey=${apiKey}&text=${encodeURIComponent(text)}&lang=ru_RU&ll=${coords.lng},${coords.lat}&spn=0.552,0.402&rspn=1&results=10`;
+      
+      const response = await axios.get(searchUrl);
+      const features = response.data?.features || [];
+      
+      return features.map((feature: any) => {
+        const [lng, lat] = feature.geometry.coordinates;
+        const properties = feature.properties.CompanyMetaData || {};
+        
+        return {
+          name: properties.name || 'Место без названия',
+          address: properties.address || '',
+          type: this.categorizePlace(query),
+          rating: this.getRatingFromYandex(properties),
+          price_level: this.estimatePriceLevelFromYandex(properties),
+          coordinates: { lat, lng }
+        };
+      });
+
+    } catch (error) {
+      console.error(`Error searching Yandex places for "${query}":`, error);
       return [];
     }
+  }
+  
+  /**
+   * Оценка ценового уровня на основе данных Yandex
+   */
+  private estimatePriceLevelFromYandex(properties: any): number {
+    const categories = (properties.Categories || []).map((c: any) => c.name.toLowerCase()).join(' ');
+
+    if (categories.includes('дорогой ресторан')) return 5;
+    if (categories.includes('ресторан')) return 4;
+    if (categories.includes('кафе') || categories.includes('кофейня') || categories.includes('бистро')) return 3;
+    if (categories.includes('быстрое питание') || categories.includes('фастфуд')) return 2;
+    
+    return 3;
+  }
+
+  /**
+   * Получение рейтинга из данных Yandex
+   */
+  private getRatingFromYandex(properties: any): number {
+    if (properties.Reviews) {
+      return parseFloat(properties.Reviews.rating) || 4.0;
+    }
+    return 4.0;
+  }
+
+
+  /**
+   * Преобразование запросов в категории Geoapify - БОЛЬШE НЕ ИСПОЛЬЗУЕТСЯ
+   */
+  private getGeoapifyCategories(query: string): string {
+    const categoryMap: { [key: string]: string } = {
+      'ресторан': 'catering.restaurant',
+      'кафе': 'catering.cafe',
+      'музей': 'entertainment.museum',
+      'театр': 'entertainment.theatre',
+      'кинотеатр': 'entertainment.cinema',
+      'парк': 'leisure.park',
+      'набережная': 'leisure.park',
+      'spa салон': 'healthcare.beauty_salon',
+      'книжный магазин': 'commercial.books',
+      'библиотека': 'education.library',
+      'литературное кафе': 'catering.cafe',
+      'мастер-класс': 'education.school',
+      'кулинарная школа': 'education.school',
+      'торговый центр': 'commercial.shopping_mall',
+      'антикварный магазин': 'commercial.marketplace',
+      'ювелирный': 'commercial.jewelry'
+    };
+
+    return categoryMap[query] || 'catering.restaurant,catering.cafe,entertainment,leisure';
+  }
+
+  /**
+   * Получение поисковых запросов на основе предпочтений
+   */
+  private getSearchQueriesByPreferences(analysis: any): string[] {
+    const baseQueries = ['ресторан', 'кафе'];
+    
+    if (analysis.loveLanguage === 'quality_time') {
+      return [...baseQueries, 'музей', 'театр', 'кинотеатр', 'парк'];
+    } else if (analysis.loveLanguage === 'physical_touch') {
+      return [...baseQueries, 'парк', 'набережная', 'spa салон'];
+    } else if (analysis.loveLanguage === 'words_of_affirmation') {
+      return [...baseQueries, 'книжный магазин', 'библиотека', 'литературное кафе'];
+    } else if (analysis.loveLanguage === 'acts_of_service') {
+      return [...baseQueries, 'мастер-класс', 'кулинарная школа'];
+    } else if (analysis.loveLanguage === 'receiving_gifts') {
+      return [...baseQueries, 'торговый центр', 'антикварный магазин', 'ювелирный'];
+    }
+    
+    return baseQueries;
+  }
+
+  /**
+   * Категоризация места по запросу
+   */
+  private categorizePlace(query: string): string {
+    if (query.includes('ресторан')) return 'restaurant';
+    if (query.includes('кафе')) return 'cafe';
+    if (query.includes('музей')) return 'museum';
+    if (query.includes('театр')) return 'theater';
+    if (query.includes('парк')) return 'park';
+    if (query.includes('кино')) return 'cinema';
+    return 'entertainment';
+  }
+
+  /**
+   * Оценка ценового уровня на основе свойств Geoapify
+   */
+  private estimatePriceLevelFromProperties(properties: any): number {
+    // Попробуем определить по названию и типу заведения
+    const name = (properties?.name || '').toLowerCase();
+    const category = (properties?.categories?.[0] || '').toLowerCase();
+    
+    if (name.includes('премиум') || name.includes('люкс') || name.includes('элит')) return 5;
+    if (category.includes('restaurant') && !name.includes('fast')) return 4;
+    if (category.includes('cafe') || category.includes('bistro')) return 3;
+    if (name.includes('fast') || name.includes('быстр') || name.includes('макдон')) return 2;
+    if (category.includes('fast_food')) return 2;
+    
+    return 3;
+  }
+
+  /**
+   * Оценка ценового уровня (старый метод для совместимости)
+   */
+  private estimatePriceLevel(categories: any[]): number {
+    if (!categories) return 3;
+    
+    const categoryNames = categories.map(c => c.name?.toLowerCase() || '').join(' ');
+    
+    if (categoryNames.includes('премиум') || categoryNames.includes('люкс')) return 5;
+    if (categoryNames.includes('ресторан') && !categoryNames.includes('быстр')) return 4;
+    if (categoryNames.includes('кафе') || categoryNames.includes('бистро')) return 3;
+    if (categoryNames.includes('фаст') || categoryNames.includes('быстр')) return 2;
+    
+    return 3;
+  }
+
+  /**
+   * Фильтрация по бюджету
+   */
+  private filterPlacesByBudget(places: PlaceData[], budgetLevel: string): PlaceData[] {
+    if (budgetLevel === 'low') {
+      return places.filter(p => (p.price_level || 3) <= 2);
+    } else if (budgetLevel === 'high') {
+      return places.filter(p => (p.price_level || 3) >= 4);
+    }
+    return places;
+  }
+
+  /**
+   * Fallback к статическим данным
+   */
+  private getStaticPlacesByPreferences(analysis: any): PlaceData[] {
+    let selectedPlaces: PlaceData[] = [];
+    
+    if (analysis.loveLanguage === 'quality_time') {
+      selectedPlaces = [...this.STATIC_PLACES.activities, ...this.STATIC_PLACES.cultural];
+    } else if (analysis.loveLanguage === 'physical_touch') {
+      selectedPlaces = [...this.STATIC_PLACES.activities.filter(p => p.type === 'park'), ...this.STATIC_PLACES.restaurants];
+    } else {
+      selectedPlaces = [...this.STATIC_PLACES.restaurants, ...this.STATIC_PLACES.activities];
+    }
+
+    return selectedPlaces.slice(0, 8);
   }
 
   /**
