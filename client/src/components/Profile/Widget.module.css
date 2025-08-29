@@ -18,8 +18,6 @@
   .widgetIconWrapper {
     font-size: 1.75rem;
   }
-  .pairWidget .widgetIconWrapper { color: var(--color-primary); }
-  .telegramWidget .widgetIconWrapper { color: #0088cc; }
   
   .widgetContent {
     display: flex;
@@ -42,10 +40,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-  }
-  
-  .widgetBody button {
-    margin-top: auto;
   }
   
   .input {

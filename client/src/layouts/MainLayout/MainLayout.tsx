@@ -42,10 +42,9 @@ const MainLayout: React.FC = () => {
   const navigate = useNavigate();
   
   const handleLogout = () => {
-    console.log('🚪 Выполняем выход из системы');
-    logoutUser(); // Очищаем Redux auth
-    resetCurrency(); // Очищаем Redux currency
-    navigate('/login'); // Перенаправляем на страницу входа
+            logoutUser();
+        resetCurrency();
+            navigate('/login');
   };
   
   const handleNavigate = (path: string) => {

@@ -1,0 +1,1250 @@
+import { TurnBasedGame } from '../base/TurnBasedGame';
+import { 
+  GameTypes, 
+  IPokerSettings, 
+  IPokerMove, 
+  IPokerCard, 
+  IPokerPlayer, 
+  IPokerPot,
+  PokerStage,
+  PokerAction,
+  PokerSuit,
+  PokerRank 
+} from '../../types/game.interfaces';
+
+// Импортируем покерные утилиты для оценки рук
+const Hand = require('pokersolver').Hand;
+
+/**
+ * Новая реализация Poker игры на основе TurnBasedGame
+ * Техасский холдем покер с поддержкой блайндов, ставок, боковых банков
+ */
+export class PokerGameNew extends TurnBasedGame<GameTypes.IPokerState, IPokerMove> {
+  public readonly gameType = 'poker';
+  
+  // Геттер для текущего игрока
+  public get currentPlayerId(): string | undefined {
+    const active = this._getActivePlayersBySeat();
+    if (this._currentPlayerIndex >= 0 && this._currentPlayerIndex < active.length) {
+      return active[this._currentPlayerIndex]?.id;
+    }
+    return undefined;
+  }
+  
+  // Покерные данные
+  private _stage: PokerStage = 'pre-flop';
+  private _pot: number = 0;
+  private _sidePots: IPokerPot[] = [];
+  private _communityCards: IPokerCard[] = [];
+  private _dealerPosition: number = -1;
+  private _blinds: { small: number; big: number };
+  private _lastRaiser: string | null = null;
+  private _lastRaiseAmount: number = 0;
+  private _showdownPhase: boolean = false;
+  private _winnersInfo: any | null = null;
+  
+  // Логика хода основана на номере места (seat) для стабильности
+  private _currentPlayerSeat: number = -1;
+  
+  // Колода карт
+  private _deck: IPokerCard[] = [];
+  
+  // Покерные игроки (расширенные)
+  private _pokerPlayers: Map<string, IPokerPlayer> = new Map();
+  
+  // Таймаут для перезапуска руки
+  private _handRestartTimeout: NodeJS.Timeout | null = null;
+  
+  // Таймаут для завершения showdown
+  private _showdownEndTimeout: NodeJS.Timeout | null = null;
+  
+  constructor(roomId?: string, settings?: Partial<IPokerSettings>) {
+    const pokerSettings: IPokerSettings = {
+      maxPlayers: 8,
+      minPlayers: 2,
+      // Базовый TurnBasedGame ожидает timeLimit в секундах
+      timeLimit: settings?.timeLimit ?? Math.floor((settings?.turnTimeLimit ?? 30000) / 1000),
+      difficulty: 'medium',
+      smallBlind: settings?.smallBlind || 5,
+      bigBlind: settings?.bigBlind || 10,
+      buyInAmount: settings?.buyInAmount || 1000,
+      turnTimeLimit: settings?.turnTimeLimit || 30000,
+      ...settings
+    };
+    
+    super(roomId, pokerSettings);
+    
+    this._blinds = {
+      small: pokerSettings.smallBlind!,
+      big: pokerSettings.bigBlind!
+    };
+    
+    // Настройки таймера берутся из this.settings.timeLimit
+  }
+  
+  // Переопределяем addPlayer для создания poker-специфичных игроков
+  public override addPlayer(player: any): GameTypes.IPokerState {
+    // Проверяем статус игры до вызова super.addPlayer
+    const wasGameInProgress = this._status === 'in_progress';
+    
+    const baseState = super.addPlayer(player);
+    
+    // Находим свободное место за столом
+    const assignedSeat = this._findAvailableSeat();
+    
+    // Определяем является ли игрок observer
+    const isObserver = wasGameInProgress || player.isObserver;
+    
+    // Создаем poker-специфичного игрока
+    const pokerPlayer: IPokerPlayer = {
+      ...player,
+      stack: 0, // Устанавливается при buy-in
+      currentBet: 0,
+      inHand: false,
+      hasActed: false,
+      isWaitingToPlay: !isObserver, // Observer не ждет игры
+      isAllIn: false,
+      hasBoughtIn: false,
+      showCards: false,
+      hand: [],
+      seat: assignedSeat, // КРИТИЧНО: Номер места для стабильности
+      isObserver: isObserver // Устанавливаем isObserver на основе статуса игры
+    };
+    
+    this._pokerPlayers.set(player.id, pokerPlayer);
+    
+    // Если это observer, не начинаем новую игру
+    
+    return this.getState();
+  }
+  
+  // Метод для покупки фишек (buy-in)
+  public playerBuyIn(playerId: string, amount: number): { success: boolean; error?: string } {
+    try {
+      const player = this._pokerPlayers.get(playerId);
+      if (!player) {
+        return { success: false, error: 'Player not found' };
+      }
+      
+      if (player.hasBoughtIn) {
+        return { success: false, error: 'Player has already bought in' };
+      }
+      
+      player.stack = amount;
+      player.hasBoughtIn = true;
+      player.isWaitingToPlay = false;
+      
+      // Проверяем можно ли начать игру
+      const readyPlayers = Array.from(this._pokerPlayers.values())
+        .filter(p => p.hasBoughtIn);
+      
+      if (readyPlayers.length >= this.settings.minPlayers && this._status === 'waiting') {
+        this._startNewHand();
+      }
+      
+      this._emitStateChange();
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: (error as Error).message || 'Unknown error' };
+    }
+  }
+  
+  // Реализация абстрактных методов TurnBasedGame
+  protected override _executeMove(playerId: string, move: IPokerMove): void {
+    
+    if (this._showdownPhase) {
+      this._handleShowdownAction(playerId, move);
+      return;
+    }
+    
+    const { action, amount } = move;
+    const player = this._pokerPlayers.get(playerId);
+
+    if (!player || !player.inHand) {
+      throw new Error('Player not in hand');
+    }
+    
+    // Валидируем и выполняем действие
+    const allowedActions = this._getAllowedActions(player);
+    
+    if (!allowedActions.actions.includes(action)) {
+      throw new Error(`Action ${action} not allowed`);
+    }
+    
+    // Выполняем действие
+    switch (action) {
+      case 'fold':
+        player.inHand = false;
+        break;
+        
+      case 'check':
+        // Ничего дополнительного не делаем
+        break;
+        
+      case 'call':
+        this._postBet(player, allowedActions.callAmount || 0);
+        break;
+        
+      case 'raise':
+        if (amount === undefined || amount === null) throw new Error('Raise amount required');
+
+        // Валидация: сервер ожидает итоговую ставку (total amount)
+        const allowed = this._getAllowedActions(player);
+        const allowedMin = allowed.minRaise || player.currentBet;
+        const allowedMax = allowed.maxRaise || (player.currentBet + player.stack);
+
+        if (amount < allowedMin || amount > allowedMax) {
+          throw new Error(`Invalid raise amount: ${amount}. Allowed range: ${allowedMin} - ${allowedMax}`);
+        }
+
+        // Сколько нужно добавить к текущей ставке игрока
+        const raiseAmount = amount - player.currentBet;
+        if (raiseAmount <= 0) {
+          throw new Error('Raise amount must be greater than current bet');
+        }
+
+        // --- до _postBet ---
+        const maxBetBefore = Math.max(...Array.from(this._pokerPlayers.values()).map(p => p.currentBet));
+        this._postBet(player, raiseAmount);
+        
+        this._lastRaiser = player.id;
+        this._lastRaiseAmount = Math.max(0, amount - maxBetBefore);
+        this._resetActionFlags(player.id);
+        
+        break;
+        
+      case 'bet':
+        if (!amount) throw new Error('Bet amount required');
+        this._postBet(player, amount);
+        this._lastRaiser = player.id;
+        this._lastRaiseAmount = amount;
+        this._resetActionFlags(player.id);
+        break;
+    }
+    
+    player.hasActed = true;
+    
+    this._emitEvent({
+      type: 'poker_action_made',
+      playerId,
+      data: {
+        action,
+        amount: amount || 0,
+        pot: this._pot,
+        stage: this._stage
+      },
+      timestamp: new Date()
+    });
+  }
+  
+  protected override _checkGameEnd(): boolean {
+    // Игра заканчивается если остался только один игрок в руке
+    // или завершился showdown
+    const playersInHand = Array.from(this._pokerPlayers.values()).filter(p => p.inHand);
+    return playersInHand.length <= 1 || this._stage === 'showdown';
+  }
+  
+  protected override _determineWinner(): string | 'draw' | null {
+    if (this._winnersInfo) {
+      // Возвращаем первого победителя (основной банк)
+      return this._winnersInfo.winners?.[0]?.playerId || null;
+    }
+    
+    // Если остался один игрок - он победитель
+    const playersInHand = Array.from(this._pokerPlayers.values()).filter(p => p.inHand);
+    if (playersInHand.length === 1) {
+      return playersInHand[0].id;
+    }
+    
+    return null;
+  }
+  
+  // Переопределяем логику смены хода для покера
+  protected override _nextTurn(): void {
+    // Получаем только тех игроков кто участвует в торгах (сделал buy-in, в игре и не observer)
+    const activePlayers = Array.from(this._pokerPlayers.values()).filter(p => p.inHand && p.hasBoughtIn && !p.isObserver);
+    
+    // Проверяем завершение раунда ставок
+    if (activePlayers.length <= 1) {
+      this._endHand();
+      return;
+    }
+    
+    // Проверяем что все активные игроки сделали ходы и ставки равны
+    if (activePlayers.every(p => p.hasActed)) {
+      const maxBet = Math.max(...activePlayers.map(p => p.currentBet));
+      const allMatched = activePlayers.every(p => p.currentBet === maxBet);
+      
+      ));
+      
+      if (allMatched) {
+        this._endBettingRound();
+        return;
+      }
+    }
+    
+    // Дополнительная проверка для ривера - если все чекают, то переходим к showdown
+    if (this._stage === 'river' && activePlayers.every(p => p.hasActed && p.currentBet === 0)) {
+      this._startShowdown();
+      return;
+    }
+    
+    // Проверка для любого этапа - если все чекают и нет ставок, то переходим к следующему
+    if (activePlayers.every(p => p.hasActed && p.currentBet === 0) && this._stage !== 'river') {
+      this._endBettingRound();
+      return;
+    }
+    
+    // Переходим к следующему игроку (с seat-based логикой)
+    const activeSeats = this._getActivePlayersBySeat();
+    if (this._currentPlayerIndex < 0 || this._currentPlayerIndex >= activeSeats.length) {
+      // восстанавливаем на ближайший валидный индекс
+      this._currentPlayerIndex = 0;
+      this._currentPlayerSeat = activeSeats[0]?.seat ?? 0;
+    }
+    const currentPlayer = activeSeats[this._currentPlayerIndex];
+    
+    if (currentPlayer) {
+      const nextSeat = this._getNextSeat(currentPlayer.seat);
+      // Обновляем _currentPlayerSeat и _currentPlayerIndex
+      this._currentPlayerSeat = nextSeat;
+      this._currentPlayerIndex = this._getSeatIndex(nextSeat);
+      
+      // Проверяем что индекс валидный
+      if (this._currentPlayerIndex === -1) {
+        this._currentPlayerIndex = 0;
+        this._currentPlayerSeat = activePlayers[0]?.seat || 0;
+      }
+      
+      ?.id,
+        name: this._getPlayerBySeat(nextSeat)?.name
+      });
+    }
+    
+    // Запускаем таймер для следующего игрока
+    this._startTurnTimer();
+    this._emitStateChange();
+  }
+  
+  // Реализация валидации ходов
+  public override isValidMove(playerId: string, move: IPokerMove): boolean {
+    try {
+      this._validatePlayerMove(playerId);
+      
+      const player = this._pokerPlayers.get(playerId);
+      if (!player || !player.inHand) {
+        return false;
+      }
+      
+      const allowedActions = this._getAllowedActions(player);
+      return allowedActions.actions.includes(move.action);
+    } catch {
+      return false;
+    }
+  }
+  
+  // Переопределяем getState для poker-специфичных данных
+  public override getState(): GameTypes.IPokerState {
+    const baseState = this._getTurnBasedState();
+    
+    return {
+      ...baseState,
+      stage: this._stage,
+      pot: this._pot,
+      sidePots: [...this._sidePots],
+      communityCards: [...this._communityCards],
+      dealerPosition: this._dealerPosition,
+      currentPlayerIndex: this._currentPlayerIndex,
+      blinds: { ...this._blinds },
+      lastRaiser: this._lastRaiser,
+      lastRaiseAmount: this._lastRaiseAmount,
+      showdownPhase: this._showdownPhase,
+      winnersInfo: this._winnersInfo,
+      players: Array.from(this._pokerPlayers.values())
+    };
+  }
+  
+  // Безопасный override для _getTurnBasedState
+  protected _getTurnBasedState(): any {
+    // если TurnBasedGame предоставляет реализацию — она будет использована (override не помешает)
+    // возвращаем базовый state + currentPlayerId + timeLimit (чтобы фронт получил ожидаемые поля)
+    const base = (typeof super['_getTurnBasedState'] === 'function')
+      ? super['_getTurnBasedState']()
+      : (this._getBaseState ? this._getBaseState() : {});
+
+    return {
+      ...base,
+      currentPlayerId: this.currentPlayerId ?? null,
+      currentPlayerIndex: this._currentPlayerIndex,
+      timeLimit: this.settings.timeLimit
+    };
+  }
+  
+  // Добавляем getStateForPlayer для buy-in флагов  
+  public getStateForPlayer(playerId: string): any {
+    const baseState = this.getState();
+    const player = this._pokerPlayers.get(playerId);
+    
+    if (!player) {
+      return {
+        ...baseState,
+        yourHand: [],
+        needsBuyIn: true,
+        hasBoughtIn: false,
+        validActions: [],
+        callAmount: 0,
+        minRaiseAmount: 0,
+        maxRaiseAmount: 0
+      };
+    }
+    
+    // Проверяем, ход ли игрока
+    const isPlayerTurn = baseState.currentPlayerId === playerId;
+    let allowedActionsData = {
+      validActions: [] as PokerAction[],
+      callAmount: 0,
+      minRaiseAmount: 0,
+      maxRaiseAmount: 0
+    };
+
+    if (isPlayerTurn && player.inHand) {
+      const actions = this._getAllowedActions(player);
+      allowedActionsData = {
+        validActions: actions.actions,
+        callAmount: actions.callAmount || 0,
+        minRaiseAmount: actions.minRaise || 0,
+        maxRaiseAmount: actions.maxRaise || 0
+      };
+    }
+    
+    // Маппинг мастей для клиента (H, D, C, S)
+    const mapSuitForClient = (suit: PokerSuit): string => {
+      switch (suit) {
+        case 'hearts': return 'H';
+        case 'diamonds': return 'D';
+        case 'clubs': return 'C';
+        case 'spades': return 'S';
+        default: return suit;
+      }
+    };
+    
+    // Конвертируем карты для клиента
+    const yourHand = (player.hand || []).map(card => ({
+      ...card,
+      suit: mapSuitForClient(card.suit)
+    }));
+    
+    const communityCards = baseState.communityCards.map(card => ({
+      ...card,
+      suit: mapSuitForClient(card.suit)
+    }));
+    
+    return {
+      ...baseState,
+      yourHand,
+      communityCards,
+      needsBuyIn: !player.hasBoughtIn,
+      hasBoughtIn: player.hasBoughtIn,
+      ...allowedActionsData
+    };
+  }
+  
+  // Переопределяем инициализацию игры
+  protected override _initializeGame(): void {
+    super._initializeGame();
+    
+    // Сбрасываем покерное состояние
+    this._stage = 'pre-flop';
+    this._pot = 0;
+    this._sidePots = [];
+    this._communityCards = [];
+    this._dealerPosition = -1;
+    this._lastRaiser = null;
+    this._lastRaiseAmount = 0;
+    this._showdownPhase = false;
+    this._winnersInfo = null;
+    
+    this._emitEvent({
+      type: 'poker_game_initialized',
+      data: {
+        blinds: this._blinds,
+        maxPlayers: this.settings.maxPlayers
+      },
+      timestamp: new Date()
+    });
+  }
+  
+  // Приватные методы для покерной логики
+  private _startNewHand(): void {
+    // Сбрасываем состояние руки
+    this._pot = 0;
+    this._sidePots = [];
+    this._communityCards = [];
+    this._stage = 'pre-flop';
+    this._showdownPhase = false;
+    this._winnersInfo = null;
+    this._lastRaiser = null;
+    this._lastRaiseAmount = 0;
+    
+    // Находим активных игроков (исключаем observer)
+    const activePlayers = Array.from(this._pokerPlayers.values())
+      .filter(p => p.hasBoughtIn && p.stack > 0 && !p.isObserver);
+    
+    if (activePlayers.length < 2) {
+      throw new Error('Not enough players to start hand');
+    }
+    
+    // Устанавливаем дилера
+    this._dealerPosition = this._getNextDealerPosition();
+    
+    // Сбрасываем состояние игроков
+    for (const player of this._pokerPlayers.values()) {
+      // Игрок участвует в игре если сделал buy-in и у него есть фишки
+      player.inHand = player.hasBoughtIn && player.stack > 0;
+      player.hasActed = false;
+      player.currentBet = 0;
+      player.isAllIn = false;
+      player.showCards = false;
+      player.hand = [];
+    }
+    
+    // Проверяем количество активных игроков после установки inHand
+    const finalActivePlayers = Array.from(this._pokerPlayers.values()).filter(p => p.inHand);
+    finalActivePlayers.forEach(p => {
+      });
+    
+    // Устанавливаем статус игры
+    this._status = 'in_progress';
+    
+    // Создаем и перемешиваем колоду
+    this._createDeck();
+    
+    // Раздаем карты
+    this._dealCards();
+    
+    // Ставим блайнды
+    this._postBlinds();
+    
+    // Устанавливаем первого игрока
+    let firstPlayerSeat: number;
+    
+    if (activePlayers.length === 2) {
+      // Heads-up: dealer posts SMALL, other posts BIG
+      // На пре-флопе первым ходит дилер (small blind)
+      firstPlayerSeat = this._dealerPosition;
+    } else {
+      // Мульти-тейбл: первый ход после big blind
+      const bigBlindSeat = this._getNextSeat(this._getNextSeat(this._dealerPosition));
+      firstPlayerSeat = this._getNextSeat(bigBlindSeat);
+    }
+    
+    this._currentPlayerSeat = firstPlayerSeat;
+    this._currentPlayerIndex = this._getSeatIndex(firstPlayerSeat);
+    
+    // Проверяем что индекс валидный
+    if (this._currentPlayerIndex === -1) {
+      this._currentPlayerIndex = 0;
+      // Используем только активных игроков для установки seat (исключаем observer)
+      const activePlayersForSeat = activePlayers.filter(p => p.hasBoughtIn && !p.isObserver);
+      this._currentPlayerSeat = activePlayersForSeat[0]?.seat || 0;
+    }
+    
+    // currentPlayerId устанавливается автоматически через _currentPlayerIndex
+    
+    this._emitEvent({
+      type: 'poker_hand_started',
+      data: {
+        dealerPosition: this._dealerPosition,
+        stage: this._stage,
+        pot: this._pot
+      },
+      timestamp: new Date()
+    });
+    
+    this._emitStateChange();
+  }
+  
+  private _createDeck(): void {
+    this._deck = [];
+    const suits: PokerSuit[] = ['hearts', 'diamonds', 'clubs', 'spades'];
+    const ranks: PokerRank[] = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    
+    for (const suit of suits) {
+      for (const rank of ranks) {
+        this._deck.push({ suit, rank });
+      }
+    }
+    
+    // Проверяем что колода содержит 52 карты
+    if (this._deck.length !== 52) {
+      throw new Error(`Invalid deck size: ${this._deck.length}`);
+    }
+    
+    // Перемешиваем колоду
+    for (let i = this._deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this._deck[i], this._deck[j]] = [this._deck[j], this._deck[i]];
+    }
+    
+    }
+  
+  private _dealCards(): void {
+    const activePlayers = Array.from(this._pokerPlayers.values()).filter(p => p.inHand);
+    
+    // Раздаем по 2 карты каждому игроку
+    for (let round = 0; round < 2; round++) {
+      for (const player of activePlayers) {
+        const card = this._deck.pop();
+        if (card) {
+          player.hand.push(card);
+        }
+      }
+    }
+  }
+  
+  private _postBlinds(): void {
+    const activePlayers = Array.from(this._pokerPlayers.values()).filter(p => p.inHand);
+    if (activePlayers.length < 2) return;
+    
+    // КРИТИЧНО: Heads-up rules - дилер = small blind, следующий = big blind
+    if (activePlayers.length === 2) {
+      // Heads-up: dealer posts SMALL, other posts BIG
+      const dealerPlayer = this._getPlayerBySeat(this._dealerPosition);
+      const otherPlayerSeat = this._getNextSeat(this._dealerPosition);
+      const otherPlayer = this._getPlayerBySeat(otherPlayerSeat);
+      
+      if (dealerPlayer) {
+        this._postBet(dealerPlayer, this._blinds.small);
+      }
+      if (otherPlayer) {
+        this._postBet(otherPlayer, this._blinds.big);
+      }
+    } else {
+      // Мульти-тейбл: обычные правила
+      // Small blind (следующий после дилера)
+      const smallBlindSeat = this._getNextSeat(this._dealerPosition);
+      const smallBlindPlayer = this._getPlayerBySeat(smallBlindSeat);
+      if (smallBlindPlayer) {
+        this._postBet(smallBlindPlayer, this._blinds.small);
+      }
+      
+      // Big blind (следующий после small blind)
+      const bigBlindSeat = this._getNextSeat(smallBlindSeat);
+      const bigBlindPlayer = this._getPlayerBySeat(bigBlindSeat);
+      if (bigBlindPlayer) {
+        this._postBet(bigBlindPlayer, this._blinds.big);
+      }
+    }
+  }
+  
+  private _postBet(player: IPokerPlayer, amount: number): void {
+    const actualAmount = Math.min(amount, player.stack);
+    player.stack -= actualAmount;
+    player.currentBet += actualAmount;
+    
+    // Отмечаем all-in
+    if (player.stack === 0) {
+      player.isAllIn = true;
+    }
+    
+    // КРИТИЧНО: Side pots будут пересчитаны в конце раунда
+    // Пока просто добавляем в основной pot
+    this._pot += actualAmount;
+    
+    }
+  
+  private _calculateSidePots(): void {
+    // Получаем всех игроков с ставками (исключаем observer)
+    const playersWithBets = Array.from(this._pokerPlayers.values())
+      .filter(p => p.currentBet > 0 && p.inHand && !p.isObserver)
+      .sort((a, b) => a.currentBet - b.currentBet);
+    
+    if (playersWithBets.length === 0) return;
+    
+    // Очищаем старые side pots и переносим весь pot в обработку
+    this._sidePots = [];
+    this._pot = 0;
+    
+    // Группируем игроков по уровням ставок
+    const betLevels: {level: number, players: string[]}[] = [];
+    
+    playersWithBets.forEach(player => {
+      let found = false;
+      for (const level of betLevels) {
+        if (level.level === player.currentBet) {
+          level.players.push(player.id);
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        betLevels.push({ level: player.currentBet, players: [player.id] });
+      }
+    });
+    
+    // Сортируем по уровням
+    betLevels.sort((a, b) => a.level - b.level);
+    
+    let prevLevel = 0;
+    
+    for (let i = 0; i < betLevels.length; i++) {
+      const currentLevel = betLevels[i].level;
+      const contribution = currentLevel - prevLevel;
+      
+      if (contribution > 0) {
+        // Находим всех игроков, которые допустимы к этому pot
+        const eligiblePlayers: string[] = [];
+        for (let j = i; j < betLevels.length; j++) {
+          eligiblePlayers.push(...betLevels[j].players);
+        }
+        
+        const potAmount = contribution * eligiblePlayers.length;
+        
+        if (i === 0) {
+          // Основной pot
+          this._pot = potAmount;
+        } else {
+          // Side pot
+          this._sidePots.push({
+            amount: potAmount,
+            eligiblePlayers: [...eligiblePlayers]
+          });
+        }
+      }
+      
+      prevLevel = currentLevel;
+    }
+  }
+  
+  private _endBettingRound(): void {
+    // Переходим к следующему этапу или завершаем руку
+    switch (this._stage) {
+      case 'pre-flop':
+        this._dealFlop();
+        this._stage = 'flop';
+        break;
+      case 'flop':
+        this._dealTurn();
+        this._stage = 'turn';
+        break;
+      case 'turn':
+        this._dealRiver();
+        this._stage = 'river';
+        break;
+      case 'river':
+        this._startShowdown();
+        return;
+    }
+    
+    // Дополнительная проверка для river - если все чекают, то переходим к showdown
+    if (this._stage === 'river') {
+      const activePlayers = Array.from(this._pokerPlayers.values()).filter(p => p.inHand && !p.isObserver);
+      if (activePlayers.every(p => p.hasActed && p.currentBet === 0)) {
+        this._startShowdown();
+        return;
+      }
+    }
+    
+    // КРИТИЧНО: Пересчитываем side pots в конце раунда
+    this._calculateSidePots();
+    
+    // Сбрасываем флаги действий для нового раунда
+    for (const player of this._pokerPlayers.values()) {
+      player.hasActed = false;
+      player.currentBet = 0;
+    }
+    
+    // Устанавливаем первого игрока для нового раунда (после дилера)
+    // Используем только активных игроков (сделали buy-in, в игре и не observer)
+    const activePlayersForNewRound = Array.from(this._pokerPlayers.values()).filter(p => p.inHand && p.hasBoughtIn && !p.isObserver);
+    if (activePlayersForNewRound.length === 0) {
+      this._endHand();
+      return;
+    }
+    
+    const firstPlayerSeat = this._getNextSeat(this._dealerPosition);
+    this._currentPlayerSeat = firstPlayerSeat;
+    this._currentPlayerIndex = this._getSeatIndex(firstPlayerSeat);
+    
+    // Проверяем что индекс валидный
+    if (this._currentPlayerIndex === -1) {
+      this._currentPlayerIndex = 0;
+      this._currentPlayerSeat = activePlayersForNewRound[0]?.seat || 0;
+    }
+    
+    // currentPlayerId устанавливается автоматически через _currentPlayerIndex
+    
+    this._emitEvent({
+      type: 'poker_betting_round_ended',
+      data: {
+        stage: this._stage,
+        pot: this._pot,
+        communityCards: this._communityCards
+      },
+      timestamp: new Date()
+    });
+    
+    this._emitStateChange();
+  }
+  
+  private _dealFlop(): void {
+    // Сжигаем карту
+    this._deck.pop();
+    
+    // Раздаем 3 карты на стол
+    for (let i = 0; i < 3; i++) {
+      const card = this._deck.pop();
+      if (card) {
+        this._communityCards.push(card);
+      }
+    }
+  }
+  
+  private _dealTurn(): void {
+    // Сжигаем карту
+    this._deck.pop();
+    
+    // Раздаем 1 карту на стол
+    const card = this._deck.pop();
+    if (card) {
+      this._communityCards.push(card);
+    }
+  }
+  
+  private _dealRiver(): void {
+    // Сжигаем карту
+    this._deck.pop();
+    
+    // Раздаем 1 карту на стол
+    const card = this._deck.pop();
+    if (card) {
+      this._communityCards.push(card);
+    }
+  }
+  
+  private _startShowdown(): void {
+    this._stage = 'showdown';
+    this._showdownPhase = true;
+    
+    // Определяем победителей
+    this._determineShowdownWinners();
+    
+    this._emitEvent({
+      type: 'poker_showdown_started',
+      data: {
+        communityCards: this._communityCards,
+        winnersInfo: this._winnersInfo
+      },
+      timestamp: new Date()
+    });
+    
+    // Останавливаем таймеры перед showdown
+    this._stopTurnTimer();
+    
+    // Завершаем руку
+    if (this._showdownEndTimeout) clearTimeout(this._showdownEndTimeout);
+    this._showdownEndTimeout = setTimeout(() => {
+      this._showdownEndTimeout = null;
+      this._endHand();
+    }, 3000);
+  }
+  
+  private _determineShowdownWinners(): void {
+    const activePlayers = Array.from(this._pokerPlayers.values()).filter(p => p.inHand && !p.isObserver);
+    
+    // Преобразуем карты для pokersolver (КРИТИЧНО: '10' -> 'T')
+    const playerHands = new Map();
+    const handStrings: string[] = [];
+    
+    activePlayers.forEach(player => {
+      const allCards = [...player.hand, ...this._communityCards];
+      const cardStrings = allCards.map(card => {
+        // pokersolver ожидает 'T' вместо '10'
+        const rank = card.rank === '10' ? 'T' : card.rank;
+        return `${rank}${card.suit.charAt(0)}`;
+      });
+      const handString = cardStrings.join(' ');
+      playerHands.set(handString, player.id);
+      handStrings.push(handString); // Сохраняем строку для совместимости
+    });
+    
+    // КРИТИЧНО: Используем Hand.winners() для правильных тай-брейков
+    const winningHands = Hand.winners(handStrings.map(h => Hand.solve(h)));
+    
+    // КРИТИЧНО: Распределяем ОСНОВНОЙ pot и SIDE pots
+    const totalWinnings = this._distributePots(winningHands, playerHands);
+    
+    // --- Патч: формируем winnersInfo с player объектом ---
+    this._winnersInfo = {
+      winners: winningHands.map((hand: any) => {
+        const handString = hand.cards.map((c: any) => c.toString()).join(' ');
+        const playerId = this._findPlayerByHandString(handString, playerHands) || '';
+        const playerObj = this._pokerPlayers.get(playerId) || { id: playerId, name: `Player ${playerId}` };
+
+        return {
+          player: {
+            id: playerObj.id,
+            name: playerObj.name
+          },
+          playerId: playerObj.id,
+          handName: hand.name,
+          handRank: hand.rank,
+          // Выигрышные карты для подсветки
+          handCards: hand.cards.map((c: any) => ({
+            rank: c.value === 'T' ? '10' : c.value,
+            suit: this._mapSolverSuit(c.suit)
+          }))
+        };
+      }),
+      pot: this._pot + this._sidePots.reduce((sum, pot) => sum + pot.amount, 0),
+      totalWinnings
+    };
+  }
+  
+  private _distributePots(winningHands: any[], playerHands: Map<string, string>): {[playerId: string]: number} {
+    const winnings: {[playerId: string]: number} = {};
+    
+    // Распределяем основной pot
+    if (this._pot > 0) {
+      // Eligibility для основного пота — те игроки, которые вносили вклад в этот pot
+      const mainEligible = Array.from(this._pokerPlayers.values())
+        .filter(p => p.inHand && p.currentBet > 0 && !p.isObserver)
+        .map(p => p.id);
+      this._distributeSinglePot(this._pot, winningHands, playerHands, mainEligible, winnings);
+    }
+    
+    // Распределяем side pots
+    for (const sidePot of this._sidePots) {
+      this._distributeSinglePot(sidePot.amount, winningHands, playerHands, sidePot.eligiblePlayers, winnings);
+    }
+    
+    // Применяем выигрыши к стекам игроков
+    for (const [playerId, amount] of Object.entries(winnings)) {
+      const player = this._pokerPlayers.get(playerId);
+      if (player) {
+        player.stack += amount;
+      }
+    }
+    
+    return winnings;
+  }
+  
+  private _distributeSinglePot(potAmount: number, winningHands: any[], playerHands: Map<string, string>, eligiblePlayers: string[], winnings: {[playerId: string]: number}): void {
+    // Находим победителей среди допустимых игроков
+    const eligibleWinners = winningHands.filter((hand: any) => {
+      const handString = hand.cards.map((c: any) => c.toString()).join(' ');
+      const playerId = this._findPlayerByHandString(handString, playerHands);
+      return playerId && eligiblePlayers.includes(playerId);
+    });
+    
+    if (eligibleWinners.length > 0) {
+      const base = Math.floor(potAmount / eligibleWinners.length);
+      let remainder = potAmount - base * eligibleWinners.length;
+      
+      for (const hand of eligibleWinners) {
+        const handString = hand.cards.map((c: any) => c.toString()).join(' ');
+        const playerId = this._findPlayerByHandString(handString, playerHands);
+        if (playerId) {
+          winnings[playerId] = (winnings[playerId] || 0) + base + (remainder > 0 ? 1 : 0);
+          remainder--;
+        }
+      }
+    }
+  }
+  
+  private _findPlayerByHandString(handString: string, playerHands: Map<string, string>): string | null {
+    // Поиск по соответствию карт (может быть в разном порядке)
+    for (const [playerHandString, playerId] of playerHands.entries()) {
+      if (this._handsMatch(handString, playerHandString)) {
+        return playerId;
+      }
+    }
+    return null;
+  }
+  
+     private _handsMatch(hand1: string, hand2: string): boolean {
+     const cards1 = hand1.split(' ').sort();
+     const cards2 = hand2.split(' ').sort();
+     return cards1.length === cards2.length && cards1.every((card, i) => card === cards2[i]);
+   }
+   
+   // Преобразуем масти из pokersolver в наши
+   private _mapSolverSuit(solverSuit: string): PokerSuit {
+     switch(solverSuit) {
+       case 's': return 'spades';
+       case 'h': return 'hearts';
+       case 'd': return 'diamonds';
+       case 'c': return 'clubs';
+       default: return 'spades';
+     }
+   }
+  
+  private _endHand(): void {
+    // Завершаем руку и проверяем не завершилась ли игра
+    // Исключаем observer при проверке активных игроков
+    const activePlayers = Array.from(this._pokerPlayers.values())
+      .filter(p => p.stack > 0 && !p.isObserver);
+    
+    if (activePlayers.length <= 1) {
+      this._status = 'finished';
+      this._winner = activePlayers[0]?.id || null;
+    } else {
+      // Начинаем новую руку если есть активные игроки
+      // Останавливаем таймеры перед новой рукой
+      this._stopTurnTimer();
+      if (this._handRestartTimeout) clearTimeout(this._handRestartTimeout);
+      this._handRestartTimeout = setTimeout(() => {
+        this._handRestartTimeout = null;
+        this._startNewHand();
+      }, 2000);
+    }
+    
+    this._emitEvent({
+      type: 'poker_hand_ended',
+      data: {
+        winnersInfo: this._winnersInfo,
+        gameStatus: this._status
+      },
+      timestamp: new Date()
+    });
+    
+    this._emitStateChange();
+  }
+  
+  // Утилитарные методы
+  // Удалено: старые index-based методы
+  // Теперь используем seat-based методы для стабильности
+  
+  // Новые методы для работы с seat numbers
+  private _findAvailableSeat(): number {
+    const maxSeats = this.settings.maxPlayers || 8;
+    // Observer тоже занимают места за столом
+    const occupiedSeats = Array.from(this._pokerPlayers.values()).map(p => p.seat);
+    
+    for (let seat = 0; seat < maxSeats; seat++) {
+      if (!occupiedSeats.includes(seat)) {
+        return seat;
+      }
+    }
+    
+    throw new Error('No available seats');
+  }
+  
+  private _getPlayersBySeat(): IPokerPlayer[] {
+    // Возвращаем всех игроков отсортированных по месту (включая observer)
+    return Array.from(this._pokerPlayers.values()).sort((a, b) => a.seat - b.seat);
+  }
+  
+  private _getActivePlayersBySeat(): IPokerPlayer[] {
+    // Возвращаем только тех игроков кто участвует в торгах (сделал buy-in, в игре и не observer)
+    return this._getPlayersBySeat().filter(p => p.inHand && p.hasBoughtIn && !p.isObserver);
+  }
+  
+  private _getNextSeat(currentSeat: number, activeOnly: boolean = true): number {
+    // Если activeOnly = true, то исключаем observer автоматически через _getActivePlayersBySeat
+    const players = activeOnly ? this._getActivePlayersBySeat() : this._getPlayersBySeat();
+    if (players.length === 0) return -1;
+    
+    const currentIndex = players.findIndex(p => p.seat === currentSeat);
+    if (currentIndex === -1) return players[0].seat;
+    
+    const nextIndex = (currentIndex + 1) % players.length;
+    return players[nextIndex].seat;
+  }
+  
+  private _getPlayerBySeat(seat: number): IPokerPlayer | null {
+    return Array.from(this._pokerPlayers.values()).find(p => p.seat === seat) || null;
+  }
+  
+  private _getSeatIndex(seat: number): number {
+    // Преобразуем seat number в индекс для _currentPlayerIndex
+    // Используем только активных игроков (сделали buy-in, в игре и не observer)
+    const activePlayers = this._getActivePlayersBySeat();
+    return activePlayers.findIndex(p => p.seat === seat);
+  }
+  
+  private _getNextDealerPosition(): number {
+    // Получаем только тех игроков кто участвует в торгах (исключаем observer)
+    const activePlayers = this._getActivePlayersBySeat();
+    if (this._dealerPosition === -1 || activePlayers.length === 0) {
+      return activePlayers[0]?.seat || 0; // Первая рука
+    }
+    
+    return this._getNextSeat(this._dealerPosition, true);
+  }
+  
+  private _getAllowedActions(player: IPokerPlayer): { 
+    actions: PokerAction[]; 
+    callAmount?: number; 
+    minRaise?: number; 
+    maxRaise?: number; 
+  } {
+    // Если это showdown фаза, то доступны только show/muck
+    if (this._showdownPhase) {
+      return {
+        actions: ['show', 'muck'],
+        callAmount: undefined,
+        minRaise: undefined,
+        maxRaise: undefined
+      };
+    }
+    
+    const actions: PokerAction[] = [];
+    // Исключаем observer и игроков вне раздачи при расчете максимальной ставки
+    const activePlayers = Array.from(this._pokerPlayers.values()).filter(p => p.inHand && !p.isObserver);
+    const maxBet = activePlayers.length > 0 ? Math.max(...activePlayers.map(p => p.currentBet)) : 0;
+    const callAmount = maxBet - player.currentBet;
+    
+    // Fold всегда доступен (кроме если уже в all-in)
+    if (!player.isAllIn) {
+      actions.push('fold');
+    }
+    
+    if (callAmount === 0) {
+      // Можно сделать check
+      actions.push('check');
+      
+      // На пре-флопе после блайндов можно raise, на пост-флопе можно bet
+      if (this._stage === 'pre-flop') {
+        // Пре-флоп: всегда можно raise если есть деньги (даже если pot = 0)
+        if (player.stack > 0) {
+          actions.push('raise');
+        }
+      } else if (this._stage === 'flop' || this._stage === 'turn' || this._stage === 'river') {
+        // Пост-флоп: можно bet
+        if (player.stack > 0) {
+          actions.push('bet');
+        }
+      }
+    } else {
+      // Можно сделать call
+      if (player.stack >= callAmount) {
+        actions.push('call');
+      }
+      // Можно сделать raise (всегда доступен если есть деньги)
+      if (player.stack > callAmount) {
+        actions.push('raise');
+      }
+    }
+    
+    // --- BEGIN REPLACE: normalize raise semantics to "final total bet" ---
+    // КРИТИЧНО: Правильный расчет minRaise (в виде итоговой суммы),
+    // и maxRaise — тоже итоговая сумма (player.currentBet + player.stack).
+    let computedMinRaise = this._blinds.big;
+
+    if (this._lastRaiseAmount > 0) {
+      computedMinRaise = Math.max(this._blinds.big, this._lastRaiseAmount);
+    }
+
+    if (this._stage === 'pre-flop' && !this._lastRaiser) {
+      computedMinRaise = this._blinds.big;
+    }
+
+    if (player.currentBet > 0) {
+      computedMinRaise = Math.max(computedMinRaise, player.currentBet + this._blinds.big);
+    }
+
+    // totalMaxRaise = итоговая ставка, до которой игрок может поднять (включая его текущую ставку)
+    const totalMaxRaise = player.currentBet + player.stack;
+
+    // Убедимся, что minRaise не больше возможного max и не меньше текущей ставки
+    const normalizedMinRaise = Math.min(Math.max(computedMinRaise, player.currentBet), totalMaxRaise);
+
+    return {
+      actions,
+      callAmount: callAmount > 0 ? callAmount : undefined,
+      // Возвращаем итоговые суммы (фронт должен передавать итоговую ставку в amount)
+      minRaise: normalizedMinRaise,
+      maxRaise: totalMaxRaise
+    };
+    // --- END REPLACE ---
+  }
+  
+  private _resetActionFlags(excludePlayerId: string): void {
+    // Сбрасываем флаги hasActed для всех кроме указанного игрока
+    for (const player of this._pokerPlayers.values()) {
+      if (player.id !== excludePlayerId && player.inHand) {
+        player.hasActed = false;
+      }
+    }
+  }
+  
+  private _handleShowdownAction(playerId: string, move: IPokerMove): void {
+    // Обработка действий в showdown (show/muck)
+    const { action } = move;
+    const player = this._pokerPlayers.get(playerId);
+    
+    if (!player) return;
+    
+    if (action === 'show') {
+      player.showCards = true;
+    } else if (action === 'muck') {
+      player.showCards = false;
+    }
+    
+    this._emitEvent({
+      type: 'poker_showdown_action',
+      playerId,
+      data: { action },
+      timestamp: new Date()
+    });
+  }
+  
+  // Методы совместимости со старым socket кодом (убран - используем переопределенный выше)
+  
+  // Переопределяем обработку таймаута хода
+  protected override _handleTurnTimeout(): void {
+    const currentPlayer = this.currentPlayerId;
+    if (!currentPlayer || this._status !== 'in_progress') return;
+    
+    // Автоматически делаем fold для игрока
+    try {
+      this.makeMove(currentPlayer, { action: 'fold', amount: 0 });
+    } catch (error) {
+      console.error(`[POKER] Error auto-folding on timeout:`, error);
+      // Если не удалось сделать ход, просто переходим к следующему
+      this._nextTurn();
+    }
+    
+    this._emitEvent({
+      type: 'turn_timeout',
+      playerId: currentPlayer,
+      timestamp: new Date()
+    });
+  }
+  
+  // Переопределяем _emitStateChange для отправки персонализированного состояния
+  protected override _emitStateChange(): void {
+    // Отправляем персонализированное состояние для каждого игрока
+    for (const player of this._pokerPlayers.values()) {
+      const stateForPlayer = this.getStateForPlayer(player.id);
+      this._emitEvent({
+        type: 'game_update',
+        playerId: player.id,
+        data: stateForPlayer,
+        timestamp: new Date()
+      });
+    }
+  }
+  
+  protected override _onCleanup(): void {
+    super._onCleanup();
+    
+    // Очищаем таймауты
+    if (this._handRestartTimeout) {
+      clearTimeout(this._handRestartTimeout);
+      this._handRestartTimeout = null;
+    }
+    
+    if (this._showdownEndTimeout) {
+      clearTimeout(this._showdownEndTimeout);
+      this._showdownEndTimeout = null;
+    }
+    
+    this._pokerPlayers.clear();
+    this._deck = [];
+    this._communityCards = [];
+    this._sidePots = [];
+  }
+}

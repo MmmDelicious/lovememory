@@ -1,16 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../../store/hooks';
 import { useCoins } from '../../store/hooks';
-import { useGameSocket } from '../../hooks/useGameSocket';
 import PokerTable from '../../components/PokerGame/PokerTable';
 import PokerModal from '../../components/PokerModal/PokerModal';
 import LeaveGameButton from '../../components/LeaveGameButton/LeaveGameButton';
 import gameService from '../../services/game.service';
 import { io, Socket } from 'socket.io-client';
+import type { PokerGameState, GameRoom } from '../../../types/game.types';
 interface RoomData {
   id: string;
   bet: number;
+  name: string;
+  gameType: string;
+  maxPlayers: number;
+  currentPlayers: number;
+  status: string;
+  host: {
+    id: string;
+    first_name?: string;
+    name?: string;
+  };
   Host?: {
     first_name?: string;
   };
@@ -19,70 +29,128 @@ const PokerPage: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const user = useUser();
   const coins = useCoins();
-  // Убираем двойное подключение сокетов - оставляем только один!
-  // const { gameState, makeMove } = useGameSocket(roomId!, user?.token || '', () => {});
   const navigate = useNavigate();
+  
+  // Состояния
   const [showBuyInModal, setShowBuyInModal] = useState<boolean>(false);
   const [roomData, setRoomData] = useState<RoomData | null>(null);
-  const [hasBoughtIn, setHasBoughtIn] = useState<boolean>(false);
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [gameState, setGameState] = useState<any>(null);
+  const [gameState, setGameState] = useState<PokerGameState | null>(null);
+  const [isConnecting, setIsConnecting] = useState<boolean>(true);
   
-  // Функция для отправки ходов (заменяет makeMove из useGameSocket)
-  const makeMove = (move: any) => {
-    if (socket) {
-      console.log('[POKER] Making move:', move);
-      socket.emit('make_move', move);
+  // Refs для стабильности
+  const socketRef = useRef<Socket | null>(null);
+  const mountedRef = useRef<boolean>(true);
+  
+  // Функция для отправки ходов
+  const makeMove = useCallback((move: any) => {
+    if (socketRef.current?.connected) {
+
+      socketRef.current.emit('make_move', { roomId, move });
+    } else {
+      console.warn('[POKER] Cannot make move: socket not connected');
     }
-  };
+  }, [roomId]);
+  // Инициализация сокета
   useEffect(() => {
-    if (!user?.token) return;
+    if (!user?.token || !roomId) return;
+    
     const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+    
+    // Закрываем предыдущий сокет если есть
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+    
     const socketInstance = io(SOCKET_URL, {
       auth: { token: user.token },
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      forceNew: true
     });
-    setSocket(socketInstance);
     
-    // Подключаемся к комнате
+    socketRef.current = socketInstance;
+    
+    // Обработчики подключения
     socketInstance.on('connect', () => {
-      console.log('[POKER] Socket connected, joining room:', roomId);
+      if (!mountedRef.current) return;
+
+      setIsConnecting(false);
       socketInstance.emit('join_room', roomId);
     });
     
-    // Обработчики игрового состояния
-    socketInstance.on('game_state_update', (newGameState) => {
-      console.log('[POKER] Game state update:', newGameState);
+    socketInstance.on('disconnect', () => {
+      if (!mountedRef.current) return;
+
+      setIsConnecting(true);
+    });
+    
+    // КРИТИЧНО: Обработка ошибок сокета
+    socketInstance.on('connect_error', (error) => {
+      if (!mountedRef.current) return;
+      console.error('[POKER] Socket connection error:', error);
+      setIsConnecting(true);
+    });
+    
+    socketInstance.on('error', (error) => {
+      if (!mountedRef.current) return;
+      console.error('[POKER] Socket error:', error);
+    });
+    
+    socketInstance.on('reconnect', (attemptNumber) => {
+      if (!mountedRef.current) return;
+
+      setIsConnecting(false);
+    });
+    
+    socketInstance.on('reconnect_error', (error) => {
+      if (!mountedRef.current) return;
+      console.error('[POKER] Socket reconnect error:', error);
+    });
+    
+    // Обработчики игровых событий
+    const handleGameUpdate = (newGameState: PokerGameState) => {
+      if (!mountedRef.current) return;
+
       setGameState(newGameState);
-    });
-    
-    socketInstance.on('room_info', (roomInfo: any) => {
-      console.log('[POKER] Room info:', roomInfo);
-      setGameState((prevState: any) => ({
-        ...prevState,
-        ...roomInfo
-      }));
-    });
-    
-    // Покер-специфичные события
-    socketInstance.on('poker_buy_in_success', (data) => {
-      console.log('[POKER] Buy-in успешен:', data);
-      setHasBoughtIn(true);
-      setShowBuyInModal(false);
-      // setCoins(data.newBalance); // This line was removed as per the edit hint
-    });
-    socketInstance.on('poker_rebuy_success', (data) => {
-      console.log('[POKER] Rebuy успешен:', data);
-      // setCoins(data.newBalance); // This line was removed as per the edit hint
-    });
-    socketInstance.on('poker_cash_out_success', (data) => {
-      console.log('[POKER] Cash-out успешен:', data);
-      // setCoins(data.newBalance); // This line was removed as per the edit hint
-    });
-    return () => {
-      socketInstance.disconnect();
     };
-  }, [user?.token, roomId]); // Добавили roomId для пересоздания сокета при смене комнаты
+    
+    // КРИТИЧНО: Правильные типы для room_info
+    const handleRoomInfo = (roomInfo: any) => {
+      if (!mountedRef.current) return;
+
+      // Преобразуем в формат PokerGameState если необходимо
+      if (roomInfo.gameType === 'poker' || roomInfo.players) {
+        setGameState(roomInfo);
+      }
+    };
+    
+    const handleBuyInSuccess = (data: { buyInAmount: number; stack: number }) => {
+      if (!mountedRef.current) return;
+
+    };
+    
+    const handleRebuySuccess = (data: { rebuyAmount: number; oldStack: number; newStack: number }) => {
+      if (!mountedRef.current) return;
+
+    };
+    
+    const handleCashOutSuccess = (data: { cashOutAmount: number }) => {
+      if (!mountedRef.current) return;
+
+    };
+    
+    // КРИТИЧНО: Для покера используем game_update (персонализированное состояние)
+    socketInstance.on('game_update', handleGameUpdate);
+    socketInstance.on('room_info', handleRoomInfo);
+    socketInstance.on('poker_buy_in_success', handleBuyInSuccess);
+    socketInstance.on('poker_rebuy_success', handleRebuySuccess);
+    socketInstance.on('poker_cash_out_success', handleCashOutSuccess);
+    
+    return () => {
+      mountedRef.current = false;
+      socketInstance.disconnect();
+      socketRef.current = null;
+    };
+  }, [user?.token, roomId]);
   useEffect(() => {
     const fetchRoomData = async () => {
       try {
@@ -103,38 +171,79 @@ const PokerPage: React.FC = () => {
       fetchRoomData();
     }
   }, [roomId, roomData, navigate]);
+  // КРИТИЧНО: Удаляем дублирование cleanup (UZЕ есть в socket effect)
+  // useEffect(() => {
+  //   return () => {
+  //     mountedRef.current = false;
+  //   };
+  // }, []);
+  
+  // КРИТИЧНО: Логика показа модалки buy-in (исправлено dependencies)
   useEffect(() => {
-    if (gameState && roomData && !hasBoughtIn) {
-      const needsBuyIn = (gameState as any).needsBuyIn || !(gameState as any).hasBoughtIn;
-      if (needsBuyIn) {
+    if (!gameState || !mountedRef.current) return;
+    
+    const needsBuyIn = Boolean(gameState.needsBuyIn);
+    const hasBoughtInFromServer = Boolean(gameState.hasBoughtIn);
+    const gameStatus = gameState.status;
+
+    // Показываем модалку только если нужен buy-in и игрок не сделал его
+    if (needsBuyIn && !hasBoughtInFromServer) {
+      if (!showBuyInModal) {
+  
         setShowBuyInModal(true);
       }
+    } 
+    // Скрываем модалку если buy-in уже сделан
+    else if (hasBoughtInFromServer) {
+      if (showBuyInModal) {
+
+        setShowBuyInModal(false);
+      }
     }
-  }, [gameState, roomData, hasBoughtIn]);
-  const handleBuyIn = (buyInAmount: number) => {
-    if (socket) {
-      socket.emit('poker_buy_in', { roomId, buyInAmount });
+  }, [gameState?.needsBuyIn, gameState?.hasBoughtIn, gameState?.status]); // УБРАЛИ showBuyInModal из зависимостей
+  // Обработчики действий
+  const handleBuyIn = useCallback((buyInAmount: number) => {
+    if (socketRef.current?.connected) {
+
+      socketRef.current.emit('poker_buy_in', { roomId, buyInAmount });
+    } else {
+      console.warn('[POKER] Cannot buy-in: socket not connected');
     }
-  };
-  const handleCloseBuyInModal = () => {
+  }, [roomId]);
+  
+  const handleCloseBuyInModal = useCallback(() => {
     setShowBuyInModal(false);
-    navigate('/games/poker'); // Возвращаемся в лобби
-  };
-  const handlePokerAction = (action: any, value = 0) => {
+    // НЕ переходим на другую страницу - остаемся в текущей игре!
+    // navigate('/games/poker'); // УБРАНО: Вызывало отключение socket
+  }, []);
+  
+  const handlePokerAction = useCallback((action: string, value = 0) => {
     makeMove({ action, value });
-  };
-  const handlePokerRebuy = (rebuyAmount: number) => {
-    if (socket) {
-      socket.emit('poker_rebuy', { roomId, rebuyAmount });
+  }, [makeMove]);
+  
+  const handlePokerRebuy = useCallback((rebuyAmount: number) => {
+    if (socketRef.current?.connected) {
+
+      socketRef.current.emit('poker_rebuy', { roomId, rebuyAmount });
+    } else {
+      console.warn('[POKER] Cannot rebuy: socket not connected');
     }
-  };
-  const handleLeaveGame = () => {
-    if (socket) {
-      socket.emit('poker_cash_out', { roomId });
+  }, [roomId]);
+  
+  const handleLeaveGame = useCallback(() => {
+    if (socketRef.current?.connected) {
+
+      socketRef.current.emit('poker_cash_out', { roomId });
     }
     navigate('/games/poker');
-  };
-  if (!gameState || !user) {
+  }, [roomId, navigate]);
+  // Обработчик открытия модалки buy-in (ДОЛЖЕН быть ДО условного рендера!)
+  const handleOpenBuyIn = useCallback(() => {
+    setShowBuyInModal(true);
+  }, []);
+
+  // Показываем загрузку если нет состояния игры или пользователя
+  if (!gameState || !user || isConnecting) {
     return (
       <div style={{ 
         width: '100vw', 
@@ -160,11 +269,22 @@ const PokerPage: React.FC = () => {
           fontWeight: '700'
         }}>
           <div style={{ fontSize: '48px', marginBottom: '15px' }}>🎰</div>
-          Загрузка игры...
+          {isConnecting ? 'Подключение к игре...' : 'Загрузка игры...'}
+          {isConnecting && (
+            <div style={{ 
+              fontSize: '12px', 
+              marginTop: '10px', 
+              opacity: 0.7,
+              animation: 'pulse 1.5s infinite'
+            }}>
+              Соединение с сервером
+            </div>
+          )}
         </div>
       </div>
     );
   }
+  
   return (
     <>
       <LeaveGameButton gameType="poker" />
@@ -172,17 +292,17 @@ const PokerPage: React.FC = () => {
         isOpen={showBuyInModal}
         onClose={handleCloseBuyInModal}
         onConfirm={handleBuyIn}
-        maxAmount={roomData?.bet || 1000}
+        maxAmount={roomData?.bet ?? 1000} // КРИТИЧНО: Проверка undefined bet
         mode="buyin"
         roomName={`Стол ${roomData?.Host?.first_name || 'Хоста'}`}
       />
       <PokerTable
-        gameState={gameState as any}
+        gameState={gameState}
         onAction={handlePokerAction}
         onRebuy={handlePokerRebuy}
         userId={user.id}
         roomData={roomData as any}
-        onOpenBuyIn={() => setShowBuyInModal(true)}
+        onOpenBuyIn={handleOpenBuyIn}
       />
     </>
   );

@@ -5,13 +5,28 @@
   align-items: center;
   width: 100vw;
   height: 100vh;
-  padding: 2rem;
+  padding: 1.5rem;
   box-sizing: border-box;
-  background-color: var(--color-background);
-  color: var(--color-text-primary);
+  background: linear-gradient(135deg, #fdedde 0%, #f8e6d3 100%);
+  background-attachment: fixed;
+  color: #443a32;
   text-align: center;
   overflow: hidden;
   position: relative;
+  font-family: 'Lora', serif;
+}
+
+.gameRoomContainer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://www.transparenttextures.com/patterns/noise.png');
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .gameArea {
@@ -27,27 +42,29 @@
 
 .exitButton {
   position: absolute;
-  top: 24px;
-  right: 24px;
-  padding: 10px 20px;
-  font-size: 1rem;
-  font-weight: 500;
-  font-family: var(--font-family-body);
-  color: var(--color-text-secondary);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius);
+  top: 20px;
+  right: 20px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Lora', serif;
+  color: #443a32;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 244, 239, 0.9) 100%);
+  backdrop-filter: blur(8px);
+  border: 2px solid rgba(203, 116, 89, 0.3);
+  border-radius: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 100;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .exitButton:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  border-color: #e8826b;
+  color: #e8826b;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 6px 20px rgba(232, 130, 107, 0.3);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(248, 244, 239, 1) 100%);
 }
 
 .title {
@@ -58,12 +75,15 @@
 }
 
 .status {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   margin-bottom: 1.5rem;
   min-height: 25px;
-  font-weight: 500;
-  font-family: var(--font-family-body);
-  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-family: 'Playfair Display', serif;
+  color: #443a32;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+  z-index: 2;
+  position: relative;
 }
 
 .ticTacToeBoard {
@@ -72,34 +92,40 @@
   grid-template-rows: repeat(3, 120px);
   gap: 16px;
   width: fit-content;
-  background: var(--color-surface);
-  padding: 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 244, 239, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  padding: 30px;
   border-radius: 20px;
-  box-shadow: var(--shadow-md);
+  border: 2px solid rgba(203, 116, 89, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+  position: relative;
 }
 
 .cell {
   width: 120px;
   height: 120px;
-  background-color: var(--color-background);
-  border: 2px solid var(--color-border);
-  border-radius: var(--border-radius);
+  background: linear-gradient(135deg, #fcefdf 0%, #f8e6d3 100%);
+  border: 2px solid rgba(203, 116, 89, 0.4);
+  border-radius: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-family-heading);
+  font-family: 'Playfair Display', serif;
   font-size: 4.5rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
   user-select: none;
   position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .cell:not(.filled):hover {
-  background-color: #fff;
-  border-color: var(--color-secondary);
-  transform: scale(1.05);
+  background: linear-gradient(135deg, #ffffff 0%, #fcefdf 100%);
+  border-color: #e8826b;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(232, 130, 107, 0.3);
 }
 
 .cell.filled {
@@ -107,11 +133,13 @@
 }
 
 .cellX {
-  color: var(--color-primary);
+  color: #e8826b;
+  text-shadow: 0 2px 4px rgba(232, 130, 107, 0.3);
 }
 
 .cellO {
-  color: var(--color-secondary);
+  color: #cb7459;
+  text-shadow: 0 2px 4px rgba(203, 116, 89, 0.3);
 }
 
 .cell.disabled {
@@ -143,7 +171,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(255, 251, 248, 0.85);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(68, 58, 50, 0.9) 100%);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
@@ -158,6 +186,16 @@
   align-items: center;
   position: relative;
   text-align: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 244, 239, 0.95) 100%);
+  backdrop-filter: blur(15px);
+  padding: 3rem 2.5rem;
+  border-radius: 24px;
+  border: 2px solid rgba(203, 116, 89, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 450px;
+  width: 90%;
+  color: #443a32;
+  font-family: 'Lora', serif;
 }
 
 .lottieAnimation {
@@ -186,43 +224,46 @@
 }
 
 .winnerText, .loserText, .drawText {
-  font-family: var(--font-family-heading);
-  font-size: 5rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
   font-weight: 700;
   margin-bottom: 2rem;
   text-shadow: 0px 4px 15px rgba(0,0,0,0.05);
 }
 
 .winnerText {
-  color: var(--color-primary);
+  color: #4CAF50;
+  text-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
 }
 
 .loserText {
-  color: var(--color-error);
+  color: #e8826b;
+  text-shadow: 0 2px 4px rgba(232, 130, 107, 0.3);
 }
 
 .drawText {
-  color: var(--color-text-secondary);
+  color: #cb7459;
+  text-shadow: 0 2px 4px rgba(203, 116, 89, 0.3);
 }
 
 .lobbyButton {
   border: none;
   padding: 1rem 2.5rem;
-  border-radius: var(--border-radius);
-  font-size: 1.2rem;
-  font-weight: bold;
-  font-family: var(--font-family-body);
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-family: 'Lora', serif;
   cursor: pointer;
-  transition: all 0.2s;
-  background-color: var(--color-primary);
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #e8826b 0%, #cb7459 100%);
   color: white;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 25px rgba(232, 130, 107, 0.4);
 }
 
 .lobbyButton:hover {
-  background-color: var(--color-primary-hover);
+  background: linear-gradient(135deg, #f39474 0%, #d67e63 100%);
   transform: translateY(-3px);
-  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 35px rgba(232, 130, 107, 0.5);
 }
 
 @media (max-width: 768px) {

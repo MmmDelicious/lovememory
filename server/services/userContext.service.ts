@@ -37,8 +37,6 @@ class UserContextService implements IUserContextService {
    * @returns Полный контекст для AI
    */
   async buildContext(userId: string): Promise<UserContext> {
-    console.log(`🧠 UserContextService: Building context for user ${userId}`);
-    
     try {
       // Параллельно загружаем все необходимые данные
       const [
@@ -76,7 +74,6 @@ class UserContextService implements IUserContextService {
         }
       };
 
-      console.log(`✅ UserContextService: Context built successfully. Events: ${recentEvents.length}, Interactions: ${aiInteractionHistory.length}`);
       return context;
 
     } catch (error) {
@@ -289,8 +286,7 @@ class UserContextService implements IUserContextService {
       const { profile, created } = await RelationshipProfile.findOrCreateByUserId(userId);
       
       if (created) {
-        console.log(`📝 Created new RelationshipProfile for user ${userId}`);
-      }
+        }
 
       return profile.toJSON() as IRelationshipProfile;
 

@@ -25,12 +25,10 @@ export const useGameSocket = (
     });
     socketRef.current = socket;
     socket.on('connect', () => {
-      console.log('[SOCKET] Connected with id:', socket.id);
       setIsConnected(true);
       socket.emit('join_room', roomId);
     });
     socket.on('disconnect', () => {
-      console.log('[SOCKET] Disconnected');
       setIsConnected(false);
     });
     socket.on('connect_error', (err: Error) => {
@@ -39,14 +37,11 @@ export const useGameSocket = (
       if (err.message.includes('Invalid namespace')) {
         console.error("[SOCKET] Invalid namespace error - check server configuration");
       }
-      console.log("Не удалось подключиться к игре. Попробуйте обновить страницу.");
-    });
+      });
     const handleStateUpdate = (newGameState: any) => {
-      console.log('[CLIENT] Received game state update:', newGameState);
       setGameState(newGameState);
     };
     const handleRoomInfo = (roomInfo: any) => {
-      console.log('[CLIENT] Received room info:', roomInfo);
       setGameState((prevState: any) => ({
         ...prevState,
         gameType: roomInfo.gameType,
@@ -58,7 +53,6 @@ export const useGameSocket = (
       }));
     };
     const handlePlayerListUpdate = (players: any[]) => {
-      console.log('[CLIENT] Received player list update:', players);
       setGameState((prevState: any) => {
         if (!prevState) {
           return { 
@@ -84,8 +78,7 @@ export const useGameSocket = (
     socket.on('game_end', handleStateUpdate);
     socket.on('new_hand_started', handleStateUpdate);
     socket.on('rebuy_opportunity', (data: { message: string }) => {
-      console.log('[CLIENT] Rebuy opportunity:', data.message);
-    });
+      });
     if (setCoinsCallback) {
       socket.on('update_coins', setCoinsCallback);
     }
@@ -100,7 +93,6 @@ export const useGameSocket = (
     });
 
     return () => {
-      console.log('[SOCKET] Cleaning up socket connection.');
       socket.off('player_list_update');
       socket.off('game_start');
       socket.off('game_update');
@@ -114,11 +106,9 @@ export const useGameSocket = (
     };
   }, [roomId, token, navigate, setCoinsCallback]);
   const makeMove = useCallback((move: GameMove) => {
-    console.log('[CLIENT] makeMove called with:', move);
     if (socketRef.current && socketRef.current.connected) {
       socketRef.current.emit('make_move', { roomId, move });
-      console.log('[CLIENT] make_move event emitted');
-    } else {
+      } else {
       console.error('[SOCKET] Cannot make move, socket not connected.');
       throw new Error('Нет подключения к серверу');
     }

@@ -2,16 +2,18 @@ import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import LottieMascot from '../LottieMascot/LottieMascot';
 import InterceptedMascot from '../InterceptedMascot/InterceptedMascot';
-import { useEventMascotData, useEventMascotActions } from '../../store/hooks';
-import { useInterceptedMascot } from '../../store/hooks';
+import { useMascot } from '../../context/MascotContext';
 
 const GlobalMascot = () => {
-  // Получаем данные из Redux вместо Context
-  const mascot = useEventMascotData();
-  const interceptedMascot = useInterceptedMascot();
-  
-  // Получаем действия из Redux
-  const { hideMascot } = useEventMascotActions();
+  const { 
+    mascot, 
+    hideMascot, 
+    interceptedMascot, 
+    globalMascot, 
+    globalMascotAnimation,
+    isAIVisible,
+    toggleAIMascot 
+  } = useMascot();
   
   const location = useLocation();
 

@@ -1,8 +1,6 @@
 const { Op } = require('sequelize');
 const { Event, Media, User, Pair, ActivityLog } = require('../models');
 
-console.log('Models loaded:', { Event: !!Event, Media: !!Media, User: !!User, Pair: !!Pair });
-
 class EventService {
   async getEventsForUser(userId) {
     const activePair = await Pair.findOne({

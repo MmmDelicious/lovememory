@@ -24,9 +24,7 @@ const UserLessonProgress = require('./UserLessonProgress');
 const PairDailyLesson = require('./PairDailyLesson');
 const ActivityLog = require('./ActivityLog');
 
-// TypeScript модели пока отключены - будут подключены после компиляции
 let RelationshipProfile = null;
-console.log('📝 RelationshipProfile (TS model) temporarily disabled - will be enabled after TS compilation');
 const models = {
   User,
   Event,

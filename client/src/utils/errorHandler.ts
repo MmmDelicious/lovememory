@@ -97,8 +97,7 @@ export const setupGlobalErrorHandler = () => {
     window.location.href = `/error?error=${errorInfo}`;
   });
   window.addEventListener('beforeunload', (event) => {
-    console.log('Page is unloading');
-  });
+    });
 };
 export const logError = (error: any, context: string = '') => {
   const errorInfo = {

@@ -1,10 +1,8 @@
-/**
- * @fileoverview Утилиты для валидации игровых данных
- */
+// Game validation utilities
 
 /**
- * Валидация хода в крестиках-ноликах
- * @param {number} moveIndex - Индекс клетки (0-8)
+ * Tic-tac-toe move validation
+ * @param {number} moveIndex - Cell index (0-8)
  * @returns {boolean}
  */
 function validateTicTacToeMove(moveIndex) {
@@ -12,12 +10,12 @@ function validateTicTacToeMove(moveIndex) {
   }
   
   /**
-   * Валидация шахматного хода
-   * @param {Object} move - Объект хода
-   * @param {string} move.from - Откуда ход
-   * @param {string} move.to - Куда ход
-   * @returns {boolean}
-   */
+ * Chess move validation
+ * @param {Object} move - Move object
+ * @param {string} move.from - Move from
+ * @param {string} move.to - Move to
+ * @returns {boolean}
+ */
   function validateChessMove(move) {
     if (!move || typeof move !== 'object') return false;
     if (!move.from || !move.to) return false;
@@ -27,19 +25,19 @@ function validateTicTacToeMove(moveIndex) {
   }
   
   /**
-   * Валидация покерного хода
-   * @param {Object} move - Объект хода
-   * @param {string} move.action - Действие
-   * @param {number} [move.value] - Значение для ставок
-   * @returns {boolean}
-   */
+ * Poker move validation
+ * @param {Object} move - Move object
+ * @param {string} move.action - Action
+ * @param {number} [move.value] - Value for bets
+ * @returns {boolean}
+ */
   function validatePokerMove(move) {
     if (!move || typeof move !== 'object') return false;
     
     const validActions = ['fold', 'check', 'call', 'raise', 'bet'];
     if (!validActions.includes(move.action)) return false;
     
-    // Для raise и bet требуется положительное значение
+    // For raise and bet, positive value is required
     if (['raise', 'bet'].includes(move.action)) {
       return Number.isInteger(move.value) && move.value > 0;
     }
@@ -48,19 +46,19 @@ function validateTicTacToeMove(moveIndex) {
   }
   
   /**
-   * Валидация ответа в квизе
-   * @param {number} answerIndex - Индекс ответа
-   * @returns {boolean}
-   */
+ * Quiz answer validation
+ * @param {number} answerIndex - Answer index
+ * @returns {boolean}
+ */
   function validateQuizAnswer(answerIndex) {
     return Number.isInteger(answerIndex) && answerIndex >= 0 && answerIndex <= 3;
   }
   
   /**
-   * Валидация данных комнаты
-   * @param {Object} roomData - Данные комнаты
-   * @returns {Object} Результат валидации
-   */
+ * Room data validation
+ * @param {Object} roomData - Room data
+ * @returns {Object} Validation result
+ */
   function validateRoomData(roomData) {
     const errors = [];
     
@@ -76,7 +74,7 @@ function validateTicTacToeMove(moveIndex) {
       errors.push('Max players must be between 2 and 10');
     }
     
-    // Специфичная валидация для покера
+    // Poker-specific validation
     if (roomData.gameType === 'poker') {
       const validTableTypes = ['standard', 'premium', 'elite'];
       if (roomData.tableType && !validTableTypes.includes(roomData.tableType)) {
@@ -91,17 +89,17 @@ function validateTicTacToeMove(moveIndex) {
   }
   
   /**
-   * Санитизация пользовательского ввода
-   * @param {string} input - Входная строка
-   * @returns {string} Очищенная строка
-   */
+ * User input sanitization
+ * @param {string} input - Input string
+ * @returns {string} Cleaned string
+ */
   function sanitizeInput(input) {
     if (typeof input !== 'string') return '';
     
     return input
       .trim()
-      .replace(/[<>]/g, '') // Удаляем потенциально опасные символы
-      .substring(0, 1000); // Ограничиваем длину
+      .replace(/[<>]/g, '') // Remove potentially dangerous characters
+      .substring(0, 1000); // Limit length
   }
   
   module.exports = {

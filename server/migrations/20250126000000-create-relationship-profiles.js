@@ -133,11 +133,9 @@ module.exports = {
       name: 'relationship_profiles_analysis_status_idx'
     });
 
-    console.log('✅ Created relationship_profiles table with indexes');
-  },
+    },
 
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('relationship_profiles');
-    console.log('❌ Dropped relationship_profiles table');
-  }
+    }
 };

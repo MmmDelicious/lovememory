@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Heart, AlertTriangle, Users, Crown, Sparkles, Network, Brain } from 'lucide-react';
+import { TrendingUp, Heart, AlertTriangle, Users, Crown, Sparkles, Network, Brain, Activity } from 'lucide-react';
 import styles from './OverviewTab.module.css';
 import Lottie from 'lottie-react';
 import { getLessonAnimation } from '../../assets/lessons';
 import HexagonChart from '../HexagonChart/HexagonChart';
 import LoveLanguageAnalysis from '../LoveLanguageAnalysis/LoveLanguageAnalysis';
+import ActivityTracker from '../ActivityTracker/ActivityTracker';
 
 interface OverviewTabProps {
   harmonyScore?: number;
@@ -468,6 +469,23 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Activity Tracker Section */}
+      <div className={styles.activityTrackerSection}>
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionIcon}>
+            <Activity size={24} />
+          </div>
+          <div>
+            <h3>Трекер активности</h3>
+            <p>Отслеживайте физическую активность и укрепляйте отношения через здоровый образ жизни</p>
+          </div>
+        </div>
+
+        <div className={styles.activityTrackerContent}>
+          <ActivityTracker />
         </div>
       </div>
     </div>

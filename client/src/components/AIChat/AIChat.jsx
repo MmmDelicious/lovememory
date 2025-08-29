@@ -6,10 +6,8 @@ import styles from './AIChat.module.css';
 const MAX_PROMPT_LENGTH = 500;
 
 const AIChat = () => {
-  // Получаем состояние из Redux вместо Context
-  const { isLoading } = useAIMascot();
+  const { isLoading } = useAIChat();
   
-  // Получаем действия из Redux
   const { sendMessageToAI, setMessage } = useMascotActions();
   
   const user = useUser();
@@ -29,13 +27,12 @@ const AIChat = () => {
       return;
     }
 
-    // Безопасная проверка пользователя
+
     if (!user) {
       setMessage('Ошибка: данные пользователя не загружены');
       return;
     }
 
-    // Получаем актуального партнера из pairing с безопасными проверками
     const partner = pairing?.status === 'active' 
       ? (pairing?.Requester?.id === user?.id ? pairing?.Receiver : pairing?.Requester)
       : null;

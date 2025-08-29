@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Calendar, Clock, DollarSign, MapPin, Star, Check, Bug } from 'lucide-react';
+import { X, Calendar, Clock, DollarSign, MapPin, Star, Check } from 'lucide-react';
 import dateGeneratorService from '../../services/dateGenerator.service';
 import styles from './DateGeneratorModal.module.css';
-import DebugDataViewer from '../DebugDataViewer/DebugDataViewer';
 
 import type { DateOption, DateScheduleItem } from '../../../types/common';
 
@@ -29,7 +28,7 @@ const DateGeneratorModal: React.FC<DateGeneratorModalProps> = ({
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showDebugData, setShowDebugData] = useState(false);
+
   const [userLocation, setUserLocation] = useState<{ city: string; coordinates?: { latitude: number; longitude: number } } | null>(null);
 
   // Генерация свиданий при открытии модального окна
@@ -84,8 +83,7 @@ const DateGeneratorModal: React.FC<DateGeneratorModalProps> = ({
       // Проверяем что result.options существует и это массив
       if (result && result.options && Array.isArray(result.options)) {
         setDateOptions(result.options);
-        console.log('Date options set:', result.options);
-      } else {
+        } else {
         console.error('Invalid date options received:', result);
         setDateOptions([]); // устанавливаем пустой массив как fallback
         setError('Получены некорректные данные. Попробуйте еще раз.');
@@ -180,15 +178,7 @@ const DateGeneratorModal: React.FC<DateGeneratorModalProps> = ({
             {step === 'calendar' && '📅 Выберите дату'}
           </h2>
           <div className={styles.headerButtons}>
-            {userLocation && (
-              <button 
-                onClick={() => setShowDebugData(true)} 
-                className={styles.debugButton}
-                title="Посмотреть данные для отладки"
-              >
-                <Bug size={20} />
-              </button>
-            )}
+
             <button className={styles.closeButton} onClick={onClose}>
               <X size={24} />
             </button>
@@ -421,14 +411,7 @@ const DateGeneratorModal: React.FC<DateGeneratorModalProps> = ({
       </div>
       
       {/* Отладочный просмотрщик данных */}
-      {showDebugData && userLocation && (
-        <DebugDataViewer
-          isOpen={showDebugData}
-          onClose={() => setShowDebugData(false)}
-          city={userLocation.city}
-          coordinates={userLocation.coordinates}
-        />
-      )}
+
     </div>
   );
 };

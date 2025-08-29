@@ -11,7 +11,8 @@ const Player: React.FC<PlayerProps> = ({
   isWinner = false, 
   dealingPhase = false, 
   yourHand = [], 
-  isWinningCard = () => false 
+  isWinningCard = () => false,
+  hasBoughtIn = false
 }) => {
   if (!player) return null;
   const renderPlayerCards = () => {
@@ -53,7 +54,7 @@ const Player: React.FC<PlayerProps> = ({
     });
   };
   return (
-    <div className={`${styles.playerContainer} ${isActive ? styles.active : ''} ${isWinner ? styles.winner : ''}`}>
+    <div className={`${styles.playerContainer} ${isActive ? styles.active : ''} ${isWinner ? styles.winner : ''} ${player?.hasBoughtIn ? styles.hasBoughtIn : styles.waitingBuyIn}`}>
       <UserAvatar
         user={player}
         className={styles.avatar}
@@ -62,25 +63,28 @@ const Player: React.FC<PlayerProps> = ({
       />
       <div className={styles.playerInfo}>
         <div className={styles.playerName}>
-          {player.name}
+          {player?.name || 'Игрок'}
         </div>
         <div className={styles.stack}>
           <span className={styles.chipsIcon}>🪙</span>
-          {player.stack}
+          {player?.stack || 0}
         </div>
+        {!player?.hasBoughtIn && (
+          <div className={styles.waitingStatus}>Ожидает buy-in</div>
+        )}
       </div>
       <div className={styles.playerCards}>
         {renderPlayerCards()}
       </div>
-      {player.currentBet > 0 && (
+      {(player?.currentBet || 0) > 0 && (
         <div className={styles.betIndicator}>
           {player.currentBet}
         </div>
       )}
-      {!player.inHand && player.stack > 0 && (
+      {!player?.inHand && (player?.stack || 0) > 0 && (
         <div className={styles.foldedIndicator}>Пас</div>
       )}
-      {player.isAllIn && (
+      {player?.isAllIn && (
         <div className={styles.allInIndicator}>All-in</div>
       )}
     </div>

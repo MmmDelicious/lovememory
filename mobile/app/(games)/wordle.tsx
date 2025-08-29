@@ -421,7 +421,6 @@ function GameSetupModal({ visible, onClose, onStart }: GameSetupModalProps) {
   ];
 
   const handleStart = () => {
-    console.log('handleStart called with language:', selectedLanguage);
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
@@ -461,7 +460,6 @@ function GameSetupModal({ visible, onClose, onStart }: GameSetupModalProps) {
                   selectedLanguage === 'russian' && styles.selectedLanguageOption
                 ]}
                 onPress={() => {
-                  console.log('Setting language to russian');
                   setSelectedLanguage('russian');
                   if (Platform.OS !== 'web') {
                     Haptics.selectionAsync();
@@ -481,7 +479,6 @@ function GameSetupModal({ visible, onClose, onStart }: GameSetupModalProps) {
                   selectedLanguage === 'english' && styles.selectedLanguageOption
                 ]}
                 onPress={() => {
-                  console.log('Setting language to english');
                   setSelectedLanguage('english');
                   if (Platform.OS !== 'web') {
                     Haptics.selectionAsync();
@@ -654,7 +651,6 @@ export default function WordleScreen() {
   };
 
   const startGame = (duration: number, selectedLanguage: 'russian' | 'english') => {
-    console.log('Starting game with language:', selectedLanguage);
     setGameDuration(duration);
     setTimeLeft(duration);
     setGamePhase('playing');

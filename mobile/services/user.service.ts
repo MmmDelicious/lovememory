@@ -26,4 +26,3 @@ export async function uploadAvatarFile(fileUri: string) {
   return uploadAvatar(formData);
 }
 
-

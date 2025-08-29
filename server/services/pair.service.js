@@ -9,8 +9,6 @@ class PairService {
       throw error;
     }
     
-    console.log('getPairingStatus called with userId:', userId);
-    
     // Ищем активную пару
     const activePair = await Pair.findOne({
       where: {

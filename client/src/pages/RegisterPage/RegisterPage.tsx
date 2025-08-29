@@ -38,9 +38,7 @@ const RegisterPage: React.FC = () => {
   const { mascotMessage, handleAvatarClick, handleInteraction, triggerError } = useInteractiveMascot(mascotConfig);
   
   React.useEffect(() => {
-    // TODO: Проверять isAuthenticated из Redux state
-    // const isAuthenticated = useIsAuthenticated();
-    // if (isAuthenticated) navigate('/dashboard', { replace: true });
+    
   }, [navigate]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

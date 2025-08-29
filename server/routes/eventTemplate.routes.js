@@ -10,24 +10,21 @@ const {
   duplicateTemplate,
   incrementUsage
 } = require('../controllers/eventTemplate.controller');
-const authMiddleware = require('../middleware/auth.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
 
 const router = Router();
 
-// Все роуты требуют авторизации
-router.use(authMiddleware);
+// Basic CRUD operations
+router.get('/', authenticateToken, getTemplates);
+router.post('/', authenticateToken, createTemplate);
+router.put('/:id', authenticateToken, updateTemplate);
+router.delete('/:id', authenticateToken, deleteTemplate);
 
-// Основные CRUD операции
-router.get('/', getTemplates);
-router.post('/', createTemplate);
-router.put('/:id', updateTemplate);
-router.delete('/:id', deleteTemplate);
-
-// Дополнительные операции
-router.get('/popular', getPopularTemplates);
-router.get('/search', searchTemplates);
-router.get('/type/:type', getTemplatesByType);
-router.post('/:id/duplicate', duplicateTemplate);
-router.post('/:id/use', incrementUsage);
+// Additional operations
+router.get('/popular', authenticateToken, getPopularTemplates);
+router.get('/search', authenticateToken, searchTemplates);
+router.get('/type/:type', authenticateToken, getTemplatesByType);
+router.post('/:id/duplicate', authenticateToken, duplicateTemplate);
+router.post('/:id/use', authenticateToken, incrementUsage);
 
 module.exports = router;

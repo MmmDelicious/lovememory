@@ -24,4 +24,3 @@ export async function createRoom(roomData: { gameType: GameType; bet: number; ma
   return res.data;
 }
 
-

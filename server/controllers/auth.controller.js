@@ -8,6 +8,13 @@ const generateToken = (user) => {
   });
 };
 const sendAuthResponse = (res, user, token) => {
+  res.cookie('authToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 24 * 60 * 60 * 1000
+  });
+  
   res.json({ token, user });
 };
 const register = async (req, res, next) => {
@@ -27,26 +34,16 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    console.log('🔍 Login attempt for:', email);
     
     const { user } = await authService.login({ email, password });
-    console.log('✅ Auth service returned user:', user);
-    
     const fullUser = await userService.getProfile(user.id);
-    console.log('✅ User service returned profile:', fullUser);
     
-    // Логируем вход пользователя
     await activityService.logUserLogin(fullUser.id, {});
     
     const token = generateToken(fullUser);
-    console.log('🔑 Generated token:', token.substring(0, 20) + '...');
-    
-    const response = { token, user: fullUser };
-    console.log('📤 Sending response:', { token: token.substring(0, 20) + '...', user: fullUser.id });
     
     sendAuthResponse(res, fullUser, token);
   } catch (error) {
-    console.error('💥 Login error:', error);
     next(error);
   }
 };
@@ -55,6 +52,7 @@ const logout = (req, res, next) => {
     if (err) {
       return next(err);
     }
+    res.clearCookie('authToken');
     res.status(200).json({ message: 'Logged out successfully' });
   });
 };
@@ -62,10 +60,17 @@ const googleCallback = async (req, res, next) => {
   try {
     const fullUser = await userService.getProfile(req.user.id);
     
-    // Логируем вход через Google OAuth
     await activityService.logUserLogin(fullUser.id, {});
     
     const token = generateToken(fullUser);
+    
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+    
     const tokenParam = encodeURIComponent(token);
     const userParam = encodeURIComponent(JSON.stringify(fullUser));
     const redirectUrl = `${process.env.CLIENT_URL}/auth/callback#token=${tokenParam}&user=${userParam}`;
@@ -77,16 +82,9 @@ const googleCallback = async (req, res, next) => {
 
 const getMe = async (req, res, next) => {
   try {
-    console.log('🔍 getMe вызван, req.user:', req.user);
-    console.log('🔍 req.user.userId:', req.user?.userId);
-    
-    // req.user уже доступен благодаря passport.authenticate('jwt')
     const fullUser = await userService.getProfile(req.user.userId);
-    console.log('✅ Получили профиль пользователя:', fullUser);
-    
     res.json(fullUser);
   } catch (error) {
-    console.error('💥 Ошибка в getMe:', error);
     next(error);
   }
 };

@@ -4,8 +4,7 @@ import LottiePlayer from 'react-lottie-player';
 import { useUser, useCurrencyActions } from '../../store/hooks';
 import { useGameSocket } from '../../hooks/useGameSocket';
 import QuizGame from '../../components/QuizGame/QuizGame';
-import ChessGame from '../../components/ChessGame/ChessGame';
-import ChessGameEnhanced from '../../components/ChessGame/ChessGameEnhanced';
+import ChessGame from '../../components/ChessGame/ChessGameEnhanced';
 import WordleGame from '../../components/WordleGame/WordleGame';
 import CodenamesGame from '../../components/CodenamesGame/CodenamesGame';
 import MemoryGameComponent from '../../components/MemoryGame/MemoryGameComponent';
@@ -113,7 +112,7 @@ const GameRoomPage = () => {
           </div>
         );
       case 'chess':
-        return <ChessGameEnhanced 
+        return <ChessGame 
                   gameState={gameState} 
                   user={user} 
                   makeMove={makeMove}

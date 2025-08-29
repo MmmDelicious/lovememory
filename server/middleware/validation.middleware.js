@@ -13,9 +13,9 @@ const validateSearch = [handleValidationErrors];
 const sanitizeHTML = (text) => {
   if (typeof text !== 'string') return text;
   return text
-    .replace(/[<>]/g, '') // Удаляем < и >
-    .replace(/javascript:/gi, '') // Удаляем javascript: схемы
-    .replace(/on\w+=/gi, '') // Удаляем event handlers
+    .replace(/[<>]/g, '') // Remove < and >
+    .replace(/javascript:/gi, '') // Remove javascript: schemes
+    .replace(/on\w+=/gi, '') // Remove event handlers
     .trim();
 };
 module.exports = {

@@ -3,19 +3,59 @@ import styles from './QuizGame.module.css';
 const QuizGame = ({ gameState, user, makeMove, handleReturnToLobby }) => {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+  const [localTimeRemaining, setLocalTimeRemaining] = useState(15);
+  // Правильная синхронизация при смене вопроса
   useEffect(() => {
-    if (gameState?.currentQuestion) {
-      if (gameState.currentQuestion.questionNumber !== gameState.lastQuestionNumber) {
-        setSelectedAnswer(null);
-        setIsAnswerSubmitted(false);
-      }
+    // Сбрасываем состояние при смене вопроса
+    setSelectedAnswer(null);
+    setIsAnswerSubmitted(false);
+    // Сбрасываем локальный таймер до серверного значения
+    if (gameState?.questionTimeRemaining !== undefined) {
+      setLocalTimeRemaining(gameState.questionTimeRemaining);
     }
-  }, [gameState?.currentQuestion?.questionNumber, gameState?.lastQuestionNumber]);
-  const handleQuizMove = (move) => {
+  }, [gameState?.currentQuestionIndex]);
+
+  // Обновляем локальный таймер на основе серверного (авторитетного)
+  useEffect(() => {
+    if (gameState?.questionTimeRemaining !== undefined) {
+      setLocalTimeRemaining(Math.max(0, gameState.questionTimeRemaining)); // Защита от отрицательных значений
+    }
+  }, [gameState?.questionTimeRemaining]);
+
+  // Запускаем локальный таймер, который обновляется каждую секунду
+  useEffect(() => {
+    if (gameState?.status !== 'in_progress' || isAnswerSubmitted) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setLocalTimeRemaining(prev => {
+        const newTime = Math.max(0, prev - 1);
+        return newTime;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [gameState?.status, gameState?.currentQuestionIndex, isAnswerSubmitted]);
+  const handleQuizMove = async (move) => {
     if (isAnswerSubmitted) return;
     setSelectedAnswer(move);
     setIsAnswerSubmitted(true);
-    makeMove(move);
+    
+    try {
+      // Поддерживаем как Promise, так и синхронные вызовы
+      const result = makeMove(move);
+      if (result && typeof result.then === 'function') {
+        await result; // Ожидаем Promise
+      }
+    } catch (error) {
+      console.error('[QuizGame] Error submitting answer:', error);
+      // Откатываем состояние при ошибке
+      setIsAnswerSubmitted(false);
+      setSelectedAnswer(null);
+      // Можно добавить показ ошибки пользователю
+      alert('Ошибка при отправке ответа: ' + (error.message || 'Неизвестная ошибка'));
+    }
   };
   if (gameState.status === 'finished') {
     let isWinner, isDraw, resultText;
@@ -99,14 +139,21 @@ const QuizGame = ({ gameState, user, makeMove, handleReturnToLobby }) => {
     );
   }
   const isWaiting = !gameState.currentQuestion || gameState.status === 'waiting';
-  const { question, options, questionNumber, totalQuestions, timeRemaining } = gameState.currentQuestion || {
+  // Защита от undefined и некорректных значений
+  const safeCurrentQuestionIndex = gameState?.currentQuestionIndex || 0;
+  const safeTotalQuestions = gameState?.totalQuestions || 10;
+  
+  const { question, options } = gameState.currentQuestion || {
     question: "Ожидание соперника...",
-    options: ["Вариант 1", "Вариант 2", "Вариант 3", "Вариант 4"],
-    questionNumber: 1,
-    totalQuestions: 10,
-    timeRemaining: 15
+    options: ["Вариант 1", "Вариант 2", "Вариант 3", "Вариант 4"]
   };
-  const progressPercentage = (questionNumber / totalQuestions) * 100;
+  
+  // Читаем questionNumber из top-level полей с фолбэком
+  const questionNumber = Math.max(1, safeCurrentQuestionIndex + 1);
+  const totalQuestions = Math.max(1, safeTotalQuestions);
+  
+  // Нормализованный прогресс с защитой от деления на ноль
+  const progressPercentage = Math.max(0, Math.min(100, (questionNumber / totalQuestions) * 100));
   return (
     <div className={`${styles.quizContainer} ${isWaiting ? styles.waiting : ''}`}>
         <h3 className={styles.brandTitle}>Lovememory</h3>
@@ -116,7 +163,9 @@ const QuizGame = ({ gameState, user, makeMove, handleReturnToLobby }) => {
             <div className={styles.progressBar}>
                 <div className={styles.progressBarFill} style={{ width: `${progressPercentage}%` }}></div>
             </div>
-            <span className={styles.timer}>{timeRemaining !== undefined ? timeRemaining : 15} sec</span>
+            <span className={`${styles.timer} ${localTimeRemaining <= 5 ? styles.timerWarning : ''}`}>
+              {localTimeRemaining} sec
+            </span>
         </div>
         {gameState?.gameFormat === '2v2' && (
           <div className={styles.teamScores}>

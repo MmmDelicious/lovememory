@@ -26,11 +26,10 @@ const startBot = () => {
   });
 
   bot.on('polling_error', (error) => {
-    console.error('!!! Ошибка опроса Telegram:', error.code);
+    console.error('Telegram polling error:', error.code);
   });
   
-  console.log('Телеграм-бот успешно запущен.');
-};
+  };
 
 const sendMessage = (chatId, message) => {
   if (!bot) {
@@ -45,7 +44,6 @@ const sendMessage = (chatId, message) => {
 };
 
 const sendDailyReminders = async () => {
-  console.log('Выполняется задача ежедневных уведомлений...');
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -65,7 +63,6 @@ const sendDailyReminders = async () => {
     });
 
     if (eventsToday.length === 0) {
-        console.log('На сегодня событий нет.');
         return;
     }
 
@@ -85,10 +82,8 @@ const sendDailyReminders = async () => {
       const message = `*Напоминание на сегодня* 🔔\n\nСегодня у вас запланировано:\n- ${titles.join('\n- ')}`;
       sendMessage(chatId, message);
     }
-    console.log(`Отправлено уведомлений: ${notifications.size}.`);
-
-  } catch (error) {
-    console.error('!!! Ошибка при отправке ежедневных уведомлений:', error);
+    } catch (error) {
+    console.error('Error sending daily reminders:', error);
   }
 };
 
@@ -98,7 +93,8 @@ const startCronJobs = () => {
     scheduled: true,
     timezone: "Europe/Moscow"
   });
-  console.log('Планировщик задач (cron) для уведомлений запущен.');
+  
+  console.log('Telegram bot for notifications started.');
 };
 
 module.exports = { startBot, sendMessage, startCronJobs };

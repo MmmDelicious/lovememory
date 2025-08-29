@@ -43,7 +43,8 @@ import {
   updateUser,
   logout,
   loginUser,
-  registerUser
+  registerUser,
+  syncCoinsWithCurrency
 } from './slices/authSlice';
 import {
   setCoins,
@@ -170,16 +171,12 @@ export const useMascotActions = () => {
             const { askAI } = await import('../services/ai.service');
             const response = await askAI(message, context);
             
-            console.log('🎯 AI Response received:', response);
-            
-            // Проверяем если это генерация свиданий
+        
             if (response.intent === 'GENERATE_DATE' && response.data?.options) {
-              console.log('💕 Date generation detected, showing results...');
               
-              // Импортируем компонент для отображения результатов
               const { default: DateGenerationResult } = await import('../components/DateGenerationResult/DateGenerationResult');
               
-              // Создаем и показываем модальное окно с результатами
+          
               const modalContainer = document.createElement('div');
               document.body.appendChild(modalContainer);
               
@@ -187,7 +184,6 @@ export const useMascotActions = () => {
               const root = createRoot(modalContainer);
               
               const handleSelectDate = (option: any) => {
-                console.log('📅 Date option selected:', option);
                 // TODO: Интеграция с календарем
                 root.unmount();
                 document.body.removeChild(modalContainer);
@@ -200,7 +196,7 @@ export const useMascotActions = () => {
                 dispatch(setAIResponse('Хотите создать новые варианты свиданий? 💕'));
               };
               
-              // Используем React.createElement вместо JSX
+          
               const React = await import('react');
               root.render(React.createElement(DateGenerationResult, {
                 options: response.data.options,
@@ -254,7 +250,8 @@ export const useAuthActions = () => {
     updateUser: (updates: any) => dispatch(updateUser(updates)),
     logout: () => dispatch(logout()),
     loginUser: (credentials: { email: string; password: string }) => dispatch(loginUser(credentials)),
-    registerUser: (userData: { email: string; password: string; name: string; first_name?: string; last_name?: string; gender?: 'male' | 'female' | 'other'; city?: string }) => dispatch(registerUser(userData))
+    registerUser: (userData: { email: string; password: string; name: string; first_name?: string; last_name?: string; gender?: 'male' | 'female' | 'other'; city?: string }) => dispatch(registerUser(userData)),
+    syncCoinsWithCurrency: (coins: number) => dispatch(syncCoinsWithCurrency(coins))
   }), [dispatch]);
 };
 

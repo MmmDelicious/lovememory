@@ -29,8 +29,6 @@ class AnalysisEngine implements IAnalysisEngine {
    * Главный метод анализа пользователя
    */
   async analyzeUser(request: AnalysisRequest): Promise<AnalysisResult> {
-    console.log(`🔬 AnalysisEngine: Starting analysis for user ${request.userId}`);
-    
     try {
       const context = await userContextService.buildContext(request.userId);
       let analysisResults: AnalysisResult[] = [];
@@ -55,8 +53,6 @@ class AnalysisEngine implements IAnalysisEngine {
 
       // Обновляем профиль отношений
       const updatedProfile = await this.updateRelationshipProfile(request.userId, analysisResults);
-
-      console.log(`✅ AnalysisEngine: Analysis completed for user ${request.userId}`);
 
       return {
         userId: request.userId,
@@ -128,8 +124,6 @@ class AnalysisEngine implements IAnalysisEngine {
     context: UserContext
   ): Promise<AnalysisResult> {
     
-    console.log(`🔍 Analyzing ${analysisType} for user ${context.user.id}`);
-
     switch (analysisType) {
       case 'love_languages':
         return await this.analyzeLoveLanguages(context);
@@ -327,18 +321,22 @@ ${interactionsText}
     // Частота активности
     const frequencyScore = this.calculateActivityFrequency(events);
 
+    // Анализируем физическую активность из трекера
+    const physicalActivityScore = await this.analyzePhysicalActivity(context.user.id);
+
     const result: ActivityPatterns = {
       timePreferences,
       budgetLevel,
       categoryPreferences,
-      frequencyScore
+      frequencyScore,
+      physicalActivity: physicalActivityScore
     };
 
     return {
       userId: context.user.id,
       analysisType: 'activity_patterns',
       result,
-      confidence: 0.7,
+      confidence: 0.8, // Увеличиваем уверенность благодаря трекеру
       analyzedAt: new Date(),
       dataUsed: {
         eventsCount: events.length,
@@ -346,6 +344,149 @@ ${interactionsText}
         timeRange: this.getTimeRange(events)
       }
     };
+  }
+
+  /**
+   * Анализ физической активности из трекера
+   */
+  private async analyzePhysicalActivity(userId: string): Promise<any> {
+    try {
+      // Импортируем сервис трекера
+      const activityTrackerService = require('./activityTracker.service');
+      
+      const stats = await activityTrackerService.getUserStats(userId);
+      if (!stats) {
+        return {
+          hasTracker: false,
+          score: 0,
+          consistency: 0,
+          recommendations: []
+        };
+      }
+
+      // Рассчитываем общий скор активности
+      const activityScore = this.calculatePhysicalActivityScore(stats);
+      const consistencyScore = this.calculateConsistencyScore(stats);
+      
+      // Генерируем рекомендации
+      const recommendations = this.generateActivityRecommendations(stats);
+
+      return {
+        hasTracker: true,
+        score: activityScore,
+        consistency: consistencyScore,
+        dailyAverage: Math.round(stats.weeklyActivity.reduce((sum, day) => sum + day.steps, 0) / 7),
+        currentStreak: stats.streaks.current,
+        longestStreak: stats.streaks.longest,
+        achievements: stats.achievements.length,
+        recommendations,
+        lastUpdated: stats.current.steps > 0 ? 'today' : 'recently'
+      };
+
+    } catch (error) {
+      console.error('Error analyzing physical activity:', error);
+      return {
+        hasTracker: false,
+        score: 0,
+        consistency: 0,
+        recommendations: ['Начните использовать трекер активности для лучшего анализа']
+      };
+    }
+  }
+
+  /**
+   * Рассчитывает скор физической активности
+   */
+  private calculatePhysicalActivityScore(stats: any): number {
+    let score = 0;
+    
+    // Базовые баллы за текущие шаги
+    const currentSteps = stats.current.steps;
+    if (currentSteps >= 15000) score += 40;
+    else if (currentSteps >= 12000) score += 35;
+    else if (currentSteps >= 10000) score += 30;
+    else if (currentSteps >= 8000) score += 25;
+    else if (currentSteps >= 6000) score += 20;
+    else if (currentSteps >= 4000) score += 15;
+    else if (currentSteps >= 2000) score += 10;
+    else score += 5;
+
+    // Бонус за достижение цели
+    if (stats.current.goalProgress >= 100) score += 20;
+    else if (stats.current.goalProgress >= 80) score += 15;
+    else if (stats.current.goalProgress >= 60) score += 10;
+    else if (stats.current.goalProgress >= 40) score += 5;
+
+    // Бонус за серию дней
+    if (stats.streaks.current >= 7) score += 20;
+    else if (stats.streaks.current >= 3) score += 10;
+    else if (stats.streaks.current >= 1) score += 5;
+
+    // Бонус за достижения
+    score += stats.achievements.length * 5;
+
+    return Math.min(score, 100);
+  }
+
+  /**
+   * Рассчитывает скор постоянства
+   */
+  private calculateConsistencyScore(stats: any): number {
+    let score = 0;
+    
+    // Анализируем недельную активность
+    const weeklyData = stats.weeklyActivity;
+    const activeDays = weeklyData.filter(day => day.steps > 0).length;
+    const goalDays = weeklyData.filter(day => day.goalAchieved).length;
+    
+    // Бонус за активные дни
+    score += (activeDays / 7) * 30;
+    
+    // Бонус за достижение целей
+    score += (goalDays / 7) * 40;
+    
+    // Бонус за тренд
+    if (stats.trends.trend === 'increasing') score += 20;
+    else if (stats.trends.trend === 'stable') score += 10;
+    
+    return Math.min(score, 100);
+  }
+
+  /**
+   * Генерирует рекомендации по активности
+   */
+  private generateActivityRecommendations(stats: any): string[] {
+    const recommendations = [];
+    
+    // Анализируем текущую активность
+    if (stats.current.steps < 5000) {
+      recommendations.push('Попробуйте увеличить количество шагов до 10,000 в день');
+    }
+    
+    if (stats.current.goalProgress < 50) {
+      recommendations.push('Установите более реалистичную цель для начала');
+    }
+    
+    if (stats.streaks.current === 0) {
+      recommendations.push('Начните с малого - поставьте цель на 3 дня подряд');
+    }
+    
+    if (stats.trends.trend === 'decreasing') {
+      recommendations.push('Попробуйте найти новые маршруты для прогулок');
+    }
+    
+    if (stats.achievements.length < 2) {
+      recommendations.push('Достигайте целей для получения достижений');
+    }
+    
+    // Если рекомендаций мало, добавляем общие
+    if (recommendations.length < 3) {
+      recommendations.push('Прогуливайтесь с партнером для укрепления отношений');
+      recommendations.push('Используйте лестницу вместо лифта');
+      recommendations.push('Паркуйтесь дальше от входа');
+    }
+    
+    return recommendations.slice(0, 3); // Возвращаем максимум 3 рекомендации
   }
 
   /**
@@ -586,15 +727,13 @@ ${interactionsText}
    * Планировщик фонового анализа
    */
   async scheduleBackgroundAnalysis(userId: string): Promise<void> {
-    console.log(`📅 Scheduling background analysis for user ${userId}`);
-    
     // Проверяем нужен ли анализ
     const profile = await RelationshipProfile.findOne({ where: { userId } });
     if (!profile || profile.needsAnalysis()) {
       // Запускаем анализ асинхронно
       setImmediate(() => {
         this.analyzeUser({ userId })
-          .then(() => console.log(`✅ Background analysis completed for user ${userId}`))
+          .then(() => )
           .catch(error => console.error(`❌ Background analysis failed for user ${userId}:`, error));
       });
     }

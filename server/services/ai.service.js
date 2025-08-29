@@ -2,14 +2,14 @@ const axios = require('axios');
 
 const buildSystemPrompt = (context) => {
   if (!context) {
-    console.error('❌ Context is undefined in buildSystemPrompt');
+    console.error('Context is undefined in buildSystemPrompt');
     throw new Error('Context is required for buildSystemPrompt');
   }
 
   const { user, partner, relationship } = context;
 
   if (!user) {
-    console.error('❌ User is undefined in buildSystemPrompt context');
+    console.error('User is undefined in buildSystemPrompt context');
     throw new Error('User is required in context');
   }
 
@@ -78,7 +78,7 @@ class AiService {
   async getChatResponse(userPrompt, context) {
     const gatewayUrl = process.env.AI_GATEWAY_URL;
     if (!gatewayUrl) {
-      console.warn('⚠️ AI Gateway URL not configured, using fallback response');
+      console.warn('AI Gateway URL not configured, using fallback response');
       return this.getFallbackResponse(userPrompt, context);
     }
 
@@ -92,7 +92,7 @@ class AiService {
     try {
       systemPrompt = buildSystemPrompt(context);
     } catch (error) {
-      console.error('❌ Error building system prompt:', error.message);
+      console.error('Error building system prompt:', error.message);
       throw error;
     }
 
@@ -124,7 +124,7 @@ class AiService {
           console.error('Data:', JSON.stringify(error.response.data, null, 2));
       }
       
-      console.warn('⚠️ AI Gateway failed, using fallback response');
+      console.warn('AI Gateway failed, using fallback response');
       return this.getFallbackResponse(userPrompt, context);
     }
   }
@@ -178,7 +178,6 @@ class AiService {
 
     const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
     
-    console.log(`💬 Fallback response for user ${userName}: "${randomResponse}"`);
     return { text: randomResponse };
   }
 }

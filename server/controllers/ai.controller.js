@@ -8,8 +8,6 @@ const handleChat = async (req, res, next) => {
       return res.status(400).json({ message: 'Prompt is required' });
     }
 
-    console.log(`🎯 AI Controller: Received prompt "${prompt.substring(0, 50)}..."`);
-    
     // Проверяем если это запрос на генерацию свидания
     const lowerPrompt = prompt.toLowerCase();
     const isDateGeneration = lowerPrompt.includes('свидание') || 
@@ -19,21 +17,15 @@ const handleChat = async (req, res, next) => {
                             lowerPrompt.includes('создай');
 
     if (isDateGeneration) {
-      console.log('💕 Detected date generation request, using real DateGenerationService...');
-      
+
       try {
         // Получаем актуальный профиль пользователя из БД
         let userProfile;
         try {
           userProfile = await userService.getProfile(req.user.userId || req.user.id);
-          console.log('👤 User profile from DB:', {
-            name: userProfile.first_name,
-            city: userProfile.city,
-            age: userProfile.age,
-            gender: userProfile.gender
-          });
+
         } catch (profileError) {
-          console.warn('⚠️ Could not get user profile from DB, using defaults:', profileError.message);
+          console.warn('Could not get user profile from DB, using defaults:', profileError.message);
           // Fallback данные пользователя
           userProfile = {
             id: req.user.userId || req.user.id,
@@ -87,13 +79,6 @@ const handleChat = async (req, res, next) => {
           }
         };
 
-        console.log('🏗️ User context for date generation:', {
-          name: request.context.user.name,
-          city: request.context.user.city,
-          age: request.context.user.age
-        });
-
-        console.log('🏗️ Generating dates with real places from Geoapify...');
         const result = await dateService.generate(request);
         
         // Преобразуем результат для фронтенда с РЕАЛЬНЫМИ местами
@@ -129,12 +114,11 @@ const handleChat = async (req, res, next) => {
           },
           confidence: 0.9
         };
-        
-        console.log('✅ Real date generation response ready');
+
         return res.json(response);
         
       } catch (generationError) {
-        console.error('❌ Real date generation failed, using fallback:', generationError);
+        console.error('Real date generation failed, using fallback:', generationError);
         
         // Fallback к простым вариантам только если реальный сервис не работает
         const mockOptions = [
@@ -240,19 +224,17 @@ const handleChat = async (req, res, next) => {
           },
           confidence: 0.9
         };
-        
-        console.log('✅ Smart date generation response ready');
+
         return res.json(response);
       }
     }
 
     // Обычный AI чат
-    console.log('💬 Using regular AI service...');
     const result = await aiService.getChatResponse(prompt, context);
     res.json(result);
     
   } catch (error) {
-    console.error('❌ AI Controller error:', error);
+    console.error('AI Controller error:', error);
     next(error);
   }
 };

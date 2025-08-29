@@ -674,6 +674,19 @@
   color: #047857;
 }
 
+/* Activity Tracker Section */
+.activityTrackerSection {
+  background: white;
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.activityTrackerContent {
+  margin-top: 1.5rem;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .insightCardsRow {
@@ -702,6 +715,7 @@
   .harmonyIndexCard,
   .loveLanguagesSection,
   .relationshipGraphSection,
+  .activityTrackerSection,
   .quoteCard {
     padding: 1.5rem;
   }
@@ -723,6 +737,7 @@
   .harmonyIndexCard,
   .loveLanguagesSection,
   .relationshipGraphSection,
+  .activityTrackerSection,
   .quoteCard {
     padding: 1rem;
   }

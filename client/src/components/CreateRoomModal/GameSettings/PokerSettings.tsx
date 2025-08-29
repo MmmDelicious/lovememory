@@ -19,7 +19,7 @@ const PokerSettings: React.FC<GameSettingsProps> = ({
       isPrivate,
       gameFormat: 'poker'
     });
-  }, [maxPlayers, pokerType, blindStructure, isPrivate, onSettingsChange]);
+  }, [maxPlayers, pokerType, blindStructure, isPrivate]);
 
   return (
     <div>

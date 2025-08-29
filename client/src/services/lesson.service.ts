@@ -65,10 +65,8 @@ export interface LessonStats {
 }
 class LessonService {
   async getTodaysLesson(): Promise<DailyLessonResponse> {
-    console.log('🎯 LessonService: Fetching daily lesson...');
     try {
       const response = await api.get('/lessons/daily');
-      console.log('✅ LessonService: Daily lesson response:', response.data);
       return response.data.data;
     } catch (error: unknown) {
       console.error('❌ LessonService: Failed to fetch daily lesson:', error);
@@ -76,13 +74,11 @@ class LessonService {
     }
   }
   async completeLesson(lessonId: string, feedback?: string): Promise<any> {
-    console.log('🎯 LessonService: Completing lesson:', lessonId, { feedback });
     try {
       const response = await api.post(`/lessons/${lessonId}/complete`, {
         feedback,
         completionTime: Date.now()
       });
-      console.log('✅ LessonService: Lesson completion response:', response.data);
       return response.data.data;
     } catch (error: unknown) {
       console.error('❌ LessonService: Failed to complete lesson:', error);
@@ -90,10 +86,8 @@ class LessonService {
     }
   }
   async getProgress(): Promise<LessonProgress> {
-    console.log('🎯 LessonService: Fetching lesson progress...');
     try {
       const response = await api.get('/lessons/progress');
-      console.log('✅ LessonService: Lesson progress response:', response.data);
       return response.data.data;
     } catch (error: unknown) {
       console.error('❌ LessonService: Failed to fetch lesson progress:', error);

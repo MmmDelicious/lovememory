@@ -38,7 +38,7 @@ exports.getProfileStats = async (req, res, next) => {
 exports.uploadAvatar = async (req, res, next) => {
   try {
     if (!req.file) {
-      const error = new Error('Файл не был загружен');
+      const error = new Error('File was not uploaded');
       error.statusCode = 400;
       throw error;
     }
@@ -54,17 +54,17 @@ exports.getPlaceHistory = async (req, res, next) => {
     res.json([]);
   } catch (error) {
     console.error('Get place history error:', error);
-    res.status(500).json({ message: 'Ошибка при получении истории мест' });
+    res.status(500).json({ message: 'Error getting place history' });
   }
 };
 exports.addPlaceToHistory = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { placeId, placeName, placeType, visitDate } = req.body;
-    res.json({ message: 'Место добавлено в историю' });
+    res.json({ message: 'Place added to history' });
   } catch (error) {
     console.error('Add place to history error:', error);
-    res.status(500).json({ message: 'Ошибка при добавлении места в историю' });
+    res.status(500).json({ message: 'Error adding place to history' });
   }
 };
 exports.searchUsers = async (req, res, next) => {
@@ -73,17 +73,17 @@ exports.searchUsers = async (req, res, next) => {
     res.json([]);
   } catch (error) {
     console.error('Search users error:', error);
-    res.status(500).json({ message: 'Ошибка при поиске пользователей' });
+    res.status(500).json({ message: 'Error searching users' });
   }
 };
 exports.saveFCMToken = async (req, res, next) => {
   try {
     const { token } = req.body;
     const userId = req.user.id;
-    res.json({ message: 'FCM token сохранен' });
+    res.json({ message: 'FCM token saved' });
   } catch (error) {
     console.error('Save FCM token error:', error);
-    res.status(500).json({ message: 'Ошибка при сохранении FCM токена' });
+    res.status(500).json({ message: 'Error saving FCM token' });
   }
 };
 

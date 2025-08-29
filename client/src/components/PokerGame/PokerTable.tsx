@@ -7,21 +7,22 @@ import styles from './PokerTable.module.css';
 import Player from './Player/Player';
 import { toast } from '../../context/ToastContext';
 import type { GameState, GameRoom } from '../../../types/common';
+import type { PokerGameState } from '../../../types/game.types';
 interface PokerTableProps {
-  gameState: GameState;
+  gameState: PokerGameState | null;
   onAction: (action: string, value?: number) => void;
   onRebuy: (rebuyAmount: number) => void;
   userId: string;
-  roomData?: GameRoom;
+  roomData?: GameRoom | null;
   onOpenBuyIn?: () => void;
 }
 const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, userId, roomData, onOpenBuyIn }) => {
   const [raiseAmount, setRaiseAmount] = useState(0);
-  const [animatingCards, setAnimatingCards] = useState([]);
+  const [animatingCards, setAnimatingCards] = useState<number[]>([]);
   const [dealingPhase, setDealingPhase] = useState(false);
-  const [prevStage, setPrevStage] = useState(null);
+  const [prevStage, setPrevStage] = useState<string | null>(null);
   const [showRebuyModal, setShowRebuyModal] = useState(false);
-  const [winnerAnimation, setWinnerAnimation] = useState(null);
+  const [winnerAnimation, setWinnerAnimation] = useState<string | null>(null);
   const [turnTimer, setTurnTimer] = useState(30);
   const coins = useCoins();
   const { 
@@ -58,8 +59,13 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
   const mainPlayerStack = useMemo(() => {
     return currentPlayer ? currentPlayer.stack : 0;
   }, [currentPlayer]);
-  const minRaise = Math.max(0, Number(minRaiseAmount) || 0);
-  const maxRaise = Math.max(minRaise, Number(maxRaiseAmount) || mainPlayerStack || 0);
+  // Сервер теперь присылает minRaise и maxRaise как итоговые суммы (total bet).
+  const serverMinRaise = Number(minRaiseAmount) || 0;
+  const serverMaxRaise = Number(maxRaiseAmount) || 0; // ожидаем итоговую ставку
+
+  const currentBet = currentPlayer?.currentBet || 0;
+  const minRaise = Math.max(currentBet, serverMinRaise, 0);
+  const maxRaise = Math.max(minRaise, serverMaxRaise || (currentBet + mainPlayerStack) || 0);
   const isPlayerTurn = currentPlayerId === userId;
   useEffect(() => {
     setTurnTimer(30);
@@ -73,9 +79,9 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [gameState]);
+  }, [currentPlayerId, status]);
   useEffect(() => {
-    if (prevStage !== stage) {
+    if (prevStage !== stage && stage) {
       setPrevStage(stage);
       if (stage === 'pre-flop' && prevStage === null) {
         setDealingPhase(true);
@@ -84,7 +90,7 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
       if ((stage === 'flop' && prevStage === 'pre-flop') ||
           (stage === 'turn' && prevStage === 'flop') ||
           (stage === 'river' && prevStage === 'turn')) {
-        const newCards = [];
+        const newCards: number[] = [];
         if (stage === 'flop') {
           newCards.push(0, 1, 2);
         } else if (stage === 'turn') {
@@ -102,23 +108,25 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
       setDealingPhase(true);
       setTimeout(() => setDealingPhase(false), 2000);
     }
-  }, [gameState?.yourHand]);
+  }, [gameState?.yourHand, stage]);
   useEffect(() => {
     if (gameState && gameState.status === 'finished' && gameState.winner) {
-      const winnerId = typeof gameState.winner === 'object' ? gameState.winner.id : gameState.winner;
+      const winnerId = typeof gameState.winner === 'object' ? (gameState.winner as any).id : gameState.winner;
       setWinnerAnimation(winnerId);
       setTimeout(() => setWinnerAnimation(null), 3000);
     }
   }, [gameState?.status, gameState?.winner]);
   useEffect(() => {
-    setRaiseAmount(minRaise);
-  }, [minRaise]);
+    const baseline = currentPlayer?.currentBet || 0;
+    const initial = clamp(Math.max(minRaise, baseline), minRaise, maxRaise);
+    setRaiseAmount(initial);
+  }, [minRaise, maxRaise, currentPlayer?.currentBet]);
   const [winnerId, winningFiveSet] = useMemo(() => {
     if (!winnersInfo || winnersInfo.length === 0) return [null, new Set()];
     const primary = winnersInfo[0];
-    if (!primary.handCards || primary.handCards.length === 0) {
+    if (!primary || !primary.handCards || primary.handCards.length === 0) {
       console.warn('[PokerTable] No handCards in winnersInfo:', primary);
-      return [primary.player?.id || null, new Set()];
+      return [primary?.player?.id || null, new Set()];
     }
     const set = new Set(primary.handCards.map(c => {
       if (!c || !c.rank || !c.suit) {
@@ -127,47 +135,63 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
       }
       return `${c.rank}-${c.suit}`;
     }).filter(Boolean));
-    console.log('[PokerTable] Winning cards set:', Array.from(set));
+
     return [primary.player?.id || null, set];
   }, [winnersInfo]);
-  const isWinningCardForPlayer = useCallback((playerId, card) => {
+  const isWinningCardForPlayer = useCallback((playerId: string, card: any) => {
     if (!card || !winnerId) return false;
     if (playerId !== winnerId) return false;
     return winningFiveSet.has(`${card.rank}-${card.suit}`);
   }, [winnerId, winningFiveSet]);
-  const isWinningCommunityCard = useCallback((card) => {
+  const isWinningCommunityCard = useCallback((card: any) => {
     if (!card) return false;
     return winningFiveSet.has(`${card.rank}-${card.suit}`);
   }, [winningFiveSet]);
   const getPlayerSeatMap = () => {
     if (!players || players.length === 0) return Array(5).fill(null);
-    const mainPlayer = players.find(p => p.id === userId);
-    const others = players.filter(p => p.id !== userId);
-    const seats = [mainPlayer || null];
-    for (let i = 0; i < 4; i++) {
-      seats.push(others[i] || null);
+    
+    try {
+      // Показываем всех игроков в комнате, независимо от buy-in статуса
+      // Это позволяет видеть кто ожидает buy-in
+      
+      const mainPlayer = players.find(p => p?.id === userId) || null;
+      const others = players.filter(p => p?.id !== userId) || [];
+      const seats = [mainPlayer];
+      
+      
+      for (let i = 0; i < 4; i++) {
+        seats.push(others[i] || null);
+      }
+      return seats;
+    } catch (error) {
+      console.error('[PokerTable] Error in getPlayerSeatMap:', error);
+      return Array(5).fill(null);
     }
-    return seats;
   };
-  const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-  const handleRaiseChange = (e) => {
-    const newValue = Number(e.target.value);
+  const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+  const handleRaiseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const parsed = parseFloat(e.target.value);
+    const newValue = Number.isFinite(parsed) ? parsed : minRaise;
     setRaiseAmount(clamp(newValue, minRaise, maxRaise));
   };
-  const handleRebuyClick = (rebuyAmount) => {
+  const handleRebuyClick = (rebuyAmount: number) => {
     onRebuy(rebuyAmount);
     setShowRebuyModal(false);
   };
-  const handleAction = (action, value = 0) => {
+  const handleAction = (action: string, value = 0) => {
     if (action === 'raise') {
       if (value < minRaise || value > maxRaise) {
         toast.warning(`Некорректная сумма рейза. Допустимый диапазон: ${minRaise} - ${maxRaise}`, 'Некорректная ставка');
         return;
       }
     }
+    
     onAction(action, value);
   };
-  const needsBuyIn = gameState?.needsBuyIn || (!gameState?.hasBoughtIn && gameState?.status === 'waiting');
+  // Логика показа баннера buy-in
+  const needsBuyIn = Boolean(gameState?.needsBuyIn);
+  const hasBoughtIn = Boolean(gameState?.hasBoughtIn);
+  const showBuyInBanner = needsBuyIn && !hasBoughtIn && gameState;
   return (
     <div className={styles.gameContainer}>
       <div className={styles.pokerTable}>
@@ -245,6 +269,7 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
                 dealingPhase={dealingPhase}
                 yourHand={yourHand}
                 isWinningCard={(card) => isWinningCardForPlayer(player.id, card)}
+                hasBoughtIn={Boolean(player.hasBoughtIn)}
               />
             ) : (
               <div className={styles.emptySeat}> 
@@ -285,12 +310,11 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
           <Button 
             onClick={() => setShowRebuyModal(true)}
             variant="secondary"
-            className={styles.rebuyButton}
           >
             Rebuy
           </Button>
         )}
-        {needsBuyIn && onOpenBuyIn && (
+        {showBuyInBanner && onOpenBuyIn && (
           <div className={styles.buyInBanner} onClick={onOpenBuyIn}>
             <div className={styles.buyInIcon}>💰</div>
             <div>
@@ -327,15 +351,31 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
       {}
       {isPlayerTurn && gameState && status !== 'finished' && !showdownPhase && (
         <div className={styles.actions}>
+          {/* Отладочная информация */}
+          <div style={{ 
+            position: 'absolute', 
+            top: '-30px', 
+            left: '50%', 
+            transform: 'translateX(-50%)',
+            fontSize: '12px',
+            color: 'red',
+            background: 'rgba(0,0,0,0.8)',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            whiteSpace: 'nowrap'
+          }}>
+            Debug: validActions=[{validActions.join(', ')}], callAmount={callAmount}, minRaise={minRaise}, maxRaise={maxRaise}
+          </div>
+          
           {(validActions || []).includes('fold') && <Button onClick={() => handleAction('fold')}>Сбросить</Button>}
           {(validActions || []).includes('check') && <Button onClick={() => handleAction('check')}>Чек</Button>}
           {(validActions || []).includes('call') && callAmount > 0 && (
             <Button onClick={() => handleAction('call')}>Уравнять ({callAmount})</Button>
           )}
-          {(validActions || []).includes('raise') && (
+          {(validActions || []).includes('raise') && maxRaise > minRaise && (
             <>
               <Button onClick={() => handleAction('raise', clamp(raiseAmount, minRaise, maxRaise))}>
-                Рейз {raiseAmount}
+                Рейз до {raiseAmount}
               </Button>
               <div className={styles.raiseContainer}>
                 <input 

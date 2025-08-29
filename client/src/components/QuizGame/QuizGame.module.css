@@ -50,6 +50,24 @@
     color: #7A6C65;
     flex-shrink: 0;
   }
+
+  .timer {
+    transition: all 0.3s ease;
+  }
+
+  .timerWarning {
+    background: rgba(255, 99, 71, 0.8) !important;
+    color: #fff !important;
+    animation: pulse 1s infinite;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
   
   .progressBar {
     flex-grow: 1;
@@ -246,12 +264,6 @@
   .returnButton:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px -5px rgba(224, 151, 131, 0.4);
-  }
-  
-  /* Placeholder */
-  .boardPlaceholder {
-    color: #7A6C65;
-    font-style: italic;
   }
 
   /* Стили для состояния ожидания */

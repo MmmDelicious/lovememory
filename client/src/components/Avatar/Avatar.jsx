@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import styles from './Avatar.module.css';
 
 const Avatar = ({ src, alt = 'avatar', size = 'medium', variant = 'circle', className = '' }) => {
@@ -18,14 +17,6 @@ const Avatar = ({ src, alt = 'avatar', size = 'medium', variant = 'circle', clas
       />
     </div>
   );
-};
-
-Avatar.propTypes = {
-  src: PropTypes.string,
-  alt: PropTypes.string,
-  size: PropTypes.oneOf(['small', 'medium', 'large']),
-  variant: PropTypes.oneOf(['circle', 'rounded', 'square']),
-  className: PropTypes.string,
 };
 
 export default Avatar;

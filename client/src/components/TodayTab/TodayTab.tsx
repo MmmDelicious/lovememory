@@ -50,8 +50,6 @@ const TodayTab: React.FC<TodayTabProps> = ({
 
   // Загружаем анимацию Lottie
   useEffect(() => {
-    console.log('🎭 Loading Lottie animation...');
-    
     // Список доступных анимаций для попытки загрузки
     const animationFiles = [
       'Couple sharing and caring love.json',
@@ -63,7 +61,6 @@ const TodayTab: React.FC<TodayTabProps> = ({
     for (const filename of animationFiles) {
       const animation = getLessonAnimation(filename);
       if (animation) {
-        console.log('🎭 Successfully loaded:', filename);
         setAnimationData(animation);
         return;
       }
@@ -137,8 +134,6 @@ const TodayTab: React.FC<TodayTabProps> = ({
   };
 
   const handleRecommendationAction = (recommendationId: string) => {
-    console.log('Starting recommendation:', recommendationId);
-    
     // Простое уведомление для пользователя
     alert(`Начинаем рекомендацию: ${recommendations.find(r => r.id === recommendationId)?.title}`);
     
@@ -146,15 +141,11 @@ const TodayTab: React.FC<TodayTabProps> = ({
   };
 
   const handleSchedule = () => {
-    console.log('Scheduling lesson with partner');
-    
     // Простое уведомление
     alert('Функция планирования будет доступна в следующем обновлении!');
   };
 
   const handleShare = () => {
-    console.log('Sharing lesson');
-    
     // Простое уведомление
     if (navigator.share) {
       navigator.share({
@@ -311,8 +302,7 @@ const TodayTab: React.FC<TodayTabProps> = ({
                 </div>
               )}
             </div>
-            
-         
+
           </div>
              {/* Steps Section - показывается только после нажатия "Начать" */}
              {showSteps && (

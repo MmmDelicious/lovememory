@@ -28,33 +28,26 @@ const LessonsPage: React.FC = () => {
     loadData();
   }, [refreshKey]);
   const loadData = async () => {
-    console.log('🎯 LessonsPage: Loading data for tab:', activeTab, 'viewMode:', viewMode);
     try {
       setLoading(true);
       setError(null);
       
       // Load data based on active tab
       if (activeTab === 'today') {
-        console.log('📅 LessonsPage: Fetching today\'s lesson...');
         const lesson = await lessonService.getTodaysLesson();
-        console.log('✅ LessonsPage: Today lesson loaded:', lesson);
         setTodayLesson(lesson);
       } 
       
       if (activeTab === 'insights') {
-        console.log('📊 LessonsPage: Fetching progress...');
         const progressData = await lessonService.getProgress();
-        console.log('✅ LessonsPage: Progress loaded:', progressData);
         setProgress(progressData);
       }
       
       if (activeTab === 'topics') {
-        console.log('📚 LessonsPage: Topics tab loaded');
         // ThemesTab component handles its own data
       }
       
       if (activeTab === 'insights') {
-        console.log('💡 LessonsPage: Fetching insights...');
         // TODO: Implement getInsights service method
         const insightsData = null; // await lessonService.getInsights();
         setInsights(insightsData);
@@ -191,7 +184,6 @@ const LessonsPage: React.FC = () => {
             >
               <ThemesTab
                 onThemeSelect={(themeId) => {
-                  console.log('Selected theme:', themeId);
                   // TODO: Navigate to theme lessons or open theme modal
                 }}
               />

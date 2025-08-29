@@ -17,6 +17,7 @@
   text-align: center;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--color-border);
+  animation: fadeIn 0.6s ease-out;
 }
 
 .animationContainer {
@@ -213,24 +214,4 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.errorContent {
-  animation: fadeIn 0.6s ease-out;
-}
-
-/* Анимации */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.errorContent {
-  animation: fadeIn 0.6s ease-out;
 } 

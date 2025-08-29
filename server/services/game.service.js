@@ -12,8 +12,6 @@ class GameService {
     // Для покера показываем и waiting и in_progress комнаты (можно присоединиться как наблюдатель)
     // Для других игр только waiting (игра уже идет, присоединиться нельзя)
     const statusFilter = gameType === 'poker' ? ['waiting', 'in_progress'] : ['waiting'];
-    console.log(`[SERVER] Finding rooms for gameType: ${gameType}, statusFilter:`, statusFilter);
-    
     const rooms = await GameRoom.findAll({
       where: { 
         gameType, 
@@ -28,8 +26,6 @@ class GameService {
       raw: true,
       nest: true
     });
-
-    console.log(`[SERVER] Found ${rooms.length} rooms in database for ${gameType}`);
 
     // Оптимизация: получаем информацию о всех комнатах за один проход
     const roomIds = rooms.map(room => room.id);
@@ -53,11 +49,9 @@ class GameService {
         players: sockets.map(s => s.user?.id).filter(Boolean),
         playerCount: sockets.length,
       };
-      console.log(`[SERVER] Room ${room.id} (${room.status}) has ${sockets.length} connected players`);
       return roomWithCount;
     });
 
-    console.log(`[SERVER] Returning ${roomsWithPlayerCount.length} rooms for ${gameType}`);
     return roomsWithPlayerCount;
   }
 
@@ -126,7 +120,6 @@ class GameService {
       const room = await GameRoom.findByPk(roomId);
       if (room) {
         await room.destroy();
-        console.log(`[SERVER] Room ${roomId} has been deleted from the database.`);
         return true;
       }
       return false;
@@ -159,10 +152,9 @@ class GameService {
       if (room && room.status === 'waiting') {
         room.status = 'in_progress';
         await room.save();
-        console.log(`Статус комнаты ${roomId} изменен на 'in_progress'.`);
-      }
+        }
     } catch (error) {
-      console.error(`!!! Ошибка в startGame для комнаты ${roomId}:`, error);
+      console.error(`Error in startGame for room ${roomId}:`, error);
       throw error;
     }
   }
@@ -173,7 +165,7 @@ class GameService {
         const room = await GameRoom.findByPk(roomId, { transaction: t });
         if (!room) {
             await t.rollback();
-            console.warn(`[FINALIZE_POKER] Room ${roomId} not found for finalization.`);
+            console.warn(`Room ${roomId} not found for finalization.`);
             return null;
         }
 
@@ -187,8 +179,7 @@ class GameService {
                 if (user.coins < 0) user.coins = 0;
                 await user.save({ transaction: t });
                 updatedUsers.push({ id: user.id, coins: user.coins });
-                console.log(`[FINALIZE_POKER] User ${user.id} stack changed by ${netChange}. New balance: ${user.coins}`);
-            }
+                }
         }
         
         // Сессию завершаем, но комнату переводим в ожидание, чтобы можно было продолжить играть позже
@@ -196,12 +187,11 @@ class GameService {
         await room.save({ transaction: t });
         
         await t.commit();
-        console.log(`[FINALIZE_POKER] Session for room ${roomId} finalized. Room status set to 'waiting'.`);
         return updatedUsers;
 
     } catch (error) {
         await t.rollback();
-        console.error(`[FINALIZE_POKER] Error finalizing poker session for room ${roomId}:`, error);
+        console.error(`Error finalizing poker session for room ${roomId}:`, error);
         return null;
     }
   }
@@ -210,7 +200,6 @@ class GameService {
     try {
       const room = await GameRoom.findByPk(roomId);
       if (!room) {
-        console.log(`Комната ${roomId} не найдена`);
         return null;
       }
 
@@ -218,7 +207,6 @@ class GameService {
       
       if (economyType === 'poker') {
         // Для покера используем старую логику
-        console.log(`[FINALIZE] Покер игра ${roomId} завершается через PokerGame`);
         return null;
       }
 
@@ -227,14 +215,13 @@ class GameService {
       const result = await economyService.finalizeStandardGame(roomId, isDraw ? null : winnerId, playerIds, isDraw);
       
       if (result.success) {
-        console.log(`[FINALIZE] Стандартная игра ${roomId} завершена через новую экономическую систему`);
         return result.results;
       } else {
-        console.error(`[FINALIZE] Ошибка завершения игры ${roomId}:`, result.reason);
+        console.error(`Error finalizing game ${roomId}:`, result.reason);
         return null;
       }
     } catch (error) {
-      console.error(`[FINALIZE] Ошибка в finalizeGame для комнаты ${roomId}:`, error);
+      console.error(`Error in finalizeGame for room ${roomId}:`, error);
       return null;
     }
   }

@@ -23,10 +23,7 @@ const server = http.createServer(app);
 
 const io = initSocket(server, app);
 
-// Делаем io доступным глобально для services
 global.io = io;
-
-// Build CORS allow-list. Supports comma-separated ALLOWED_ORIGINS.
 const defaultOrigin = process.env.CLIENT_URL || "http://localhost:5173";
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
   .split(',')
@@ -39,28 +36,27 @@ if (!allowedOrigins.includes(defaultOrigin)) {
 app.use(cors({
   credentials: true,
   origin: (origin, callback) => {
-    // Allow non-browser or same-origin requests
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
-    // In development, allow localhost origins automatically
     if (process.env.NODE_ENV !== 'production' && /^(http:\/\/|https:\/\/)localhost:\d+/.test(origin)) {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));
   },
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
 }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'fallback-secret-key',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
@@ -70,7 +66,6 @@ app.use(passport.session());
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
-  console.log('Created uploads directory.');
 }
 app.use('/uploads', express.static(uploadsDir));
 
@@ -87,28 +82,23 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await sequelize.authenticate();
-    console.log('Database connection has been established successfully.');
-    
-    await sequelize.sync({ alter: true });
-    console.log('All models were synchronized successfully.');
-    
-    await gameService.cleanupOrphanedRooms(io);
 
-    // Инициализируем систему очередей (опционально)
+    await sequelize.sync({ alter: true });
+
+    await gameService.cleanupOrphanedRooms(io);
     try {
       const redisHealthy = await checkRedisHealth();
       if (redisHealthy) {
         await queueService.initialize();
-        console.log('✅ Queue service initialized successfully');
+
       } else {
-        console.log('⚠️ Redis not available - queue service disabled');
+
       }
     } catch (error) {
-      console.log('⚠️ Queue service initialization failed:', error.message);
-      console.log('📝 Server will continue without background jobs');
+
     }
 
-    server.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+    server.listen(PORT, () => {});
     
     startBot();
     startCronJobs();

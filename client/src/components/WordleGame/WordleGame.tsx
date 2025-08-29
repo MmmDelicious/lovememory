@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './WordleGame.module.css';
-import { ENGLISH_WORDS, RUSSIAN_WORDS } from '../../utils/dictionaries';
+// import { ENGLISH_WORDS, RUSSIAN_WORDS } from '../../utils/dictionaries'; // Убираем клиентскую проверку словаря
 interface WordleGameProps {
   gameState: any;
   user: { id: string; email: string };
@@ -22,6 +22,7 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
   const [currentGuess, setCurrentGuess] = useState('');
   const [error, setError] = useState('');
   const [notification, setNotification] = useState('');
+  const [notificationTimeoutId, setNotificationTimeoutId] = useState<NodeJS.Timeout | null>(null);
   const wordLength = gameState?.targetWordLength || 5;
   const maxAttempts = gameState?.maxAttempts || 6;
   const playerGuesses = gameState?.playerGuesses || [];
@@ -29,37 +30,49 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
   const language = gameState?.language || 'russian';
   const keyboardRows = language === 'english' ? ENGLISH_KEYBOARD_ROWS : KEYBOARD_ROWS;
   useEffect(() => {
-    console.log('[WordleGame] Game state updated:', {
-      playerGuesses,
-      playerResults,
-      gameState
-    });
-  }, [gameState, playerGuesses, playerResults]);
+    }, [gameState, playerGuesses, playerResults]);
+  // Исправляем очистку currentGuess - очищаем только при успешном отправлении собственного хода
+  const [lastSubmittedGuess, setLastSubmittedGuess] = useState<string>('');
+  
   useEffect(() => {
-    if (playerGuesses.length > 0) {
-      const lastGuess = playerGuesses[playerGuesses.length - 1];
-      if (lastGuess && currentGuess.toUpperCase() === lastGuess) {
-        console.log('[WordleGame] Clearing current guess after server confirmation');
-        setCurrentGuess('');
-      }
+
+    if (lastSubmittedGuess && currentGuess.toUpperCase() === lastSubmittedGuess && 
+        playerGuesses.length > 0 && playerGuesses[playerGuesses.length - 1] === lastSubmittedGuess) {
+      setCurrentGuess('');
+      setLastSubmittedGuess(''); // Сбрасываем флаг
     }
-  }, [playerGuesses, currentGuess]);
+  }, [playerGuesses, currentGuess, lastSubmittedGuess]);
   const getLetterStatus = (letter: string): LetterStatus => {
+    let bestStatus: LetterStatus = 'unused';
+    
+    // Проходим по всем попыткам и позициям
     for (let i = playerResults.length - 1; i >= 0; i--) {
       const guess = playerGuesses[i];
       const result = playerResults[i];
-      const letterIndex = guess.indexOf(letter);
-      if (letterIndex !== -1) {
-        const status = result[letterIndex];
-        if (status === 'correct') return 'correct';
-        if (status === 'present') return 'present';
-        if (status === 'absent') return 'absent';
+      
+      if (!guess || !result) continue;
+      
+      // Итерируем по позициям, а не используем indexOf
+      for (let j = 0; j < guess.length; j++) {
+        if (guess[j] === letter) {
+          const status = result[j];
+          
+          // Приоритет: correct > present > absent > unused
+          if (status === 'correct') {
+            return 'correct'; // Наивысший приоритет
+          } else if (status === 'present' && bestStatus !== 'correct') {
+            bestStatus = 'present';
+          } else if (status === 'absent' && bestStatus === 'unused') {
+            bestStatus = 'absent';
+          }
+        }
       }
     }
-    return 'unused';
+    
+    return bestStatus;
   };
   const handleKeyPress = (letter: string) => {
-    if (currentGuess.length < 5) { // Жестко 5 букв
+    if (currentGuess.length < wordLength) { // Параметризованная длина
       setCurrentGuess(prev => prev + letter);
       setError('');
       setNotification('');
@@ -71,28 +84,47 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
     setNotification('');
   };
   const showNotification = (message: string) => {
+
+    if (notificationTimeoutId) {
+      clearTimeout(notificationTimeoutId);
+    }
+    
     setNotification(message);
-    setTimeout(() => setNotification(''), 3000); // Убираем через 3 секунды
+    const timeoutId = setTimeout(() => {
+      setNotification('');
+      setNotificationTimeoutId(null);
+    }, 3000);
+    
+    setNotificationTimeoutId(timeoutId);
   };
-  const handleSubmit = () => {
-    if (currentGuess.length !== 5) {
-      showNotification('Введите 5 букв');
+  
+  
+  useEffect(() => {
+    return () => {
+      if (notificationTimeoutId) {
+        clearTimeout(notificationTimeoutId);
+      }
+    };
+  }, [notificationTimeoutId]);
+  const handleSubmit = async () => {
+    if (currentGuess.length !== wordLength) {
+      showNotification(`Введите ${wordLength} букв`);
       return;
     }
-    const dictionary = language === 'english' ? ENGLISH_WORDS : RUSSIAN_WORDS;
-    const fiveLetterWords = dictionary.filter((word: string) => word.length === 5);
-    const normalizedGuess = currentGuess.toLowerCase();
-    if (!fiveLetterWords.includes(normalizedGuess)) {
-      showNotification('Этого слова нет в нашем словаре');
-      return; // НЕ очищаем currentGuess
-    }
-    console.log('[WordleGame] Submitting guess:', currentGuess);
+    // Убираем клиентскую проверку словаря - единый источник правды на сервере
+    // Сервер вернёт ошибку, если слово невалидно
     try {
-      makeMove(currentGuess);
+      // Поддерживаем как Promise, так и синхронные вызовы
+      const result = makeMove(currentGuess);
+      if (result && typeof result.then === 'function') {
+        await result; // Ожидаем Promise
+      }
+      setLastSubmittedGuess(currentGuess.toUpperCase()); // Запоминаем отправленное слово
       setError('');
       setNotification('');
     } catch (error: any) {
       console.error('[WordleGame] Error submitting guess:', error);
+      showNotification(error.message || 'Ошибка при отправке слова');
       setError(error.message || 'Ошибка при отправке слова');
     }
   };
@@ -103,13 +135,20 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
         handleSubmit();
       } else if (e.key === 'Backspace') {
         handleBackspace();
-      } else if (e.key.match(/^[а-яёa-z]$/i)) {
-        handleKeyPress(e.key.toUpperCase());
+      } else {
+        // Валидируем ввод в зависимости от языка
+        const isValidLetter = language === 'english' 
+          ? /^[a-z]$/i.test(e.key) // Английские буквы
+          : /^[а-яё]$/i.test(e.key); // Русские буквы
+        
+        if (isValidLetter) {
+          handleKeyPress(e.key.toUpperCase());
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentGuess, gameState]);
+  }, [currentGuess, gameState, isWaiting]); // Добавляем isWaiting в deps
   if (gameState?.status === 'finished') {
     const isWinner = gameState.winner === user.id;
     const isDraw = gameState.winner === 'draw';
@@ -211,11 +250,11 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
             </div>
           ) : (
             (gameState?.players || [])
-              .filter((playerId: string, index: number, array: string[]) => array.indexOf(playerId) === index)
-              .map((playerId: string) => (
-                <div key={playerId} className={styles.playerScore}>
-                  <span>{playerId === user.id ? 'Вы' : 'Соперник'}</span>
-                  <span>{gameState?.scores?.[playerId] || 0}</span>
+              .filter((player: any, index: number, array: any[]) => array.findIndex(p => p.id === player.id) === index)
+              .map((player: any) => (
+                <div key={player.id} className={styles.playerScore}>
+                  <span>{player.id === user.id ? 'Вы' : 'Соперник'}</span>
+                  <span>{gameState?.scores?.[player.id] || 0}</span>
                 </div>
               ))
           )}
@@ -231,9 +270,9 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
                 let status = '';
                 if (rowIndex < playerGuesses.length) {
                   const guess = playerGuesses[rowIndex] || '';
-                  const result = playerResults[rowIndex] || [];
+                  const result = (playerResults[rowIndex] || []); // Смягченный доступ
                   letter = guess[colIndex] || '';
-                  status = result[colIndex] || '';
+                  status = result[colIndex] || ''; // Безопасный доступ
                 } else if (rowIndex === playerGuesses.length) {
                   letter = currentGuess[colIndex] || '';
                 }
@@ -265,7 +304,7 @@ const WordleGame: React.FC<WordleGameProps> = ({ gameState, user, makeMove, hand
                 <button
                   className={`${styles.key} ${styles.specialKey}`}
                   onClick={handleSubmit}
-                  disabled={currentGuess.length !== 5 || isWaiting}
+                  disabled={currentGuess.length !== wordLength || isWaiting}
                 >
                   ВВОД
                 </button>

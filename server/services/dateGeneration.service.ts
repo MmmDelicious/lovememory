@@ -76,14 +76,11 @@ class DateGenerationService implements IDateGenerationService {
    * Главный метод генерации свиданий
    */
   async generate(request: DateGenerationRequest): Promise<DateGenerationResponse> {
-    console.log(`💕 DateGenerationService: Generating date options for user ${request.context.user.id}`);
-
     try {
       const startTime = Date.now();
 
       // 1. Анализируем контекст и предпочтения
       const analysis = this.analyzeUserContext(request.context);
-      console.log(`🧠 Context analysis completed: ${JSON.stringify(analysis)}`);
 
       // 2. Собираем данные о местах параллельно
       const [realPlaces, realEvents] = await Promise.allSettled([
@@ -94,8 +91,6 @@ class DateGenerationService implements IDateGenerationService {
       const placesData = realPlaces.status === 'fulfilled' ? realPlaces.value : [];
       const eventsData = realEvents.status === 'fulfilled' ? realEvents.value : [];
 
-      console.log(`🌍 Fetched ${placesData.length} places and ${eventsData.length} events`);
-
       // 3. Генерируем 3 варианта свиданий через AI
       const dateOptions = await Promise.all([
         this.generateSingleDateOption(1, request.context, analysis, placesData, eventsData),
@@ -104,8 +99,6 @@ class DateGenerationService implements IDateGenerationService {
       ]);
 
       const processingTime = Date.now() - startTime;
-      console.log(`✅ DateGenerationService: Generated ${dateOptions.length} options in ${processingTime}ms`);
-
       return {
         options: dateOptions,
         reasoning: [
@@ -154,8 +147,6 @@ class DateGenerationService implements IDateGenerationService {
    */
   private async fetchRealPlaces(city: string, analysis: any): Promise<PlaceData[]> {
     try {
-      console.log(`🗺️ Fetching real places from Yandex Maps for ${city}`);
-      
       const cityCoords = await this.getCityCoordinatesYandex(city);
       if (!cityCoords) {
         console.warn(`⚠️ Could not get coordinates for ${city}, using static data`);
@@ -177,7 +168,6 @@ class DateGenerationService implements IDateGenerationService {
 
       const filteredPlaces = this.filterPlacesByBudget(allPlaces, analysis.budgetLevel);
       
-      console.log(`✅ Found ${filteredPlaces.length} real places in ${city}`);
       return filteredPlaces.slice(0, 8);
 
     } catch (error) {
@@ -274,7 +264,6 @@ class DateGenerationService implements IDateGenerationService {
     }
     return 4.0;
   }
-
 
   /**
    * Преобразование запросов в категории Geoapify - БОЛЬШE НЕ ИСПОЛЬЗУЕТСЯ
@@ -404,7 +393,7 @@ class DateGenerationService implements IDateGenerationService {
   private async fetchRealEvents(city: string): Promise<EventData[]> {
     try {
       // Заглушка для реального API событий
-      console.log('🎭 Fetching real events (using static data for now)');
+      ');
       
       const staticEvents: EventData[] = [
         {
@@ -608,8 +597,6 @@ class DateGenerationService implements IDateGenerationService {
    * Генерация fallback-вариантов при полном сбое
    */
   private async generateFallbackDates(context: UserContext): Promise<DateGenerationResponse> {
-    console.log('⚠️ Generating fallback date options');
-
     const analysis = this.analyzeUserContext(context);
     const staticPlaces = [...this.STATIC_PLACES.restaurants, ...this.STATIC_PLACES.activities];
 

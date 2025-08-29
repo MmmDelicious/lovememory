@@ -87,7 +87,6 @@ const AppRoutes: React.FC = () => {
         
         <Route path="/error" element={<ErrorPage />} />
 
-        
         <Route path="/login" element={<Navigate to="/dashboard" />} />
         <Route path="/register" element={<Navigate to="/dashboard" />} />
         <Route path="/auth/callback" element={<Navigate to="/dashboard" />} />

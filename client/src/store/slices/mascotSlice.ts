@@ -28,7 +28,7 @@ const mascotSlice = createSlice({
       
       state.globalMascot.position = newPosition;
       state.globalMascot.direction = newDirection;
-      state.globalMascot.message = ''; // Очищаем сообщение при движении
+              state.globalMascot.message = '';
     },
     
     setMascotMessage: (state, action: PayloadAction<SetMascotMessagePayload>) => {
@@ -103,9 +103,9 @@ const mascotSlice = createSlice({
       state.isMobile = action.payload;
     },
     
-    // Комплексные действия
+    
     moveMascotToElement: (state, action: PayloadAction<{ element: HTMLElement; message?: string }>) => {
-      // Проверяем что мы в браузере
+  
       if (typeof window !== 'undefined') {
         const rect = action.payload.element.getBoundingClientRect();
         const targetX = Math.min(95, Math.max(5, (rect.left + rect.width / 2) / window.innerWidth * 100));

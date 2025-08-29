@@ -15,7 +15,7 @@ import {
 import manAvatar from '../../assets/man.png';
 import womanAvatar from '../../assets/woman.png';
 import defaultAvatar from '../../assets/react.svg';
-// Используем тип User из Redux, но расширяем его для локальных потребностей
+
 type ExtendedUser = any; // Временно используем any для упрощения
 const ProfilePage: React.FC = () => {
   const user = useUser();

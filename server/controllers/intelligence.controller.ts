@@ -40,15 +40,10 @@ export const handleChat = async (req: AuthenticatedRequest, res: Response, next:
       return;
     }
 
-    console.log(`🎭 Intelligence Controller: Chat request from user ${userId}`);
-    console.log(`📝 Prompt: "${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}"`);
-
     // Вызываем AI Orchestrator
     const startTime = Date.now();
     const response = await aiOrchestrator.handleRequest(prompt, userId);
     const processingTime = Date.now() - startTime;
-
-    console.log(`✅ Intelligence Controller: Response generated in ${processingTime}ms`);
 
     // Формируем ответ
     res.json({
@@ -107,13 +102,9 @@ export const generateDate = async (req: AuthenticatedRequest, res: Response, nex
       return;
     }
 
-    console.log(`💕 Intelligence Controller: Date generation request from user ${userId}`);
-
     const startTime = Date.now();
     const response = await aiOrchestrator.handleRequest('Создай варианты свиданий', userId);
     const processingTime = Date.now() - startTime;
-
-    console.log(`✅ Intelligence Controller: Date options generated in ${processingTime}ms`);
 
     res.json({
       success: true,
@@ -149,13 +140,9 @@ export const analyzeRelationship = async (req: AuthenticatedRequest, res: Respon
       return;
     }
 
-    console.log(`📊 Intelligence Controller: Relationship analysis request from user ${userId}`);
-
     const startTime = Date.now();
     const response = await aiOrchestrator.handleRequest('Проанализируй наши отношения', userId);
     const processingTime = Date.now() - startTime;
-
-    console.log(`✅ Intelligence Controller: Analysis completed in ${processingTime}ms`);
 
     res.json({
       success: true,
@@ -259,8 +246,6 @@ export const rateResponse = async (req: AuthenticatedRequest, res: Response, nex
       });
       return;
     }
-
-    console.log(`⭐ Intelligence Controller: Rating ${rating} from user ${userId}`);
 
     // Сохраняем рейтинг
     const userContextService = (await import('../services/userContext.service')).default;

@@ -39,21 +39,17 @@ export const useGameLobby = (gameType: string): UseGameLobbyReturn => {
       transports: ['websocket', 'polling']
     });
     socket.on('connect', () => {
-      console.log('Lobby socket connected successfully.');
-    });
+      });
     socket.on('connect_error', (err: Error) => {
       console.error('Lobby socket connection error:', err.message);
       console.error('Lobby socket error details:', err);
     });
     socket.on('room_list_updated', () => {
-      console.log('Received "room_list_updated" event, refreshing rooms.');
       fetchRooms();
     });
     socket.on('disconnect', () => {
-      console.log('Lobby socket disconnected.');
-    });
+      });
     return () => {
-      console.log('Cleaning up lobby socket.');
       socket.off('room_list_updated');
       socket.disconnect();
     };

@@ -16,4 +16,3 @@ export function deletePairing(pairingId: string | number) {
   return api.delete(`/pair/${pairingId}`);
 }
 
-

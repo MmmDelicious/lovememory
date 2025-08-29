@@ -10,6 +10,11 @@ interface PokerModalProps {
   mode: 'buyin' | 'rebuy';
   roomName?: string;
   currentStack?: number;
+  // КРИТИЧНО: Настраиваемые значения вместо hardcode
+  defaultAmount?: number;
+  minAmount?: number;
+  sliderStep?: number;
+  maxAmountFallback?: number;
 }
 const PokerModal: React.FC<PokerModalProps> = ({
   isOpen,
@@ -18,18 +23,22 @@ const PokerModal: React.FC<PokerModalProps> = ({
   maxAmount,
   mode,
   roomName,
-  currentStack = 0
+  currentStack = 0,
+  // КРИТИЧНО: Настраиваемые значения
+  defaultAmount = 200,
+  minAmount: propMinAmount = 50,
+  sliderStep = 10,
+  maxAmountFallback = 1000
 }) => {
   const coins = useCoins();
-  const [amount, setAmount] = useState(Math.min(maxAmount, coins, 200));
+  const [amount, setAmount] = useState(Math.min(maxAmount, coins, defaultAmount));
   const actualMax = Math.min(maxAmount, coins);
-  const minAmount = Math.min(50, actualMax);
+  const minAmount = Math.min(propMinAmount, actualMax);
   const handleConfirm = () => {
     if (amount >= minAmount && amount <= actualMax) {
       onConfirm(amount);
-      if (mode === 'rebuy') {
-        onClose();
-      }
+      // КРИТИЧНО: Консистентное поведение - закрываем для любого режима
+      onClose();
     }
   };
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,10 +106,10 @@ const PokerModal: React.FC<PokerModalProps> = ({
                 <div className={styles.balanceInfo}>
                   <div className={styles.balanceItem}>
                     <Coins size={16} />
-                    <span>Ваш баланс: {coins} монет</span>
+                    <span>Ваш баланс: {coins || 0} монет</span>
                   </div>
                   <div className={styles.balanceItem}>
-                    <span>Лимит стола: {maxAmount} монет</span>
+                    <span>Лимит стола: {maxAmount || maxAmountFallback} монет</span>
                   </div>
                 </div>
               )}
@@ -108,18 +117,18 @@ const PokerModal: React.FC<PokerModalProps> = ({
                 <div className={styles.statusInfo}>
                   <div className={styles.statusItem}>
                     <span className={styles.statusLabel}>Текущий стек:</span>
-                    <span className={styles.statusValue}>{currentStack} фишек</span>
+                    <span className={styles.statusValue}>{currentStack || 0} фишек</span>
                   </div>
                   <div className={styles.statusItem}>
                     <span className={styles.statusLabel}>Ваш баланс:</span>
                     <span className={styles.statusValue}>
                       <Coins size={16} />
-                      {coins} монет
+                      {coins || 0} монет
                     </span>
                   </div>
                   <div className={styles.statusItem}>
                     <span className={styles.statusLabel}>Лимит rebuy:</span>
-                    <span className={styles.statusValue}>{maxAmount} монет</span>
+                    <span className={styles.statusValue}>{maxAmount || maxAmountFallback} монет</span>
                   </div>
                 </div>
               )}
@@ -136,15 +145,35 @@ const PokerModal: React.FC<PokerModalProps> = ({
                     {minAmount} - {actualMax} монет
                   </div>
                 </div>
+                
+                {/* КРИТИЧНО: Добавлено input validation */}
+                <div className={styles.inputContainer}>
+                  <input
+                    type="number"
+                    min={minAmount}
+                    max={actualMax}
+                    step={sliderStep}
+                    value={amount}
+                    onChange={(e) => {
+                      const value = Math.max(minAmount, Math.min(actualMax, Number(e.target.value) || minAmount));
+                      setAmount(value);
+                    }}
+                    className={styles.numberInput}
+                    aria-label="Сумма для игры"
+                  />
+                  <span className={styles.inputLabel}>монет</span>
+                </div>
+                
                 <div className={styles.sliderContainer}>
                   <input
                     type="range"
                     min={minAmount}
                     max={actualMax}
-                    step="10"
+                    step={sliderStep.toString()}
                     value={amount}
                     onChange={handleSliderChange}
                     className={styles.slider}
+                    aria-label="Слайдер суммы"
                   />
                   <div className={styles.sliderLabels}>
                     <span>{minAmount}</span>
@@ -156,6 +185,7 @@ const PokerModal: React.FC<PokerModalProps> = ({
                     type="button" 
                     onClick={() => setPresetAmount(0.25)}
                     className={styles.presetButton}
+                    aria-label="Установить 25% от максимума"
                   >
                     25%
                   </button>
@@ -163,6 +193,7 @@ const PokerModal: React.FC<PokerModalProps> = ({
                     type="button" 
                     onClick={() => setPresetAmount(0.5)}
                     className={styles.presetButton}
+                    aria-label="Установить 50% от максимума"
                   >
                     50%
                   </button>
@@ -170,6 +201,7 @@ const PokerModal: React.FC<PokerModalProps> = ({
                     type="button" 
                     onClick={() => setPresetAmount(0.75)}
                     className={styles.presetButton}
+                    aria-label="Установить 75% от максимума"
                   >
                     75%
                   </button>
@@ -177,6 +209,7 @@ const PokerModal: React.FC<PokerModalProps> = ({
                     type="button" 
                     onClick={() => setPresetAmount(1)}
                     className={styles.presetButton}
+                    aria-label="Установить максимальную сумму"
                   >
                     Макс
                   </button>
@@ -201,7 +234,7 @@ const PokerModal: React.FC<PokerModalProps> = ({
                 <div className={styles.resultPreview}>
                   <div className={styles.previewLabel}>После rebuy:</div>
                   <div className={styles.previewValue}>
-                    Стек: {currentStack + amount} фишек
+                    Стек: {(currentStack || 0) + amount} фишек
                   </div>
                 </div>
               )}

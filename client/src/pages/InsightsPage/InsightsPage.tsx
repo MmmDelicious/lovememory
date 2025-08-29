@@ -151,7 +151,6 @@ const InsightsPage: React.FC = () => {
     };
   }, [user, analyticsView]);
   const handlePremiumUpgrade = () => {
-    console.log('Upgrading to premium...');
     setIsPremiumModalOpen(false);
     
     // Показываем приветственного маскота
@@ -169,7 +168,6 @@ const InsightsPage: React.FC = () => {
     setHasMascotShownWelcome(true);
   };
 
-
   const renderAnalytics = () => {
     return renderOverviewContent();
   };
@@ -184,7 +182,7 @@ const InsightsPage: React.FC = () => {
       );
     }
 
-    // Используем данные из AnalyticsService
+
     const harmonyScore = analyticsData.harmonyIndex;
     const previousScore = Math.max(20, harmonyScore - Math.floor(Math.random() * 20 + 5));
 
@@ -198,7 +196,7 @@ const InsightsPage: React.FC = () => {
       value: Math.round(value as number)
     }));
 
-    // Создаем данные для графа отношений
+
     const relationshipGraphData = {
       nodes: [
         { id: 'couple', label: 'Вы как пара', x: 400, y: 200, strength: harmonyScore, type: 'center' },
@@ -245,12 +243,6 @@ const InsightsPage: React.FC = () => {
     );
   };
 
-
-
-
-
-
-
   return (
     <div className={styles.insightsPage}>
 
@@ -295,8 +287,7 @@ const InsightsPage: React.FC = () => {
         onSave={(settings) => {
           setPrivacySettings(settings);
           setIsPrivacyControlsOpen(false);
-          console.log('Privacy settings updated:', settings);
-        }}
+          }}
         currentSettings={privacySettings}
       />
       

@@ -54,7 +54,6 @@ function WordGrid({ guesses, currentGuess, targetWord, guessedLetters }: { guess
     );
 }
 
-
 function Keyboard({ onKeyPress, guessedLetters }: { onKeyPress: (key: string) => void, guessedLetters: Record<string, LetterStatus> }) {
     return (
         <div className={styles.keyboard}>

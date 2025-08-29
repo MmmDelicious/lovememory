@@ -100,5 +100,3 @@ const styles = StyleSheet.create({
   },
 });
 
-
-

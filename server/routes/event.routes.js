@@ -1,18 +1,16 @@
 const { Router } = require('express');
 const { getEvents, createEvent, updateEvent, deleteEvent, uploadFile, getMediaForEvent } = require('../controllers/event.controller');
-const authMiddleware = require('../middleware/auth.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
 const uploadMiddleware = require('../middleware/upload.middleware');
 
 const router = Router();
 
-router.use(authMiddleware);
+router.get('/', authenticateToken, getEvents);
+router.post('/', authenticateToken, createEvent);
+router.put('/:id', authenticateToken, updateEvent);
+router.delete('/:id', authenticateToken, deleteEvent);
 
-router.get('/', getEvents);
-router.post('/', createEvent);
-router.put('/:id', updateEvent);
-router.delete('/:id', deleteEvent);
-
-router.get('/:id/media', getMediaForEvent);
-router.post('/:id/upload', uploadMiddleware.single('file'), uploadFile);
+router.get('/:id/media', authenticateToken, getMediaForEvent);
+router.post('/:id/upload', authenticateToken, uploadMiddleware.single('file'), uploadFile);
 
 module.exports = router;

@@ -5,10 +5,8 @@ import mascotIcon from '../../assets/AI.json';
 import Lottie from 'lottie-react';
 
 const AIToggleButton = () => {
-  // Получаем состояние из Redux вместо Context
   const { isVisible } = useAIMascot();
   
-  // Получаем действия из Redux
   const { toggleAI } = useMascotActions();
 
   return (

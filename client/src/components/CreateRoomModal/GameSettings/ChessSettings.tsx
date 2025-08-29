@@ -16,7 +16,7 @@ const ChessSettings: React.FC<GameSettingsProps> = ({
       isPrivate,
       gameFormat: '1v1'
     });
-  }, [timeControl, isPrivate, onSettingsChange]);
+  }, [timeControl, isPrivate]);
 
   return (
     <div>

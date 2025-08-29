@@ -1,58 +1,55 @@
 const express = require('express');
 const queueController = require('../controllers/queue.controller');
-const authMiddleware = require('../middleware/auth.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
 /**
  * Queue Management Routes
- * Управление фоновыми задачами и очередями
+ * Background tasks and queues management
  */
 
 /**
  * GET /api/queue/status
- * Получение статуса всех очередей
+ * Get status of all queues
  */
 router.get('/status', queueController.getQueueStatus);
 
 /**
  * GET /api/queue/health
- * Проверка здоровья системы очередей
+ * Check queue system health
  */
 router.get('/health', queueController.healthCheck);
 
-// Защищенные роуты (требуют аутентификации)
-router.use(authMiddleware);
-
 /**
  * POST /api/queue/analysis
- * Добавление задачи анализа пользователя
+ * Add user analysis task
  * 
  * Body: { priority?: number, delay?: number }
  */
-router.post('/analysis', queueController.addAnalysisJob);
+router.post('/analysis', authenticateToken, queueController.addAnalysisJob);
 
 /**
  * POST /api/queue/insight
- * Добавление задачи генерации инсайтов
+ * Add insight generation task
  * 
- * Body: { eventId: string, priority?: number, delay?: number }
+ * Body: { priority?: number, delay?: number }
  */
-router.post('/insight', queueController.addInsightJob);
+router.post('/insight', authenticateToken, queueController.addInsightJob);
 
 /**
  * POST /api/queue/manage
- * Управление очередью (пауза/возобновление/очистка)
+ * Queue management (pause/resume/clear)
  * 
  * Body: { queueName: string, action: 'pause'|'resume'|'clear' }
  */
-router.post('/manage', queueController.manageQueue);
+router.post('/manage', authenticateToken, queueController.manageQueue);
 
 /**
  * DELETE /api/queue/clear-all
- * Очистка всех очередей (только для разработки)
+ * Clear all queues (development only)
  */
-router.delete('/clear-all', queueController.clearAllQueues);
+router.delete('/clear-all', authenticateToken, queueController.clearAllQueues);
 
 module.exports = router;
 

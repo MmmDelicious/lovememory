@@ -317,10 +317,6 @@ class DateGeneratorService {
         );
         const events = await eventsAfisha.searchEvents(location.city, 14); // на 2 недели вперед
         this.addReasoning(`🎭 Найдено ${events.length} актуальных событий в городе`);
-        console.log('=== DEBUG: Найденные места ===');
-        console.log('Активности:', realActivities);
-        console.log('События:', events);
-        console.log('================================');
         const realRestaurants = await placesService.searchRestaurants(
           location.city,
           location.coordinates,

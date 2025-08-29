@@ -18,7 +18,7 @@ const CodenamesSettings: React.FC<GameSettingsProps> = ({
       teamDistribution,
       isPrivate
     });
-  }, [wordDifficulty, teamDistribution, isPrivate, onSettingsChange]);
+  }, [wordDifficulty, teamDistribution, isPrivate]);
 
   return (
     <div>

@@ -1,31 +1,14 @@
 const express = require('express');
-
-// Импортируем middleware (JS файлы)
-const authMiddleware = require('../middleware/auth.middleware');
-// const rateLimitMiddleware = require('../middleware/rateLimit.middleware'); // Временно отключено
+const { authenticateToken } = require('../middleware/auth.middleware');
 
 const router = express.Router();
 
-/**
- * Intelligence Core Routes - JS версия для совместимости
- */
-
-// Применяем middleware для всех роутов
-router.use(authMiddleware); // Требуем аутентификацию
-// router.use(rateLimitMiddleware.aiInteraction); // Временно отключено для тестирования
-
-/**
- * Временные заглушки пока не скомпилируем TS версии
- */
-
-// POST /api/intelligence/chat - основной чат с AI Orchestrator
-router.post('/chat', async (req, res, next) => {
+router.post('/chat', authenticateToken, async (req, res, next) => {
   try {
-    // Временная заглушка
     res.json({
       success: true,
       data: {
-        message: "🚧 Intelligence Core пока в разработке. Скоро будет готов! 🚀",
+        message: "Intelligence Core is still in development. Coming soon!",
         intent: "CHAT",
         confidence: 1.0,
         metadata: {
@@ -39,8 +22,7 @@ router.post('/chat', async (req, res, next) => {
   }
 });
 
-// POST /api/intelligence/generate-date - генерация вариантов свиданий
-router.post('/generate-date', async (req, res, next) => {
+router.post('/generate-date', authenticateToken, async (req, res, next) => {
   try {
     res.json({
       success: true,
@@ -48,34 +30,34 @@ router.post('/generate-date', async (req, res, next) => {
         options: [
           {
             id: "temp_1",
-            title: "Романтический вечер",
-            description: "Прогулка + ужин в уютном ресторане",
+            title: "Romantic evening",
+            description: "Walk + dinner in cozy restaurant",
             schedule: [
               {
                 time: "19:00",
                 endTime: "20:30",
-                activity: "Прогулка по центру",
-                description: "Неспешная прогулка и общение"
+                activity: "City center walk",
+                description: "Leisurely walk and conversation"
               },
               {
                 time: "21:00", 
                 endTime: "22:30",
-                activity: "Ужин в ресторане",
-                description: "Романтический ужин"
+                activity: "Restaurant dinner",
+                description: "Romantic dinner"
               }
             ],
             estimatedCost: 3000,
             duration: 3.5,
             atmosphere: "romantic",
-            reasoning: "Создан на основе ваших предпочтений",
+            reasoning: "Created based on your preferences",
             isRealData: false,
             activitiesCount: 2
           }
         ],
         reasoning: [
-          "🚧 Анализирую ваши предпочтения...",
-          "🚧 Intelligence Core в разработке...",
-          "✅ Готово! (пока демо-версия)"
+          "Analyzing your preferences...",
+          "Intelligence Core in development...",
+          "Ready! (demo version for now)"
         ],
         metadata: {
           generatedAt: new Date(),
@@ -90,13 +72,12 @@ router.post('/generate-date', async (req, res, next) => {
   }
 });
 
-// GET /api/intelligence/analyze-relationship - анализ отношений
-router.get('/analyze-relationship', async (req, res, next) => {
+router.get('/analyze-relationship', authenticateToken, async (req, res, next) => {
   try {
     res.json({
       success: true,
       data: {
-        message: "📊 Анализ отношений:\n\n🏆 Общая сила отношений: 75/100\n💕 Главный язык любви: Качественное время\n📈 Тренд настроения: стабильный ➡️\n\n🚧 Полный анализ будет доступен после запуска Intelligence Core!",
+        message: "Relationship analysis:\n\nOverall relationship strength: 75/100\nDominant love language: Quality time\nMood trend: stable\n\nFull analysis will be available after Intelligence Core launch!",
         analysis: {
           overallStrength: 75,
           dominantLoveLanguage: "quality_time",
@@ -114,24 +95,20 @@ router.get('/analyze-relationship', async (req, res, next) => {
   }
 });
 
-// POST /api/intelligence/rate - оценка качества ответа AI
-router.post('/rate', async (req, res, next) => {
+router.post('/rate', authenticateToken, async (req, res, next) => {
   try {
     const { rating } = req.body;
     
-    console.log(`⭐ Received rating: ${rating} from user ${req.user?.id}`);
-    
     res.json({
       success: true,
-      message: "Спасибо за оценку! 🙏"
+      message: "Thank you for the rating!"
     });
   } catch (error) {
     next(error);
   }
 });
 
-// GET /api/intelligence/context - получение контекста (для отладки)
-router.get('/context', async (req, res, next) => {
+router.get('/context', authenticateToken, async (req, res, next) => {
   try {
     if (process.env.NODE_ENV === 'production') {
       return res.status(403).json({ 
@@ -148,7 +125,7 @@ router.get('/context', async (req, res, next) => {
           name: req.user?.name || "Demo User"
         },
         status: "development",
-        message: "🚧 Intelligence Core пока в разработке",
+        message: "Intelligence Core is still in development",
         availableEndpoints: [
           "POST /api/intelligence/chat",
           "POST /api/intelligence/generate-date", 

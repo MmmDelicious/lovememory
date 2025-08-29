@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { X } from 'lucide-react';
 import styles from './CreateRoomModal.module.css';
 import {
@@ -108,9 +108,9 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
     onSubmit(formData);
   };
 
-  const updateGameSettings = (newSettings: any) => {
+  const updateGameSettings = useCallback((newSettings: any) => {
     setGameSettings(prev => ({ ...prev, ...newSettings }));
-  };
+  }, []);
 
   const renderGameSettings = () => {
     const commonProps = {

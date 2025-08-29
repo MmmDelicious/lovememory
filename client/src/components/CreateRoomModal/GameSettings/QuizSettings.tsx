@@ -21,7 +21,7 @@ const QuizSettings: React.FC<GameSettingsProps> = ({
       questionCount,
       isPrivate
     });
-  }, [maxPlayers, gameFormat, category, questionCount, isPrivate, onSettingsChange]);
+  }, [maxPlayers, gameFormat, category, questionCount, isPrivate]);
 
   return (
     <div>

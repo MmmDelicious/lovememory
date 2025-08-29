@@ -19,7 +19,7 @@ const WordleSettings: React.FC<GameSettingsProps> = ({
       language,
       roundCount
     });
-  }, [maxPlayers, gameFormat, language, roundCount, onSettingsChange]);
+  }, [maxPlayers, gameFormat, language, roundCount]);
 
   return (
     <div>

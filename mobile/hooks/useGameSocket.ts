@@ -134,4 +134,3 @@ export function useGameSocket(roomId: string) {
   return { isConnected, gameState, makeMove, rebuy, newHandStarted, actionLog, lastActionByPlayer, turnProgress };
 }
 
-

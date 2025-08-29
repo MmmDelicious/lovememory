@@ -144,8 +144,7 @@ class UserService {
         const oldAvatarPath = path.join(__dirname, '..', user.avatarUrl);
         await fs.unlink(oldAvatarPath);
       } catch (error) {
-        console.log('Старый аватар не найден для удаления:', error.message);
-      }
+        }
     }
 
     // Сохраняем новый аватар

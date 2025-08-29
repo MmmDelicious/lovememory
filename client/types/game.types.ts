@@ -36,6 +36,8 @@ export interface Player {
     hasActed: boolean;
     isWaitingToPlay: boolean;
     isAllIn: boolean;
+    hasBoughtIn: boolean;
+    showCards: boolean;
   }
   
   // Информация о победителе в покере
@@ -63,9 +65,17 @@ export interface Player {
     minRaiseAmount: number;
     maxRaiseAmount: number;
     callAmount: number;
-    initialBuyIn: number;
+    initialBuyIn?: number;
     winningHandCards: Card[];
     visibleHands: Array<{ playerId: string; hand: Card[] }>;
+    
+    // Дополнительные поля для покера
+    needsBuyIn?: boolean;
+    hasBoughtIn?: boolean;
+    showdownPhase?: boolean;
+    playersToShow?: string[];
+    currentShowdownPlayer?: string | null;
+    showdownOrder?: string[] | null;
   }
   
   // Вопрос для квиза
@@ -95,6 +105,21 @@ export interface Player {
     fen: string;
     whiteTime: number;
     blackTime: number;
+    moveHistorySan: string[]; // История ходов в алгебраической нотации
+    isCheck: boolean;
+    isCheckmate: boolean;
+    isStalemate: boolean;
+    isDraw: boolean;
+    canCastleKingSide: { white: boolean; black: boolean };
+    canCastleQueenSide: { white: boolean; black: boolean };
+    enPassantSquare?: string;
+    drawOffer?: string | null; // ID игрока, предложившего ничью
+    isPaused?: boolean;
+    gameStatus?: 'playing' | 'check' | 'checkmate' | 'draw' | 'paused' | 'resigned';
+    capturedPieces?: {
+      white: string[];
+      black: string[];
+    };
   }
   
   // Состояние крестиков-ноликов
@@ -178,12 +203,18 @@ export interface Player {
     promotion?: 'q' | 'r' | 'b' | 'n';
   }
   
+  export interface ChessAction {
+    action: 'offer_draw' | 'accept_draw' | 'decline_draw' | 'resign' | 'pause' | 'request_undo';
+  }
+  
+  export type ChessMoveOrAction = ChessMove | ChessAction;
+  
   export interface PokerMove {
     action: 'fold' | 'check' | 'call' | 'raise' | 'bet';
     value?: number;
   }
   
-  export type GameMove = ChessMove | PokerMove | CodenamesMove | number; // number для TicTacToe и Quiz
+  export type GameMove = ChessMoveOrAction | PokerMove | CodenamesMove | number; // number для TicTacToe и Quiz
   
   // Комната игры
   export interface GameRoom {
@@ -246,6 +277,7 @@ export interface Player {
     dealingPhase?: boolean;
     yourHand?: Card[];
     isWinningCard?: (card: Card) => boolean;
+    hasBoughtIn?: boolean;
   }
   
   // Пропсы для игральной карты

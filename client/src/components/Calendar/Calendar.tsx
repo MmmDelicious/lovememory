@@ -7,7 +7,7 @@ import type { EventDropArg, EventClickArg, EventContentArg } from '@fullcalendar
 import Sidebar from '../Sidebar/Sidebar';
 import StoryViewer from '../StoryViewer/StoryViewer';
 import { FaChevronLeft, FaChevronRight, FaFilter, FaListUl, FaPlus } from 'react-icons/fa';
-import { useEventMascotActions } from '../../store/hooks';
+import { useMascot } from '../../context/MascotContext';
 import { toast } from '../../context/ToastContext';
 import styles from './Calendar.module.css';
 import CalendarFilters from './SearchAndFilter';
@@ -125,7 +125,7 @@ const Calendar: React.FC<CalendarProps> = ({
   const [storyDate, setStoryDate] = useState<string>('');
   const [memoryStoryData, setMemoryStoryData] = useState<any>(null);
   
-  const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useEventMascotActions();
+  const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useMascot();
   
   const TYPE_LABELS: Record<string, string> = {
     plan: 'План',
@@ -142,6 +142,8 @@ const Calendar: React.FC<CalendarProps> = ({
     return Object.entries(EVENT_TYPE_COLORS)
       .sort(([, c1], [, c2]) => getHueFromHex(c1) - getHueFromHex(c2));
   }, []);
+
+
 
   // ВРЕМЕННО ОТКЛЮЧЕНО: useEffect(() => {
   //   const draggables: any[] = [];
@@ -171,7 +173,7 @@ const Calendar: React.FC<CalendarProps> = ({
   //     }
   //   };
   //   
-  //   // Создаем Draggable только если контейнеры существуют
+  //   
   //   if (templateContainerRef.current) {
   //     const draggable = createDraggable(templateContainerRef.current);
   //     if (draggable) {
@@ -186,13 +188,13 @@ const Calendar: React.FC<CalendarProps> = ({
   //     }
   //   }
   //   
-  //   // Очистка при размонтировании
+  //   
   //   return () => {
-  //     // Останавливаем mascot loop
+  //     
   //     stopMascotLoop();
   //     clearMascotTargets();
   //     
-  //     // Очищаем Draggable
+  //     
   //     draggables.forEach(draggable => {
   //       if (draggable && typeof draggable.destroy === 'function') {
   //       try {
@@ -202,10 +204,10 @@ const Calendar: React.FC<CalendarProps> = ({
   //       }
   //     }
   //     
-  //     // Очищаем массив
+  //     
   //     draggables.length = 0;
   //     
-  //     // Очищаем refs
+  //     
   //     if (calendarRef.current) {
   //       try {
   //         // Calendar API не имеет метода destroy, просто очищаем ref
@@ -217,18 +219,35 @@ const Calendar: React.FC<CalendarProps> = ({
   //   };
   // }, [stopMascotLoop, clearMascotTargets]); // Добавляем зависимости
 
-  // Дополнительная очистка при размонтировании компонента
+
   useEffect(() => {
     return () => {
-      // Останавливаем mascot loop при размонтировании
       stopMascotLoop();
       clearMascotTargets();
-      
-      // В React 19 НЕ очищаем refs вручную - это может вызвать ошибки
-      // React сам очистит refs при размонтировании
-      console.log('🧹 Calendar: компонент размонтируется, очищаем mascot');
     };
   }, [stopMascotLoop, clearMascotTargets]);
+
+  const openStoryMode = useCallback((date: string) => {
+    const dayEvents = events.filter(event => 
+      event.start.split('T')[0] === date
+    );
+    
+    if (dayEvents.length === 0) {
+      toast.warning('В этот день нет событий для показа', 'Story mode');
+      return;
+    }
+    
+    setStoryDate(date);
+    setStoryViewerOpen(true);
+  }, [events, toast]);
+
+  const closeStoryMode = useCallback(() => {
+    setStoryViewerOpen(false);
+    setTimeout(() => {
+      setStoryDate('');
+      setMemoryStoryData(null);
+    }, 300);
+  }, []);
 
   const updateMascotTargets = useCallback(() => {
     const calendarApi = calendarRef.current?.getApi();
@@ -239,13 +258,13 @@ const Calendar: React.FC<CalendarProps> = ({
     
     const calendarEl = (calendarApi as any).el as HTMLElement;
     const dayCells = calendarEl.querySelectorAll('[data-date]');
-    const cellMap = new Map<string, string>(); // Map<date, elementId>
+    const cellMap = new Map<string, string>();
     
     dayCells.forEach((cell: any) => {
       const element = cell as HTMLElement;
       const date = element.getAttribute('data-date');
       if (date) {
-        // Создаем уникальный ID для ячейки
+    
         const elementId = `calendar-cell-${date}`;
         element.id = elementId;
         cellMap.set(date, elementId);
@@ -259,41 +278,26 @@ const Calendar: React.FC<CalendarProps> = ({
         acc.push({
           page: 'dashboard',
           data: { event: event.extendedProps.rawEvent },
-          elementId: elementId, // Используем ID вместо DOM элемента
+          element: document.getElementById(elementId),
           containerRef: calendarContainerRef,
-          onActionClick: () => handleEventClick({ event } as EventClickArg),
+          onActionClick: () => {
+            const eventDate = event.startStr.split('T')[0];
+            openStoryMode(eventDate);
+          },
         });
       }
       return acc;
     }, []);
     
     registerMascotTargets(targets);
-  }, [events, registerMascotTargets]);
+    
+    // Запускаем цикл маскотов после регистрации целей
+    if (targets.length > 0) {
+      startMascotLoop();
+    }
+  }, [events, registerMascotTargets, startMascotLoop, openStoryMode]);
 
-  // ВРЕМЕННО ОТКЛЮЧЕНО: useEffect(() => {
-  //   updateMascotTargets();
-  //   startMascotLoop();
-  //   
-  //   const calendarApi = calendarRef.current?.getApi();
-  //   if (calendarApi) {
-  //     const handleDatesSet = (arg: any) => {
-  //       updateMascotTargets();
-  //       setCurrentDate(arg.view.currentStart);
-  //       setCurrentTitle(arg.view?.title || '');
-  //       setCurrentView(arg.view?.type || 'dayGridMonth');
-  //     };
-  //     calendarApi.on('datesSet', handleDatesSet);
-  //   }
-  //   
-  //   return () => {
-  //     stopMascotLoop();
-  //     clearMascotTargets();
-  //     const api = calendarRef.current?.getApi();
-  //     if (api) {
-  //       (api as any).off('datesSet');
-  //     }
-  //   };
-  // }, [updateMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets]);
+
 
   const handleInteraction = <T extends any[]>(handler: (...args: T) => void) => (...args: T) => {
     hideMascot();
@@ -346,27 +350,7 @@ const Calendar: React.FC<CalendarProps> = ({
     handleContextMenuClose();
   };
 
-  const openStoryMode = useCallback((date: string) => {
-    const dayEvents = events.filter(event => 
-      event.start.split('T')[0] === date
-    );
-    
-    if (dayEvents.length === 0) {
-      toast.warning('В этот день нет событий для показа', 'Story mode');
-      return;
-    }
-    
-    setStoryDate(date);
-    setStoryViewerOpen(true);
-  }, [events, toast]);
 
-  const closeStoryMode = useCallback(() => {
-    setStoryViewerOpen(false);
-    setTimeout(() => {
-      setStoryDate('');
-      setMemoryStoryData(null);
-    }, 300);
-  }, []);
 
   useEffect(() => {
     const handleShowMemoryStory = async (event: any) => {
@@ -376,7 +360,7 @@ const Calendar: React.FC<CalendarProps> = ({
       try {
         const memoryStory = await memoriesService.createMemoryStory(memoryCollection);
         setMemoryStoryData(memoryStory);
-        setStoryDate(''); // Очищаем дату, так как это воспоминание
+        setStoryDate('');
         setStoryViewerOpen(true);
       } catch (error) {
         toast.error('Не удалось загрузить воспоминание', 'Ошибка');

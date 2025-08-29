@@ -10,10 +10,10 @@ const sendGift = async (req, res) => {
     const fromUserId = req.user.id;
     const user = await User.findByPk(fromUserId);
     if (!user) {
-      return res.status(404).json({ message: 'Пользователь не найден' });
+      return res.status(404).json({ message: 'User not found' });
     }
     if (user.coins < parseInt(price)) {
-      return res.status(400).json({ message: 'Недостаточно монеток' });
+      return res.status(400).json({ message: 'Not enough coins' });
     }
     const activePair = await Pair.findOne({
       where: {
@@ -34,7 +34,7 @@ const sendGift = async (req, res) => {
       ],
     });
     if (!activePair) {
-      return res.status(400).json({ message: 'У вас нет активного партнера для отправки подарка' });
+      return res.status(400).json({ message: 'You have no active partner to send gift to' });
     }
     const partner = activePair.user1Id === fromUserId ? activePair.Receiver : activePair.Requester;
     let photoPath = null;
@@ -61,7 +61,7 @@ const sendGift = async (req, res) => {
           giftType: gift.giftType,
           message: gift.message,
           photoPath: gift.photoPath,
-          senderName: user.first_name || 'Ваш партнер',
+          senderName: user.first_name || 'Your partner',
           createdAt: gift.createdAt
         });
         await gift.update({ 
@@ -72,7 +72,7 @@ const sendGift = async (req, res) => {
     }
     res.json({
       success: true,
-      message: 'Подарок успешно отправлен!',
+      message: 'Gift sent successfully!',
               gift: {
         id: gift.id,
         giftType: gift.giftType,
@@ -81,7 +81,7 @@ const sendGift = async (req, res) => {
       remainingCoins: user.coins - parseInt(price)
     });
   } catch (error) {
-    res.status(500).json({ message: 'Ошибка при отправке подарка' });
+    res.status(500).json({ message: 'Error sending gift' });
   }
 };
 const getGifts = async (req, res) => {
@@ -128,7 +128,7 @@ const markGiftAsViewed = async (req, res) => {
       }
     });
     if (!gift) {
-      return res.status(404).json({ message: 'Подарок не найден' });
+      return res.status(404).json({ message: 'Gift not found' });
     }
     await gift.update({
       isViewed: true,
@@ -136,7 +136,7 @@ const markGiftAsViewed = async (req, res) => {
     });
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ message: 'Ошибка при обновлении подарка' });
+    res.status(500).json({ message: 'Error updating gift' });
   }
 };
 const getUnviewedGifts = async (req, res) => {
@@ -176,7 +176,7 @@ const getGiftStats = async (req, res) => {
       totalSpent
     });
   } catch (error) {
-    res.status(500).json({ message: 'Ошибка при получении статистики' });
+    res.status(500).json({ message: 'Error getting statistics' });
   }
 };
 module.exports = {

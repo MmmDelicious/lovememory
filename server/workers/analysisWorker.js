@@ -1,15 +1,6 @@
 const { Worker } = require('bullmq');
 const { getRedisClient } = require('../config/redis');
 
-/**
- * Analysis Worker - Фоновый обработчик задач анализа
- * 
- * Этот воркер работает в отдельном процессе и обрабатывает тяжелые задачи:
- * - Анализ профиля пользователя через AI
- * - Генерация инсайтов о отношениях
- * - Обновление RelationshipProfile
- */
-
 class AnalysisWorker {
   constructor() {
     this.workers = [];
@@ -17,27 +8,18 @@ class AnalysisWorker {
     this.isRunning = false;
   }
 
-  /**
-   * Запуск воркеров
-   */
   async start() {
     if (this.isRunning) {
-      console.log('⚠️ Analysis workers already running');
       return;
     }
 
-    console.log('🚀 Starting Analysis Workers...');
-
     try {
-      // Подключение к Redis
       this.connection = getRedisClient();
       await this.connection.ping();
 
-      // Создаем воркеры для разных типов задач
       await this.createWorkers();
 
       this.isRunning = true;
-      console.log('✅ Analysis Workers started successfully');
 
     } catch (error) {
       console.error('❌ Failed to start Analysis Workers:', error);
@@ -74,28 +56,20 @@ class AnalysisWorker {
     // Настройка обработчиков событий
     this.setupWorkerEvents();
 
-    console.log(`👷 Created ${this.workers.length} workers`);
   }
 
-  /**
-   * Обработка задач анализа пользователя
-   */
   async processAnalysisJob(job) {
     const { userId, type } = job.data;
-    console.log(`📊 Processing analysis job for user ${userId}`);
 
     try {
-      // Обновляем прогресс
       await job.updateProgress(10);
-
-      // Динамический импорт TS сервисов (пока заглушка)
       let analysisEngine;
       try {
         // В будущем: analysisEngine = require('../services/analysisEngine.service');
         analysisEngine = {
           analyzeUser: async (request) => {
             // Заглушка пока TS сервисы не скомпилированы
-            console.log(`🧠 Mock analysis for user ${request.userId}`);
+
             await new Promise(resolve => setTimeout(resolve, 2000)); // Имитация работы
             return {
               userId: request.userId,
@@ -107,7 +81,7 @@ class AnalysisWorker {
           }
         };
       } catch (error) {
-        console.warn('⚠️ Using mock analysis engine:', error.message);
+        console.warn('Using mock analysis engine:', error.message);
       }
 
       await job.updateProgress(30);
@@ -122,7 +96,6 @@ class AnalysisWorker {
 
       await job.updateProgress(100);
 
-      console.log(`✅ Analysis completed for user ${userId}`);
       return { 
         success: true, 
         userId, 
@@ -131,7 +104,7 @@ class AnalysisWorker {
       };
 
     } catch (error) {
-      console.error(`❌ Analysis failed for user ${userId}:`, error);
+      console.error(`Analysis failed for user ${userId}:`, error);
       
       // Обновляем статус ошибки
       await this.updateAnalysisStatus(userId, 'error');
@@ -145,7 +118,6 @@ class AnalysisWorker {
    */
   async processInsightJob(job) {
     const { userId, eventId, type } = job.data;
-    console.log(`💡 Processing insight job for user ${userId}, event ${eventId}`);
 
     try {
       await job.updateProgress(20);
@@ -168,7 +140,6 @@ class AnalysisWorker {
 
       await job.updateProgress(100);
 
-      console.log(`✅ Insight generated for user ${userId}`);
       return {
         success: true,
         insight,
@@ -176,7 +147,7 @@ class AnalysisWorker {
       };
 
     } catch (error) {
-      console.error(`❌ Insight generation failed for user ${userId}:`, error);
+      console.error(`Insight generation failed for user ${userId}:`, error);
       throw error;
     }
   }
@@ -186,7 +157,6 @@ class AnalysisWorker {
    */
   async processMaintenanceJob(job) {
     const { type, cleanupType } = job.data;
-    console.log(`🧹 Processing maintenance job: ${cleanupType}`);
 
     try {
       await job.updateProgress(25);
@@ -207,7 +177,6 @@ class AnalysisWorker {
 
       await job.updateProgress(100);
 
-      console.log(`✅ Maintenance completed: ${cleanupType}`);
       return {
         success: true,
         cleanupType,
@@ -215,7 +184,7 @@ class AnalysisWorker {
       };
 
     } catch (error) {
-      console.error(`❌ Maintenance failed for ${cleanupType}:`, error);
+      console.error(`Maintenance failed for ${cleanupType}:`, error);
       throw error;
     }
   }
@@ -226,7 +195,7 @@ class AnalysisWorker {
   setupWorkerEvents() {
     this.workers.forEach((worker, index) => {
       worker.on('completed', (job) => {
-        console.log(`✅ Worker ${index} completed job ${job.id}`);
+  
       });
 
       worker.on('failed', (job, err) => {
@@ -238,7 +207,7 @@ class AnalysisWorker {
       });
 
       worker.on('stalled', (jobId) => {
-        console.warn(`⚠️ Worker ${index} job ${jobId} stalled`);
+        console.warn(`Worker ${index} job ${jobId} stalled`);
       });
     });
   }
@@ -260,7 +229,7 @@ class AnalysisWorker {
           ]
         }
       );
-      console.log(`📝 Updated analysis status for user ${userId}: ${status}`);
+  
     } catch (error) {
       console.error('Error updating analysis status:', error);
     }
@@ -269,14 +238,14 @@ class AnalysisWorker {
   async saveInsight(insight) {
     try {
       // Заглушка - в будущем сохранить в таблицу Insights
-      console.log(`💾 Saving insight for user ${insight.userId}:`, insight.title);
+  
     } catch (error) {
       console.error('Error saving insight:', error);
     }
   }
 
   async cleanupOldInteractions() {
-    console.log('🧹 Cleaning up old AI interactions...');
+    
     // Удаляем взаимодействия старше 90 дней
     const { sequelize } = require('../models');
     const result = await sequelize.query(`
@@ -284,16 +253,16 @@ class AnalysisWorker {
       WHERE activity_type = 'ai_interaction' 
       AND created_at < NOW() - INTERVAL '90 days'
     `);
-    console.log(`🗑️ Removed ${result[1]} old interactions`);
+    
   }
 
   async cleanupFailedJobs() {
-    console.log('🧹 Cleaning up failed jobs...');
+    
     // BullMQ автоматически очистит failed jobs по настройкам
   }
 
   async cleanupTempFiles() {
-    console.log('🧹 Cleaning up temp files...');
+    
     // Очистка временных файлов
   }
 
@@ -314,18 +283,14 @@ class AnalysisWorker {
    */
   async stop() {
     if (!this.isRunning) {
-      console.log('⚠️ Analysis workers not running');
       return;
     }
-
-    console.log('🔄 Stopping Analysis Workers...');
 
     // Останавливаем всех воркеров
     await Promise.all(this.workers.map(worker => worker.close()));
     this.workers = [];
     this.isRunning = false;
 
-    console.log('✅ Analysis Workers stopped');
   }
 
   /**

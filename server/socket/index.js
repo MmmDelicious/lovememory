@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { GameRoom, User } = require('../models');
 const gameService = require('../services/game.service');
 const economyService = require('../services/economy.service');
-const GameManager = require('../gameLogic/GameManager');
+const GameManager = require('../compiled/gameLogic/GameManagerNew');
 
 const quizUpdateIntervals = new Map();
 
@@ -63,7 +63,7 @@ function initSocket(server, app) {
         try {
             const room = await GameRoom.findByPk(roomId);
             if (!room) {
-                socket.emit('error', 'Комната не найдена.');
+                socket.emit('error', 'Room not found.');
                 return;
             }
 
@@ -71,11 +71,10 @@ function initSocket(server, app) {
             const isRoomFull = allSocketsInRoom.length >= room.maxPlayers;
 
             if (isRoomFull) {
-                socket.emit('error', 'Комната уже заполнена.');
+                socket.emit('error', 'Room is already full.');
                 return;
             }
 
-            // Для стандартных игр (не покер) резервируем ставку при входе
             const economyType = economyService.getEconomyType(room.gameType);
             if (economyType === 'standard' && room.status === 'waiting') {
                 const betResult = await economyService.reservePlayerBet(socket.user.id, roomId, room.bet);
@@ -83,14 +82,12 @@ function initSocket(server, app) {
                     socket.emit('error', betResult.reason);
                     return;
                 }
-                // Отправляем обновленный баланс клиенту
                 socket.emit('update_coins', betResult.newBalance);
             }
 
             await socket.join(roomId);
             userRooms.add(roomId);
             
-            // Отправляем информацию о комнате клиенту
             socket.emit('room_info', {
                 id: room.id,
                 gameType: room.gameType,
@@ -100,7 +97,6 @@ function initSocket(server, app) {
             });
             
             const currentSockets = await io.in(roomId).fetchSockets();
-            // Подтягиваем профиль, чтобы был общий аватар/пол
             const userIdsForInfo = currentSockets.map(s => s.user.id);
             const usersForInfo = await User.findAll({ where: { id: userIdsForInfo }, attributes: ['id', 'email', 'gender', 'avatarUrl', 'first_name'] });
             const usersForInfoMap = new Map(usersForInfo.map(u => [u.id, u]));
@@ -117,21 +113,18 @@ function initSocket(server, app) {
             io.to(roomId).emit('player_list_update', playerInfo);
 
             if (room.status === 'waiting') {
-                // Для покера создаем игру объект, но не меняем статус комнаты на in_progress
-                // Для остальных игр ждем нужное количество игроков и сразу запускаем
                 let requiredPlayers = 2;
                 if (room.gameType === 'poker') {
                   requiredPlayers = 1;
                 } else if (room.gameType === 'codenames') {
-                  requiredPlayers = 4; // Codenames требует ровно 4 игрока (2v2)
+                  requiredPlayers = 4;
                 } else if ((room.gameType === 'wordle' || room.gameType === 'quiz') && room.maxPlayers === 4) {
-                  requiredPlayers = 4; // Формат 2x2
+                  requiredPlayers = 4;
                 }
                 
                 const shouldCreateGame = currentSockets.length >= requiredPlayers;
                 
                 if (shouldCreateGame) {
-                    // Для покера НЕ меняем статус комнаты - оставляем waiting
                     if (room.gameType !== 'poker') {
                         await gameService.startGame(roomId);
                     }
@@ -149,40 +142,42 @@ function initSocket(server, app) {
                             name: user ? (user.first_name || user.email.split('@')[0]) : s.user.email.split('@')[0],
                             gender: user ? user.gender : 'male',
                             avatarUrl: user ? user.avatarUrl : null,
-                            // Для покера передаем лимит как buyInCoins для расчета блайндов, для остальных игр передаем ставку
                             ...(gameType === 'poker' ? { buyInCoins: room.bet } : { buyInCoins: room.bet })
                         };
                     });
                     
-                    // Подготавливаем опции игры
                     const gameOptions = {
-                      onStateChange: (gameInstance) => {
+                      onStateChange: (gameState) => {
+                        const gameInstance = GameManager.getGame(roomId);
+                        
+                        if (!gameInstance) {
+                          console.error('[SOCKET] Game instance not found for state change callback');
+                          return;
+                        }
+                        
                         if (gameInstance.gameType === 'poker' || gameInstance.gameType === 'wordle') {
                           gameInstance.players.forEach(p => {
                             const stateForPlayer = gameInstance.getStateForPlayer(p.id);
                             io.to(p.id).emit('game_update', stateForPlayer);
                           });
                         } else if (gameInstance.gameType === 'memory') {
-                          const newState = gameInstance.getGameState();
+                          const newState = gameInstance.getGameState ? gameInstance.getGameState() : gameState;
                           io.to(roomId).emit('game_update', newState);
                         } else {
-                          const newState = gameInstance.getState();
+                          const newState = gameState || gameInstance.getState();
                           io.to(roomId).emit('game_update', newState);
                         }
                       },
                       onGameStart: gameType === 'poker' ? async () => {
-                        // Меняем статус покерной комнаты на in_progress когда игра начинается
                         try {
                           await gameService.startGame(roomId);
                           io.emit('room_list_updated');
                         } catch (error) {
-                          // Silent error handling
                         }
                       } : undefined,
                       gameFormat: room.gameFormat || '1v1'
                     };
 
-                    // Добавляем специфичные настройки игры
                     if (room.gameSettings) {
                       Object.assign(gameOptions, room.gameSettings);
                     }
@@ -190,9 +185,7 @@ function initSocket(server, app) {
                     const game = GameManager.createGame(roomId, gameType, playerInfo, gameOptions);
                     io.to(roomId).emit('game_start', { gameType, players: playerInfo, maxPlayers: room.maxPlayers });
 
-                    // Для покера нужно добавить всех игроков, которые еще не в игре
                     if (game.gameType === 'poker') {
-                        // Добавляем новых игроков в покер
                         currentSockets.forEach(socket => {
                             const existingPlayer = game.players.find(p => p.id === socket.user.id);
                             if (!existingPlayer) {
@@ -216,9 +209,8 @@ function initSocket(server, app) {
                             io.to(player.id).emit('game_update', stateForPlayer);
                         });
                     } else if (game.gameType === 'codenames') {
-                        // Для Codenames отправляем разные состояния капитанам и игрокам
                         game.players.forEach(playerId => {
-                            const playerRole = game.getPlayerRole(playerId);
+                            const playerRole = game.getPlayerRoleOld ? game.getPlayerRoleOld(playerId) : game.getPlayerRole(playerId);
                             let stateForPlayer;
                             if (playerRole && playerRole.role === 'captain') {
                                 stateForPlayer = game.getCaptainState(playerId);
@@ -228,11 +220,9 @@ function initSocket(server, app) {
                             io.to(playerId).emit('game_update', stateForPlayer);
                         });
                     } else if (game.gameType === 'memory') {
-                        // Для мемори отправляем состояние всем игрокам
                         const initialState = game.getGameState();
                         io.to(roomId).emit('game_update', initialState);
                     } else if (game.gameType === 'quiz') {
-                        // Запускаем таймер для квиза
                         startQuizTimerUpdates(io, roomId, game);
                         const initialState = game.getState();
                         io.to(roomId).emit('game_update', initialState);
@@ -251,12 +241,9 @@ function initSocket(server, app) {
                         gender: user ? user.gender : 'male'
                     };
                     
-                    // Проверяем, есть ли уже такой игрок в игре
                     const existingPlayer = game.players.find(p => p.id === socket.user.id);
                     if (existingPlayer) {
-                        // Игрок переподключается
                     } else {
-                        // Новый игрок присоединяется как наблюдатель (без buy-in)
                         game.addPlayer(newPlayerInfo);
                     }
                     
@@ -268,7 +255,7 @@ function initSocket(server, app) {
             }
         } catch (error) {
             console.error(`[SERVER] [ERROR] in 'join_room':`, error);
-            socket.emit('error', 'Произошла ошибка при подключении к комнате.');
+            socket.emit('error', 'An error occurred while connecting to the room.');
         }
     });
 
@@ -297,11 +284,9 @@ function initSocket(server, app) {
                 stage: 'waiting'
               });
             } else if (room.status === 'in_progress') {
-              // Игра была в процессе, но GameManager сбросился при перезагрузке сервера
               
               const socketsInRoom = await io.in(roomId).fetchSockets();
                 if (socketsInRoom.length >= 2) {
-                // Восстанавливаем игру
                 const userIds = socketsInRoom.map(s => s.user.id);
                 const users = await User.findAll({ where: { id: userIds }, attributes: ['id', 'email', 'gender'] });
                 const usersMap = new Map(users.map(u => [u.id, u]));
@@ -317,14 +302,21 @@ function initSocket(server, app) {
                 });
                 
                 const recoveredGame = GameManager.createGame(roomId, room.gameType, playerBuyInInfo, {
-                  onStateChange: (gameInstance) => {
+                  onStateChange: (gameState) => {
+                    const gameInstance = GameManager.getGame(roomId);
+                    
+                    if (!gameInstance) {
+                      console.error('[SOCKET] Game instance not found for recovery state change callback');
+                      return;
+                    }
+                    
                     if (gameInstance.gameType === 'poker') {
                       gameInstance.players.forEach(p => {
                         const stateForPlayer = gameInstance.getStateForPlayer(p.id);
                         io.to(p.id).emit('game_update', stateForPlayer);
                       });
                     } else {
-                      const newState = gameInstance.getState();
+                      const newState = gameState || gameInstance.getState();
                       io.to(roomId).emit('game_update', newState);
                     }
                   }
@@ -336,7 +328,6 @@ function initSocket(server, app) {
                     io.to(player.id).emit('game_update', stateForPlayer);
                   });
                 } else if (recoveredGame.gameType === 'quiz') {
-                  // Запускаем таймер для восстановленного квиза
                   startQuizTimerUpdates(io, roomId, recoveredGame);
                   const initialState = recoveredGame.getState();
                   io.to(roomId).emit('game_update', initialState);
@@ -345,7 +336,6 @@ function initSocket(server, app) {
                   io.to(roomId).emit('game_update', initialState);
                 }
               } else {
-                // Недостаточно игроков для восстановления
                 socket.emit('game_update', {
                   gameType: room.gameType,
                   status: 'waiting',
@@ -385,7 +375,7 @@ function initSocket(server, app) {
       const { roomId, move } = data;
       const game = GameManager.getGame(roomId);
       if (!game) {
-        socket.emit('move_error', { error: 'Игра не найдена' });
+        socket.emit('move_error', { error: 'Game not found' });
         return;
       }
       
@@ -394,7 +384,6 @@ function initSocket(server, app) {
         
         let moveResult;
         if (gameType === 'memory') {
-          // Для мемори используем flipCard
           try {
             moveResult = game.flipCard(socket.user.id, move);
           } catch (error) {
@@ -403,25 +392,34 @@ function initSocket(server, app) {
             return;
           }
         } else {
-          moveResult = game.makeMove(socket.user.id, move);
+          try {
+            moveResult = game.makeMove(socket.user.id, move);
+          } catch (error) {
+            socket.emit('move_error', { error: error.message });
+            return;
+          }
         }
 
-        // Отправляем результат хода игроку
         if (moveResult && moveResult.error) {
           socket.emit('move_error', { error: moveResult.error });
           return;
         }
 
         if (gameType === 'poker' || gameType === 'wordle') {
-          game.players.forEach(player => {
+          if (gameType === 'poker') {
+            game.players.forEach(player => {
               const stateForPlayer = game.getStateForPlayer(player.id);
               io.to(player.id).emit('game_update', stateForPlayer);
-          });
+            });
+          } else {
+            game.players.forEach(playerId => {
+              const stateForPlayer = game.getStateForPlayer(playerId);
+              io.to(playerId).emit('game_update', stateForPlayer);
+            });
+          }
         } else if (gameType === 'codenames') {
-          // Для Codenames отправляем разные состояния капитанам и игрокам
-          // Используем актуальное состояние после хода
           game.players.forEach(playerId => {
-            const playerRole = game.getPlayerRole(playerId);
+            const playerRole = game.getPlayerRoleOld ? game.getPlayerRoleOld(playerId) : game.getPlayerRole(playerId);
             let stateForPlayer;
             if (playerRole && playerRole.role === 'captain') {
               stateForPlayer = game.getCaptainState(playerId);
@@ -431,18 +429,17 @@ function initSocket(server, app) {
             io.to(playerId).emit('game_update', stateForPlayer);
           });
         } else if (gameType === 'memory') {
-          // Для мемори отправляем обновленное состояние всем игрокам
           try {
             const newState = game.getGameState();
             if (newState.status === 'error') {
               console.error(`[MEMORY] Game state error:`, newState.error);
-              socket.emit('move_error', { error: newState.error || 'Ошибка состояния игры' });
+              socket.emit('move_error', { error: newState.error || 'Game state error' });
               return;
             }
             io.to(roomId).emit('game_update', newState);
           } catch (error) {
             console.error(`[MEMORY] Error getting game state:`, error.message);
-            socket.emit('move_error', { error: 'Ошибка получения состояния игры' });
+            socket.emit('move_error', { error: 'Error getting game state' });
             return;
           }
         } else if (gameType === 'quiz') {
@@ -452,14 +449,12 @@ function initSocket(server, app) {
             handleQuizGameEnd(io, roomId, game);
           }
         } else {
-          // Для остальных игр
           const newState = game.getState();
           io.to(roomId).emit('game_update', newState);
         }
         
         if (game.status === 'finished') {
-          if (gameType === 'memory') {
-            // Для мемори отправляем финальное состояние
+                      if (gameType === 'memory') {
             try {
               const finalState = game.getGameState();
               if (finalState.status === 'error') {
@@ -468,7 +463,6 @@ function initSocket(server, app) {
               }
               io.to(roomId).emit('game_end', finalState);
               
-              // Используем экономическую систему для завершения игры
               const room = await GameRoom.findByPk(roomId);
               if (room && economyService.getEconomyType(room.gameType) === 'standard') {
                 const winnerId = finalState.winner?.id;
@@ -476,7 +470,6 @@ function initSocket(server, app) {
                 
                 const economyResult = await economyService.finalizeStandardGame(roomId, winnerId, playerIds, false);
                 if (economyResult.success) {
-                  // Отправляем обновленные балансы всем игрокам
                   Object.keys(economyResult.results.playerResults || {}).forEach(playerId => {
                     const playerResult = economyResult.results.playerResults[playerId];
                     io.to(playerId).emit('update_coins', playerResult.newBalance);
@@ -485,7 +478,6 @@ function initSocket(server, app) {
                 }
               }
               
-              // Удаляем игру через некоторое время
               setTimeout(() => {
                 GameManager.removeGame(roomId);
               }, 5000);
@@ -493,7 +485,6 @@ function initSocket(server, app) {
               console.error(`[MEMORY] Error handling game end:`, error.message);
             }
           } else if (gameType === 'poker') {
-            // Для покера отправляем персонализированное финальное состояние (с yourHand)
             game.players.forEach(player => {
               const finalStateForPlayer = game.getStateForPlayer(player.id);
               io.to(player.id).emit('game_end', finalStateForPlayer);
@@ -505,44 +496,35 @@ function initSocket(server, app) {
                 return;
               }
               
-              // Проверяем всех игроков, которые сделали buy-in (независимо от текущего стека)
               const activePlayers = currentGame.players.filter(p => p.hasBoughtIn);
               const playersWithMoney = activePlayers.filter(p => p.stack > 0);
               
-              // Если есть хотя бы 2 активных игрока (независимо от стека), продолжаем игру
               if (activePlayers.length >= 2) {
-                // Если есть игроки с деньгами, начинаем новую раздачу
                 if (playersWithMoney.length >= 2) {
                   currentGame.startNewHand();
                   
-                  // Отправляем состояние всем игрокам сразу
                   currentGame.players.forEach(player => {
                     const stateForPlayer = currentGame.getStateForPlayer(player.id);
                     io.to(player.id).emit('game_update', stateForPlayer);
                   });
                   
-                  // Отправляем событие о начале новой раздачи после обновления состояния
                   io.to(roomId).emit('new_hand_started', { 
                     gameType: 'poker', 
                     players: currentGame.players.map(p => ({ id: p.id, name: p.name }))
                   });
                 } else {
-                  // Если игроков с деньгами меньше 2, но есть активные игроки - ждем rebuy
-                  currentGame.status = 'waiting'; // Переводим игру в режим ожидания rebuy
+                  currentGame.status = 'waiting';
                   
-                  // Отправляем состояние всем игрокам
                   currentGame.players.forEach(player => {
                     const stateForPlayer = currentGame.getStateForPlayer(player.id);
                     io.to(player.id).emit('game_update', stateForPlayer);
                   });
                   
-                  // Уведомляем игроков о возможности rebuy
                   io.to(roomId).emit('rebuy_opportunity', {
-                    message: 'Игроки могут сделать rebuy для продолжения игры'
+                    message: 'Players can make rebuy to continue game'
                   });
                 }
               } else {
-                // Если активных игроков меньше 2, завершаем сессию
                 const room = await GameRoom.findByPk(roomId);
                 if (room) {
                     const updatedUsers = await gameService.finalizePokerSession(roomId, currentGame.players, room.bet);
@@ -553,11 +535,10 @@ function initSocket(server, app) {
                 GameManager.removeGame(roomId);
                 io.emit('room_list_updated');
               }
-            }, 4000); // 4 секунды для просмотра результатов раздачи
+            }, 4000);
                   } else if (gameType === 'memory') {
                     const finalState = game.getGameState();
                     
-                    // Используем экономическую систему для завершения игры
                     const room = await GameRoom.findByPk(roomId);
                     if (room && economyService.getEconomyType(room.gameType) === 'standard') {
                       const winnerId = finalState.winner?.id;
@@ -565,7 +546,6 @@ function initSocket(server, app) {
                       
                       const economyResult = await economyService.finalizeStandardGame(roomId, winnerId, playerIds, false);
                       if (economyResult.success) {
-                        // Отправляем обновленные балансы всем игрокам
                         Object.keys(economyResult.results.playerResults || {}).forEach(playerId => {
                           const playerResult = economyResult.results.playerResults[playerId];
                           io.to(playerId).emit('update_coins', playerResult.newBalance);
@@ -574,17 +554,14 @@ function initSocket(server, app) {
                       }
                     }
                     
-                    // Отправляем финальное состояние
                     io.to(roomId).emit('game_end', finalState);
                     
-                    // Удаляем игру через некоторое время
                     setTimeout(() => {
                       GameManager.removeGame(roomId);
                     }, 5000);
                   } else {
                     const finalState = game.getState();
             
-            // Используем новую экономическую систему для завершения игры
             const room = await GameRoom.findByPk(roomId);
             if (room && economyService.getEconomyType(room.gameType) === 'standard') {
               const isDraw = finalState.winner === 'draw' || finalState.isDraw;
@@ -593,27 +570,23 @@ function initSocket(server, app) {
               
               const economyResult = await economyService.finalizeStandardGame(roomId, winnerId, playerIds, isDraw);
               if (economyResult.success) {
-                // Создаем расширенное состояние игры с информацией о монетах
                 const enhancedGameState = {
                   ...finalState,
                   economyResults: economyResult.results.playerResults
                 };
                 
-                // Отправляем game_end с информацией о монетах
                 io.to(roomId).emit('game_end', enhancedGameState);
                 
-                // Отправляем обновленные балансы всем игрокам
+                // Send updated balances to all players
                 Object.keys(economyResult.results.playerResults || {}).forEach(playerId => {
                   const playerResult = economyResult.results.playerResults[playerId];
                   io.to(playerId).emit('update_coins', playerResult.newBalance);
                 });
                 io.emit('room_list_updated');
               } else {
-                // Если экономическая система не сработала, отправляем обычное состояние
                 io.to(roomId).emit('game_end', finalState);
               }
-            } else {
-              // Fallback для старой системы (если нужно)
+                          } else {
               io.to(roomId).emit('game_end', finalState);
               if (finalState.winner && finalState.winner !== 'draw') {
                 const winnerId = finalState.winner;
@@ -633,16 +606,16 @@ function initSocket(server, app) {
         }
       } catch (error) {
         console.error(`[SERVER] [ERROR] in 'make_move':`, error.message);
-        // Отправляем более дружелюбные сообщения об ошибках
+        // Send more user-friendly error messages
         let userMessage = error.message;
         if (error.message === 'Not your turn') {
-          userMessage = 'Сейчас не ваш ход';
+          userMessage = 'Not your turn now';
         } else if (error.message === 'Cell is already taken') {
-          userMessage = 'Эта клетка уже занята';
+          userMessage = 'This cell is already taken';
         } else if (error.message === 'Game is already over') {
-          userMessage = 'Игра уже завершена';
+          userMessage = 'Game is already over';
         } else if (error.message === 'Invalid move position') {
-          userMessage = 'Некорректная позиция хода';
+          userMessage = 'Invalid move position';
         }
         socket.emit('error', userMessage);
       }
@@ -675,7 +648,6 @@ function initSocket(server, app) {
           return;
         }
 
-        // Проверяем, что у пользователя достаточно монет для ребая
         const rebuyAmount = room.bet - player.stack;
         if (rebuyAmount <= 0) {
           socket.emit('error', 'No rebuy needed.');
@@ -687,18 +659,15 @@ function initSocket(server, app) {
           return;
         }
 
-        // Выполняем ребай
         user.coins -= rebuyAmount;
         player.stack += rebuyAmount;
         await user.save();
 
-        // Отправляем обновленное состояние всем игрокам
         game.players.forEach(gamePlayer => {
           const stateForPlayer = game.getStateForPlayer(gamePlayer.id);
           io.to(gamePlayer.id).emit('game_update', stateForPlayer);
         });
 
-        // Отправляем обновленные монеты пользователю
         socket.emit('update_coins', user.coins);
         socket.emit('rebuy_success', { newStack: player.stack });
 
@@ -708,40 +677,46 @@ function initSocket(server, app) {
       }
     });
 
-    // Новый обработчик для покерного buy-in
     socket.on('poker_buy_in', async (data) => {
       const { roomId, buyInAmount } = data;
       
       try {
         const room = await GameRoom.findByPk(roomId);
         if (!room || room.gameType !== 'poker') {
-          socket.emit('error', 'Покерный buy-in доступен только в покерных комнатах');
+          socket.emit('error', 'Poker buy-in is only available in poker rooms');
           return;
         }
 
-        // Проверяем лимиты
+        // Check limits
         if (buyInAmount < 50 || buyInAmount > room.bet) {
-          socket.emit('error', `Buy-in должен быть от 50 до ${room.bet} монет`);
+          socket.emit('error', `Buy-in must be from 50 to ${room.bet} coins`);
           return;
         }
 
-        // Выполняем buy-in через экономический сервис
+        // Perform buy-in through economic service
         const buyInResult = await economyService.pokerBuyIn(socket.user.id, buyInAmount);
+        
         if (!buyInResult.success) {
           socket.emit('error', buyInResult.reason);
           return;
         }
-
-        // Интегрируем с покерной игрой
+        // Integrate with poker game
         const game = GameManager.getGame(roomId);
         if (game && game.gameType === 'poker') {
-          const success = game.playerBuyIn(socket.user.id, buyInAmount);
-          if (success) {
-            // Отправляем обновленное состояние всем игрокам
+          const gameResult = game.playerBuyIn(socket.user.id, buyInAmount);
+          
+          if (gameResult.success) {
+            // Send updated state to all players
             game.players.forEach(gamePlayer => {
               const stateForPlayer = game.getStateForPlayer(gamePlayer.id);
               io.to(gamePlayer.id).emit('game_update', stateForPlayer);
             });
+          } else {
+            console.error(`[SOCKET] Buy-in failed: ${gameResult.error}`);
+            // Return money if failed to enter game
+            await economyService.pokerCashOut(socket.user.id, buyInAmount);
+            socket.emit('error', gameResult.error || 'Не удалось войти в игру');
+            return;
           }
         }
 
@@ -794,8 +769,15 @@ function initSocket(server, app) {
           return;
         }
 
-        // Добавляем деньги к стеку игрока
-        player.stack += rebuyAmount;
+        // Используем метод rebuy из игры
+        const gameResult = game.playerRebuy(socket.user.id, rebuyAmount);
+        if (!gameResult.success) {
+          console.error(`[SOCKET] Rebuy failed: ${gameResult.error}`);
+          // Возвращаем деньги если не удалось сделать rebuy
+          await economyService.pokerCashOut(socket.user.id, rebuyAmount);
+          socket.emit('error', gameResult.error || 'Не удалось сделать rebuy');
+          return;
+        }
 
         // Отправляем обновленное состояние всем игрокам
         game.players.forEach(gamePlayer => {
@@ -860,20 +842,34 @@ function initSocket(server, app) {
           return;
         }
 
-        const cashOutAmount = player.stack;
-        
-        if (cashOutAmount > 0) {
-          // Выполняем cash-out через экономический сервис
-          const cashOutResult = await economyService.pokerCashOut(socket.user.id, cashOutAmount);
-          if (cashOutResult.success) {
-            socket.emit('update_coins', cashOutResult.newBalance);
-            socket.emit('poker_cash_out_success', { 
-              cashOutAmount, 
-              newBalance: cashOutResult.newBalance 
-            });
-          } else {
-            console.error(`[POKER] Ошибка cash-out:`, cashOutResult.reason);
+        // Используем метод cash-out из игры
+        const gameResult = game.playerCashOut(socket.user.id);
+        if (gameResult.success) {
+          const cashOutAmount = gameResult.cashOutAmount;
+          
+          if (cashOutAmount > 0) {
+            // Возвращаем деньги через экономический сервис
+            const cashOutResult = await economyService.pokerCashOut(socket.user.id, cashOutAmount);
+            if (cashOutResult.success) {
+              socket.emit('update_coins', cashOutResult.newBalance);
+              socket.emit('poker_cash_out_success', { 
+                cashOutAmount, 
+                newBalance: cashOutResult.newBalance 
+              });
+            } else {
+              console.error(`[SOCKET] Ошибка cash-out:`, cashOutResult.reason);
+            }
           }
+          
+          // Отправляем обновленное состояние всем игрокам
+          game.players.forEach(gamePlayer => {
+            const stateForPlayer = game.getStateForPlayer(gamePlayer.id);
+            io.to(gamePlayer.id).emit('game_update', stateForPlayer);
+          });
+          
+        } else {
+          console.error(`[SOCKET] Cash-out failed: ${gameResult.error}`);
+          socket.emit('error', gameResult.error || 'Не удалось выйти из игры');
         }
       } catch (error) {
         console.error(`[POKER] Ошибка cash-out:`, error);
@@ -895,8 +891,6 @@ function initSocket(server, app) {
       const remainingPlayerIds = remainingSockets.map(s => s.user.id);
       
       if (game && game.gameType === 'poker') {
-        console.log(`[SERVER] Poker game detected for room ${roomId}`);
-        
         // Найдем игрока до удаления
         const playerThatLeft = game.players.find(p => p.id === socket.user.id);
         
@@ -905,29 +899,35 @@ function initSocket(server, app) {
           const cashOutResult = await economyService.pokerCashOut(socket.user.id, playerThatLeft.stack);
           if (cashOutResult.success) {
             socket.emit('update_coins', cashOutResult.newBalance);
-            console.log(`[POKER] Auto cash-out ${playerThatLeft.stack} монет для игрока ${socket.user.id}`);
-          }
+            }
         }
         
-        game.handlePlayerLeave(socket.user.id);
+        // Вызываем handlePlayerLeave только если метод существует (старые игры)
+        if (typeof game.handlePlayerLeave === 'function') {
+          game.handlePlayerLeave(socket.user.id);
+        }
         game.removePlayer(socket.user.id);
 
-        game.players.forEach(player => {
-            const stateForPlayer = game.getStateForPlayer(player.id);
-            io.to(player.id).emit('game_update', stateForPlayer);
-        });
+        // Отправляем обновленное состояние
+        if (typeof game.getStateForPlayer === 'function') {
+          game.players.forEach(player => {
+              const stateForPlayer = game.getStateForPlayer(player.id);
+              io.to(player.id).emit('game_update', stateForPlayer);
+          });
+        } else {
+          // Для игр без персонализированного состояния
+          const gameState = game.getState();
+          io.to(roomId).emit('game_update', gameState);
+        }
 
         if (game.players.length < 2) {
-            console.log(`[SERVER] Less than 2 players left in poker game. Finalizing session.`);
-            
             // Выполняем cash-out для всех оставшихся игроков
             for (const remainingPlayer of game.players) {
               if (remainingPlayer.stack > 0) {
                 const cashOutResult = await economyService.pokerCashOut(remainingPlayer.id, remainingPlayer.stack);
                 if (cashOutResult.success) {
                   io.to(remainingPlayer.id).emit('update_coins', cashOutResult.newBalance);
-                  console.log(`[POKER] Auto cash-out ${remainingPlayer.stack} монет для игрока ${remainingPlayer.id}`);
-                }
+                  }
               }
             }
             
@@ -936,8 +936,7 @@ function initSocket(server, app) {
             // Удаляем пустую комнату из базы данных
             try {
               await room.destroy();
-              console.log(`[SERVER] Deleted empty poker room ${roomId} from database`);
-            } catch (error) {
+              } catch (error) {
               console.error(`[SERVER] Error deleting poker room ${roomId}:`, error);
             }
             
@@ -951,14 +950,12 @@ function initSocket(server, app) {
         if (economyType === 'standard') {
           if (room.status === 'waiting') {
             // Игра еще не началась - возвращаем ставку
-            console.log(`[SERVER] Игра ${roomId} еще не началась, возвращаем ставку игроку ${socket.user.id}`);
             const refundResult = await economyService.refundPlayerBet(socket.user.id, room.bet);
             if (refundResult.success) {
               socket.emit('update_coins', refundResult.newBalance);
             }
           } else if (room.status === 'in_progress' && remainingPlayerIds.length >= 1) {
             // Игра началась - засчитываем поражение покинувшему игроку, победу остальным
-            console.log(`[SERVER] Игрок ${socket.user.id} покинул начавшуюся игру ${roomId}, засчитываем поражение`);
             const leaveResult = await economyService.handlePlayerLeave(roomId, socket.user.id, remainingPlayerIds);
             
             if (leaveResult.success && leaveResult.results.gameStatus !== 'continues') {
@@ -989,24 +986,19 @@ function initSocket(server, app) {
       
       stopQuizTimerUpdates(roomId);
       
-      console.log(`[SERVER] Room ${roomId} has ${remainingSockets.length} remaining sockets after user ${socket.user.id} left`);
-      
       if (remainingSockets.length === 0) {
-        console.log(`[SERVER] Room ${roomId} is empty, deleting it`);
         GameManager.removeGame(roomId);
         
         // Удаляем пустую комнату из базы данных
         if (room) {
           try {
             await room.destroy();
-            console.log(`[SERVER] Deleted empty room ${roomId} from database`);
             io.emit('room_list_updated');
           } catch (error) {
             console.error(`[SERVER] Error deleting room ${roomId}:`, error);
           }
         }
       } else {
-        console.log(`[SERVER] Room ${roomId} still has ${remainingSockets.length} players, not deleting`);
         const remainingIds = remainingSockets.map(s => s.user.id);
         try {
           const remainingUsers = await User.findAll({ where: { id: remainingIds }, attributes: ['id', 'email', 'gender', 'avatarUrl', 'first_name'] });
@@ -1031,10 +1023,8 @@ function initSocket(server, app) {
         if (currentGame && currentGame.status === 'in_progress' && remainingSockets.length < 2) {
           if (currentGame.gameType !== 'poker') {
               // Для стандартных игр логика уже обработана выше через economyService.handlePlayerLeave
-              console.log(`[SERVER] Non-poker game with less than 2 players - handled by economy service`);
-          } else {
+              } else {
               // Для покера - оставляем игру в покое, игрок может вернуться
-              console.log(`[SERVER] Poker game with less than 2 players, keeping game active for potential rejoin`);
               // Переводим комнату в статус ожидания, если в комнате остался 1 игрок
               try {
                 const room = await GameRoom.findByPk(roomId);
@@ -1060,8 +1050,7 @@ function initSocket(server, app) {
         const roomName = `lesson:${relationshipId}`;
         socket.join(roomName);
         socket.lessonRoom = roomName;
-        console.log(`[SOCKET] User ${socket.user.id} joined lesson room: ${roomName}`);
-      }
+        }
     });
 
     socket.on('lesson:completed', (data) => {
@@ -1075,8 +1064,7 @@ function initSocket(server, app) {
           progress,
           timestamp: new Date().toISOString()
         });
-        console.log(`[SOCKET] Lesson ${lessonId} completed by user ${socket.user.id} in room ${socket.lessonRoom}`);
-      }
+        }
     });
 
     socket.on('lesson:progress-updated', (data) => {
@@ -1104,7 +1092,7 @@ function initSocket(server, app) {
     });
 
     socket.on('disconnect', () => {
-      console.log(`[SERVER] Socket ${socket.id} (user ${socket.user.id}) disconnected.`);
+      console.log(`User ${socket.user?.id || 'unknown'} disconnected.`);
       for (const roomId of userRooms) {
         handleLeaveOrDisconnect(roomId);
       }

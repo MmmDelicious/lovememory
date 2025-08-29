@@ -32,7 +32,7 @@ export const TournamentPage: React.FC = () => {
   useEffect(() => {
     if (id) {
       loadTournamentState();
-      // Обновляем каждые 5 секунд для real-time данных
+  
       const interval = setInterval(loadTournamentState, 5000);
       return () => clearInterval(interval);
     }
@@ -58,7 +58,7 @@ export const TournamentPage: React.FC = () => {
   const handleReadyToggle = async (matchId: string) => {
     try {
       await tournamentService.setMatchReady(id!, matchId);
-      loadTournamentState(); // Обновляем состояние
+      loadTournamentState();
     } catch (error) {
       console.error('Error setting ready:', error);
     }
@@ -67,7 +67,7 @@ export const TournamentPage: React.FC = () => {
   const handleStartMatch = async (matchId: string) => {
     try {
       await tournamentService.startMatch(id!, matchId);
-      loadTournamentState(); // Обновляем состояние
+      loadTournamentState();
     } catch (error) {
       console.error('Error starting match:', error);
     }
@@ -98,7 +98,7 @@ export const TournamentPage: React.FC = () => {
 
   const { tournament, matches, participants, currentRound, totalRounds } = tournamentState;
   
-  // Определяем, участвует ли текущий пользователь в турнире
+
   const userParticipation = participants.find(p => p.user_id === user?.id);
   const isParticipant = !!userParticipation;
 

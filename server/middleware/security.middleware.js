@@ -5,7 +5,7 @@ const securityHeaders = helmet({
       defaultSrc: ["'self'"],
       styleSrc: [
         "'self'", 
-        "'unsafe-inline'", // Для CSS-in-JS
+        "'unsafe-inline'", // For CSS-in-JS
         "fonts.googleapis.com"
       ],
       scriptSrc: [
@@ -21,14 +21,14 @@ const securityHeaders = helmet({
         "'self'",
         "data:",
         "blob:",
-        "*.unsplash.com", // Для изображений из Unsplash
-        "*.githubusercontent.com" // Для аватаров GitHub
+        "*.unsplash.com", // For images from Unsplash
+        "*.githubusercontent.com" // For GitHub avatars
       ],
       connectSrc: [
         "'self'",
         process.env.AI_GATEWAY_URL || '', // AI Gateway
-        "wss:", // WebSocket соединения
-        "ws:" // WebSocket соединения (dev)
+        "wss:", // WebSocket connections
+        "ws:" // WebSocket connections (dev)
       ],
       mediaSrc: ["'self'", "blob:"],
       objectSrc: ["'none'"],
@@ -38,7 +38,7 @@ const securityHeaders = helmet({
   hidePoweredBy: true,
   frameguard: { action: 'deny' },
   hsts: process.env.NODE_ENV === 'production' ? {
-    maxAge: 31536000, // 1 год
+    maxAge: 31536000, // 1 year
     includeSubDomains: true,
     preload: true
   } : false,

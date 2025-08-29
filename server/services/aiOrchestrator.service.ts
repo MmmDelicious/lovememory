@@ -26,18 +26,11 @@ class AIOrchestrator implements IAIOrchestrator {
    * Главный метод обработки запроса
    */
   async handleRequest(prompt: string, userId: string): Promise<AIResponse> {
-    console.log(`🎭 AIOrchestrator: Handling request from user ${userId}`);
-    console.log(`📝 Prompt: "${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}"`);
-
     try {
       // 1. Собираем контекст пользователя
       const context = await userContextService.buildContext(userId);
-      console.log(`🧠 Context built: ${context.recentEvents.length} events, ${context.aiInteractionHistory.length} interactions`);
-
       // 2. Определяем намерение пользователя
       const intent = await this.recognizeIntent(prompt, context.aiInteractionHistory);
-      console.log(`🎯 Intent recognized: ${intent}`);
-
       // 3. Выбираем и вызываем нужный инструмент
       let response: AIResponse;
 
@@ -92,7 +85,6 @@ class AIOrchestrator implements IAIOrchestrator {
         intent
       );
 
-      console.log(`✅ AIOrchestrator: Request completed for intent ${intent}`);
       return response;
 
     } catch (error) {
@@ -156,8 +148,6 @@ class AIOrchestrator implements IAIOrchestrator {
    * Обработка генерации свиданий
    */
   private async handleDateGeneration(context: UserContext): Promise<AIResponse> {
-    console.log('💕 Generating date options with real DateGenerationService...');
-    
     try {
       // Подключаем настоящий DateGenerationService
       const dateService = require('./dateGeneration.service').default;
@@ -411,8 +401,6 @@ ${context.partner ? `Учитывая, что вы с ${context.partner.name} - 
    * Обычный чат с полным контекстом
    */
   private async handleChat(prompt: string, context: UserContext): Promise<AIResponse> {
-    console.log('💬 Handling chat with full context...');
-
     try {
       // Строим мега-промпт с полным контекстом
       const systemPrompt = this.buildMegaPrompt(context);

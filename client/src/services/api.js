@@ -1,16 +1,13 @@
 import axios from 'axios';
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true,
 });
 api.interceptors.request.use(
   (config) => {
-    // Ищем токен в правильном месте (Redux использует 'authToken')
     const token = localStorage.getItem('authToken');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
-      console.log('🔑 API: Добавляем токен в заголовок:', token.substring(0, 20) + '...');
-    } else {
-      console.log('❌ API: Токен не найден в localStorage');
     }
     return config;
   },
@@ -23,7 +20,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.group('🔥 API ERROR 🔥');
+    console.group('API ERROR');
     console.error('Full Error Object:', error);
     console.error('Request Config:', error.config);
     console.error('Request URL:', error.config?.url);

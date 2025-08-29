@@ -13,6 +13,7 @@ const aiRoutes = require('./ai.routes');
 const intelligenceRoutes = require('./intelligence.routes');
 const giftRoutes = require('./gift.routes');
 const lessonRoutes = require('./lesson.routes');
+const activityTrackerRoutes = require('./activityTracker.routes');
 
 const router = Router();
 
@@ -20,7 +21,7 @@ router.use('/auth', authRoutes);
 router.use('/events', eventRoutes);
 router.use('/event-templates', eventTemplateRoutes);
 router.use('/media', mediaRoutes);
-router.use('/media', mediaDerivativeRoutes); // MediaDerivative routes под /media prefix
+router.use('/media', mediaDerivativeRoutes); // MediaDerivative routes under /media prefix
 router.use('/pair', pairRoutes);
 router.use('/user', userRoutes);
 router.use('/games', gameRoutes);
@@ -30,5 +31,6 @@ router.use('/ai', aiRoutes);
 router.use('/intelligence', intelligenceRoutes);
 router.use('/gifts', giftRoutes);
 router.use('/lessons', lessonRoutes);
+router.use('/activity-tracker', activityTrackerRoutes);
 
 module.exports = router;

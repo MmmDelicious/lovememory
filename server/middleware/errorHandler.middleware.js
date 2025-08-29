@@ -1,7 +1,7 @@
 function errorHandler(err, req, res, next) {
-    console.error('!!! Произошла ошибка:', err.message);
+    console.error('Error occurred:', err.message);
     const statusCode = err.statusCode || 500;
-    const message = err.message || 'Произошла непредвиденная ошибка на сервере.';
+    const message = err.message || 'An unexpected error occurred on the server.';
     res.status(statusCode).json({
       status: 'error',
       statusCode,

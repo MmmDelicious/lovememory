@@ -35,4 +35,3 @@ export function moveMediaToEvent(mediaId: string | number, targetEventId: string
   return api.put(`/media/${mediaId}/move`, { targetEventId });
 }
 
-

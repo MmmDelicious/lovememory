@@ -1,21 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const lessonService = require('../services/lesson.service');
-const authenticate = require('../middleware/auth.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
 const { Op } = require('sequelize');
-
-// Middleware для аутентификации на всех routes
-router.use(authenticate);
 
 /**
  * GET /api/lessons/daily
- * Получить урок дня для текущего пользователя
+ * Get today's lesson for current user
  */
-router.get('/daily', async (req, res) => {
+router.get('/daily', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Сброс streak если нужно
+    // Reset streak if needed
     await lessonService.resetStreakIfNeeded(userId);
     
     const dailyLesson = await lessonService.getTodaysLesson(userId);
@@ -35,9 +32,9 @@ router.get('/daily', async (req, res) => {
 
 /**
  * POST /api/lessons/:lessonId/complete
- * Отметить урок как выполненный
+ * Mark lesson as completed
  */
-router.post('/:lessonId/complete', async (req, res) => {
+router.post('/:lessonId/complete', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     const { lessonId } = req.params;
@@ -58,7 +55,7 @@ router.post('/:lessonId/complete', async (req, res) => {
         coinsEarned: result.progress.coins_earned,
         streakBonus: result.progress.streak_bonus
       },
-      message: `Урок выполнен! Получено ${result.totalReward} монет.`
+      message: `Lesson completed! Got ${result.totalReward} coins.`
     });
   } catch (error) {
     console.error('Error completing lesson:', error);
@@ -71,13 +68,13 @@ router.post('/:lessonId/complete', async (req, res) => {
 
 /**
  * GET /api/lessons/progress
- * Получить прогресс по урокам (для пар или одиночных пользователей)
+ * Get lesson progress (for pairs or single users)
  */
-router.get('/progress', async (req, res) => {
+router.get('/progress', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id;
     
-    // Сначала ищем партнера через существующую модель Pair
+    // First look for partner through existing Pair model
     const { Pair } = require('../models');
     const pair = await Pair.findOne({
       where: {
@@ -90,7 +87,7 @@ router.get('/progress', async (req, res) => {
     });
     
     if (pair) {
-      // Если есть партнер - возвращаем прогресс пары
+      // If there's a partner - return pair progress
       const partnerId = pair.user1Id === userId ? pair.user2Id : pair.user1Id;
       const progress = await lessonService.getPairProgress(userId, partnerId);
       
@@ -99,7 +96,7 @@ router.get('/progress', async (req, res) => {
         data: progress
       });
     } else {
-      // Если нет партнера - возвращаем персональный прогресс
+      // If no partner - return personal progress
       const progress = await lessonService.getSingleUserProgress(userId);
       
       res.json({
@@ -118,7 +115,7 @@ router.get('/progress', async (req, res) => {
 
 /**
  * GET /api/lessons/history
- * Получить историю выполненных уроков
+ * Get completed lessons history
  */
 router.get('/history', async (req, res) => {
   try {
@@ -168,7 +165,7 @@ router.get('/history', async (req, res) => {
 
 /**
  * GET /api/lessons/stats
- * Получить статистику пользователя по урокам
+ * Get user lesson statistics
  */
 router.get('/stats', async (req, res) => {
   try {
@@ -178,7 +175,7 @@ router.get('/stats', async (req, res) => {
     const stats = await UserLessonProgress.getCompletionStats(userId);
     const streak = await lessonService.getUserLessonStreak(userId);
     
-    // Статистика по последним 7 дням
+    // Statistics for last 7 days
     const weeklyProgress = await UserLessonProgress.getWeeklyProgress(userId, 0);
     
     res.json({
@@ -201,7 +198,7 @@ router.get('/stats', async (req, res) => {
 
 /**
  * GET /api/lessons/themes
- * Получить прогресс по темам уроков
+ * Get lesson themes progress
  */
 router.get('/themes', async (req, res) => {
   try {
@@ -238,7 +235,7 @@ router.get('/themes', async (req, res) => {
 
 /**
  * POST /api/lessons/relationship/metrics
- * Обновить метрики отношений (для настройки алгоритма)
+ * Update relationship metrics (for algorithm tuning)
  */
 router.post('/relationship/metrics', async (req, res) => {
   try {
@@ -250,7 +247,7 @@ router.post('/relationship/metrics', async (req, res) => {
       relationship_stage 
     } = req.body;
     
-    // Найти партнера
+    // Find partner
     const { Pair } = require('../models');
     const pair = await Pair.findOne({
       where: {
@@ -272,7 +269,7 @@ router.post('/relationship/metrics', async (req, res) => {
     const partnerId = pair.user1Id === userId ? pair.user2Id : pair.user1Id;
     const relationshipMetrics = await lessonService.getOrCreateRelationshipMetrics(userId, partnerId);
     
-    // Обновляем метрики
+    // Update metrics
     const updateData = {};
     if (love_language_primary) updateData.love_language_primary = love_language_primary;
     if (love_language_secondary) updateData.love_language_secondary = love_language_secondary;
@@ -284,7 +281,7 @@ router.post('/relationship/metrics', async (req, res) => {
     res.json({
       success: true,
       data: relationshipMetrics,
-      message: 'Метрики отношений обновлены'
+      message: 'Relationship metrics updated'
     });
   } catch (error) {
     console.error('Error updating relationship metrics:', error);
@@ -297,14 +294,14 @@ router.post('/relationship/metrics', async (req, res) => {
 
 /**
  * GET /api/lessons/weekly
- * Получить уроки недели для пары
+ * Get weekly lessons for pair
  */
 router.get('/weekly', async (req, res) => {
   try {
     const userId = req.user.id;
     const { weekOffset = 0 } = req.query;
     
-    // Найти партнера
+    // Find partner
     const { Pair } = require('../models');
     const pair = await Pair.findOne({
       where: {

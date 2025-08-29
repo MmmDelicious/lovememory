@@ -427,16 +427,6 @@
   box-shadow: 0 12px 32px rgba(217, 122, 108, 0.4);
 }
 
-.boardPlaceholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 50vh;
-  font-size: 18px;
-  color: #6b7280;
-  text-align: center;
-}
-
 /* Стили для состояния ожидания */
 .wordleContainer.waiting {
   opacity: 0.7;

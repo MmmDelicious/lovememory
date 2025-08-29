@@ -1,12 +1,10 @@
 const { Router } = require('express');
 const { moveMediaToEvent } = require('../controllers/event.controller');
-const authMiddleware = require('../middleware/auth.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
 
 const router = Router();
 
-router.use(authMiddleware);
-
-// Маршрут для перемещения медиа между событиями
-router.put('/:mediaId/move', moveMediaToEvent);
+// Route for moving media between events
+router.put('/:mediaId/move', authenticateToken, moveMediaToEvent);
 
 module.exports = router; 

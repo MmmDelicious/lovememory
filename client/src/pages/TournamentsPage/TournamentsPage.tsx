@@ -51,7 +51,7 @@ export const TournamentsPage: React.FC = () => {
       });
     } catch (error) {
       console.error('Error loading tournament stats:', error);
-      // Используем тестовые данные при ошибке
+  
       setTournamentStats({
         totalTournaments: 12,
         activeTournaments: 5,

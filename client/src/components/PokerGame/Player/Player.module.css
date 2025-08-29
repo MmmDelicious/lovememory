@@ -127,3 +127,39 @@
             transform: translateY(0) scale(1);
         }
     }
+
+    .waitingStatus {
+        font-size: 11px;
+        color: #8b7355;
+        font-weight: 500;
+        margin-top: 2px;
+        text-align: center;
+    }
+
+    .seatTakenIndicator {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        color: white;
+        padding: 2px 8px;
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 600;
+        white-space: nowrap;
+        z-index: 4;
+        border: 1px solid #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .waitingBuyIn {
+        opacity: 0.7;
+    }
+
+    .waitingBuyIn .playerInfo {
+        background-color: #d4c0a1;
+    }
+
+    .hasBoughtIn {
+        opacity: 1;
+    }

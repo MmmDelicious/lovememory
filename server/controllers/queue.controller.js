@@ -56,8 +56,6 @@ const addAnalysisJob = async (req, res, next) => {
       source: 'manual_api'
     });
 
-    console.log(`📊 Added analysis job ${job.id} for user ${userId}`);
-
     res.json({
       success: true,
       data: {
@@ -99,8 +97,6 @@ const addInsightJob = async (req, res, next) => {
       delay: delay || 5000, // 5 секунд по умолчанию
       source: 'manual_api'
     });
-
-    console.log(`💡 Added insight job ${job.id} for user ${userId}, event ${eventId}`);
 
     res.json({
       success: true,
@@ -161,8 +157,6 @@ const manageQueue = async (req, res, next) => {
         break;
     }
 
-    console.log(`🎛️ Queue action: ${action} on ${queueName}`);
-
     res.json({
       success: true,
       data: {
@@ -203,8 +197,6 @@ const clearAllQueues = async (req, res, next) => {
       queueService.clearQueue('maintenance', 'completed'),
       queueService.clearQueue('maintenance', 'failed')
     ]);
-
-    console.log('🧹 All queues cleared (development mode)');
 
     res.json({
       success: true,
@@ -285,11 +277,9 @@ const triggerAnalysisOnEvent = async (userId, eventId) => {
     });
 
     // Тихо логируем успех только если нужно
-    // console.log(`🎯 Auto-triggered analysis (${analysisJob.id}) and insight (${insightJob.id}) for user ${userId}`);
 
   } catch (error) {
     // Тихо пропускаем ошибки - автоанализ не должен ломать основной flow
-    // console.error('Error triggering auto-analysis:', error);
   }
 };
 

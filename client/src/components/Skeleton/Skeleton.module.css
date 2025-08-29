@@ -31,19 +31,9 @@
   height: 40px;
 }
 
-.card {
-  height: 200px;
-  border-radius: 12px;
-  margin-bottom: 0;
-}
-
 .rectangular {
   border-radius: 8px;
   margin-bottom: 0;
-}
-
-.rounded {
-  border-radius: 20px;
 }
 
 /* Complex skeleton layouts */

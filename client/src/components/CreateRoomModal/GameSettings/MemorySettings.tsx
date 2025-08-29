@@ -17,7 +17,7 @@ const MemorySettings: React.FC<GameSettingsProps> = ({
       difficulty,
       gameFormat: 'memory'
     });
-  }, [maxPlayers, fieldSize, difficulty, onSettingsChange]);
+  }, [maxPlayers, fieldSize, difficulty]);
 
   const getDifficultyLabel = (diff: string) => {
     switch (diff) {

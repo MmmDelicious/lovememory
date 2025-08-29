@@ -1,69 +1,66 @@
 const express = require('express');
 const router = express.Router();
 const tournamentController = require('../controllers/tournament.controller');
-const authMiddleware = require('../middleware/auth.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
 
-// Применяем аутентификацию ко всем маршрутам
-router.use(authMiddleware);
+// GET /tournaments - get all tournaments with filters
+router.get('/', authenticateToken, tournamentController.getTournaments);
 
-// GET /tournaments - получить все турниры с фильтрами
-router.get('/', tournamentController.getTournaments);
+// GET /tournaments/active - get active tournaments
+router.get('/active', authenticateToken, tournamentController.getActiveTournaments);
 
-// GET /tournaments/active - получить активные турниры
-router.get('/active', tournamentController.getActiveTournaments);
+// GET /tournaments/my - get user tournaments (created)
+router.get('/my', authenticateToken, tournamentController.getMyTournaments);
 
-// GET /tournaments/my - получить турниры пользователя (созданные)
-router.get('/my', tournamentController.getMyTournaments);
+// GET /tournaments/participations - get tournament participations
+router.get('/participations', authenticateToken, tournamentController.getMyParticipations);
 
-// GET /tournaments/participations - получить участие в турнирах
-router.get('/participations', tournamentController.getMyParticipations);
+// POST /tournaments - create tournament
+router.post('/', authenticateToken, tournamentController.createTournament);
 
-// POST /tournaments - создать турнир
-router.post('/', tournamentController.createTournament);
+// GET /tournaments/:id - get tournament by ID
+router.get('/:id', authenticateToken, tournamentController.getTournamentById);
 
-// GET /tournaments/:id - получить турнир по ID
-router.get('/:id', tournamentController.getTournamentById);
+// PUT /tournaments/:id - update tournament
+router.put('/:id', authenticateToken, tournamentController.updateTournament);
 
-// PUT /tournaments/:id - обновить турнир
-router.put('/:id', tournamentController.updateTournament);
+// POST /tournaments/:id/register - register for tournament
+router.post('/:id/register', authenticateToken, tournamentController.registerForTournament);
 
-// POST /tournaments/:id/register - зарегистрироваться в турнире
-router.post('/:id/register', tournamentController.registerForTournament);
+// DELETE /tournaments/:id/register - cancel registration
+router.delete('/:id/register', authenticateToken, tournamentController.unregisterFromTournament);
 
-// DELETE /tournaments/:id/register - отменить регистрацию
-router.delete('/:id/register', tournamentController.unregisterFromTournament);
+// POST /tournaments/:id/start - start tournament
+router.post('/:id/start', authenticateToken, tournamentController.startTournament);
 
-// POST /tournaments/:id/start - запустить турнир
-router.post('/:id/start', tournamentController.startTournament);
+// POST /tournaments/:id/complete - complete tournament
+router.post('/:id/complete', authenticateToken, tournamentController.completeTournament);
 
-// POST /tournaments/:id/complete - завершить турнир
-router.post('/:id/complete', tournamentController.completeTournament);
+// POST /tournaments/:id/cancel - cancel tournament
+router.post('/:id/cancel', authenticateToken, tournamentController.cancelTournament);
 
-// POST /tournaments/:id/cancel - отменить турнир
-router.post('/:id/cancel', tournamentController.cancelTournament);
+// GET /tournaments/:id/participants - get participants
+router.get('/:id/participants', authenticateToken, tournamentController.getTournamentParticipants);
 
-// GET /tournaments/:id/participants - получить участников
-router.get('/:id/participants', tournamentController.getTournamentParticipants);
+// GET /tournaments/:id/stats - get tournament stats
+router.get('/:id/stats', authenticateToken, tournamentController.getTournamentStats);
 
-// GET /tournaments/:id/stats - получить статистику турнира
-router.get('/:id/stats', tournamentController.getTournamentStats);
+// GET /tournaments/:id/lobby - get tournament lobby (status)
+router.get('/:id/lobby', authenticateToken, tournamentController.getTournamentLobby);
 
-// GET /tournaments/:id/lobby - получить лобби турнира (состояние)
-router.get('/:id/lobby', tournamentController.getTournamentLobby);
+// GET /tournaments/:id/matches - get tournament matches
+router.get('/:id/matches', authenticateToken, tournamentController.getTournamentMatches);
 
-// GET /tournaments/:id/matches - получить матчи турнира
-router.get('/:id/matches', tournamentController.getTournamentMatches);
+// GET /tournaments/:id/matches/:matchId - get match by ID
+router.get('/:id/matches/:matchId', authenticateToken, tournamentController.getMatchById);
 
-// GET /tournaments/:id/matches/:matchId - получить матч по ID
-router.get('/:id/matches/:matchId', tournamentController.getMatchById);
+// POST /tournaments/:id/matches/:matchId/ready - participant ready for match
+router.post('/:id/matches/:matchId/ready', authenticateToken, tournamentController.setMatchReady);
 
-// POST /tournaments/:id/matches/:matchId/ready - участник готов к матчу
-router.post('/:id/matches/:matchId/ready', tournamentController.setMatchReady);
+// POST /tournaments/:id/matches/:matchId/start - start match
+router.post('/:id/matches/:matchId/start', authenticateToken, tournamentController.startMatch);
 
-// POST /tournaments/:id/matches/:matchId/start - начать матч
-router.post('/:id/matches/:matchId/start', tournamentController.startMatch);
-
-// POST /tournaments/:id/matches/:matchId/complete - завершить матч
-router.post('/:id/matches/:matchId/complete', tournamentController.completeMatch);
+// POST /tournaments/:id/matches/:matchId/complete - complete match
+router.post('/:id/matches/:matchId/complete', authenticateToken, tournamentController.completeMatch);
 
 module.exports = router;

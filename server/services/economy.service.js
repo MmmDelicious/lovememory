@@ -84,8 +84,6 @@ class EconomyService {
       await user.save({ transaction });
 
       await transaction.commit();
-      console.log(`[ECONOMY] Зарезервирована ставка ${betAmount} монет для игрока ${userId} в комнате ${roomId}`);
-      
       return { 
         success: true, 
         newBalance: user.coins 
@@ -116,8 +114,6 @@ class EconomyService {
       await user.save({ transaction });
 
       await transaction.commit();
-      console.log(`[ECONOMY] Возвращена ставка ${betAmount} монет игроку ${userId}`);
-      
       return { 
         success: true, 
         newBalance: user.coins 
@@ -170,8 +166,7 @@ class EconomyService {
             };
           }
         }
-        console.log(`[ECONOMY] Ничья в комнате ${roomId}, ставки возвращены всем игрокам`);
-      } else if (winnerId) {
+        } else if (winnerId) {
         // Победитель получает всю сумму
         const winner = await User.findByPk(winnerId, { transaction });
         if (!winner) {
@@ -202,8 +197,7 @@ class EconomyService {
           }
         }
 
-        console.log(`[ECONOMY] Игра ${roomId} завершена. Победитель ${winnerId} получил ${totalPrize} монет`);
-      }
+        }
 
       // Обновляем статус комнаты
       room.status = 'finished';
@@ -243,7 +237,6 @@ class EconomyService {
           return await this.finalizeStandardGame(roomId, winnerId, allPlayers, false);
         } else if (remainingPlayerIds.length > 1) {
           // Остается несколько игроков - игра продолжается
-          console.log(`[ECONOMY] Игрок ${leavingPlayerId} покинул игру ${roomId}, игра продолжается`);
           return { 
             success: true, 
             results: { 
@@ -255,7 +248,6 @@ class EconomyService {
         }
       } else if (economyType === GAME_TYPES.POKER) {
         // Для покера обрабатывается в PokerGame
-        console.log(`[ECONOMY] Игрок ${leavingPlayerId} покинул покер ${roomId}`);
         return { success: true, results: { gameType: 'poker', handled: 'by_poker_game' } };
       }
 
@@ -299,7 +291,6 @@ class EconomyService {
       await room.save({ transaction });
 
       await transaction.commit();
-      console.log(`[ECONOMY] Игра ${roomId} отменена, ставки возвращены`);
       return { success: true };
     } catch (error) {
       await transaction.rollback();
@@ -339,6 +330,17 @@ class EconomyService {
   async pokerBuyIn(userId, buyInAmount) {
     const transaction = await sequelize.transaction();
     try {
+      // Дополнительная валидация для покера
+      if (buyInAmount < 10) {
+        await transaction.rollback();
+        return { success: false, reason: 'Минимальный buy-in: 10 монет' };
+      }
+      
+      if (buyInAmount > 10000) {
+        await transaction.rollback();
+        return { success: false, reason: 'Максимальный buy-in: 10,000 монет' };
+      }
+
       // Проверяем возможность buy-in
       const canBet = await this.canPlayerBet(userId, buyInAmount);
       if (!canBet.canBet) {
@@ -348,19 +350,22 @@ class EconomyService {
 
       // Списываем монеты
       const user = await User.findByPk(userId, { transaction });
+      if (!user) {
+        await transaction.rollback();
+        return { success: false, reason: 'Пользователь не найден' };
+      }
+      
       user.coins -= buyInAmount;
       await user.save({ transaction });
 
       await transaction.commit();
-      console.log(`[POKER] Buy-in ${buyInAmount} монет для игрока ${userId}`);
-      
       return { 
         success: true, 
         newBalance: user.coins 
       };
     } catch (error) {
       await transaction.rollback();
-      console.error('Ошибка покерного buy-in:', error);
+      console.error('[ECONOMY] Ошибка покерного buy-in:', error);
       return { success: false, reason: 'Ошибка обработки buy-in' };
     }
   }
@@ -374,9 +379,14 @@ class EconomyService {
   async pokerCashOut(userId, cashOutAmount) {
     const transaction = await sequelize.transaction();
     try {
-      if (cashOutAmount <= 0) {
+      if (cashOutAmount < 0) {
         await transaction.rollback();
         return { success: false, reason: 'Некорректная сумма для возврата' };
+      }
+      
+      // Если сумма 0, это валидная операция (игрок потерял все деньги)
+      if (cashOutAmount === 0) {
+        return { success: true, newBalance: 0 };
       }
 
       const user = await User.findByPk(userId, { transaction });
@@ -389,15 +399,13 @@ class EconomyService {
       await user.save({ transaction });
 
       await transaction.commit();
-      console.log(`[POKER] Cash-out ${cashOutAmount} монет игроку ${userId}`);
-      
       return { 
         success: true, 
         newBalance: user.coins 
       };
     } catch (error) {
       await transaction.rollback();
-      console.error('Ошибка покерного cash-out:', error);
+      console.error('[ECONOMY] Ошибка покерного cash-out:', error);
       return { success: false, reason: 'Ошибка возврата средств' };
     }
   }
@@ -411,6 +419,17 @@ class EconomyService {
   async pokerRebuy(userId, rebuyAmount) {
     const transaction = await sequelize.transaction();
     try {
+      // Дополнительная валидация для rebuy
+      if (rebuyAmount < 10) {
+        await transaction.rollback();
+        return { success: false, reason: 'Минимальный rebuy: 10 монет' };
+      }
+      
+      if (rebuyAmount > 5000) {
+        await transaction.rollback();
+        return { success: false, reason: 'Максимальный rebuy: 5,000 монет' };
+      }
+
       // Проверяем возможность rebuy
       const canBet = await this.canPlayerBet(userId, rebuyAmount);
       if (!canBet.canBet) {
@@ -420,19 +439,22 @@ class EconomyService {
 
       // Списываем монеты
       const user = await User.findByPk(userId, { transaction });
+      if (!user) {
+        await transaction.rollback();
+        return { success: false, reason: 'Пользователь не найден' };
+      }
+      
       user.coins -= rebuyAmount;
       await user.save({ transaction });
 
       await transaction.commit();
-      console.log(`[POKER] Rebuy ${rebuyAmount} монет для игрока ${userId}`);
-      
       return { 
         success: true, 
         newBalance: user.coins 
       };
     } catch (error) {
       await transaction.rollback();
-      console.error('Ошибка покерного rebuy:', error);
+      console.error('[ECONOMY] Ошибка покерного rebuy:', error);
       return { success: false, reason: 'Ошибка обработки rebuy' };
     }
   }

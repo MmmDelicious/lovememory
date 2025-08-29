@@ -69,7 +69,7 @@ const TournamentList: React.FC<TournamentListProps> = ({
       
       const response = await tournamentService.getTournaments(filters);
       
-      // Получаем дополнительные данные для каждого турнира
+
       const tournamentsWithData = await Promise.all(
         response.data.map(async (tournament: Tournament) => {
           try {
@@ -88,7 +88,7 @@ const TournamentList: React.FC<TournamentListProps> = ({
               userRegistered
             };
           } catch (err) {
-            // Если не удалось получить доп. данные, возвращаем базовый турнир
+
             return tournament;
           }
         })
@@ -96,7 +96,7 @@ const TournamentList: React.FC<TournamentListProps> = ({
       
       setTournaments(tournamentsWithData);
       
-      // Обновляем общую статистику
+
       setTotalStats({
         total: tournamentsWithData.length,
         active: tournamentsWithData.filter(t => t.status === 'active').length,
@@ -119,7 +119,6 @@ const TournamentList: React.FC<TournamentListProps> = ({
       setActionLoading(tournamentId);
       await tournamentService.registerForTournament(tournamentId);
       
-      // Обновляем локальное состояние
       setTournaments(prev => 
         prev.map(t => 
           t.id === tournamentId 
@@ -143,7 +142,6 @@ const TournamentList: React.FC<TournamentListProps> = ({
       setActionLoading(tournamentId);
       await tournamentService.unregisterFromTournament(tournamentId);
       
-      // Обновляем локальное состояние
       setTournaments(prev => 
         prev.map(t => 
           t.id === tournamentId 
@@ -192,7 +190,7 @@ const TournamentList: React.FC<TournamentListProps> = ({
 
   return (
     <div className={styles.tournamentList}>
-      {/* Заголовок и статистика */}
+
       <div className={styles.header}>
         <div className={styles.titleSection}>
           <h2>{title}</h2>

@@ -17,15 +17,13 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { loginUser } = useAuthActions();
-  const user = useUser(); // Получаем пользователя из Redux
+  const user = useUser();
   const navigate = useNavigate();
   const location = useLocation();
   const { mascotMessage, handleAvatarClick, handleInteraction, triggerError } = useInteractiveMascot(mascotConfig);
   
   React.useEffect(() => {
-    // Если пользователь уже авторизован, перенаправляем на dashboard
     if (user) {
-      console.log('✅ Пользователь уже авторизован, перенаправляем на dashboard');
       navigate('/dashboard');
     }
   }, [user, navigate]);
@@ -42,24 +40,14 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     if (!email || !password) return triggerError('Нужен и email, и пароль.');
     
-    console.log('🚀 Попытка входа с:', { email, password });
-    
     try {
       await loginUser({ email, password });
-      console.log('✅ Вход выполнен, пользователь в Redux:', user);
       
-      // Проверяем, что токен сохранился
-      const savedToken = localStorage.getItem('authToken');
-      console.log('💾 Токен в localStorage:', savedToken ? 'Сохранен' : 'НЕ сохранен');
-      
-      // Даем время Redux обновиться, затем перенаправляем
       setTimeout(() => {
-        console.log('🔄 Перенаправляем на dashboard после обновления Redux');
         navigate('/dashboard');
       }, 100);
       
     } catch (err: any) {
-      console.error('❌ Ошибка входа:', err);
       triggerError(err.response?.data?.message || 'Неверный email или пароль.');
     }
   };

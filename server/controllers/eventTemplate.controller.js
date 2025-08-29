@@ -55,7 +55,7 @@ exports.searchTemplates = async (req, res, next) => {
   try {
     const { q } = req.query;
     if (!q || q.trim() === '') {
-      return res.status(400).json({ error: 'Поисковый запрос не может быть пустым' });
+      return res.status(400).json({ error: 'Search query cannot be empty' });
     }
     const templates = await eventTemplateService.searchTemplates(req.user.id, q.trim());
     res.status(200).json(templates);
@@ -68,7 +68,7 @@ exports.duplicateTemplate = async (req, res, next) => {
     const { id } = req.params;
     const { name } = req.body;
     if (!name || name.trim() === '') {
-      return res.status(400).json({ error: 'Название для копии шаблона обязательно' });
+      return res.status(400).json({ error: 'Template copy name is required' });
     }
     const duplicatedTemplate = await eventTemplateService.duplicateTemplate(id, req.user.id, name);
     res.status(201).json(duplicatedTemplate);

@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import userService from '../../services/user.service';
+import { loginUser, registerUser, updateUser } from './authSlice';
 
 export interface CurrencySliceState {
   coins: number;
@@ -68,6 +69,28 @@ const currencySlice = createSlice({
       .addCase(refreshCoins.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      // Синхронизация с authSlice
+      .addCase(loginUser.fulfilled, (state, action) => {
+        if (action.payload.coins !== undefined) {
+          state.coins = action.payload.coins;
+        }
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        if (action.payload.coins !== undefined) {
+          state.coins = action.payload.coins;
+        }
+      })
+      .addCase(updateUser, (state, action) => {
+        if (action.payload.coins !== undefined) {
+          state.coins = action.payload.coins;
+        }
+      })
+      // Сброс при выходе
+      .addCase('auth/logout', (state) => {
+        state.coins = 0;
+        state.error = null;
+        state.isLoading = false;
       });
   },
 });

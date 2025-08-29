@@ -1,19 +1,16 @@
 const { Router } = require('express');
 const gameController = require('../controllers/game.controller');
-const authMiddleware = require('../middleware/auth.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
 
 const router = Router();
 
-// Защищаем все игровые маршруты
-router.use(authMiddleware);
+// GET /api/games -> to get list of rooms
+router.get('/', authenticateToken, gameController.getRooms);
 
-// GET /api/games -> для получения списка комнат
-router.get('/', gameController.getRooms);
+// POST /api/games/room -> to create room
+router.post('/room', authenticateToken, gameController.createRoom);
 
-// POST /api/games/room -> для создания комнаты
-router.post('/room', gameController.createRoom);
-
-// POST /api/games/valid-moves -> для получения возможных ходов в шахматах
-router.post('/valid-moves', gameController.getValidMoves);
+// POST /api/games/valid-moves -> to get valid moves in chess
+router.post('/valid-moves', authenticateToken, gameController.getValidMoves);
 
 module.exports = router;

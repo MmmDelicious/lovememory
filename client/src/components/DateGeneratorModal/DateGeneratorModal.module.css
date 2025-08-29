@@ -441,30 +441,6 @@
   }
 }
 
-.headerButtons {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-}
-
-.debugButton {
-  background: #6c757d;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.debugButton:hover {
-  background: #5a6268;
-}
-
 .noOptionsMessage {
   text-align: center;
   padding: var(--space-6);

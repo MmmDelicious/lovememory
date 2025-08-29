@@ -7,7 +7,7 @@ interface UserData {
   email: string;
   avatarUrl?: string;
   gender?: 'male' | 'female' | 'other';
-  partner?: any; // Добавляем информацию о паре
+  partner?: any;
 }
 interface UserDropdownProps {
   user: UserData;

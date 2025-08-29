@@ -43,36 +43,28 @@ class AnalyticsService {
     const week = 7 * 24 * 60 * 60 * 1000;
     const month = 30 * 24 * 60 * 60 * 1000;
     
-    // Получаем активности если не переданы
+
     if (!activities) {
       activities = await this.fetchUserActivities(user?.id, 30);
     }
     
-    // Фильтруем события по периодам
     const eventsLastWeek = this.filterEventsByPeriod(events, week);
     const eventsLastMonth = this.filterEventsByPeriod(events, month);
     const sharedEvents = events.filter(e => e.isShared);
     
-    // Фильтруем активности по периодам
     const activitiesLastWeek = this.filterActivitiesByPeriod(activities, week);
     const activitiesLastMonth = this.filterActivitiesByPeriod(activities, month);
     
-    // 1. Interaction Frequency (используем реальные данные)
     const interactionFrequency = this.calculateIFFromActivities(activitiesLastWeek, stats);
     
-    // 2. Shared Moments Count (из активностей + событий)
     const sharedMomentsCount = this.calculateSharedMoments(activities, sharedEvents);
     
-    // 3. Engagement Depth (глубина вовлечения)
     const engagementDepth = this.calculateEngagementDepthFromActivities(activities, stats);
     
-    // 4. Consistency (постоянство из логинов)
     const consistency = this.calculateConsistencyFromActivities(activities, stats);
     
-    // 5. Love Language Distribution (из активностей)
     const loveLanguageDistribution = this.calculateLoveLanguagesFromActivities(activities, events, stats);
     
-    // 6. Harmony Index (обновленная формула)
     const harmonyIndex = this.calculateHarmonyIndex(stats, {
       interactionFrequency,
       sharedMomentsCount,
@@ -80,7 +72,6 @@ class AnalyticsService {
       consistency
     });
     
-    // 7. Growth indicators
     const growthSignals = this.calculateGrowthSignalsFromActivities(activities, stats, user);
     
     return {
@@ -97,7 +88,6 @@ class AnalyticsService {
         engagementDepth,
         consistency
       }),
-      // Инсайты
       insights: this.generateInsightsFromActivities(activities, stats, {
         interactionFrequency,
         sharedMomentsCount,
@@ -314,7 +304,7 @@ class AnalyticsService {
       "Постоянство": Math.round(harmonyIndex * 0.10)
     };
 
-    // Определяем топ драйверы
+
     const sortedComponents = Object.entries(components)
       .sort(([,a], [,b]) => b - a);
 

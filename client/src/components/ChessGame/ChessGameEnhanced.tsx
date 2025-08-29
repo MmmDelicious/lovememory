@@ -127,17 +127,9 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   );
 };
 interface ChessGameEnhancedProps extends Omit<GameComponentProps, 'gameState'> {
-  gameState: ChessGameState & {
-    drawOffer?: string | null;
-    isPaused?: boolean;
-    gameStatus?: 'playing' | 'check' | 'checkmate' | 'draw' | 'paused' | 'resigned';
-    capturedPieces?: {
-      white: string[];
-      black: string[];
-    };
-  };
+  gameState: ChessGameState;
 }
-const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({ 
+const ChessGame: React.FC<ChessGameEnhancedProps> = ({ 
   gameState, 
   user, 
   makeMove, 
@@ -146,19 +138,34 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
 }) => {
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
   const [validMoves, setValidMoves] = useState<string[]>([]);
-  const [whiteTime, setWhiteTime] = useState<number>(300);
-  const [blackTime, setBlackTime] = useState<number>(300);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
+  
+  const [whiteTimeLocal, setWhiteTimeLocal] = useState<number>(gameState.whiteTime || 300);
+  const [blackTimeLocal, setBlackTimeLocal] = useState<number>(gameState.blackTime || 300);
   const [showDrawModal, setShowDrawModal] = useState<boolean>(false);
   const [showResignModal, setShowResignModal] = useState<boolean>(false);
   const [lastMove, setLastMove] = useState<{from: string, to: string} | null>(null);
   const [animatingPiece, setAnimatingPiece] = useState<string | null>(null);
-  const isPlayerWhite = useMemo(() => gameState.players[0] === user.id, [gameState.players, user.id]);
+  const [showPromotionModal, setShowPromotionModal] = useState<boolean>(false);
+  const [promotionMove, setPromotionMove] = useState<{from: string, to: string} | null>(null);
+  const isPlayerWhite = useMemo(() => {
+    // В шахматах первый игрок в массиве всегда играет белыми
+    // Правильная типизация: players может быть Player[] или string[]
+    if (!gameState.players || gameState.players.length === 0) return false;
+    
+    const firstPlayer = gameState.players[0] as any;
+    const firstPlayerId = typeof firstPlayer === 'string' ? firstPlayer : firstPlayer?.id;
+    const result = firstPlayerId === user.id;
+    
+    return result;
+  }, [gameState.players, user.id]);
+  
   const playerColor = isPlayerWhite ? 'белые' : 'черные';
   const opponentColor = isPlayerWhite ? 'черные' : 'белые';
   const capturedPieces = useMemo(() => {
     return gameState.capturedPieces || { white: [], black: [] };
   }, [gameState.capturedPieces]);
+  
+  const isPaused = gameState.isPaused || false;
   const getInitialBoard = () => {
     return {
       'a8': 'r', 'b8': 'n', 'c8': 'b', 'd8': 'q', 'e8': 'k', 'f8': 'b', 'g8': 'n', 'h8': 'r',
@@ -171,18 +178,17 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
   const isWaiting = gameState.status === 'waiting';
   useEffect(() => {
     if (gameState) {
-      setWhiteTime(gameState.whiteTime || 300);
-      setBlackTime(gameState.blackTime || 300);
-      setIsPaused(gameState.isPaused || false);
+      setWhiteTimeLocal(gameState.whiteTime || 300);
+      setBlackTimeLocal(gameState.blackTime || 300);
     }
-  }, [gameState?.whiteTime, gameState?.blackTime, gameState?.isPaused]);
+  }, [gameState?.whiteTime, gameState?.blackTime]);
   useEffect(() => {
     if (gameState?.status !== 'in_progress' || isPaused) return;
     const timer = setInterval(() => {
       if (gameState.currentPlayerId === gameState.players[0]) {
-        setWhiteTime(t => Math.max(0, t - 1));
+        setWhiteTimeLocal(t => Math.max(0, t - 1));
       } else {
-        setBlackTime(t => Math.max(0, t - 1));
+        setBlackTimeLocal(t => Math.max(0, t - 1));
       }
     }, 1000);
     return () => clearInterval(timer);
@@ -199,13 +205,19 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
     }
   }, [gameState?.drawOffer, user.id]);
   const handleChessMove = useCallback((from: string, to: string) => {
-    const move = { from, to };
     const piece = gameState.board[from];
     const isPawnMove = piece?.toUpperCase() === 'P';
     const promotionRank = piece === 'P' ? '8' : '1';
+    
+
     if (isPawnMove && to[1] === promotionRank) {
-      (move as any).promotion = 'q';
+      setPromotionMove({ from, to });
+      setShowPromotionModal(true);
+      return;
     }
+    
+    // Обычный ход
+    const move = { from, to };
     setLastMove({ from, to });
     setAnimatingPiece(to);
     setTimeout(() => setAnimatingPiece(null), 300);
@@ -213,6 +225,20 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
     setSelectedSquare(null);
     setValidMoves([]);
   }, [gameState.board, makeMove]);
+  
+  const handlePromotion = useCallback((promotionPiece: 'q' | 'r' | 'b' | 'n') => {
+    if (!promotionMove) return;
+    
+    const move = { ...promotionMove, promotion: promotionPiece };
+    setLastMove(promotionMove);
+    setAnimatingPiece(promotionMove.to);
+    setTimeout(() => setAnimatingPiece(null), 300);
+    makeMove(move);
+    setSelectedSquare(null);
+    setValidMoves([]);
+    setShowPromotionModal(false);
+    setPromotionMove(null);
+  }, [promotionMove, makeMove]);
   const fetchValidMoves = useCallback(async (square: string) => {
     if (isWaiting || gameState.status !== 'in_progress') {
       setValidMoves([]);
@@ -290,6 +316,10 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
   }, [makeMove]);
   const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
   const ranks = ['8', '7', '6', '5', '4', '3', '2', '1'];
+  
+  // Правильная ориентация доски:
+  // - Белый игрок: белые фигуры снизу (1-я линия снизу) - НЕ флипать
+  // - Черный игрок: черные фигуры снизу (8-я линия снизу) - ФЛИПАТЬ
   const shouldFlipBoard = !isPlayerWhite;
   const boardRanks = shouldFlipBoard ? [...ranks].reverse() : ranks;
   const boardFiles = shouldFlipBoard ? [...files].reverse() : files;
@@ -310,14 +340,18 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
   const getPlayerName = (playerId: string, color: string): string => {
     return playerId === user.id ? `Вы (${color})` : `Соперник (${color})`;
   };
-  const currentGameStatus = gameState.gameStatus || (gameState.status === 'finished' ? 'checkmate' : 'playing');
+  const currentGameStatus = gameState.gameStatus || 
+    (gameState.isCheckmate ? 'checkmate' : 
+     gameState.isCheck ? 'check' : 
+     gameState.isDraw || gameState.isStalemate ? 'draw' : 
+     gameState.status === 'finished' ? 'checkmate' : 'playing');
   return (
     <div className={`${styles.chessGameContainer} ${isWaiting ? styles.waiting : ''}`}>
       {}
       <div className={styles.gameHeader}>
         <div className={styles.headerCenter}>
           <h2 className={styles.headerTitle}>Шахматы</h2>
-          <p className={styles.headerSubtitle}>Ход {Math.floor((gameState.moveHistory?.length || 0) / 2) + 1}</p>
+          <p className={styles.headerSubtitle}>Ход {Math.floor((gameState.moveHistorySan?.length || gameState.moveHistory?.length || 0) / 2) + 1}</p>
         </div>
         <button className={styles.pauseButton} onClick={handlePause}>
           {isPaused ? <FaPlay /> : <FaPause />}
@@ -327,7 +361,7 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
       <PlayerInfo
         name={getPlayerName(gameState.players[isPlayerWhite ? 1 : 0], opponentColor)}
         rating={1420}
-        timeLeft={isPlayerWhite ? blackTime : whiteTime}
+        timeLeft={isPlayerWhite ? blackTimeLocal : whiteTimeLocal}
         isActive={gameState.currentPlayerId === gameState.players[isPlayerWhite ? 1 : 0] && !isPaused}
         isTop={true}
         capturedPieces={isPlayerWhite ? capturedPieces.white : capturedPieces.black}
@@ -375,7 +409,7 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
       <PlayerInfo
         name={getPlayerName(gameState.players[isPlayerWhite ? 0 : 1], playerColor)}
         rating={1380}
-        timeLeft={isPlayerWhite ? whiteTime : blackTime}
+        timeLeft={isPlayerWhite ? whiteTimeLocal : blackTimeLocal}
         isActive={gameState.currentPlayerId === gameState.players[isPlayerWhite ? 0 : 1] && !isPaused}
         capturedPieces={isPlayerWhite ? capturedPieces.black : capturedPieces.white}
         isCurrentUser={true}
@@ -392,7 +426,7 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
           icon={<FaUndo />}
           label="Отменить"
           onClick={handleUndo}
-          disabled={!gameState.moveHistory?.length || gameState.status !== 'in_progress'}
+          disabled={!(gameState.moveHistorySan?.length || gameState.moveHistory?.length) || gameState.status !== 'in_progress'}
         />
         <ActionButton
           icon={<FaFlag />}
@@ -403,11 +437,11 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
         />
       </div>
       {}
-      {gameState.moveHistory && gameState.moveHistory.length > 0 && (
+              {(gameState.moveHistorySan || gameState.moveHistory) && (gameState.moveHistorySan?.length || gameState.moveHistory?.length || 0) > 0 && (
         <div className={styles.moveHistory}>
           <h4 className={styles.moveHistoryTitle}>История ходов</h4>
           <div className={styles.moveList}>
-            {gameState.moveHistory.map((move, index) => (
+            {(gameState.moveHistorySan || gameState.moveHistory || []).map((move, index) => (
               <div key={index} className={styles.moveEntry}>
                 {index % 2 === 0 && (
                   <span className={styles.moveNumber}>{Math.floor(index / 2) + 1}.</span>
@@ -430,6 +464,49 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
               </button>
               <button className={styles.modalButtonPrimary} onClick={handleAcceptDraw}>
                 Принять
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Модаль выбора фигуры при promotion */}
+      {showPromotionModal && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <h3>Выберите фигуру для превращения</h3>
+            <div className={styles.promotionOptions}>
+              <button 
+                className={styles.promotionButton} 
+                onClick={() => handlePromotion('q')}
+                title="Ферзь"
+              >
+                <FaChessQueen className={`${styles.piece} ${isPlayerWhite ? styles.whitePiece : styles.blackPiece}`} />
+                <span>Ферзь</span>
+              </button>
+              <button 
+                className={styles.promotionButton} 
+                onClick={() => handlePromotion('r')}
+                title="Ладья"
+              >
+                <FaChessRook className={`${styles.piece} ${isPlayerWhite ? styles.whitePiece : styles.blackPiece}`} />
+                <span>Ладья</span>
+              </button>
+              <button 
+                className={styles.promotionButton} 
+                onClick={() => handlePromotion('b')}
+                title="Слон"
+              >
+                <FaChessBishop className={`${styles.piece} ${isPlayerWhite ? styles.whitePiece : styles.blackPiece}`} />
+                <span>Слон</span>
+              </button>
+              <button 
+                className={styles.promotionButton} 
+                onClick={() => handlePromotion('n')}
+                title="Конь"
+              >
+                <FaChessKnight className={`${styles.piece} ${isPlayerWhite ? styles.whitePiece : styles.blackPiece}`} />
+                <span>Конь</span>
               </button>
             </div>
           </div>
@@ -471,5 +548,5 @@ const ChessGameEnhanced: React.FC<ChessGameEnhancedProps> = ({
     </div>
   );
 };
-export default ChessGameEnhanced;
+export default ChessGame;
 

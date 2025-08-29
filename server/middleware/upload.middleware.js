@@ -1,5 +1,5 @@
 const multer = require('multer');
-const path = require('path'); // <-- Добавить
+const path = require('path');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, '../uploads/'));
@@ -23,7 +23,7 @@ const fileFilter = (req, file, cb) => {
   if (allowedMimeTypes.includes(file.mimetype) && allowedExtensions.includes(fileExtension)) {
     cb(null, true);
   } else {
-    cb(new Error('Поддерживаются только изображения форматов JPEG, PNG, GIF, WebP!'), false);
+    cb(new Error('Only JPEG, PNG, GIF, WebP image formats are supported!'), false);
   }
 };
 module.exports = multer({

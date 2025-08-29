@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { authService } from '../../services';
 
 export interface User {
   id: string;
@@ -39,78 +40,55 @@ export interface AuthSliceState {
 const initialState: AuthSliceState = {
   user: null,
   isAuthenticated: false,
-  isLoading: true, // 🔥 ВАЖНО: Начинаем с загрузки!
+  isLoading: true,
   error: null,
 };
 
 // Async thunks
 export const loginUser = createAsyncThunk(
   'auth/login',
-  async (credentials: LoginCredentials, { rejectWithValue }) => {
+  async (credentials: LoginCredentials, { rejectWithValue, dispatch }) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
-      });
+      const data = await authService.login(credentials.email, credentials.password);
       
-      console.log('🌐 Login API response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.log('❌ Login API error:', errorData);
-        return rejectWithValue(errorData.message || 'Ошибка входа');
-      }
-      
-      const data = await response.json();
-      console.log('✅ Login API response data:', data);
-      console.log('🔑 Token from response:', data.token ? 'Есть' : 'НЕТ');
-      console.log('👤 User from response:', data.user ? 'Есть' : 'НЕТ');
-      
-      // Возвращаем данные пользователя с токеном
-      const result = {
+      const userData = {
         ...data.user,
         token: data.token
       };
+
+      // Обновляем монеты в currencySlice
+      if (userData.coins !== undefined) {
+        const { setCoins } = await import('./currencySlice');
+        dispatch(setCoins(userData.coins));
+      }
       
-      console.log('📤 Returning to Redux:', { 
-        id: result.id, 
-        email: result.email, 
-        hasToken: !!result.token 
-      });
-      
-      return result;
+      return userData;
     } catch (error: any) {
-      console.error('💥 Login fetch error:', error);
-      return rejectWithValue(error.message || 'Ошибка входа');
+      return rejectWithValue(error.response?.data?.message || error.message || 'Ошибка входа');
     }
   }
 );
 
 export const registerUser = createAsyncThunk(
   'auth/register',
-  async (credentials: RegisterCredentials, { rejectWithValue }) => {
+  async (credentials: RegisterCredentials, { rejectWithValue, dispatch }) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
-      });
+      const data = await authService.register(credentials);
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        return rejectWithValue(errorData.message || 'Ошибка регистрации');
-      }
-      
-      const data = await response.json();
-      
-      // Возвращаем данные пользователя с токеном
-      return {
+      const userData = {
         ...data.user,
         token: data.token
       };
+
+      // Обновляем монеты в currencySlice
+      if (userData.coins !== undefined) {
+        const { setCoins } = await import('./currencySlice');
+        dispatch(setCoins(userData.coins));
+      }
+      
+      return userData;
     } catch (error: any) {
-      return rejectWithValue(error.message || 'Ошибка регистрации');
+      return rejectWithValue(error.response?.data?.message || error.message || 'Ошибка регистрации');
     }
   }
 );
@@ -141,13 +119,19 @@ const authSlice = createSlice({
         state.user = { ...state.user, ...action.payload };
       }
     },
-    logout: (state) => {
+    // Новый редьюсер для синхронизации монет
+    syncCoinsWithCurrency: (state, action: PayloadAction<number>) => {
+      if (state.user) {
+        state.user.coins = action.payload;
+      }
+    },
+          logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;
       
-      // Удаляем токен из localStorage
       localStorage.removeItem('authToken');
+      document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     },
   },
   extraReducers: (builder) => {
@@ -157,20 +141,13 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log('🔄 Redux: loginUser.fulfilled action.payload:', action.payload);
-        console.log('🔑 Redux: action.payload.token:', action.payload.token ? 'Есть' : 'НЕТ');
-        
         state.isLoading = false;
         state.user = action.payload;
         state.isAuthenticated = true;
         state.error = null;
         
-        // Сохраняем токен в localStorage
         if (action.payload.token) {
-          console.log('💾 Redux: Сохраняем токен в localStorage');
           localStorage.setItem('authToken', action.payload.token);
-        } else {
-          console.log('❌ Redux: Токен НЕ найден в action.payload!');
         }
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -187,7 +164,6 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.error = null;
         
-        // Сохраняем токен в localStorage
         if (action.payload.token) {
           localStorage.setItem('authToken', action.payload.token);
         }
@@ -205,7 +181,8 @@ export const {
   setLoading, 
   setError, 
   updateUser, 
-  logout 
+  logout,
+  syncCoinsWithCurrency 
 } = authSlice.actions;
 
 export default authSlice.reducer;

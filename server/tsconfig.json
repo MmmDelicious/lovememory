@@ -5,11 +5,11 @@
     "module": "CommonJS",
     "moduleResolution": "node",
     "rootDir": "./",
-    "outDir": "./dist",
+    "outDir": "./compiled",
     "allowJs": true,
     "checkJs": false,
-    "declaration": true,
-    "declarationMap": true,
+    "declaration": false,
+    "declarationMap": false,
     "sourceMap": true,
     "strict": true,
     "noImplicitAny": true,
@@ -17,7 +17,7 @@
     "strictFunctionTypes": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true,
+    "noImplicitOverride": false,
     "exactOptionalPropertyTypes": false,
     "noPropertyAccessFromIndexSignature": false,
     "noUncheckedIndexedAccess": false,
@@ -39,13 +39,13 @@
     }
   },
   "include": [
-    "**/*.ts",
-    "**/*.js",
-    "types/**/*"
+    "gameLogic/**/*.ts",
+    "types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
+    "compiled",
     "logs",
     "uploads",
     "backups",

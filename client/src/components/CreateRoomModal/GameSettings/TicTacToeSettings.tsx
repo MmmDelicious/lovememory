@@ -14,7 +14,7 @@ const TicTacToeSettings: React.FC<GameSettingsProps> = ({
       timeLimit,
       gameFormat: '1v1'
     });
-  }, [timeLimit, onSettingsChange]);
+  }, [timeLimit]);
 
   return (
     <div>

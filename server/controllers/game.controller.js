@@ -1,5 +1,5 @@
 const gameService = require('../services/game.service');
-const GameManager = require('../gameLogic/GameManager');
+const GameManager = require('../compiled/gameLogic/GameManagerNew');
 const activityService = require('../services/activity.service');
 class GameController {
   async getRooms(req, res, next) {
@@ -36,19 +36,16 @@ class GameController {
       if (game.status !== 'in_progress') {
         return res.status(400).json({ error: 'Game not in progress' });
       }
-      if (game.getCurrentPlayerId() !== req.user.id) {
+      if (game.currentPlayerId !== req.user.id) {
         return res.status(400).json({ error: 'Not your turn' });
       }
-      const piece = game.game ? game.game.get(square) : null;
-      if (!piece) {
-        return res.status(400).json({ error: 'No piece at square' });
-      }
-      const playerIndex = game.players.indexOf(req.user.id);
-      const playerColor = playerIndex === 0 ? 'w' : 'b';
-      if (piece.color !== playerColor) {
-        return res.status(400).json({ error: 'Cannot move opponent\'s piece' });
-      }
-      const validMoves = game.getValidMoves(square);
+      // Для нового ChessGameNew проверяем валидность хода через getValidMovesFromSquare
+      // Если вернет пустой массив - значит нет валидных ходов с этой клетки
+      // Используем метод getValidMovesFromSquare для получения валидных ходов с конкретной клетки
+      const validMoves = game.getValidMovesFromSquare ? 
+        game.getValidMovesFromSquare(req.user.id, square) : 
+        game.getValidMoves ? game.getValidMoves(square) : [];
+      
       res.status(200).json({ validMoves });
     } catch (error) {
       console.error('[CONTROLLER] Error in getValidMoves:', error);

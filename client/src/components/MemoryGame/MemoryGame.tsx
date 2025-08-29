@@ -95,30 +95,25 @@ const MemoryGame: React.FC<MemoryGameProps> = ({
     // Защита от множественных кликов
     const now = Date.now();
     if (now - lastMoveTime < 500) {
-      console.log('Слишком частые клики, игнорируем');
       return;
     }
 
     if (!isPlayerTurn || isProcessing || gameFinished) {
-      console.log('Не ваш ход или игра завершена');
       return;
     }
 
     const card = cards.find(c => c.id === cardId);
     if (!card || card.isMatched || card.isFlipped) {
-      console.log('Карта недоступна для клика');
       return;
     }
 
     // СТРОГАЯ проверка - игрок не может открыть больше 2 карт за ход
     if (localFlippedCards.length >= 2) {
-      console.log('Нельзя открыть больше 2 карт за ход');
       return;
     }
 
     // Проверяем, что карта еще не открыта локально
     if (localFlippedCards.includes(cardId)) {
-      console.log('Эта карта уже открыта');
       return;
     }
 

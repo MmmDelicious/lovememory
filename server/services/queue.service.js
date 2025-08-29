@@ -26,8 +26,6 @@ class QueueService {
       return;
     }
 
-    console.log('🚀 Initializing Queue Service...');
-
     try {
       // Получаем Redis соединение
       this.connection = getRedisClient();
@@ -40,10 +38,8 @@ class QueueService {
       this.setupQueueMonitoring();
 
       this.isInitialized = true;
-      console.log('✅ Queue Service initialized successfully');
-
-    } catch (error) {
-      console.error('❌ Failed to initialize Queue Service:', error);
+      } catch (error) {
+      console.error('Failed to initialize Queue Service:', error);
       throw error;
     }
   }
@@ -83,8 +79,6 @@ class QueueService {
       }
     });
     this.queues.set('maintenance', maintenanceQueue);
-
-    console.log('📋 Created queues:', Array.from(this.queues.keys()));
   }
 
   /**
@@ -97,15 +91,15 @@ class QueueService {
 
       // Логирование событий
       queueEvents.on('completed', ({ jobId, returnvalue }) => {
-        console.log(`✅ Job ${jobId} completed in queue ${name}`);
+        // Логирование завершенных задач
       });
 
       queueEvents.on('failed', ({ jobId, failedReason }) => {
-        console.error(`❌ Job ${jobId} failed in queue ${name}:`, failedReason);
+        console.error(`Job ${jobId} failed in queue ${name}:`, failedReason);
       });
 
       queueEvents.on('stalled', ({ jobId }) => {
-        console.warn(`⚠️ Job ${jobId} stalled in queue ${name}`);
+        console.warn(`Job ${jobId} stalled in queue ${name}`);
       });
     }
   }
@@ -132,8 +126,6 @@ class QueueService {
       jobId: `analysis-${userId}-${Date.now()}`, // Уникальный ID
     };
 
-    console.log(`📊 Adding analysis job for user ${userId}`);
-    
     const job = await queue.add('analyze-user', jobData, jobOptions);
     return job;
   }
@@ -161,8 +153,6 @@ class QueueService {
       jobId: `insights-${userId}-${eventId}-${Date.now()}`,
     };
 
-    console.log(`💡 Adding insight job for user ${userId}, event ${eventId}`);
-    
     const job = await queue.add('generate-insights', jobData, jobOptions);
     return job;
   }
@@ -189,8 +179,6 @@ class QueueService {
       jobId: `cleanup-${type}-${Date.now()}`,
     };
 
-    console.log(`🧹 Adding cleanup job: ${type}`);
-    
     const job = await queue.add('cleanup', jobData, jobOptions);
     return job;
   }
@@ -234,8 +222,7 @@ class QueueService {
     const queue = this.queues.get(queueName);
     if (queue) {
       await queue.pause();
-      console.log(`⏸️ Queue ${queueName} paused`);
-    }
+      }
   }
 
   /**
@@ -245,8 +232,7 @@ class QueueService {
     const queue = this.queues.get(queueName);
     if (queue) {
       await queue.resume();
-      console.log(`▶️ Queue ${queueName} resumed`);
-    }
+      }
   }
 
   /**
@@ -256,34 +242,28 @@ class QueueService {
     const queue = this.queues.get(queueName);
     if (queue) {
       await queue.clean(0, 1000, status);
-      console.log(`🧹 Cleared ${status} jobs from queue ${queueName}`);
-    }
+      }
   }
 
   /**
    * Корректное закрытие сервиса
    */
   async shutdown() {
-    console.log('🔄 Shutting down Queue Service...');
-
     // Закрываем мониторинг событий
     for (const [name, queueEvents] of this.queueEvents) {
       await queueEvents.close();
-      console.log(`📋 Closed events for queue ${name}`);
-    }
+      }
 
     // Закрываем очереди
     for (const [name, queue] of this.queues) {
       await queue.close();
-      console.log(`📋 Closed queue ${name}`);
-    }
+      }
 
     this.queues.clear();
     this.queueEvents.clear();
     this.isInitialized = false;
 
-    console.log('✅ Queue Service shutdown complete');
-  }
+    }
 
   /**
    * Проверка доступности сервиса

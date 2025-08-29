@@ -101,7 +101,7 @@ const gameSlice = createSlice({
       if (state.gameState && state.gameState.players) {
         const player = state.gameState.players.find(p => p.id === action.payload.playerId);
         if (player) {
-          // Обновляем состояние игрока
+  
           Object.assign(player, action.payload.data);
         }
       }

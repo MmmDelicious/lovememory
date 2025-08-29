@@ -25,14 +25,14 @@ const Toast: React.FC<ToastProps> = ({
     }, 300); // Синхронизировано с CSS анимацией выхода
   }, [isExiting, onClose, id]);
   useEffect(() => {
-    console.log(`Toast ${id}: duration = ${duration}ms`); // Debug log
+    // Debug log
     const enterTimer = setTimeout(() => {
       setIsEntering(false);
     }, 400);
     const minDuration = Math.max(duration, 4000); // увеличиваем минимум до 4 секунд
-    console.log(`Toast ${id}: will close after ${minDuration}ms`); // Debug log
+    // Debug log
     const closeTimer = setTimeout(() => {
-      console.log(`Toast ${id}: auto-closing now`); // Debug log
+      // Debug log
       handleClose();
     }, minDuration);
     return () => {

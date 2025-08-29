@@ -32,7 +32,7 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
   const [startTime] = useState(Date.now());
   const { isMobile } = useDevice();
   
-  // Определяем размер анимации в зависимости от размера экрана
+  
   const getAnimationSize = () => {
     const screenWidth = window.innerWidth;
     if (screenWidth <= 480) {

@@ -227,7 +227,7 @@ export const useDayStory = (relationshipStartDate = new Date('2023-01-01')) => {
   useEffect(() => {
     if (!isPlaying || !storyData) return;
     const storyDuration = 4000; // 4 секунды на слайд
-    const progressInterval = 100; // обновляем каждые 100мс (было 50мс)
+    const progressInterval = 100;
     const progressStep = (progressInterval / storyDuration) * 100;
     let animationFrameId: number;
     const updateProgress = () => {

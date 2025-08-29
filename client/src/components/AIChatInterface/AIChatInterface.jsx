@@ -7,11 +7,9 @@ import FreeRoamMascot from '../FreeRoamMascot/FreeRoamMascot';
 import DateGeneratorModal from '../DateGeneratorModal/DateGeneratorModal';
 
 const AIChatInterface = () => {
-  // Получаем состояние из Redux вместо Context
   const { isVisible, isChatOpen, isLoading } = useAIMascot();
   const globalMascot = useGlobalMascot();
   
-  // Получаем действия из Redux
   const { toggleAI, toggleChat, sendMessageToAI, closeDateGenerator } = useMascotActions();
   
   const user = useUser();
@@ -28,7 +26,6 @@ const AIChatInterface = () => {
     zIndex: 10000
   };
 
-  // Создаем контекст один раз
   const createContext = () => {
     if (!user) return null;
 
@@ -94,7 +91,6 @@ const AIChatInterface = () => {
   };
 
   const handleEventCreated = (event) => {
-    // Event created successfully
   };
 
   return (
@@ -113,7 +109,7 @@ const AIChatInterface = () => {
         {isChatOpen && <AIChat />}
       </div>
       <DateGeneratorModal
-        isOpen={false} // Временно, пока не мигрируем DateGenerator
+        isOpen={false}
         onClose={closeDateGenerator}
         onEventCreated={handleEventCreated}
       />
