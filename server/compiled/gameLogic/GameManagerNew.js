@@ -149,7 +149,7 @@ class GameManagerNew {
     // Методы создания новых игр (TypeScript) - временно отключены
     _createTicTacToeGame(roomId, players, options) {
         // Временно возвращаем заглушку
-        console.log(`[GameManager] TicTacToe game creation disabled for room ${roomId}`);
+                    // TicTacToe game creation disabled
         return {
             gameType: 'tic-tac-toe',
             status: 'waiting',
@@ -160,7 +160,7 @@ class GameManagerNew {
     }
     _createMemoryGameNew(roomId, players, options) {
         // Временно возвращаем заглушку
-        console.log(`[GameManager] Memory game creation disabled for room ${roomId}`);
+                    // Memory game creation disabled
         return {
             gameType: 'memory',
             status: 'waiting',
@@ -171,7 +171,7 @@ class GameManagerNew {
     }
     _createChessGameNew(roomId, players, options) {
         // Временно возвращаем заглушку
-        console.log(`[GameManager] Chess game creation disabled for room ${roomId}`);
+                    // Chess game creation disabled
         return {
             gameType: 'chess',
             status: 'waiting',
@@ -182,7 +182,7 @@ class GameManagerNew {
     }
     _createQuizGameNew(roomId, players, options) {
         // Временно возвращаем заглушку
-        console.log(`[GameManager] Quiz game creation disabled for room ${roomId}`);
+                    // Quiz game creation disabled
         return {
             gameType: 'quiz',
             status: 'waiting',
@@ -193,7 +193,7 @@ class GameManagerNew {
     }
     _createWordleGameNew(roomId, players, options) {
         // Временно возвращаем заглушку
-        console.log(`[GameManager] Wordle game creation disabled for room ${roomId}`);
+                    // Wordle game creation disabled
         return {
             gameType: 'wordle',
             status: 'waiting',
@@ -204,7 +204,7 @@ class GameManagerNew {
     }
     _createCodenamesGameNew(roomId, players, options) {
         // Временно возвращаем заглушку
-        console.log(`[GameManager] Codenames game creation disabled for room ${roomId}`);
+                    // Codenames game creation disabled
         return {
             gameType: 'codenames',
             status: 'waiting',
@@ -215,7 +215,7 @@ class GameManagerNew {
     }
     _createPokerGameNew(roomId, players, options) {
         // Временно возвращаем заглушку
-        console.log(`[GameManager] Poker game creation disabled for room ${roomId}`);
+                    // Poker game creation disabled
         return {
             gameType: 'poker',
             status: 'waiting',

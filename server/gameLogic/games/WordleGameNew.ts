@@ -498,7 +498,7 @@ export class WordleGameNew extends RealtimeGame<IWordleState, IWordleMove> {
     
     });
     
-    console.log(`Teams initialized: Team1: ${this._teams.team1.join(', ')}, Team2: ${this._teams.team2.join(', ')}`);
+    // Teams initialized
   }
   
   private _updateTeamScore(playerId: string, points: number): void {

@@ -499,7 +499,7 @@ export class QuizGameNew extends RealtimeGame<IQuizState, IQuizMove> {
     
     });
     
-    console.log(`Teams initialized: Team1: ${this._teams.team1.join(', ')}, Team2: ${this._teams.team2.join(', ')}`);
+    // Teams initialized
   }
 
   private _generateQuestions(): void {

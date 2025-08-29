@@ -94,7 +94,7 @@ const startCronJobs = () => {
     timezone: "Europe/Moscow"
   });
   
-  console.log('Telegram bot for notifications started.');
+  // Telegram bot for notifications started
 };
 
 module.exports = { startBot, sendMessage, startCronJobs };

@@ -1092,7 +1092,7 @@ function initSocket(server, app) {
     });
 
     socket.on('disconnect', () => {
-      console.log(`User ${socket.user?.id || 'unknown'} disconnected.`);
+      // User disconnected
       for (const roomId of userRooms) {
         handleLeaveOrDisconnect(roomId);
       }
