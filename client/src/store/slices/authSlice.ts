@@ -5,14 +5,17 @@ export interface User {
   id: string;
   first_name?: string;
   last_name?: string;
-  name: string;
+  display_name?: string;
   email: string;
   gender?: 'male' | 'female' | 'other';
   city?: string;
+  age?: number;
   coins?: number;
   avatarUrl?: string;
   partner?: any;
   token?: string;
+  role?: string;
+  locale?: string;
 }
 
 export interface LoginCredentials {
@@ -23,11 +26,10 @@ export interface LoginCredentials {
 export interface RegisterCredentials {
   email: string;
   password: string;
-  name: string;
-  first_name?: string;
-  last_name?: string;
-  gender?: 'male' | 'female' | 'other';
-  city?: string;
+  first_name: string;
+  gender: 'male' | 'female' | 'other';
+  city: string;
+  age: number;
 }
 
 export interface AuthSliceState {
@@ -64,7 +66,24 @@ export const loginUser = createAsyncThunk(
       
       return userData;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || error.message || 'Ошибка входа');
+      // Более детальная обработка ошибок
+      let errorMessage = 'Ошибка входа';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Неверный email или пароль';
+      } else if (error.response?.status === 429) {
+        errorMessage = 'Слишком много попыток входа. Попробуйте позже';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'Ошибка сервера. Попробуйте позже';
+      } else if (!error.response) {
+        errorMessage = 'Проблемы с подключением к серверу';
+      }
+      
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -88,7 +107,26 @@ export const registerUser = createAsyncThunk(
       
       return userData;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || error.message || 'Ошибка регистрации');
+      // Более детальная обработка ошибок регистрации
+      let errorMessage = 'Ошибка регистрации';
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      } else if (error.response?.status === 409) {
+        errorMessage = 'Пользователь с таким email уже существует';
+      } else if (error.response?.status === 400) {
+        errorMessage = 'Некорректные данные для регистрации';
+      } else if (error.response?.status === 429) {
+        errorMessage = 'Слишком много попыток регистрации. Попробуйте позже';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'Ошибка сервера. Попробуйте позже';
+      } else if (!error.response) {
+        errorMessage = 'Проблемы с подключением к серверу';
+      }
+      
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -125,13 +163,17 @@ const authSlice = createSlice({
         state.user.coins = action.payload;
       }
     },
-          logout: (state) => {
+    logout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;
       
-      localStorage.removeItem('authToken');
-      document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      // Очищаем только localStorage (httpOnly cookie очищает сервер)
+      try {
+        localStorage.removeItem('authToken');
+      } catch (error) {
+        console.warn('Failed to clear token from localStorage during logout:', error);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -146,6 +188,8 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.error = null;
         
+        // Токен теперь автоматически сохраняется в httpOnly cookie сервером
+        // localStorage используется только для совместимости
         if (action.payload.token) {
           localStorage.setItem('authToken', action.payload.token);
         }
@@ -164,6 +208,8 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.error = null;
         
+        // Токен теперь автоматически сохраняется в httpOnly cookie сервером
+        // localStorage используется только для совместимости
         if (action.payload.token) {
           localStorage.setItem('authToken', action.payload.token);
         }

@@ -69,6 +69,8 @@ if (!fs.existsSync(uploadsDir)) {
 }
 app.use('/uploads', express.static(uploadsDir));
 
+// API routes
+
 app.use('/api', apiRouter);
 
 app.get('/', (req, res) => {
@@ -83,7 +85,7 @@ const startServer = async () => {
   try {
     await sequelize.authenticate();
 
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false });
 
     await gameService.cleanupOrphanedRooms(io);
     try {

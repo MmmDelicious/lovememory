@@ -19,6 +19,21 @@ const sendAuthResponse = (res, user, token) => {
 };
 const register = async (req, res, next) => {
   try {
+    // Дополнительная валидация на стороне сервера
+    const { email, password, first_name, gender, city, age } = req.body;
+    
+    if (!email || !password || !first_name || !gender || !city || !age) {
+      return res.status(400).json({
+        message: 'Все поля обязательны для заполнения'
+      });
+    }
+    
+    if (age < 18 || age > 99) {
+      return res.status(400).json({
+        message: 'Возраст должен быть от 18 до 99 лет'
+      });
+    }
+    
     const { user } = await authService.register(req.body);
     const fullUser = await userService.getProfile(user.id);
     
@@ -28,12 +43,31 @@ const register = async (req, res, next) => {
     const token = generateToken(fullUser);
     sendAuthResponse(res, fullUser, token);
   } catch (error) {
+    // Обработка специфичных ошибок регистрации
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(409).json({
+        message: 'Пользователь с таким email уже существует'
+      });
+    }
+    
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({
+        message: error.errors?.[0]?.message || 'Некорректные данные для регистрации'
+      });
+    }
+    
     next(error);
   }
 };
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({
+        message: 'Email и пароль обязательны'
+      });
+    }
     
     const { user } = await authService.login({ email, password });
     const fullUser = await userService.getProfile(user.id);
@@ -44,6 +78,15 @@ const login = async (req, res, next) => {
     
     sendAuthResponse(res, fullUser, token);
   } catch (error) {
+    // Обработка специфичных ошибок входа
+    if (error.message.includes('Invalid credentials') || error.message.includes('User not found') || error.message.includes('Неверный email или пароль')) {
+      return res.status(401).json({
+        status: 'error',
+        statusCode: 401,
+        message: 'Неверный email или пароль'
+      });
+    }
+    
     next(error);
   }
 };

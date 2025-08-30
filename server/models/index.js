@@ -23,6 +23,10 @@ const Lesson = require('./Lesson');
 const UserLessonProgress = require('./UserLessonProgress');
 const PairDailyLesson = require('./PairDailyLesson');
 const ActivityLog = require('./ActivityLog');
+const ActivityTracker = require('./ActivityTracker');
+const Interest = require('./Interest');
+const UserInterest = require('./UserInterest');
+const RecommendationFeedback = require('./RecommendationFeedback');
 
 let RelationshipProfile = null;
 const models = {
@@ -50,6 +54,10 @@ const models = {
   UserLessonProgress,
   PairDailyLesson,
   ActivityLog,
+  ActivityTracker,
+  Interest,
+  UserInterest,
+  RecommendationFeedback,
 };
 
 // Добавляем TS модели если они загрузились (пока отключено)

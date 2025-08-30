@@ -54,6 +54,17 @@
   box-shadow: 0 0 0 3px #e77a6533;
 }
 
+.inputError {
+  border-color: #e74c3c !important;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2) !important;
+  background-color: rgba(231, 76, 60, 0.05);
+}
+
+.inputError:focus {
+  border-color: #e74c3c !important;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.3) !important;
+}
+
 .divider {
   display: flex;
   align-items: center;

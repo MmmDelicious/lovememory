@@ -381,56 +381,32 @@ class WordleGameNew extends RealtimeGame_1.RealtimeGame {
             }
         });
     }
+    ;
 }
 exports.WordleGameNew = WordleGameNew;
+_updateTeamScore(playerId, string, points, number);
+void {
+    : ._gameFormat !== '2v2', return: ,
+    : ._teams.team1 || !this._teams.team2
+};
 {
-    this._teams.team2.join(', ');
+    console.error(`[WordleGame] Teams not initialized when updating score for player ${playerId}`);
+    return;
 }
-`);
-  }
-  
-  private _updateTeamScore(playerId: string, points: number): void {
-    if (this._gameFormat !== '2v2') return;
-    
-    // Проверяем наличие игрока в командах перед начислением
-    if (!this._teams.team1 || !this._teams.team2) {
-      console.error(`[WordleGame];
-Teams;
-not;
-initialized;
-when;
-updating;
-score;
-for (player; $; { playerId } `);
-      return;
-    }
-    
-    let teamId: string | null = null;
-    
-    if (this._teams.team1.includes(playerId)) {
-      teamId = 'team1';
-    } else if (this._teams.team2.includes(playerId)) {
-      teamId = 'team2';
-    } else {
-      console.error(`[WordleGame])
-    Player;
-$;
-{
-    playerId;
+let teamId = null;
+if (this._teams.team1.includes(playerId)) {
+    teamId = 'team1';
 }
-not;
-found in any;
-team;
-when;
-updating;
-score `);
-      return;
-    }
-    
-    if (teamId) {
-      this._teamScores[teamId] = (this._teamScores[teamId] || 0) + points;
-      `;
-;
+else if (this._teams.team2.includes(playerId)) {
+    teamId = 'team2';
+}
+else {
+    console.error(`[WordleGame] Player ${playerId} not found in any team when updating score`);
+    return;
+}
+if (teamId) {
+    this._teamScores[teamId] = (this._teamScores[teamId] || 0) + points;
+}
 _generateNewWord();
 void {
     try: {

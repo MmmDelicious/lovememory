@@ -16,11 +16,21 @@ const mascotConfig = {
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
+  const [isError, setIsError] = useState(false);
+  
   const { loginUser } = useAuthActions();
   const user = useUser();
   const navigate = useNavigate();
   const location = useLocation();
   const { mascotMessage, handleAvatarClick, handleInteraction, triggerError } = useInteractiveMascot(mascotConfig);
+  
+  // Обработчик ошибок с анимацией
+  const handleError = (message: string) => {
+    setIsError(true);
+    triggerError(message);
+    setTimeout(() => setIsError(false), 1000);
+  };
   
   React.useEffect(() => {
     if (user) {
@@ -31,14 +41,51 @@ const LoginPage: React.FC = () => {
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('error') === 'google-auth-failed') {
-      triggerError('Не удалось войти с помощью Google. Попробуйте снова.');
+      handleError('Не удалось войти с помощью Google. Попробуйте снова.');
       navigate('/login', { replace: true });
     }
-  }, [location, navigate, triggerError]);
+  }, [location, navigate, handleError]);
+  
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (fieldErrors.email) {
+      setFieldErrors(prev => ({ ...prev, email: false }));
+    }
+    handleInteraction();
+  };
+  
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (fieldErrors.password) {
+      setFieldErrors(prev => ({ ...prev, password: false }));
+    }
+    handleInteraction();
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return triggerError('Нужен и email, и пароль.');
+    
+    // Сброс ошибок
+    setFieldErrors({});
+    
+    // Валидация полей
+    const errors: Record<string, boolean> = {};
+    let errorMessage = '';
+    
+    if (!email.trim()) {
+      errors.email = true;
+      errorMessage = 'Введите email';
+    }
+    
+    if (!password) {
+      errors.password = true;
+      if (!errorMessage) errorMessage = 'Введите пароль';
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return handleError(errorMessage);
+    }
     
     try {
       await loginUser({ email, password });
@@ -48,7 +95,19 @@ const LoginPage: React.FC = () => {
       }, 100);
       
     } catch (err: any) {
-      triggerError(err.response?.data?.message || 'Неверный email или пароль.');
+      const errorMessage = err.response?.data?.message || err.message || 'Неверный email или пароль';
+      
+      // Подсвечиваем соответствующие поля в зависимости от ошибки
+      const serverErrors: Record<string, boolean> = {};
+      if (errorMessage.includes('email') || errorMessage.includes('Email') || errorMessage.includes('пользователь')) {
+        serverErrors.email = true;
+      }
+      if (errorMessage.includes('пароль') || errorMessage.includes('Пароль') || errorMessage.includes('password')) {
+        serverErrors.password = true;
+      }
+      
+      setFieldErrors(serverErrors);
+      handleError(errorMessage);
     }
   };
   const handleGoogleSignIn = () => {
@@ -58,7 +117,13 @@ const LoginPage: React.FC = () => {
     <AuthLayout>
       <div className={styles.authBox}>
         <div className={styles.mascotPositioner}>
-          <StaticMascot bubbleKey={mascotMessage} message={mascotMessage} animationData={greetAnimation} onAvatarClick={handleAvatarClick} />
+          <StaticMascot 
+            bubbleKey={mascotMessage} 
+            message={mascotMessage} 
+            animationData={greetAnimation} 
+            onAvatarClick={handleAvatarClick}
+            isError={isError}
+          />
         </div>
         <h1 className={styles.title}>LoveMemory</h1>
         <p className={styles.subtitle}>Войдите, чтобы продолжить</p>
@@ -66,16 +131,16 @@ const LoginPage: React.FC = () => {
           <input 
             type="email" 
             placeholder="Email" 
-            className={styles.input} 
+            className={`${styles.input} ${fieldErrors.email ? styles.inputError : ''}`} 
             value={email} 
-            onChange={(e) => { setEmail(e.target.value); handleInteraction(); }} 
+            onChange={handleEmailChange} 
           />
           <input 
             type="password" 
             placeholder="Пароль" 
-            className={styles.input} 
+            className={`${styles.input} ${fieldErrors.password ? styles.inputError : ''}`} 
             value={password} 
-            onChange={(e) => { setPassword(e.target.value); handleInteraction(); }} 
+            onChange={handlePasswordChange} 
           />
           <Button type="primary" submit>Войти</Button>
         </form>

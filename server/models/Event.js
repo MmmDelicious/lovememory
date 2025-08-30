@@ -66,7 +66,15 @@ const Event = sequelize.define('Event', {
       model: 'Pairs',
       key: 'id',
     },
+  },
+  source: {
+    type: DataTypes.ENUM('USER_CREATED', 'AI_SUGGESTED'),
+    allowNull: false,
+    defaultValue: 'USER_CREATED',
+    comment: 'Источник создания события: пользователем или AI',
   }
+}, {
+  timestamps: false // Отключаем timestamps, так как в таблице нет created_at/updated_at
 });
 Event.associate = (models) => {
   Event.belongsTo(models.User, { foreignKey: 'userId' });

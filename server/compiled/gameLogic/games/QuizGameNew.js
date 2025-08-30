@@ -405,147 +405,141 @@ class QuizGameNew extends RealtimeGame_1.RealtimeGame {
       }
     });
     
-    }, Team2: ${this._teams.team2.join(', ')}`;
-            ;
-        }
-        finally {
-        }
-    }
-    _generateQuestions() {
-        // Перемешиваем вопросы и выбираем нужное количество
-        const shuffled = [...this.QUESTION_BANK].sort(() => 0.5 - Math.random());
-        this._questions = shuffled.slice(0, this._totalQuestions);
-    }
-    _getCurrentQuestion() {
-        if (this._currentQuestionIndex >= this._questions.length) {
-            return null;
-        }
-        return this._questions[this._currentQuestionIndex];
-    }
-    _getQuestionTimeRemaining() {
-        if (!this._currentQuestionStartTime) {
-            return this._questionTimeLimit;
-        }
-        const elapsed = (Date.now() - this._currentQuestionStartTime.getTime()) / 1000;
-        return Math.max(0, this._questionTimeLimit - elapsed);
-    }
-    _updateTeamScore(playerId, points) {
-        if (this._gameFormat !== '2v2')
-            return;
-        // Проверяем наличие игрока в командах перед начислением
-        const team = this.getPlayerTeam(playerId);
-        if (!team) {
-            console.error(`[QuizGameNew] Player ${playerId} not found in any team when updating score`);
-            return;
-        }
-        this._teamScores[team] = (this._teamScores[team] || 0) + points;
-        `);
-  }
-  
-  // Утилитарные методы
-  public getCurrentQuestionInfo(): {
-    question: IQuizQuestion | null;
-    questionNumber: number;
-    totalQuestions: number;
-    timeRemaining: number;
-  } {
-    return {
-      question: this._getCurrentQuestion(),
-      questionNumber: this._currentQuestionIndex + 1,
-      totalQuestions: this._totalQuestions,
-      timeRemaining: this._getQuestionTimeRemaining()
-    };
-  }
-  
-  public getPlayerTeam(playerId: string): string | null {
-    if (this._gameFormat !== '2v2') return null;
+    });
     
-    if (this._teams.team1?.includes(playerId)) {
-      return 'team1';
-    } else if (this._teams.team2?.includes(playerId)) {
-      return 'team2';
+    // Teams initialized
+  }
+
+  private _generateQuestions(): void {
+    // Перемешиваем вопросы и выбираем нужное количество
+    const shuffled = [...this.QUESTION_BANK].sort(() => 0.5 - Math.random());
+    this._questions = shuffled.slice(0, this._totalQuestions);
+  }
+  
+  private _getCurrentQuestion(): IQuizQuestion | null {
+    if (this._currentQuestionIndex >= this._questions.length) {
+      return null;
     }
     
-    return null;
+    return this._questions[this._currentQuestionIndex];
   }
   
-  public getTeammates(playerId: string): string[] {
+  private _getQuestionTimeRemaining(): number {
+    if (!this._currentQuestionStartTime) {
+      return this._questionTimeLimit;
+    }
+    
+    const elapsed = (Date.now() - this._currentQuestionStartTime.getTime()) / 1000;
+    return Math.max(0, this._questionTimeLimit - elapsed);
+  }
+  
+  private _updateTeamScore(playerId: string, points: number): void {
+    if (this._gameFormat !== '2v2') return;
+    
+    // Проверяем наличие игрока в командах перед начислением
     const team = this.getPlayerTeam(playerId);
-    if (!team) return [];
-    
-    return this._teams[team].filter(id => id !== playerId);
-  }
-  
-  public getGameProgress(): number {
-    return (this._currentQuestionIndex / this._totalQuestions) * 100;
-  }
-  
-  public getPlayerStats(playerId: string): {
-    score: number;
-    accuracy: number;
-    answeredQuestions: number;
-  } {
-    const score = this._scores[playerId] || 0;
-    const answeredQuestions = Object.keys(this._playerAnswers[playerId] || {}).length;
-    const accuracy = answeredQuestions > 0 ? (score / answeredQuestions) * 100 : 0;
-    
-    return { score, accuracy, answeredQuestions };
-  }
-  
-  public hasPlayerAnswered(playerId: string, questionIndex?: number): boolean {
-    const index = questionIndex ?? this._currentQuestionIndex;
-    return this._playerAnswers[playerId]?.[index] !== undefined;
-  }
-  
-  // Переопределяем очистку
-  // Методы управления таймером
-  private _startQuestionTimer(): void {
-    // Проверяем, что игра не очищена и активна
-    if (this._isCleanedUp || this._status !== 'in_progress') {
+    if (!team) {
+      console.error(`[QuizGameNew];
+            Player;
+            $;
+            {
+                playerId;
+            }
+            not;
+            found in any;
+            team;
+            when;
+            updating;
+            score `);
       return;
     }
     
-    // Останавливаем предыдущий таймер если есть
-    this._stopQuestionTimer();
-    
-    this._questionTimer = setTimeout(() => {
-      // Автоматически отвечаем за игроков, которые не ответили
-      for (const player of this._players) {
-        if (!this._playerAnswers[player.id]?.[this._currentQuestionIndex]) {
-          this._safeAutoAnswer(player.id);
+    this._teamScores[team] = (this._teamScores[team] || 0) + points;
+    `;
+            ;
         }
-      }
-      
-      // Переходим к следующему вопросу если все ответили или время вышло
-      if (this._allPlayersMoved()) {
-        this._processAllMoves();
-      }
-      
-    }, this._questionTimeLimit * 1000);
-  }
-  
-  private _stopQuestionTimer(): void {
-    if (this._questionTimer) {
-      clearTimeout(this._questionTimer);
-      this._questionTimer = undefined;
+        // Утилитарные методы
+        finally {
+        }
+        // Утилитарные методы
     }
-  }
-
-  protected _onCleanup(): void {
-    super._onCleanup();
-    
-    // Выставляем флаг очистки перед остановкой таймера
-    this._isCleanedUp = true;
-    this._stopQuestionTimer();
-    
-    this._questions = [];
-    this._scores = {};
-    this._playerAnswers = {};
-    this._teams = {};
-    this._teamScores = {};
-  }
-}
-        ;
+    // Утилитарные методы
+    getCurrentQuestionInfo() {
+        return {
+            question: this._getCurrentQuestion(),
+            questionNumber: this._currentQuestionIndex + 1,
+            totalQuestions: this._totalQuestions,
+            timeRemaining: this._getQuestionTimeRemaining()
+        };
+    }
+    getPlayerTeam(playerId) {
+        if (this._gameFormat !== '2v2')
+            return null;
+        if (this._teams.team1?.includes(playerId)) {
+            return 'team1';
+        }
+        else if (this._teams.team2?.includes(playerId)) {
+            return 'team2';
+        }
+        return null;
+    }
+    getTeammates(playerId) {
+        const team = this.getPlayerTeam(playerId);
+        if (!team)
+            return [];
+        return this._teams[team].filter(id => id !== playerId);
+    }
+    getGameProgress() {
+        return (this._currentQuestionIndex / this._totalQuestions) * 100;
+    }
+    getPlayerStats(playerId) {
+        const score = this._scores[playerId] || 0;
+        const answeredQuestions = Object.keys(this._playerAnswers[playerId] || {}).length;
+        const accuracy = answeredQuestions > 0 ? (score / answeredQuestions) * 100 : 0;
+        return { score, accuracy, answeredQuestions };
+    }
+    hasPlayerAnswered(playerId, questionIndex) {
+        const index = questionIndex ?? this._currentQuestionIndex;
+        return this._playerAnswers[playerId]?.[index] !== undefined;
+    }
+    // Переопределяем очистку
+    // Методы управления таймером
+    _startQuestionTimer() {
+        // Проверяем, что игра не очищена и активна
+        if (this._isCleanedUp || this._status !== 'in_progress') {
+            return;
+        }
+        // Останавливаем предыдущий таймер если есть
+        this._stopQuestionTimer();
+        this._questionTimer = setTimeout(() => {
+            // Автоматически отвечаем за игроков, которые не ответили
+            for (const player of this._players) {
+                if (!this._playerAnswers[player.id]?.[this._currentQuestionIndex]) {
+                    this._safeAutoAnswer(player.id);
+                }
+            }
+            // Переходим к следующему вопросу если все ответили или время вышло
+            if (this._allPlayersMoved()) {
+                this._processAllMoves();
+            }
+        }, this._questionTimeLimit * 1000);
+    }
+    _stopQuestionTimer() {
+        if (this._questionTimer) {
+            clearTimeout(this._questionTimer);
+            this._questionTimer = undefined;
+        }
+    }
+    _onCleanup() {
+        super._onCleanup();
+        // Выставляем флаг очистки перед остановкой таймера
+        this._isCleanedUp = true;
+        this._stopQuestionTimer();
+        this._questions = [];
+        this._scores = {};
+        this._playerAnswers = {};
+        this._teams = {};
+        this._teamScores = {};
     }
 }
 exports.QuizGameNew = QuizGameNew;

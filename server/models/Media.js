@@ -30,6 +30,8 @@ const Media = sequelize.define('Media', {
       key: 'id',
     },
   },
+}, {
+  timestamps: false // Отключаем timestamps, так как в таблице нет created_at/updated_at
 });
 Media.associate = (models) => {
   Media.belongsTo(models.Event, { foreignKey: 'eventId' });

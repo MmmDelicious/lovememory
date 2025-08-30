@@ -30,40 +30,112 @@ const RegisterPage: React.FC = () => {
     password: '',
     confirmPassword: '',
     gender: 'male' as 'male' | 'female' | 'other',
-    city: ''
+    city: '',
+    age: ''
   });
+  
+  const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
+  const [isError, setIsError] = useState(false);
   
   const { registerUser } = useAuthActions();
   const navigate = useNavigate();
   const { mascotMessage, handleAvatarClick, handleInteraction, triggerError } = useInteractiveMascot(mascotConfig);
   
-  React.useEffect(() => {
-    
-  }, [navigate]);
+  // Обработчик ошибок с анимацией
+  const handleError = (message: string) => {
+    setIsError(true);
+    triggerError(message);
+    setTimeout(() => setIsError(false), 1000);
+  };
+  
+
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const fieldName = e.target.name;
+    setFormData((prev) => ({ ...prev, [fieldName]: e.target.value }));
+    
+    // Убираем ошибку с поля при вводе
+    if (fieldErrors[fieldName]) {
+      setFieldErrors(prev => ({ ...prev, [fieldName]: false }));
+    }
+    
     handleInteraction();
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      return triggerError('Пароли не совпадают');
+    
+    // Сброс ошибок
+    setFieldErrors({});
+    
+    // Валидация полей
+    const errors: Record<string, boolean> = {};
+    let errorMessage = '';
+    
+    if (!formData.name.trim()) {
+      errors.name = true;
+      errorMessage = 'Введите ваше имя';
+    } else if (!formData.email.trim()) {
+      errors.email = true;
+      errorMessage = 'Введите email';
+    } else if (!formData.password) {
+      errors.password = true;
+      errorMessage = 'Введите пароль';
+    } else if (formData.password.length < 6) {
+      errors.password = true;
+      errorMessage = 'Пароль должен быть не менее 6 символов';
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = true;
+      errorMessage = 'Пароли не совпадают';
+    } else if (!formData.city.trim()) {
+      errors.city = true;
+      errorMessage = 'Введите ваш город';
+    } else if (!formData.age || isNaN(parseInt(formData.age)) || parseInt(formData.age) < 18 || parseInt(formData.age) > 99) {
+      errors.age = true;
+      errorMessage = 'Возраст должен быть от 18 до 99 лет';
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return handleError(errorMessage);
     }
     
     try {
       await registerUser({
         email: formData.email,
         password: formData.password,
-        name: formData.name,
         first_name: formData.name,
         gender: formData.gender,
-        city: formData.city
-      });
-      navigate('/dashboard');
+        city: formData.city,
+        age: parseInt(formData.age)
+      }).unwrap();
+      
+      // Успешная регистрация
+      navigate('/onboarding/interests');
     } catch (err: any) {
-      triggerError(err.response?.data?.message || 'Ошибка регистрации');
+      // Ошибка регистрации
+      const errorMessage = err || 'Ошибка регистрации';
+      
+      // Подсвечиваем соответствующие поля в зависимости от ошибки
+      const serverErrors: Record<string, boolean> = {};
+      if (errorMessage.includes('email') || errorMessage.includes('Email')) {
+        serverErrors.email = true;
+      }
+      if (errorMessage.includes('пароль') || errorMessage.includes('Пароль')) {
+        serverErrors.password = true;
+      }
+      if (errorMessage.includes('возраст') || errorMessage.includes('Возраст')) {
+        serverErrors.age = true;
+      }
+      if (errorMessage.includes('город') || errorMessage.includes('Город')) {
+        serverErrors.city = true;
+      }
+      if (errorMessage.includes('имя') || errorMessage.includes('Имя')) {
+        serverErrors.name = true;
+      }
+      
+      setFieldErrors(serverErrors);
+      handleError(errorMessage);
     }
   };
   const handleGoogleSignIn = (): void => {
@@ -74,6 +146,12 @@ const RegisterPage: React.FC = () => {
   };
   const handleGenderChange = (gender: 'male' | 'female' | 'other'): void => {
     setFormData((prev) => ({ ...prev, gender }));
+    
+    // Убираем ошибку с поля при изменении
+    if (fieldErrors.gender) {
+      setFieldErrors(prev => ({ ...prev, gender: false }));
+    }
+    
     handleInteraction();
   };
   return (
@@ -84,7 +162,8 @@ const RegisterPage: React.FC = () => {
             bubbleKey={mascotMessage} 
             message={mascotMessage} 
             animationData={greetAnimation} 
-            onAvatarClick={handleAvatarClick} 
+            onAvatarClick={handleAvatarClick}
+            isError={isError}
           />
         </div>
         <h1 className={loginStyles.title}>Создание аккаунта</h1>
@@ -95,7 +174,7 @@ const RegisterPage: React.FC = () => {
               name="name" 
               type="text" 
               placeholder="Ваше имя" 
-              className={loginStyles.input} 
+              className={`${loginStyles.input} ${fieldErrors.name ? loginStyles.inputError : ''}`} 
               value={formData.name} 
               onChange={handleInputChange} 
             />
@@ -103,7 +182,7 @@ const RegisterPage: React.FC = () => {
               name="email" 
               type="email" 
               placeholder="Email" 
-              className={loginStyles.input} 
+              className={`${loginStyles.input} ${fieldErrors.email ? loginStyles.inputError : ''}`} 
               value={formData.email} 
               onChange={handleInputChange} 
             />
@@ -111,7 +190,7 @@ const RegisterPage: React.FC = () => {
               name="password" 
               type="password" 
               placeholder="Пароль (мин. 6 симв.)" 
-              className={loginStyles.input} 
+              className={`${loginStyles.input} ${fieldErrors.password ? loginStyles.inputError : ''}`} 
               value={formData.password} 
               onChange={handleInputChange} 
             />
@@ -119,7 +198,7 @@ const RegisterPage: React.FC = () => {
               name="confirmPassword" 
               type="password" 
               placeholder="Подтвердите пароль" 
-              className={loginStyles.input} 
+              className={`${loginStyles.input} ${fieldErrors.confirmPassword ? loginStyles.inputError : ''}`} 
               value={formData.confirmPassword} 
               onChange={handleInputChange} 
             />
@@ -133,9 +212,19 @@ const RegisterPage: React.FC = () => {
               name="city" 
               type="text" 
               placeholder="Город" 
-              className={loginStyles.input} 
+              className={`${loginStyles.input} ${fieldErrors.city ? loginStyles.inputError : ''}`} 
               value={formData.city} 
               onChange={handleInputChange} 
+            />
+            <input 
+              name="age" 
+              type="number" 
+              placeholder="Возраст (18+)" 
+              className={`${loginStyles.input} ${fieldErrors.age ? loginStyles.inputError : ''}`} 
+              value={formData.age} 
+              onChange={handleInputChange}
+              min="18"
+              max="99"
             />
           </div>
           <Button type="primary" submit>Зарегистрироваться</Button>

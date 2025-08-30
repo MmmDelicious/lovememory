@@ -29,7 +29,7 @@ const store = configureStore({
         ],
       },
     }),
-  devTools: process.env.NODE_ENV !== 'production', // Включаем DevTools только в development
+  devTools: import.meta.env.DEV, // Включаем DevTools только в development
 });
 
 export { store };

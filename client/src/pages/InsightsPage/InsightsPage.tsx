@@ -10,6 +10,7 @@ import {
 import styles from './InsightsPage.module.css';
 import userService from '../../services/user.service';
 import analyticsService from '../../services/analytics.service';
+import api from '../../services/api';
 import { useUser } from '../../store/hooks';
 import LoveLanguageAnalysis from '../../components/LoveLanguageAnalysis/LoveLanguageAnalysis';
 import PremiumModal from '../../components/PremiumModal/PremiumModal';
@@ -57,7 +58,7 @@ interface AnalyticsData {
   insights: any[];
 }
 const InsightsPage: React.FC = () => {
-  const { user } = useUser();
+  const user = useUser();
 
   const [analyticsView, setAnalyticsView] = useState<'overview'>('overview');
   const [timeFilter, setTimeFilter] = useState<'week' | 'month' | 'year'>('month');
@@ -86,7 +87,7 @@ const InsightsPage: React.FC = () => {
   useEffect(() => {
     if (!stats) return;
     const harmonyScore = Math.min(100, Math.max(30, 
-      (stats.events * 3) + (stats.memories * 2.5) + (stats.streakDays * 2) + 40
+      (stats.events * 3) + (stats.memories * 2.5) + ((stats.streakDays || 0) * 2) + 40
     ));
     const timer = setTimeout(() => {
       let current = 0;
@@ -118,7 +119,7 @@ const InsightsPage: React.FC = () => {
         const [statsResponse, profileResponse, eventsResponse] = await Promise.all([
           userService.getProfileStats(),
           userService.getProfile(),
-          fetch('/api/events').then(res => res.ok ? res.json() : []).catch(() => [])
+          api.get('/events').then(res => res.data || []).catch(() => [])
         ]);
         
         if (isMounted) {
@@ -297,7 +298,7 @@ const InsightsPage: React.FC = () => {
           isPremium={true}
           onFirstLogin={showMascotWelcome}
           onDismiss={handleMascotDismiss}
-          userName={userData?.name || user?.name || 'Пользователь'}
+          userName={userData?.name || user?.display_name || user?.first_name || 'Пользователь'}
         />
       )}
     </div>

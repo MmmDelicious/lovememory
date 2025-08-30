@@ -9,6 +9,8 @@ import GlobalMascot from './components/GlobalMascot/GlobalMascot';
 import AIChatInterface from './components/AIChatInterface/AIChatInterface';
 import { setupGlobalErrorHandler } from './utils/errorHandler';
 import { useAuthActions, useCurrencyActions } from './store/hooks';
+import { getAuthToken, clearAuthToken } from './services/api';
+import { authService } from './services';
 
 const AppInitializer: React.FC = () => {
   const { setUser, setLoading } = useAuthActions();
@@ -18,37 +20,25 @@ const AppInitializer: React.FC = () => {
     const checkAuthStatus = async () => {
       setLoading(true);
       
-      const token = localStorage.getItem('authToken');
+      const token = getAuthToken();
       
       if (token) {
         try {
-          const apiUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/auth/me`;
-          const response = await fetch(apiUrl, {
-            credentials: 'include',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+          const userData = await authService.getMe();
+          
+          setUser({
+            ...userData,
+            token: token
           });
           
-          if (response.ok) {
-            const userData = await response.json();
-            
-            setUser({
-              ...userData,
-              token: token
-            });
-            
-            if (userData.coins !== undefined && userData.coins !== null) {
-              setCoins(userData.coins);
-            } else {
-              setCoins(1000);
-            }
+          if (userData.coins !== undefined && userData.coins !== null) {
+            setCoins(userData.coins);
           } else {
-            localStorage.removeItem('authToken');
-            resetCurrency();
+            setCoins(1000);
           }
         } catch (error) {
-          localStorage.removeItem('authToken');
+          console.warn('Failed to get user info during app init:', error);
+          clearAuthToken();
           resetCurrency();
         }
       }

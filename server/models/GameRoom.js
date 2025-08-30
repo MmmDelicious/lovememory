@@ -79,6 +79,8 @@ const GameRoom = sequelize.define('GameRoom', {
       key: 'id',
     },
   }
+}, {
+  timestamps: false // Отключаем timestamps, так как в таблице нет created_at/updated_at
 });
 GameRoom.associate = (models) => {
   GameRoom.belongsTo(models.User, { as: 'Host', foreignKey: 'hostId' });

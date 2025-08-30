@@ -112,5 +112,12 @@ Pair.associate = (models) => {
     as: 'Sessions',
     onDelete: 'CASCADE',
   });
+  
+  // Ассоциация с обратной связью по рекомендациям
+  Pair.hasMany(models.RecommendationFeedback, {
+    foreignKey: 'pair_id',
+    as: 'RecommendationFeedbacks',
+    onDelete: 'CASCADE',
+  });
 };
 module.exports = Pair;

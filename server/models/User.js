@@ -191,5 +191,20 @@ User.associate = (models) => {
     as: 'CreatedSessions',
     onDelete: 'SET NULL',
   });
+  
+  // Новые ассоциации для AI-фундамента
+  // Ассоциация с интересами пользователя
+  User.hasMany(models.UserInterest, {
+    foreignKey: 'user_id',
+    as: 'UserInterests',
+    onDelete: 'CASCADE',
+  });
+  
+  // Ассоциация с обратной связью по рекомендациям
+  User.hasMany(models.RecommendationFeedback, {
+    foreignKey: 'user_id',
+    as: 'RecommendationFeedbacks',
+    onDelete: 'CASCADE',
+  });
 };
 module.exports = User;

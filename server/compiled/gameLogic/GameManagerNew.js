@@ -1,12 +1,14 @@
 "use strict";
-// Временно отключаем импорты игр для совместимости
-// import { IGame, IGameState, IPlayer, GAME_TYPES_INFO } from '../types/game.interfaces';
-// import { TicTacToeGameNew } from './games/TicTacToeGameNew';
-// import { MemoryGameNew } from './games/MemoryGameNew';
-// import { ChessGameNew } from './games/ChessGameNew';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GameManagerNew = void 0;
+const game_interfaces_1 = require("../types/game.interfaces");
+// Импортируем новые игры 
+const TicTacToeGameNew_1 = require("./games/TicTacToeGameNew");
+const MemoryGameNew_1 = require("./games/MemoryGameNew");
+const ChessGameNew_1 = require("./games/ChessGameNew");
 // import { QuizGameNew } from './games/QuizGameNew';
 // import { WordleGameNew } from './games/WordleGameNew';
-// import { CodenamesGameNew } from './games/CodenamesGameNew';
+const CodenamesGameNew_1 = require("./games/CodenamesGameNew");
 // import { PokerGameNew } from './games/PokerGameNew';
 /**
  * Обновленный GameManager с поддержкой новой архитектуры
@@ -16,6 +18,11 @@ class GameManagerNew {
     constructor() {
         this.games = new Map(); // any для совместимости со старыми играми
         this.gameInstances = new Map(); // Кэш экземпляров для производительности
+        this.onStateChange = (state) => {
+            if (options.onStateChange) {
+                options.onStateChange(state);
+            }
+        };
     }
     /**
      * Создает новую игру указанного типа
@@ -107,19 +114,13 @@ class GameManagerNew {
      * Проверяет, поддерживается ли тип игры
      */
     isGameTypeSupported(gameType) {
-        // Временно возвращаем true для всех типов игр
-        return ['tic-tac-toe', 'memory', 'chess', 'quiz', 'wordle', 'codenames', 'poker'].includes(gameType);
+        return Object.keys(game_interfaces_1.GAME_TYPES_INFO).includes(gameType);
     }
     /**
      * Получает информацию о типе игры
      */
     getGameTypeInfo(gameType) {
-        // Временно возвращаем базовую информацию
-        return {
-            name: gameType,
-            maxPlayers: 2,
-            description: `${gameType} game`
-        };
+        return game_interfaces_1.GAME_TYPES_INFO[gameType] || null;
     }
     /**
      * Приватный метод для создания экземпляра игры
@@ -146,137 +147,244 @@ class GameManagerNew {
                 throw new Error(`Unsupported game type: ${gameType}`);
         }
     }
-    // Методы создания новых игр (TypeScript) - временно отключены
+    // Методы создания новых игр (TypeScript)
     _createTicTacToeGame(roomId, players, options) {
-        // Временно возвращаем заглушку
-                    // TicTacToe game creation disabled
-        return {
-            gameType: 'tic-tac-toe',
-            status: 'waiting',
-            players: players,
-            getState: () => ({ gameType: 'tic-tac-toe', status: 'waiting' }),
-            cleanup: () => { }
+        const game = new TicTacToeGameNew_1.TicTacToeGameNew(roomId, {
+            timeLimit: options.timeLimit || 30,
+            difficulty: options.difficulty || 'medium'
+        });
+        // Добавляем игроков
+        for (const player of players) {
+            const playerData = {
+                id: player.id || player,
+                name: player.name || player.email || player.id || player,
+                email: player.email,
+                avatar: player.avatar,
+                ready: true
+            };
+            game.addPlayer(playerData);
+        }
+        // Настраиваем колбэки для уведомлений
+        game.onStateChange = (state) => {
+            if (options.onStateChange) {
+                options.onStateChange(state);
+            }
         };
+        return game;
     }
     _createMemoryGameNew(roomId, players, options) {
-        // Временно возвращаем заглушку
-                    // Memory game creation disabled
-        return {
-            gameType: 'memory',
-            status: 'waiting',
-            players: players,
-            getState: () => ({ gameType: 'memory', status: 'waiting' }),
-            cleanup: () => { }
+        const game = new MemoryGameNew_1.MemoryGameNew(roomId, {
+            timeLimit: options.timeLimit || 30,
+            difficulty: options.difficulty || 'easy'
+        });
+        for (const player of players) {
+            const playerData = {
+                id: player.id || player,
+                name: player.name || player.email || player.id || player,
+                email: player.email,
+                avatar: player.avatar,
+                ready: true
+            };
+            game.addPlayer(playerData);
+        }
+        game.onStateChange = (state) => {
+            if (options.onStateChange) {
+                options.onStateChange(state);
+            }
         };
+        return game;
     }
     _createChessGameNew(roomId, players, options) {
-        // Временно возвращаем заглушку
-                    // Chess game creation disabled
-        return {
-            gameType: 'chess',
-            status: 'waiting',
-            players: players,
-            getState: () => ({ gameType: 'chess', status: 'waiting' }),
-            cleanup: () => { }
+        const game = new ChessGameNew_1.ChessGameNew(roomId, {
+            whiteTime: options.whiteTime || 300,
+            blackTime: options.blackTime || 300,
+            increment: options.increment || 2
+        });
+        for (const player of players) {
+            const playerData = {
+                id: player.id || player,
+                name: player.name || player.email || player.id || player,
+                email: player.email,
+                avatar: player.avatar,
+                ready: true
+            };
+            game.addPlayer(playerData);
+        }
+        game.onStateChange = (state) => {
+            if (options.onStateChange) {
+                options.onStateChange(state);
+            }
         };
+        return game;
     }
     _createQuizGameNew(roomId, players, options) {
-        // Временно возвращаем заглушку
-                    // Quiz game creation disabled
-        return {
-            gameType: 'quiz',
-            status: 'waiting',
-            players: players,
-            getState: () => ({ gameType: 'quiz', status: 'waiting' }),
-            cleanup: () => { }
+        const gameFormat = options.gameFormat || (players.length === 4 ? '2v2' : '1v1');
+        throw new Error('Quiz game is temporarily disabled');
+        // const game = new QuizGameNew(roomId, {
+        gameFormat: gameFormat,
+            totalQuestions;
+        options.totalQuestions || 10,
+            questionTimeLimit;
+        options.questionTimeLimit || 15;
+    }
+    ;
+    for(, player, of, players) {
+        const playerData = {
+            id: player.id || player,
+            name: player.name || player.email || player.id || player,
+            email: player.email,
+            avatar: player.avatar,
+            ready: true
         };
-    }
-    _createWordleGameNew(roomId, players, options) {
-        // Временно возвращаем заглушку
-                    // Wordle game creation disabled
-        return {
-            gameType: 'wordle',
-            status: 'waiting',
-            players: players,
-            getState: () => ({ gameType: 'wordle', status: 'waiting' }),
-            cleanup: () => { }
-        };
-    }
-    _createCodenamesGameNew(roomId, players, options) {
-        // Временно возвращаем заглушку
-                    // Codenames game creation disabled
-        return {
-            gameType: 'codenames',
-            status: 'waiting',
-            players: players,
-            getState: () => ({ gameType: 'codenames', status: 'waiting' }),
-            cleanup: () => { }
-        };
-    }
-    _createPokerGameNew(roomId, players, options) {
-        // Временно возвращаем заглушку
-                    // Poker game creation disabled
-        return {
-            gameType: 'poker',
-            status: 'waiting',
-            players: players,
-            getState: () => ({ gameType: 'poker', status: 'waiting' }),
-            cleanup: () => { }
-        };
-    }
-    /**
-     * Утилитарные методы
-     */
-    /**
-     * Проверяет валидность хода для игры
-     */
-    isValidMove(roomId, playerId, move) {
-        const game = this.getGame(roomId);
-        if (!game)
-            return false;
-        try {
-            if (game.isValidMove) {
-                return game.isValidMove(playerId, move);
-            }
-            // Fallback для старых игр
-            return true;
-        }
-        catch {
-            return false;
-        }
-    }
-    /**
-     * Получает доступные ходы для игрока
-     */
-    getValidMoves(roomId, playerId) {
-        const game = this.getGame(roomId);
-        if (!game)
-            return [];
-        try {
-            if (game.getValidMoves) {
-                return game.getValidMoves(playerId);
-            }
-            return [];
-        }
-        catch {
-            return [];
-        }
-    }
-    /**
-     * Очищает все игры (для тестирования или перезапуска)
-     */
-    clearAllGames() {
-        for (const [roomId] of this.games.entries()) {
-            this.removeGame(roomId);
-        }
-    }
-    /**
-     * Получает количество активных игр
-     */
-    getActiveGameCount() {
-        return this.games.size;
+        game.addPlayer(playerData);
     }
 }
+exports.GameManagerNew = GameManagerNew;
+return game;
+_createWordleGameNew(roomId, string, players, any[], options, any);
+any;
+{
+    const gameFormat = options.gameFormat || (players.length === 4 ? '2v2' : '1v1');
+    const requiredPlayers = gameFormat === '2v2' ? 4 : 2;
+    throw new Error('Wordle game is temporarily disabled');
+    // const game = new WordleGameNew(roomId, {
+    gameFormat: gameFormat,
+        language;
+    options.language || 'russian',
+        maxRounds;
+    options.rounds || 3,
+        maxAttempts;
+    options.maxAttempts || 6;
+}
+;
+for (const player of players) {
+    const playerData = {
+        id: player.id || player,
+        name: player.name || player.email || player.id || player,
+        email: player.email,
+        avatar: player.avatar,
+        ready: true
+    };
+    game.addPlayer(playerData);
+}
+// Настраиваем callback для изменения состояния
+game.onStateChange = (state) => {
+    if (options.onStateChange) {
+        options.onStateChange(state);
+    }
+};
+// Автоматически стартуем игру если достаточно игроков
+if (players.length >= requiredPlayers) {
+    game.startGame();
+}
+return game;
+_createCodenamesGameNew(roomId, string, players, any[], options, any);
+CodenamesGameNew_1.CodenamesGameNew;
+{
+    if (players.length !== 4) {
+        throw new Error(`Codenames requires exactly 4 players, but got ${players.length}`);
+    }
+    const game = new CodenamesGameNew_1.CodenamesGameNew(roomId, {
+        turnTimeLimit: options.turnTimeLimit || 120,
+        difficulty: options.difficulty || 'medium'
+    });
+    for (const player of players) {
+        const playerData = {
+            id: player.id || player,
+            name: player.name || player.email || player.id || player,
+            email: player.email,
+            avatar: player.avatar,
+            ready: true
+        };
+        game.addPlayer(playerData);
+    }
+    game.onStateChange = (state) => {
+        if (options.onStateChange) {
+            options.onStateChange(state);
+        }
+    };
+    return game;
+}
+_createPokerGameNew(roomId, string, players, any[], options, any);
+any;
+{
+    // Получаем buy-in из первого игрока или используем дефолтное значение
+    const buyInCoins = players[0]?.buyInCoins || 1000;
+    const smallBlind = Math.max(1, Math.floor(buyInCoins * 0.005)); // 0.5% от buy-in
+    const bigBlind = Math.max(2, Math.floor(buyInCoins * 0.01)); // 1% от buy-in
+    throw new Error('Poker game is temporarily disabled');
+    // const game = new PokerGameNew(roomId, {
+    smallBlind,
+        bigBlind,
+        buyInAmount;
+    buyInCoins,
+        turnTimeLimit;
+    options.turnTimeLimit || 30000;
+}
+;
+// Добавляем игроков
+for (const player of players) {
+    const playerData = {
+        id: player.id || player,
+        name: player.name || player.email || player.id || player,
+        email: player.email,
+        avatar: player.avatar,
+        ready: true
+    };
+    game.addPlayer(playerData);
+}
+// Настраиваем callback состояния
+game.onStateChange = (state) => {
+    if (options.onStateChange) {
+        options.onStateChange(state);
+    }
+};
+return game;
+isValidMove(roomId, string, playerId, string, move, any);
+boolean;
+{
+    const game = this.getGame(roomId);
+    if (!game)
+        return false;
+    try {
+        if (game.isValidMove) {
+            return game.isValidMove(playerId, move);
+        }
+        // Fallback для старых игр
+        return true;
+    }
+    catch {
+        return false;
+    }
+}
+getValidMoves(roomId, string, playerId, string);
+any[];
+{
+    const game = this.getGame(roomId);
+    if (!game)
+        return [];
+    try {
+        if (game.getValidMoves) {
+            return game.getValidMoves(playerId);
+        }
+        return [];
+    }
+    catch {
+        return [];
+    }
+}
+clearAllGames();
+void {
+    : .games.entries()
+};
+{
+    this.removeGame(roomId);
+}
+getActiveGameCount();
+number;
+{
+    return this.games.size;
+}
 // Экспортируем singleton instance
-module.exports = new GameManagerNew();
+exports.default = new GameManagerNew();
 //# sourceMappingURL=GameManagerNew.js.map

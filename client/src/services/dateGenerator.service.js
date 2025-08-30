@@ -614,6 +614,7 @@ class DateGeneratorService {
       end_date: this.formatEventDateTime(selectedDate, selectedOption.schedule[selectedOption.schedule.length - 1].endTime),
       event_type: 'date',
       isShared: true,
+      source: 'AI_SUGGESTED', // Важно! Это событие создано AI
       metadata: {
         generatedBy: 'AI_MASCOT',
         option: selectedOption,

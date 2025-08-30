@@ -1,22 +1,44 @@
 .registerBox {
   max-width: 760px; /* Делаем блок регистрации шире */
+  padding: 30px 40px 40px; /* Уменьшаем верхний padding */
+  max-height: 90vh; /* Ограничиваем высоту */
+  overflow-y: auto; /* Добавляем прокрутку если нужно */
 }
 
 .formGrid {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 18px 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px; /* Немного уменьшаем отступы */
+  margin-bottom: 20px; /* Уменьшаем отступ снизу */
 }
 
 /* Элемент занимает всю ширину грида */
 .gridSpanFull {
-grid-column: 1 / -1;
+  grid-column: 1 / -1;
+}
+
+/* Компактный дизайн для маленьких экранов */
+@media (max-height: 700px) {
+  .registerBox {
+    padding: 20px 30px 30px;
+    max-height: 95vh;
+  }
+  
+  .formGrid {
+    gap: 12px 16px;
+    margin-bottom: 16px;
+  }
 }
 
 @media (max-width: 520px) {
   /* На маленьких экранах возвращаем одну колонку */
   .formGrid {
-      grid-template-columns: 1fr;
-      gap: 18px;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  
+  .registerBox {
+    padding: 20px 24px 30px;
+    max-height: 95vh;
   }
 }

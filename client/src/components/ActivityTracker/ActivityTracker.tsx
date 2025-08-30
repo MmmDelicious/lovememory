@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useUser } from '../../store/hooks';
 import { usePairing } from '../../hooks/usePairing';
+import api from '../../services/api';
 import styles from './ActivityTracker.module.css';
 
 interface ActivityData {
@@ -66,16 +67,8 @@ const ActivityTracker: React.FC = () => {
     
     setIsLoading(true);
     try {
-      const response = await fetch('/api/activity-tracker/stats', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data.data);
-      }
+      const response = await api.get('/activity-tracker/stats');
+      setStats(response.data.data);
     } catch (error) {
       console.error('Failed to load activity stats:', error);
     } finally {
@@ -88,26 +81,16 @@ const ActivityTracker: React.FC = () => {
     
     setIsLoading(true);
     try {
-      const response = await fetch('/api/activity-tracker/activity', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(activityData)
-      });
+      const response = await api.post('/activity-tracker/activity', activityData);
       
-      if (response.ok) {
-        const data = await response.json();
-        // Показываем уведомление о достижениях
-        if (data.data.newAchievements.length > 0) {
-          alert(data.data.message);
-        }
-        // Перезагружаем статистику
-        await loadStats();
-        setShowManualInput(false);
-        setManualData({ steps: 0, calories: 0, activeMinutes: 0, distance: 0 });
+      // Показываем уведомление о достижениях
+      if (response.data.data.newAchievements.length > 0) {
+        alert(response.data.data.message);
       }
+      // Перезагружаем статистику
+      await loadStats();
+      setShowManualInput(false);
+      setManualData({ steps: 0, calories: 0, activeMinutes: 0, distance: 0 });
     } catch (error) {
       console.error('Failed to update activity:', error);
     } finally {
@@ -135,18 +118,8 @@ const ActivityTracker: React.FC = () => {
     if (!user) return;
     
     try {
-      const response = await fetch('/api/activity-tracker/goals', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ dailyGoal, weeklyGoal })
-      });
-      
-      if (response.ok) {
-        await loadStats();
-      }
+      await api.put('/activity-tracker/goals', { dailyGoal, weeklyGoal });
+      await loadStats();
     } catch (error) {
       console.error('Failed to update goals:', error);
     }

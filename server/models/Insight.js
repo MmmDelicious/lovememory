@@ -110,4 +110,37 @@ Insight.getLatestForPair = async function(pairId, limit = 10) {
   });
 };
 
+// Получение инсайтов по типу
+Insight.getByType = async function(pairId, insightType, limit = 5) {
+  return await this.findAll({
+    where: { 
+      pair_id: pairId,
+      insight_type: insightType 
+    },
+    order: [['generated_at', 'DESC']],
+    limit
+  });
+};
+
+// Получение непрочитанных инсайтов
+Insight.getUnread = async function(pairId, lastReadDate) {
+  const whereCondition = { pair_id: pairId };
+  if (lastReadDate) {
+    whereCondition.generated_at = {
+      [require('sequelize').Op.gt]: new Date(lastReadDate)
+    };
+  }
+  
+  return await this.findAll({
+    where: whereCondition,
+    order: [['generated_at', 'DESC']]
+  });
+};
+
+// Пометить инсайты как прочитанные (не храним в БД, используем localStorage)
+Insight.markAsRead = function(insightIds) {
+  // Это будет обрабатываться на фронтенде через localStorage
+  return { success: true, marked_count: insightIds.length };
+};
+
 module.exports = Insight;

@@ -145,79 +145,65 @@ const Calendar: React.FC<CalendarProps> = ({
 
 
 
-  // ВРЕМЕННО ОТКЛЮЧЕНО: useEffect(() => {
-  //   const draggables: any[] = [];
-  //   
-  //   const createDraggable = (container: HTMLElement) => {
-  //     try {
-  //       return new Draggable(container, {
-  //         itemSelector: '.js-template-item',
-  //         eventData: (el) => ({
-  //           title: el.getAttribute('data-title') || 'Событие',
-  //           extendedProps: {
-  //             eventType: el.getAttribute('data-type') || 'plan',
-  //             isOwner: true,
-  //             isShared: el.getAttribute('data-is-shared') === 'true',
-  //             templateId: el.getAttribute('data-template-id'),
-  //             description: el.getAttribute('data-description') || '',
-  //           },
-  //           backgroundColor: el.getAttribute('data-color') || '#D97A6C',
-  //           borderColor: el.getAttribute('data-color') || '#D97A6C',
-  //           duration: el.getAttribute('data-duration') || null,
-  //           allDay: el.getAttribute('data-is-all-day') === 'true',
-  //         }),
-  //       });
-  //     } catch (error) {
-  //       console.warn('Ошибка при создании Draggable:', error);
-  //       return null;
-  //     }
-  //   };
-  //   
-  //   
-  //   if (templateContainerRef.current) {
-  //     const draggable = createDraggable(templateContainerRef.current);
-  //     if (draggable) {
-  //       draggables.push(draggable);
-  //     }
-  //   }
-  //   
-  //   if (customTemplatesRef.current) {
-  //     const draggable = createDraggable(customTemplatesRef.current);
-  //     if (draggable) {
-  //       draggables.push(draggable);
-  //     }
-  //   }
-  //   
-  //   
-  //   return () => {
-  //     
-  //     stopMascotLoop();
-  //     clearMascotTargets();
-  //     
-  //     
-  //     draggables.forEach(draggable => {
-  //       if (draggable && typeof draggable.destroy === 'function') {
-  //       try {
-  //         draggable.destroy();
-  //       } catch (error) {
-  //         console.warn('Ошибка при уничтожении Draggable:', error);
-  //       }
-  //     }
-  //     
-  //     
-  //     draggables.length = 0;
-  //     
-  //     
-  //     if (calendarRef.current) {
-  //       try {
-  //         // Calendar API не имеет метода destroy, просто очищаем ref
-  //         calendarRef.current = null;
-  //       } catch (error) {
-  //         console.warn('Ошибка при очистке Calendar ref:', error);
-  //       }
-  //     }
-  //   };
-  // }, [stopMascotLoop, clearMascotTargets]); // Добавляем зависимости
+  useEffect(() => {
+    const draggables: any[] = [];
+    
+    const createDraggable = (container: HTMLElement) => {
+      try {
+        return new Draggable(container, {
+          itemSelector: '.js-template-item',
+          eventData: (el) => ({
+            title: el.getAttribute('data-title') || 'Событие',
+            extendedProps: {
+              eventType: el.getAttribute('data-type') || 'plan',
+              isOwner: true,
+              isShared: el.getAttribute('data-is-shared') === 'true',
+              templateId: el.getAttribute('data-template-id'),
+              description: el.getAttribute('data-description') || '',
+            },
+            backgroundColor: el.getAttribute('data-color') || '#D97A6C',
+            borderColor: el.getAttribute('data-color') || '#D97A6C',
+            duration: el.getAttribute('data-duration') || null,
+            allDay: el.getAttribute('data-is-all-day') === 'true',
+          }),
+        });
+      } catch (error) {
+        console.warn('Ошибка при создании Draggable:', error);
+        return null;
+      }
+    };
+    
+    if (templateContainerRef.current) {
+      const draggable = createDraggable(templateContainerRef.current);
+      if (draggable) {
+        draggables.push(draggable);
+      }
+    }
+    
+    if (customTemplatesRef.current) {
+      const draggable = createDraggable(customTemplatesRef.current);
+      if (draggable) {
+        draggables.push(draggable);
+      }
+    }
+    
+    return () => {
+      stopMascotLoop();
+      clearMascotTargets();
+      
+      draggables.forEach(draggable => {
+        if (draggable && typeof draggable.destroy === 'function') {
+          try {
+            draggable.destroy();
+          } catch (error) {
+            console.warn('Ошибка при уничтожении Draggable:', error);
+          }
+        }
+      });
+      
+      draggables.length = 0;
+    };
+  }, [stopMascotLoop, clearMascotTargets]);
 
 
   useEffect(() => {
@@ -226,6 +212,8 @@ const Calendar: React.FC<CalendarProps> = ({
       clearMascotTargets();
     };
   }, [stopMascotLoop, clearMascotTargets]);
+
+
 
   const openStoryMode = useCallback((date: string) => {
     const dayEvents = events.filter(event => 
@@ -296,6 +284,18 @@ const Calendar: React.FC<CalendarProps> = ({
       startMascotLoop();
     }
   }, [events, registerMascotTargets, startMascotLoop, openStoryMode]);
+
+  // Инициализация маскотов когда события или календарь загружаются
+  useEffect(() => {
+    if (events.length > 0) {
+      // Небольшая задержка чтобы FullCalendar успел отрендериться
+      const timer = setTimeout(() => {
+        updateMascotTargets();
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [events, updateMascotTargets]);
 
 
 
@@ -445,7 +445,8 @@ const Calendar: React.FC<CalendarProps> = ({
         event_type: eventData.event_type,
         isShared: eventData.isShared,
         is_recurring: eventData.is_recurring,
-        recurrence_rule: eventData.recurrence_rule
+        recurrence_rule: eventData.recurrence_rule,
+        source: 'USER_CREATED' // Событие создано пользователем вручную
       };
       
       if (eventData.id) {

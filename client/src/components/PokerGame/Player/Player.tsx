@@ -1,5 +1,6 @@
 import React from 'react';
 import UserAvatar from '../../UserAvatar/UserAvatar';
+import { User } from '../../../store/slices/authSlice';
 import PlayingCard from '../../PlayingCard/PlayingCard';
 import type { PlayerProps } from '../../../../types/game.types';
 import styles from './Player.module.css';
@@ -55,8 +56,8 @@ const Player: React.FC<PlayerProps> = ({
   };
   return (
     <div className={`${styles.playerContainer} ${isActive ? styles.active : ''} ${isWinner ? styles.winner : ''} ${player?.hasBoughtIn ? styles.hasBoughtIn : styles.waitingBuyIn}`}>
-      <UserAvatar
-        user={player}
+              <UserAvatar 
+          user={player as User}
         className={styles.avatar}
         size="medium"
         variant="default"

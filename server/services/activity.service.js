@@ -29,18 +29,19 @@ class ActivityService {
    */
   async findUserPairId(userId) {
     try {
-      const user = await User.findByPk(userId, {
-        include: [{
-          model: Pair,
-          through: { 
-            model: require('../models').UserPair,
-            where: { accepted: true }
-          },
-          where: { status: 'active' }
-        }]
+      // Ищем активную пару через прямой запрос к Pair
+      const { Op } = require('sequelize');
+      const pair = await Pair.findOne({
+        where: {
+          [Op.or]: [
+            { user1Id: userId },
+            { user2Id: userId }
+          ],
+          status: 'active'
+        }
       });
       
-      return user?.Pairs?.[0]?.id || null;
+      return pair?.id || null;
     } catch (error) {
       console.warn('Could not find pair for user:', userId, error.message);
       return null;
@@ -236,11 +237,11 @@ class ActivityService {
       return await ActivityLog.findAll({
         where: {
           pair_id: pairId,
-          created_at: {
+          createdAt: {
             [require('sequelize').Op.between]: [startDate, endDate]
           }
         },
-        order: [['created_at', 'DESC']],
+        order: [['createdAt', 'DESC']],
         include: [
           { model: User, as: 'User', attributes: ['id', 'first_name', 'display_name'] }
         ]
@@ -259,11 +260,11 @@ class ActivityService {
       return await ActivityLog.findAll({
         where: {
           user_id: userId,
-          created_at: {
+          createdAt: {
             [require('sequelize').Op.between]: [startDate, endDate]
           }
         },
-        order: [['created_at', 'DESC']]
+        order: [['createdAt', 'DESC']]
       });
     } catch (error) {
       console.error('Failed to get user activities:', error);

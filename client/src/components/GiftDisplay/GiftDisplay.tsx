@@ -42,7 +42,7 @@ const GiftDisplay: React.FC<GiftDisplayProps> = ({ gift, onClose }) => {
       await fetch(`/api/gifts/${gift.id}/viewed`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${user.token}`
+          'Authorization': `Bearer ${user?.token}`
         }
       });
     } catch (error) {

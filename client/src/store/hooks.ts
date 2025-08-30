@@ -250,7 +250,7 @@ export const useAuthActions = () => {
     updateUser: (updates: any) => dispatch(updateUser(updates)),
     logout: () => dispatch(logout()),
     loginUser: (credentials: { email: string; password: string }) => dispatch(loginUser(credentials)),
-    registerUser: (userData: { email: string; password: string; name: string; first_name?: string; last_name?: string; gender?: 'male' | 'female' | 'other'; city?: string }) => dispatch(registerUser(userData)),
+    registerUser: (userData: { email: string; password: string; first_name: string; gender: 'male' | 'female' | 'other'; city: string; age: number }) => dispatch(registerUser(userData)),
     syncCoinsWithCurrency: (coins: number) => dispatch(syncCoinsWithCurrency(coins))
   }), [dispatch]);
 };

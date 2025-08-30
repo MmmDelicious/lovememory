@@ -14,16 +14,11 @@ class AnalyticsService {
    */
   async fetchUserActivities(userId, daysBack = 30) {
     try {
-      const response = await fetch(`/api/user/activities?days=${daysBack}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      // Импортируем API instance
+      const { default: api } = await import('./api');
+      const response = await api.get(`/user/activities?days=${daysBack}`);
       
-      if (response.ok) {
-        return await response.json();
-      }
-      return [];
+      return response.data || [];
     } catch (error) {
       console.warn('Failed to fetch user activities, using fallback:', error);
       return [];
