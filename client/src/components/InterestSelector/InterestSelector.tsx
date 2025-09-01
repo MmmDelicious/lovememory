@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaMinus, FaCheck } from 'react-icons/fa';
+import { Heart, Utensils, Film, Palette, Dumbbell, Plane, Music, Book, Gamepad2, Trees, Laptop, Shirt, ChefHat, Camera, Car, Hammer, GraduationCap, HandHeart, List, Search, ChevronDown, Star, Lightbulb } from 'lucide-react';
 import styles from './InterestSelector.module.css';
 
 export interface Interest {
@@ -26,37 +26,37 @@ interface InterestSelectorProps {
   groupByCategory?: boolean;
 }
 
-const categoryTranslations: Record<string, string> = {
-  food: '🍽️ Еда',
-  cinema: '🎬 Кино и развлечения',
-  hobby: '🎨 Хобби',
-  sport: '⚽ Спорт',
-  travel: '✈️ Путешествия',
-  music: '🎵 Музыка',
-  art: '🎭 Искусство',
-  books: '📚 Книги',
-  games: '🎮 Игры',
-  nature: '🌲 Природа',
-  technology: '💻 Технологии',
-  fashion: '👗 Мода',
-  cooking: '👨‍🍳 Готовка',
-  fitness: '💪 Фитнес',
-  photography: '📸 Фотография',
-  dancing: '💃 Танцы',
-  shopping: '🛍️ Шоппинг',
-  animals: '🐕 Животные',
-  cars: '🚗 Автомобили',
-  crafts: '🔨 Рукоделие',
-  education: '🎓 Образование',
-  volunteering: '🤝 Волонтерство',
-  other: '📋 Другое'
+const categoryConfig: Record<string, { name: string; icon: React.ReactNode }> = {
+  food: { name: 'Еда', icon: <Utensils size={16} /> },
+  cinema: { name: 'Кино и развлечения', icon: <Film size={16} /> },
+  hobby: { name: 'Хобби', icon: <Palette size={16} /> },
+  sport: { name: 'Спорт', icon: <Dumbbell size={16} /> },
+  travel: { name: 'Путешествия', icon: <Plane size={16} /> },
+  music: { name: 'Музыка', icon: <Music size={16} /> },
+  art: { name: 'Искусство', icon: <Palette size={16} /> },
+  books: { name: 'Книги', icon: <Book size={16} /> },
+  games: { name: 'Игры', icon: <Gamepad2 size={16} /> },
+  nature: { name: 'Природа', icon: <Trees size={16} /> },
+  technology: { name: 'Технологии', icon: <Laptop size={16} /> },
+  fashion: { name: 'Мода', icon: <Shirt size={16} /> },
+  cooking: { name: 'Готовка', icon: <ChefHat size={16} /> },
+  fitness: { name: 'Фитнес', icon: <Dumbbell size={16} /> },
+  photography: { name: 'Фотография', icon: <Camera size={16} /> },
+  dancing: { name: 'Танцы', icon: <Music size={16} /> },
+  shopping: { name: 'Шоппинг', icon: <Shirt size={16} /> },
+  animals: { name: 'Животные', icon: <Heart size={16} /> },
+  cars: { name: 'Автомобили', icon: <Car size={16} /> },
+  crafts: { name: 'Рукоделие', icon: <Hammer size={16} /> },
+  education: { name: 'Образование', icon: <GraduationCap size={16} /> },
+  volunteering: { name: 'Волонтерство', icon: <HandHeart size={16} /> },
+  other: { name: 'Другое', icon: <List size={16} /> }
 };
 
-const preferenceLabels = {
-  love: { label: 'Обожаю', icon: '❤️', color: '#e91e63' },
-  like: { label: 'Нравится', icon: '👍', color: '#4caf50' },
-  neutral: { label: 'Нейтрально', icon: '😐', color: '#9e9e9e' },
-  dislike: { label: 'Не нравится', icon: '👎', color: '#f44336' }
+const preferenceConfig = {
+  love: { label: 'Обожаю', icon: <Heart size={14} fill="currentColor" />, color: 'var(--color-primary)' },
+  like: { label: 'Нравится', icon: <Star size={14} fill="currentColor" />, color: 'var(--color-success)' },
+  neutral: { label: 'Нейтрально', icon: <Star size={14} />, color: 'var(--color-text-tertiary)' },
+  dislike: { label: 'Не нравится', icon: <Star size={14} />, color: 'var(--color-error)' }
 };
 
 const InterestSelector: React.FC<InterestSelectorProps> = ({
@@ -124,7 +124,7 @@ const InterestSelector: React.FC<InterestSelectorProps> = ({
       <div className={styles.header}>
         <h3 className={styles.title}>Расскажите о ваших интересах</h3>
         <p className={styles.subtitle}>
-          Нажмите на интерес для выбора, используйте ползунок для настройки отношения: ❤️ обожаю (9-10), 👍 нравится (7-8), 😐 нейтрально (4-6), 👎 не нравится (1-3)
+          Выберите интересы, которые вам близки. Используйте шкалу интенсивности для точной настройки предпочтений.
         </p>
         <div className={styles.counter}>
           <span className={`${styles.count} ${hasMinimum ? styles.valid : styles.invalid}`}>
@@ -161,7 +161,10 @@ const InterestSelector: React.FC<InterestSelectorProps> = ({
               className={`${styles.categoryButton} ${selectedCategory === category ? styles.active : ''}`}
               onClick={() => setSelectedCategory(category)}
             >
-              {categoryTranslations[category] || category}
+              <span className={styles.categoryButtonIcon}>
+                {categoryConfig[category]?.icon || <List size={14} />}
+              </span>
+              {categoryConfig[category]?.name || category}
             </button>
           ))}
         </div>
@@ -172,7 +175,10 @@ const InterestSelector: React.FC<InterestSelectorProps> = ({
           <div key={category} className={styles.categoryGroup}>
             {groupByCategory && category !== 'all' && (
               <h4 className={styles.categoryTitle}>
-                {categoryTranslations[category] || category}
+                <span className={styles.categoryIcon}>
+                  {categoryConfig[category]?.icon || <List size={16} />}
+                </span>
+                {categoryConfig[category]?.name || category}
               </h4>
             )}
             
@@ -188,23 +194,23 @@ const InterestSelector: React.FC<InterestSelectorProps> = ({
                     className={`${styles.interestCard} ${isSelected(interest.id) ? styles.selected : ''}`}
                     onClick={() => handleInterestClick(interest.id)}
                     style={{
-                      borderColor: preference ? preferenceLabels[preference].color : undefined,
+                      borderColor: preference ? preferenceConfig[preference].color : undefined,
                       opacity: !canSelectMore && !isSelected(interest.id) ? 0.5 : 1
                     }}
                   >
                     <div className={styles.interestContent}>
                       <div className={styles.interestHeader}>
-                        {interest.emoji && (
-                          <span className={styles.interestEmoji}>{interest.emoji}</span>
-                        )}
+                        <div className={styles.interestIcon}>
+                          {categoryConfig[interest.category]?.icon || <Heart size={16} />}
+                        </div>
                         <span className={styles.interestName}>{interest.name}</span>
                         {isSelected(interest.id) && preference && (
-                          <span 
+                          <div 
                             className={styles.preferenceIcon}
-                            style={{ color: preferenceLabels[preference].color }}
+                            style={{ color: preferenceConfig[preference].color }}
                           >
-                            {preferenceLabels[preference].icon}
-                          </span>
+                            {preferenceConfig[preference].icon}
+                          </div>
                         )}
                       </div>
                       
@@ -255,13 +261,16 @@ const InterestSelector: React.FC<InterestSelectorProps> = ({
               return (
                 <div key={selected.interest_id} className={styles.selectedItem}>
                   <span className={styles.selectedItemContent}>
-                    {interest.emoji} {interest.name}
-                    <span 
+                    <div className={styles.selectedItemIcon}>
+                      {categoryConfig[interest.category]?.icon || <Heart size={14} />}
+                    </div>
+                    {interest.name}
+                    <div 
                       className={styles.selectedPreference}
-                      style={{ color: preferenceLabels[selected.preference].color }}
+                      style={{ color: preferenceConfig[selected.preference].color }}
                     >
-                      {preferenceLabels[selected.preference].icon}
-                    </span>
+                      {preferenceConfig[selected.preference].icon}
+                    </div>
                   </span>
                   <span className={styles.selectedIntensity}>
                     {selected.intensity}/10

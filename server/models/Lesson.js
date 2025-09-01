@@ -74,7 +74,8 @@ const Lesson = sequelize.define('Lesson', {
     defaultValue: true,
   }
 }, {
-  tableName: 'lessons'
+  tableName: 'lessons',
+  timestamps: false  // Отключаем timestamps для модели Lesson
 });
 Lesson.prototype.checkTriggers = function(relationshipMetrics, userStreak = 0, gapDays = 0) {
   if (!this.triggers || Object.keys(this.triggers).length === 0) {

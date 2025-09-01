@@ -195,8 +195,7 @@ exports.setMultipleUserInterests = async (req, res, next) => {
         interest_id,
         preference,
         intensity: intensity || 5,
-        metadata: {},
-        added_at: created ? new Date() : undefined
+        metadata: {}
       });
       
       results.push(userInterest);

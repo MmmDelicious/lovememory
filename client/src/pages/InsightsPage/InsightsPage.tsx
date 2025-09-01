@@ -18,6 +18,8 @@ import HexagonChart from '../../components/HexagonChart/HexagonChart';
 import PrivacyControls from '../../components/PrivacyControls/PrivacyControls';
 import OverviewTab from '../../components/OverviewTab/OverviewTab';
 import AnalyticsMascot from '../../components/AnalyticsMascot/AnalyticsMascot';
+import FreeAnalytics from '../../components/FreeAnalytics/FreeAnalytics';
+
 const mockData = {
   harmonyScore: 87,
   previousScore: 82,
@@ -27,6 +29,7 @@ const mockData = {
     gaming: 8
   }
 };
+
 const PSYCHOLOGY_QUOTES = [
   {
     text: "Любовь - это не только смотреть друг на друга, но и смотреть в одном направлении.",
@@ -113,8 +116,9 @@ const InsightsPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+    
     (async () => {
-      let isMounted = true;
       try {
         const [statsResponse, profileResponse, eventsResponse] = await Promise.all([
           userService.getProfileStats(),
@@ -148,7 +152,9 @@ const InsightsPage: React.FC = () => {
         console.error('Error loading user data:', e);
       }
     })();
+    
     return () => { 
+      isMounted = false;
     };
   }, [user, analyticsView]);
   const handlePremiumUpgrade = () => {
@@ -169,7 +175,31 @@ const InsightsPage: React.FC = () => {
     setHasMascotShownWelcome(true);
   };
 
+  // Определяем уровень подписки пользователя
+  const getUserSubscriptionLevel = () => {
+    if (!user?.role) return 'free';
+    if (user.role === 'premium') return 'premium';
+    if (user.role === 'basic') return 'basic';
+    return 'free';
+  };
+
+  const subscriptionLevel = getUserSubscriptionLevel();
+  const isBasicOrHigher = subscriptionLevel === 'basic' || subscriptionLevel === 'premium';
+  const isPremium = subscriptionLevel === 'premium';
+
   const renderAnalytics = () => {
+    // Для free пользователей показываем упрощенную аналитику
+    if (subscriptionLevel === 'free') {
+      return (
+        <FreeAnalytics
+          harmonyScore={analyticsData?.harmonyIndex}
+          events={events}
+          onUpgrade={() => setIsPremiumModalOpen(true)}
+        />
+      );
+    }
+    
+    // Для basic/premium показываем полную аналитику
     return renderOverviewContent();
   };
 
@@ -238,7 +268,9 @@ const InsightsPage: React.FC = () => {
         graphData={relationshipGraphData}
         events={events}
         user={user}
-        isPremium={user?.role === 'premium'}
+        isPremium={isPremium}
+        isBasicOrHigher={isBasicOrHigher}
+        subscriptionLevel={subscriptionLevel}
         onUpgrade={() => setIsPremiumModalOpen(true)}
       />
     );
@@ -292,10 +324,10 @@ const InsightsPage: React.FC = () => {
         currentSettings={privacySettings}
       />
       
-      {/* Analytics Mascot - Always show on Overview tab */}
-      {analyticsView === 'overview' && (
+      {/* Analytics Mascot - Show only for Basic/Premium users */}
+      {analyticsView === 'overview' && isBasicOrHigher && (
         <AnalyticsMascot
-          isPremium={true}
+          isPremium={isPremium}
           onFirstLogin={showMascotWelcome}
           onDismiss={handleMascotDismiss}
           userName={userData?.name || user?.display_name || user?.first_name || 'Пользователь'}

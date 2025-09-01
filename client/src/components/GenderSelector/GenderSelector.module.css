@@ -26,25 +26,26 @@
   gap: 8px;
   cursor: pointer;
   padding: 8px;
-  border-radius: 16px;
   transition: all 0.3s ease;
-  border: 3px solid transparent;
+  /* Убираем стили контейнера, они будут только у avatarWrapper */
 }
 
 .avatarOption:hover {
-  background-color: rgba(231, 122, 101, 0.1);
   transform: translateY(-2px);
 }
 
+.avatarOption:hover .avatarWrapper {
+  border-color: rgba(217, 122, 108, 0.5); /* Легкая граница при hover */
+  box-shadow: 0 4px 12px rgba(217, 122, 108, 0.2);
+}
+
 .avatarOption.selected {
-  border-color: #e77a65;
-  background-color: rgba(231, 122, 101, 0.15);
-  box-shadow: 0 4px 16px rgba(231, 122, 101, 0.3);
+  /* Убираем стили выделения с контейнера */
 }
 
 .avatarWrapper {
-  width: 80px;
-  height: 80px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
@@ -53,10 +54,12 @@
   background-color: #f8f9fa;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  border: 3px solid transparent; /* Добавляем прозрачную границу */
 }
 
 .avatarOption.selected .avatarWrapper {
-  box-shadow: 0 4px 16px rgba(231, 122, 101, 0.4);
+  border-color: var(--color-primary); /* Оранжевая граница только у аватарки */
+  box-shadow: 0 4px 16px rgba(217, 122, 108, 0.4);
   transform: scale(1.05);
 }
 
@@ -91,13 +94,13 @@
 }
 
 .otherButton:hover {
-  border-color: #e77a65;
-  color: #e77a65;
-  background-color: rgba(231, 122, 101, 0.1);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: rgba(217, 122, 108, 0.1);
 }
 
 .otherButton.selected {
-  border-color: #e77a65;
-  background-color: #e77a65;
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
   color: white;
 } 

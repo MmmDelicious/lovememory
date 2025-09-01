@@ -55,8 +55,17 @@ export const useInteractiveMascot = (config) => {
     resetIdleTimers();
   };
   const triggerError = (serverMessage) => {
+    console.group('useInteractiveMascot: triggerError called');
+    console.log('Received server message:', serverMessage);
+    console.log('Available error phrases:', allPhrases.error);
+    
     const errorMessage = serverMessage || getRandomPhrase(allPhrases.error);
+    console.log('Final mascot message:', errorMessage);
+    
+    console.log('Setting temporary message with 7000ms duration');
     setTemporaryMessage(errorMessage, 7000);
+    console.log('triggerError completed');
+    console.groupEnd();
   };
   return { mascotMessage, handleAvatarClick, handleInteraction, triggerError };
 };

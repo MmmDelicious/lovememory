@@ -7,8 +7,7 @@ import GameLayout from './layouts/GameLayout/GameLayout';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 
 // Lazy loading для основных страниц
-const LoginPage = React.lazy(() => import('./pages/LoginPage/LoginPage'));
-const RegisterPage = React.lazy(() => import('./pages/RegisterPage/RegisterPage'));
+const AuthPage = React.lazy(() => import('./pages/AuthPage/AuthPage'));
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage/DashboardPage'));
 const DayDetailPage = React.lazy(() => import('./pages/DayDetailPage/DayDetailPage'));
 const ProfilePage = React.lazy(() => import('./pages/ProfilePage/ProfilePage'));
@@ -81,8 +80,8 @@ const AppRoutes: React.FC = () => {
       <ErrorBoundary>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/register" element={<AuthPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
             <Route path="/error" element={<ErrorPage />} />
             <Route path="*" element={<Navigate to="/login" />} />

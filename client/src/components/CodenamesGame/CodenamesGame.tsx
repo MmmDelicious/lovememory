@@ -54,7 +54,7 @@ const CodenamesGame: React.FC<CodenamesGameProps> = ({
       return;
     }
     const timer = setInterval(() => {
-      setTimeRemaining(prev => Math.max(0, prev - 1));
+      setTimeRemaining((prev: number) => Math.max(0, prev - 1));
     }, 1000);
     return () => clearInterval(timer);
   }, [gameState?.status, gameState?.turnStartTime, timeRemaining]);
@@ -70,13 +70,10 @@ const CodenamesGame: React.FC<CodenamesGameProps> = ({
     if (currentPhase !== 'guessing' || !isCurrentPlayer || isCaptain) return;
     try {
       setError('');
-      const result = await makeMove({
+      await makeMove({
         type: 'guess',
         cardId: cardId
       });
-      if (result?.error) {
-        setError(result.error);
-      }
     } catch (error: any) {
       setError(error.message || 'Ошибка при выборе карты');
     }
@@ -84,12 +81,9 @@ const CodenamesGame: React.FC<CodenamesGameProps> = ({
   const handlePass = async () => {
     try {
       setError('');
-      const result = await makeMove({
+      await makeMove({
         type: 'pass'
       });
-      if (result?.error) {
-        setError(result.error);
-      }
     } catch (error: any) {
       setError(error.message || 'Ошибка при пропуске хода');
     }
@@ -310,13 +304,15 @@ const CodenamesGame: React.FC<CodenamesGameProps> = ({
       <div className={styles.gameMainArea}>
         {}
         <div className={styles.teamsInfo}>
-        {Object.entries(gameState.teams).map(([teamId, team]: [string, Team]) => (
+        {Object.entries(gameState.teams).map(([teamId, team]: [string, any]) => {
+          const teamData = team as Team;
+          return (
           <div 
             key={teamId}
             className={`${styles.teamInfo} ${currentTeam === teamId ? styles.currentTeam : ''}`}
           >
-            <div className={`${styles.teamHeader} ${team.color === 'red' ? styles.teamred : styles.teamblue}`}>
-              <h3>{team.name}</h3>
+            <div className={`${styles.teamHeader} ${teamData.color === 'red' ? styles.teamred : styles.teamblue}`}>
+              <h3>{teamData.name}</h3>
               <div className={styles.teamProgress}>
                 {gameState?.teamProgress?.[teamId]?.revealed || 0} / {gameState?.teamProgress?.[teamId]?.total || 0}
               </div>
@@ -325,16 +321,17 @@ const CodenamesGame: React.FC<CodenamesGameProps> = ({
               <div className={styles.teamMember}>
                 <User size={16} />
                 <span className={styles.role}>Капитан:</span>
-                <span className={styles.playerName}>{getPlayerName(team.captain)}</span>
+                <span className={styles.playerName}>{getPlayerName(teamData.captain)}</span>
               </div>
               <div className={styles.teamMember}>
                 <Users size={16} />
                 <span className={styles.role}>Игрок:</span>
-                <span className={styles.playerName}>{getPlayerName(team.player)}</span>
+                <span className={styles.playerName}>{getPlayerName(teamData.player)}</span>
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
       {}
       {gameState?.status === 'in_progress' && (

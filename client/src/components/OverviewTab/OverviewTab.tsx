@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Heart, AlertTriangle, Users, Crown, Sparkles, Network, Brain, Activity } from 'lucide-react';
+import { TrendingUp, Heart, AlertTriangle, Users, Crown, Sparkles, Network, Brain } from 'lucide-react';
 import styles from './OverviewTab.module.css';
 import Lottie from 'lottie-react';
 import { getLessonAnimation } from '../../assets/lessons';
 import HexagonChart from '../HexagonChart/HexagonChart';
 import LoveLanguageAnalysis from '../LoveLanguageAnalysis/LoveLanguageAnalysis';
-import ActivityTracker from '../ActivityTracker/ActivityTracker';
+
 
 interface OverviewTabProps {
   harmonyScore?: number;
@@ -37,6 +37,8 @@ interface OverviewTabProps {
   events?: any[];
   user?: any;
   isPremium?: boolean;
+  isBasicOrHigher?: boolean;
+  subscriptionLevel?: string;
   onUpgrade?: () => void;
 }
 
@@ -102,6 +104,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
   events = [],
   user = null,
   isPremium = false,
+  isBasicOrHigher = false,
+  subscriptionLevel = 'free',
   onUpgrade
 }) => {
   const [animatedScore, setAnimatedScore] = useState(0);
@@ -346,39 +350,66 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
           <div>
             <h3>Языки любви</h3>
             <p>Анализ предпочтений в отношениях на основе активности</p>
+            {subscriptionLevel === 'free' && (
+              <div className={styles.subscriptionBadge}>
+                Доступно в Basic подписке
+              </div>
+            )}
           </div>
         </div>
 
         <div className={styles.loveLanguagesContent}>
-          <div className={styles.hexagonWrapper}>
-            <HexagonChart 
-              data={loveLanguageData.map(item => ({
-                ...item,
-                color: '#8b5cf6'
-              }))}
-              size={280}
-            />
-          </div>
+          {isBasicOrHigher ? (
+            <>
+              <div className={styles.hexagonWrapper}>
+                <HexagonChart 
+                  data={loveLanguageData.map(item => ({
+                    ...item,
+                    color: '#8b5cf6'
+                  }))}
+                  size={280}
+                />
+              </div>
 
-          <div className={styles.languageInsights}>
-            <h4>💜 Ваши предпочтения:</h4>
-            <div className={styles.insightsList}>
-              {loveLanguageData
-                .sort((a, b) => b.value - a.value)
-                .slice(0, 3)
-                .map((lang, index) => (
-                  <div key={lang.label} className={styles.languageInsight}>
-                    <span className={styles.rank}>#{index + 1}</span>
-                    <span className={styles.langName}>{lang.label}</span>
-                    <span className={styles.langValue}>{lang.value}%</span>
+              <div className={styles.languageInsights}>
+                <h4>💜 Ваши предпочтения:</h4>
+                <div className={styles.insightsList}>
+                  {loveLanguageData
+                    .sort((a, b) => b.value - a.value)
+                    .slice(0, isPremium ? 5 : 3)
+                    .map((lang, index) => (
+                      <div key={lang.label} className={styles.languageInsight}>
+                        <span className={styles.rank}>#{index + 1}</span>
+                        <span className={styles.langName}>{lang.label}</span>
+                        <span className={styles.langValue}>{lang.value}%</span>
+                      </div>
+                    ))}
+                </div>
+                
+                {!isPremium && (
+                  <div className={styles.upgradePrompt} onClick={onUpgrade}>
+                    <Crown size={16} />
+                    Разблокируйте все языки любви в Premium
                   </div>
-                ))}
+                )}
+              </div>
+            </>
+          ) : (
+            <div className={styles.lockedContent}>
+              <div className={styles.lockIcon}>🔒</div>
+              <div className={styles.lockMessage}>
+                <h4>Анализ языков любви</h4>
+                <p>Узнайте как вы выражаете и принимаете любовь в отношениях</p>
+                <button className={styles.upgradeButton} onClick={onUpgrade}>
+                  Получить Basic за $1.99/мес
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Relationship Graph Section */}
+      {/* Relationship Graph Section - Premium feature */}
       <div className={styles.relationshipGraphSection}>
         <div className={styles.sectionHeader}>
           <div className={styles.sectionIcon}>
@@ -386,108 +417,113 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
           </div>
           <div>
             <h3>Граф отношений</h3>
-            <p>Интерактивная карта связей и аспектов</p>
+            <p>Интерактивная карта связей и аспектов ваших отношений</p>
+            {!isPremium && (
+              <div className={styles.subscriptionBadge}>
+                Доступно в Premium подписке
+              </div>
+            )}
           </div>
         </div>
 
         <div className={styles.graphContent}>
-          <div className={styles.graphVisualization}>
-            <svg viewBox="0 0 800 400" className={styles.graphSvg}>
-              {/* Connections */}
-              {graphData.connections.map((connection, index) => {
-                const fromNode = graphData.nodes.find(n => n.id === connection.from);
-                const toNode = graphData.nodes.find(n => n.id === connection.to);
-                if (!fromNode || !toNode) return null;
+          {isPremium ? (
+            <>
+              <div className={styles.graphVisualization}>
+                <svg viewBox="0 0 800 400" className={styles.graphSvg}>
+                  {/* Connections */}
+                  {graphData.connections.map((connection, index) => {
+                    const fromNode = graphData.nodes.find(n => n.id === connection.from);
+                    const toNode = graphData.nodes.find(n => n.id === connection.to);
+                    if (!fromNode || !toNode) return null;
 
-                return (
-                  <line
-                    key={index}
-                    x1={fromNode.x}
-                    y1={fromNode.y}
-                    x2={toNode.x}
-                    y2={toNode.y}
-                    stroke="#10b981"
-                    strokeWidth={connection.type === 'strong' ? 3 : 2}
-                    opacity={0.6}
-                    className={styles.graphConnection}
-                  />
-                );
-              })}
+                    return (
+                      <line
+                        key={index}
+                        x1={fromNode.x}
+                        y1={fromNode.y}
+                        x2={toNode.x}
+                        y2={toNode.y}
+                        stroke="#10b981"
+                        strokeWidth={connection.type === 'strong' ? 3 : 2}
+                        opacity={0.6}
+                        className={styles.graphConnection}
+                      />
+                    );
+                  })}
 
-              {/* Nodes */}
-              {graphData.nodes.map((node) => {
-                const size = Math.max(20, (node.strength / 100) * 35);
-                const color = node.type === 'center' ? '#8b5cf6' : '#10b981';
+                  {/* Nodes */}
+                  {graphData.nodes.map((node) => {
+                    const size = Math.max(20, (node.strength / 100) * 35);
+                    const color = node.type === 'center' ? '#8b5cf6' : '#10b981';
 
-                return (
-                  <g key={node.id}>
-                    <circle
-                      cx={node.x}
-                      cy={node.y}
-                      r={size / 2}
-                      fill={color}
-                      stroke="white"
-                      strokeWidth={2}
-                      opacity={0.8}
-                      className={styles.graphNode}
-                    />
-                    <text
-                      x={node.x}
-                      y={node.y + size / 2 + 20}
-                      textAnchor="middle"
-                      fontSize="11"
-                      fill="#4a5568"
-                      className={styles.nodeLabel}
-                    >
-                      {node.label}
-                    </text>
-                    <text
-                      x={node.x}
-                      y={node.y + size / 2 + 35}
-                      textAnchor="middle"
-                      fontSize="9"
-                      fill="#718096"
-                      className={styles.nodeStrength}
-                    >
-                      {node.strength}%
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
+                    return (
+                      <g key={node.id}>
+                        <circle
+                          cx={node.x}
+                          cy={node.y}
+                          r={size / 2}
+                          fill={color}
+                          stroke="white"
+                          strokeWidth={2}
+                          opacity={0.8}
+                          className={styles.graphNode}
+                        />
+                        <text
+                          x={node.x}
+                          y={node.y + size / 2 + 20}
+                          textAnchor="middle"
+                          fontSize="11"
+                          fill="#4a5568"
+                          className={styles.nodeLabel}
+                        >
+                          {node.label}
+                        </text>
+                        <text
+                          x={node.x}
+                          y={node.y + size / 2 + 35}
+                          textAnchor="middle"
+                          fontSize="9"
+                          fill="#718096"
+                          className={styles.nodeStrength}
+                        >
+                          {node.strength}%
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
 
-          <div className={styles.overallHealth}>
-            <div className={styles.healthIcon}>
-              <Brain size={20} />
-            </div>
-            <div>
-              <h4>Общее здоровье отношений</h4>
-              <div className={styles.healthScore}>
-                <span className={styles.scoreNumber}>{graphData.overallHealth}</span>
-                <span className={styles.scoreLabel}>/ 100</span>
+              <div className={styles.overallHealth}>
+                <div className={styles.healthIcon}>
+                  <Brain size={20} />
+                </div>
+                <div>
+                  <h4>Общее здоровье отношений</h4>
+                  <div className={styles.healthScore}>
+                    <span className={styles.scoreNumber}>{graphData.overallHealth}</span>
+                    <span className={styles.scoreLabel}>/ 100</span>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className={styles.lockedContent}>
+              <div className={styles.lockIcon}>🔒</div>
+              <div className={styles.lockMessage}>
+                <h4>Интерактивный граф отношений</h4>
+                <p>Визуализация всех аспектов ваших отношений с персональными рекомендациями и глубокой аналитикой</p>
+                <button className={styles.upgradeButton} onClick={onUpgrade}>
+                  Получить Premium за $7.99/мес
+                </button>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Activity Tracker Section */}
-      <div className={styles.activityTrackerSection}>
-        <div className={styles.sectionHeader}>
-          <div className={styles.sectionIcon}>
-            <Activity size={24} />
-          </div>
-          <div>
-            <h3>Трекер активности</h3>
-            <p>Отслеживайте физическую активность и укрепляйте отношения через здоровый образ жизни</p>
-          </div>
-        </div>
 
-        <div className={styles.activityTrackerContent}>
-          <ActivityTracker />
-        </div>
-      </div>
     </div>
   );
 };

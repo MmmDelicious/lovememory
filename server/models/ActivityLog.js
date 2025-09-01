@@ -35,14 +35,11 @@ const ActivityLog = sequelize.define('ActivityLog', {
     allowNull: false,
     defaultValue: {},
   },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-  },
 }, {
   tableName: 'activity_logs',
-  timestamps: false, // Используем только createdAt
+  timestamps: true, // Используем стандартные timestamps
+  createdAt: 'created_at',
+  updatedAt: false, // Только created_at для логов
   indexes: [
     {
       fields: ['pair_id', 'created_at'],

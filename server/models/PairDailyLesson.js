@@ -60,6 +60,7 @@ const PairDailyLesson = sequelize.define('PairDailyLesson', {
   }
 }, {
   tableName: 'pair_daily_lessons',
+  timestamps: false,  // Отключаем timestamps
   indexes: [
     {
       unique: true,
@@ -111,7 +112,8 @@ PairDailyLesson.getTodaysLesson = async function(relationshipId, date = null) {
     },
     include: [{
       model: sequelize.models.Lesson,
-      as: 'Lesson'
+      as: 'Lesson',
+      attributes: ['id', 'title', 'text', 'source', 'tags', 'triggers', 'effect', 'theme', 'interactive_type', 'difficulty_level', 'required_streak', 'animation_file', 'base_coins_reward', 'is_active']
     }, {
       model: sequelize.models.RelationshipMetrics,
       as: 'Relationship'
@@ -136,7 +138,8 @@ PairDailyLesson.getWeeklyLessons = async function(relationshipId, weekOffset = 0
     },
     include: [{
       model: sequelize.models.Lesson,
-      as: 'Lesson'
+      as: 'Lesson',
+      attributes: ['id', 'title', 'text', 'source', 'tags', 'triggers', 'effect', 'theme', 'interactive_type', 'difficulty_level', 'required_streak', 'animation_file', 'base_coins_reward', 'is_active']
     }],
     order: [['date', 'ASC']]
   });

@@ -131,7 +131,8 @@ router.get('/history', async (req, res) => {
     const includeClause = [{
       model: Lesson,
       as: 'Lesson',
-      where: theme ? { theme } : undefined
+      where: theme ? { theme } : undefined,
+      attributes: ['id', 'title', 'text', 'source', 'tags', 'triggers', 'effect', 'theme', 'interactive_type', 'difficulty_level', 'required_streak', 'animation_file', 'base_coins_reward', 'is_active']
     }];
     
     const history = await UserLessonProgress.findAndCountAll({

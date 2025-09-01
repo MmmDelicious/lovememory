@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Lottie from 'lottie-react';
 import styles from './StaticMascot.module.css';
-const StaticMascot = ({ message, animationData, bubbleKey, onAvatarClick, isError = false }) => {
+const StaticMascot = ({ message, animationData, bubbleKey, onAvatarClick, isError = false, mode = 'login' }) => {
   const [isAnnoyed, setIsAnnoyed] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   
@@ -30,7 +30,7 @@ const StaticMascot = ({ message, animationData, bubbleKey, onAvatarClick, isErro
       >
         <Lottie animationData={animationData} loop={true} />
       </div>
-      <div key={bubbleKey} className={styles.speechBubble}>
+      <div key={bubbleKey} className={`${styles.speechBubble} ${mode === 'register' ? styles.speechBubbleRegister : ''}`}>
         <p>{message}</p>
       </div>
     </div>

@@ -258,11 +258,11 @@ class ActivityTrackerService {
         where: {
           user_id: userId,
           action: 'activity_updated',
-          createdAt: {
+          created_at: {
             [require('sequelize').Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
           }
         },
-        order: [['createdAt', 'DESC']],
+        order: [['created_at', 'DESC']],
         limit: 7
       });
 
@@ -289,7 +289,7 @@ class ActivityTrackerService {
         achievements: tracker.achievements || [],
         trends,
         weeklyActivity: weeklyActivity.map(log => ({
-          date: log.createdAt,
+          date: log.created_at,
           steps: log.payload.steps,
           goalAchieved: log.payload.goal_achieved
         }))

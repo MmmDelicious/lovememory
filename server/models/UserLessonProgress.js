@@ -71,7 +71,8 @@ const UserLessonProgress = sequelize.define('UserLessonProgress', {
     },
   }
 }, {
-  tableName: 'user_lesson_progress'
+  tableName: 'user_lesson_progress',
+  timestamps: false  // Отключаем timestamps
 });
 UserLessonProgress.prototype.calculateTotalReward = function() {
   return this.coins_earned + this.streak_bonus;
@@ -154,7 +155,8 @@ UserLessonProgress.getPairWeeklyProgress = async function(pairId, weekOffset = 0
     },
     include: [{
       model: sequelize.models.Lesson,
-      as: 'Lesson'
+      as: 'Lesson',
+      attributes: ['id', 'title', 'text', 'source', 'tags', 'triggers', 'effect', 'theme', 'interactive_type', 'difficulty_level', 'required_streak', 'animation_file', 'base_coins_reward', 'is_active']
     }],
     order: [['completed_at', 'ASC']]
   });
@@ -182,7 +184,8 @@ UserLessonProgress.getWeeklyProgress = async function(userId, pairId = null, wee
     where,
     include: [{
       model: sequelize.models.Lesson,
-      as: 'Lesson'
+      as: 'Lesson',
+      attributes: ['id', 'title', 'text', 'source', 'tags', 'triggers', 'effect', 'theme', 'interactive_type', 'difficulty_level', 'required_streak', 'animation_file', 'base_coins_reward', 'is_active']
     }],
     order: [['completed_at', 'ASC']]
   });
@@ -194,7 +197,8 @@ UserLessonProgress.getPairThemeProgress = async function(pairId, theme) {
     include: [{
       model: sequelize.models.Lesson,
       as: 'Lesson',
-      where: { theme: theme }
+      where: { theme: theme },
+      attributes: ['id', 'title', 'text', 'source', 'tags', 'triggers', 'effect', 'theme', 'interactive_type', 'difficulty_level', 'required_streak', 'animation_file', 'base_coins_reward', 'is_active']
     }],
     order: [['completed_at', 'ASC']]
   });
@@ -210,7 +214,8 @@ UserLessonProgress.getThemeProgress = async function(userId, theme, pairId = nul
     include: [{
       model: sequelize.models.Lesson,
       as: 'Lesson',
-      where: { theme: theme }
+      where: { theme: theme },
+      attributes: ['id', 'title', 'text', 'source', 'tags', 'triggers', 'effect', 'theme', 'interactive_type', 'difficulty_level', 'required_streak', 'animation_file', 'base_coins_reward', 'is_active']
     }],
     order: [['completed_at', 'ASC']]
   });

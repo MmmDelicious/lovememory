@@ -86,6 +86,22 @@ const startServer = async () => {
     await sequelize.authenticate();
 
     await sequelize.sync({ alter: false });
+    
+    // Автозаполнение базы данных начальными данными
+    if (process.env.NODE_ENV === 'production') {
+      try {
+        // Заполняем интересы
+        const { Interest } = require('./models');
+        const interestCount = await Interest.count();
+        if (interestCount === 0) {
+          console.log('Заполняем базу начальными данными...');
+          const seedInterests = require('./seeders/interests-seed');
+          // Функция seeding будет добавлена
+        }
+      } catch (error) {
+        console.log('Ошибка при заполнении данными:', error.message);
+      }
+    }
 
     await gameService.cleanupOrphanedRooms(io);
     try {

@@ -440,7 +440,11 @@ class LessonService {
             [Op.lt]: today + ' 23:59:59'
           }
         },
-        include: [{ model: Lesson, as: 'Lesson' }]
+        include: [{ 
+          model: Lesson, 
+          as: 'Lesson',
+          attributes: ['id', 'title', 'text', 'source', 'tags', 'triggers', 'effect', 'theme', 'interactive_type', 'difficulty_level', 'required_streak', 'animation_file', 'base_coins_reward', 'is_active']
+        }]
       });
       
       if (existingProgress) {
@@ -519,7 +523,11 @@ class LessonService {
       // Получаем прогресс по урокам
       const completedLessons = await UserLessonProgress.findAll({
         where: { user_id: userId },
-        include: [{ model: Lesson, as: 'Lesson' }]
+        include: [{ 
+          model: Lesson, 
+          as: 'Lesson',
+          attributes: ['id', 'title', 'text', 'source', 'tags', 'triggers', 'effect', 'theme', 'interactive_type', 'difficulty_level', 'required_streak', 'animation_file', 'base_coins_reward', 'is_active']
+        }]
       });
       
       // Группируем по темам
