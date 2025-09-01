@@ -104,11 +104,11 @@ const ActivityTracker = sequelize.define('ActivityTracker', {
   timestamps: true,
   indexes: [
     {
-      fields: ['user_id', 'createdAt'],
+      fields: ['user_id', 'created_at'],
       name: 'idx_activity_tracker_user_created'
     },
     {
-      fields: ['pair_id', 'createdAt'],
+      fields: ['pair_id', 'created_at'],
       name: 'idx_activity_tracker_pair_created'
     },
     {
