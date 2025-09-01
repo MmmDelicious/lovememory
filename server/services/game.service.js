@@ -56,33 +56,80 @@ class GameService {
   }
 
   async createRoom(hostId, roomData) {
+    console.log(`🎯 [SERVICE] Starting room creation`, {
+      timestamp: new Date().toISOString(),
+      hostId,
+      roomData
+    });
+
     const { bet, gameType, tableType, maxPlayers = 2, gameFormat = '1v1', specialSettings = {} } = roomData;
     
+    console.log(`📊 [SERVICE] Extracted room parameters`, {
+      timestamp: new Date().toISOString(),
+      bet,
+      gameType,
+      tableType,
+      maxPlayers,
+      gameFormat,
+      specialSettings
+    });
+
     // Проверяем корректность количества игроков для Codenames
     if (gameType === 'codenames' && maxPlayers !== 4) {
+      console.error(`❌ [SERVICE] Invalid player count for Codenames`, {
+        timestamp: new Date().toISOString(),
+        gameType,
+        maxPlayers,
+        required: 4
+      });
       const error = new Error('Codenames requires exactly 4 players (2v2 format)');
       error.statusCode = 400;
       throw error;
     }
 
     if (!bet || bet <= 0) {
+      console.error(`❌ [SERVICE] Invalid bet amount`, {
+        timestamp: new Date().toISOString(),
+        bet
+      });
       const error = new Error('Bet must be a positive number.');
       error.statusCode = 400;
       throw error;
     }
     if (!gameType) {
+      console.error(`❌ [SERVICE] Missing gameType`, {
+        timestamp: new Date().toISOString()
+      });
       const error = new Error('gameType is required.');
       error.statusCode = 400;
       throw error;
     }
 
+    console.log(`💰 [SERVICE] Checking player bet capability`, {
+      timestamp: new Date().toISOString(),
+      hostId,
+      bet
+    });
+
     // Проверяем возможность ставки через экономический сервис
     const canBet = await economyService.canPlayerBet(hostId, bet);
     if (!canBet.canBet) {
+      console.error(`❌ [SERVICE] Player cannot make bet`, {
+        timestamp: new Date().toISOString(),
+        hostId,
+        bet,
+        reason: canBet.reason
+      });
       const error = new Error(canBet.reason);
       error.statusCode = 400;
       throw error;
     }
+
+    console.log(`✅ [SERVICE] Player bet check passed`, {
+      timestamp: new Date().toISOString(),
+      hostId,
+      bet
+    });
 
     let blinds = null;
     if (gameType === 'poker') {
@@ -99,9 +146,14 @@ class GameService {
         default:
           blinds = '5/10';
       }
+      console.log(`🃏 [SERVICE] Set poker blinds`, {
+        timestamp: new Date().toISOString(),
+        tableType,
+        blinds
+      });
     }
-    
-    return GameRoom.create({
+
+    const roomCreateData = {
       hostId,
       bet,
       gameType,
@@ -111,8 +163,24 @@ class GameService {
       status: 'waiting',
       players: [],
       gameFormat,
-      gameSettings: specialSettings
+      settings: specialSettings
+    };
+
+    console.log(`🗄️  [SERVICE] Creating room in database`, {
+      timestamp: new Date().toISOString(),
+      roomCreateData
     });
+    
+    const createdRoom = await GameRoom.create(roomCreateData);
+
+    console.log(`✅ [SERVICE] Room created in database successfully`, {
+      timestamp: new Date().toISOString(),
+      roomId: createdRoom.id,
+      createdAt: createdRoom.createdAt,
+      status: createdRoom.status
+    });
+
+    return createdRoom;
   }
 
   async deleteRoom(roomId) {

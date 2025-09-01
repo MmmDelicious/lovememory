@@ -4,10 +4,10 @@ import { IGame, IGameState, IPlayer, GAME_TYPES_INFO } from '../types/game.inter
 import { TicTacToeGameNew } from './games/TicTacToeGameNew';
 import { MemoryGameNew } from './games/MemoryGameNew';
 import { ChessGameNew } from './games/ChessGameNew';
-import { QuizGameNew } from './games/QuizGameNew';
-import { WordleGameNew } from './games/WordleGameNew';
+// import { QuizGameNew } from './games/QuizGameNew'; // Временно отключено
+// import { WordleGameNew } from './games/WordleGameNew'; // Временно отключено
 import { CodenamesGameNew } from './games/CodenamesGameNew';
-import { PokerGameNew } from './games/PokerGameNew';
+import { PokerGameFactory } from './poker/PokerGameFactory';
 
 /**
  * Обновленный GameManager с поддержкой новой архитектуры
@@ -26,8 +26,22 @@ export class GameManagerNew {
     players: any[], 
     options: any = {}
   ): IGame | any {
+    console.log(`🎮 [GameManager] Creating game instance`, {
+      timestamp: new Date().toISOString(),
+      roomId,
+      gameType,
+      playersCount: players.length,
+      players: players.map(p => ({ id: p.id, name: p.name })),
+      options: Object.keys(options)
+    });
+
     // Проверяем, что игра уже не создана
     if (this.games.has(roomId)) {
+      console.log(`♻️  [GameManager] Game already exists, returning existing`, {
+        timestamp: new Date().toISOString(),
+        roomId,
+        gameType
+      });
       return this.games.get(roomId);
     }
     
@@ -37,13 +51,34 @@ export class GameManagerNew {
       // Создаем игру в зависимости от типа
       gameInstance = this._createGameInstance(roomId, gameType, players, options);
       
+      console.log(`✅ [GameManager] Game instance created successfully`, {
+        timestamp: new Date().toISOString(),
+        roomId,
+        gameType,
+        instanceType: gameInstance.constructor.name,
+        status: gameInstance.status,
+        playersInGame: gameInstance.players?.length || 0
+      });
+      
       // Сохраняем в кэше
       this.games.set(roomId, gameInstance);
+      
+      console.log(`💾 [GameManager] Game stored in cache`, {
+        timestamp: new Date().toISOString(),
+        roomId,
+        totalGamesInCache: this.games.size
+      });
       
       return gameInstance;
       
     } catch (error) {
-      console.error(`[GameManager] Error creating ${gameType} game:`, error);
+      console.error(`❌ [GameManager] Error creating ${gameType} game:`, {
+        timestamp: new Date().toISOString(),
+        roomId,
+        gameType,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       throw error;
     }
   }
@@ -158,11 +193,11 @@ export class GameManagerNew {
       case 'chess':
         return this._createChessGameNew(roomId, players, options);
       
-      case 'quiz':
-        return this._createQuizGameNew(roomId, players, options);
+      // case 'quiz':
+      //   return this._createQuizGameNew(roomId, players, options);
       
-      case 'wordle':
-        return this._createWordleGameNew(roomId, players, options);
+      // case 'wordle':
+      //   return this._createWordleGameNew(roomId, players, options);
       
       case 'codenames':
         return this._createCodenamesGameNew(roomId, players, options);
@@ -261,73 +296,73 @@ export class GameManagerNew {
     return game;
   }
   
-  private _createQuizGameNew(roomId: string, players: any[], options: any): QuizGameNew {
-    const gameFormat = options.gameFormat || (players.length === 4 ? '2v2' : '1v1');
-    
-    const game = new QuizGameNew(roomId, {
-      gameFormat: gameFormat,
-      totalQuestions: options.totalQuestions || 10,
-      questionTimeLimit: options.questionTimeLimit || 15
-    });
-    
-    for (const player of players) {
-      const playerData: IPlayer = {
-        id: player.id || player,
-        name: player.name || player.email || player.id || player,
-        email: player.email,
-        avatar: player.avatar,
-        ready: true
-      };
-      
-      game.addPlayer(playerData);
-    }
-    
-    game.onStateChange = (state: IGameState) => {
-      if (options.onStateChange) {
-        options.onStateChange(state);
-      }
-    };
-    
-    return game;
-  }
+  // private _createQuizGameNew(roomId: string, players: any[], options: any): QuizGameNew {
+  //   const gameFormat = options.gameFormat || (players.length === 4 ? '2v2' : '1v1');
+  //   
+  //   const game = new QuizGameNew(roomId, {
+  //     gameFormat: gameFormat,
+  //     totalQuestions: options.totalQuestions || 10,
+  //     questionTimeLimit: options.questionTimeLimit || 15
+  //   });
+  //   
+  //   for (const player of players) {
+  //     const playerData: IPlayer = {
+  //       id: player.id || player,
+  //       name: player.name || player.email || player.id || player,
+  //       email: player.email,
+  //       avatar: player.avatar,
+  //       ready: true
+  //     };
+  //     
+  //     game.addPlayer(playerData);
+  //   }
+  //   
+  //   game.onStateChange = (state: IGameState) => {
+  //     if (options.onStateChange) {
+  //       options.onStateChange(state);
+  //     }
+  //   };
+  //   
+  //   return game;
+  // }
   
-  private _createWordleGameNew(roomId: string, players: any[], options: any): WordleGameNew {
-    const gameFormat = options.gameFormat || (players.length === 4 ? '2v2' : '1v1');
-    const requiredPlayers = gameFormat === '2v2' ? 4 : 2;
-    
-    const game = new WordleGameNew(roomId, {
-      gameFormat: gameFormat,
-      language: options.language || 'russian',
-      maxRounds: options.rounds || 3,
-      maxAttempts: options.maxAttempts || 6
-    });
-    
-    for (const player of players) {
-      const playerData: IPlayer = {
-        id: player.id || player,
-        name: player.name || player.email || player.id || player,
-        email: player.email,
-        avatar: player.avatar,
-        ready: true
-      };
-      
-      game.addPlayer(playerData);
-    }
-    
-    // Настраиваем callback для изменения состояния
-    game.onStateChange = (state: IGameState) => {
-      if (options.onStateChange) {
-        options.onStateChange(state);
-      }
-    };
-    
-    // Автоматически стартуем игру если достаточно игроков
-    if (players.length >= requiredPlayers) {
-      game.startGame();
-    }
-    
-    return game;
-  }
+  // private _createWordleGameNew(roomId: string, players: any[], options: any): WordleGameNew {
+  //   const gameFormat = options.gameFormat || (players.length === 4 ? '2v2' : '1v1');
+  //   const requiredPlayers = gameFormat === '2v2' ? 4 : 2;
+  //   
+  //   const game = new WordleGameNew(roomId, {
+  //     gameFormat: gameFormat,
+  //     language: options.language || 'russian',
+  //     maxRounds: options.rounds || 3,
+  //     maxAttempts: options.maxAttempts || 6
+  //   });
+  //   
+  //   for (const player of players) {
+  //     const playerData: IPlayer = {
+  //       id: player.id || player,
+  //       name: player.name || player.email || player.id || player,
+  //       email: player.email,
+  //       avatar: player.avatar,
+  //       ready: true
+  //     };
+  //     
+  //     game.addPlayer(playerData);
+  //   }
+  //   
+  //   // Настраиваем callback для изменения состояния
+  //   game.onStateChange = (state: IGameState) => {
+  //     if (options.onStateChange) {
+  //       options.onStateChange(state);
+  //     }
+  //   };
+  //   
+  //   // Автоматически стартуем игру если достаточно игроков
+  //   if (players.length >= requiredPlayers) {
+  //     game.startGame();
+  //   }
+  //   
+  //   return game;
+  // }
   
   private _createCodenamesGameNew(roomId: string, players: any[], options: any): CodenamesGameNew {
     if (players.length !== 4) {
@@ -360,38 +395,56 @@ export class GameManagerNew {
     return game;
   }
   
-  private _createPokerGameNew(roomId: string, players: any[], options: any): PokerGameNew {
-    // Получаем buy-in из первого игрока или используем дефолтное значение
-    const buyInCoins = players[0]?.buyInCoins || 1000;
-    const smallBlind = Math.max(1, Math.floor(buyInCoins * 0.005)); // 0.5% от buy-in
-    const bigBlind = Math.max(2, Math.floor(buyInCoins * 0.01));   // 1% от buy-in
-    
-    const game = new PokerGameNew(roomId, {
-      smallBlind,
-      bigBlind,
-      buyInAmount: buyInCoins,
-      turnTimeLimit: options.turnTimeLimit || 30000
+  private _createPokerGameNew(roomId: string, players: any[], options: any): any {
+    console.log(`🃏 [GameManager] Creating poker game via factory`, {
+      timestamp: new Date().toISOString(),
+      roomId,
+      playersData: players,
+      optionsKeys: Object.keys(options)
     });
+
+    // Создаем новый покер через фабрику
+    const game = PokerGameFactory.createGame(roomId, players, options);
     
-    // Добавляем игроков
-    for (const player of players) {
-      const playerData: IPlayer = {
-        id: player.id || player,
-        name: player.name || player.email || player.id || player,
-        email: player.email,
-        avatar: player.avatar,
-        ready: true
-      };
-      
-      game.addPlayer(playerData);
-    }
+    console.log(`🏭 [GameManager] Poker game created by factory`, {
+      timestamp: new Date().toISOString(),
+      roomId,
+      gameType: game.gameType,
+      status: game.status,
+      playersCount: game.players?.length || 0
+    });
     
     // Настраиваем callback состояния
     game.onStateChange = (state: any) => {
+      console.log(`🔄 [GameManager] Poker state changed`, {
+        timestamp: new Date().toISOString(),
+        roomId,
+        stage: state?.stage,
+        status: state?.status,
+        playersCount: state?.players?.length || 0
+      });
+
       if (options.onStateChange) {
         options.onStateChange(state);
       }
     };
+    
+    // Настраиваем callback событий
+    game.onGameEvent = (event: any) => {
+      console.log(`📢 [GameManager] Poker game event`, {
+        timestamp: new Date().toISOString(),
+        roomId,
+        eventType: event.type,
+        eventData: event.data
+      });
+    };
+    
+    console.log(`✅ [GameManager] Poker game fully configured`, {
+      timestamp: new Date().toISOString(),
+      roomId,
+      hasStateCallback: !!options.onStateChange,
+      hasEventCallback: !!game.onGameEvent
+    });
     
     return game;
   }

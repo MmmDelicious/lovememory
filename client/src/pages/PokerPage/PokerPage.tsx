@@ -43,13 +43,26 @@ const PokerPage: React.FC = () => {
   
   // Функция для отправки ходов
   const makeMove = useCallback((move: any) => {
-    if (socketRef.current?.connected) {
+    console.log(`🚀 [POKER PAGE] makeMove called`, {
+      timestamp: new Date().toISOString(),
+      roomId,
+      move,
+      socketConnected: socketRef.current?.connected,
+      userId: user?.id
+    });
 
-      socketRef.current.emit('make_move', { roomId, move });
+    if (socketRef.current?.connected) {
+      console.log(`📡 [POKER PAGE] Emitting make_move to socket`, {
+        roomId,
+        move,
+        action: move.action,
+        value: move.value
+      });
+      socketRef.current.emit('make_move', { roomId, action: move.action, value: move.value });
     } else {
-      console.warn('[POKER] Cannot make move: socket not connected');
+      console.warn(`❌ [POKER PAGE] Cannot make move: socket not connected`);
     }
-  }, [roomId]);
+  }, [roomId, user?.id]);
   // Инициализация сокета
   useEffect(() => {
     if (!user?.token || !roomId) return;
@@ -92,7 +105,17 @@ const PokerPage: React.FC = () => {
     
     socketInstance.on('error', (error) => {
       if (!mountedRef.current) return;
-      console.error('[POKER] Socket error:', error);
+      console.error('❌ [POKER PAGE] Socket error received:', error);
+    });
+
+    // Добавляем обработчик ошибок ходов
+    socketInstance.on('move_error', (error) => {
+      if (!mountedRef.current) return;
+      console.error('❌ [POKER PAGE] Move error received from server:', {
+        timestamp: new Date().toISOString(),
+        error,
+        roomId
+      });
     });
     
     socketInstance.on('reconnect', (attemptNumber) => {
@@ -109,6 +132,22 @@ const PokerPage: React.FC = () => {
     // Обработчики игровых событий
     const handleGameUpdate = (newGameState: PokerGameState) => {
       if (!mountedRef.current) return;
+
+      console.log(`📥 [POKER PAGE] Received game_update from server`, {
+        timestamp: new Date().toISOString(),
+        stage: newGameState?.stage,
+        status: newGameState?.status,
+        currentPlayerId: newGameState?.currentPlayerId,
+        validActions: newGameState?.validActions,
+        showdownPhase: newGameState?.showdownPhase,
+        playersCount: newGameState?.players?.length,
+        needsBuyIn: newGameState?.needsBuyIn,
+        hasBoughtIn: newGameState?.hasBoughtIn,
+        pot: newGameState?.pot,
+        callAmount: newGameState?.callAmount,
+        minRaiseAmount: newGameState?.minRaiseAmount,
+        maxRaiseAmount: newGameState?.maxRaiseAmount
+      });
 
       setGameState(newGameState);
     };
@@ -218,8 +257,18 @@ const PokerPage: React.FC = () => {
   }, []);
   
   const handlePokerAction = useCallback((action: string, value = 0) => {
+    console.log(`🎰 [POKER PAGE] handlePokerAction triggered`, {
+      timestamp: new Date().toISOString(),
+      action,
+      value,
+      roomId,
+      userId: user?.id,
+      gameStage: gameState?.stage,
+      currentPlayerId: gameState?.currentPlayerId
+    });
+    
     makeMove({ action, value });
-  }, [makeMove]);
+  }, [makeMove, roomId, user?.id, gameState?.stage, gameState?.currentPlayerId]);
   
   const handlePokerRebuy = useCallback((rebuyAmount: number) => {
     if (socketRef.current?.connected) {

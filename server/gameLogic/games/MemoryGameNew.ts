@@ -182,6 +182,33 @@ export class MemoryGameNew extends TurnBasedGame<IMemoryState, IMemoryMove> {
     return validMoves;
   }
   
+  // Совместимость со старым API - flipCard метод
+  public flipCard(playerId: string, move: IMemoryMove | any): IMemoryState {
+    // Адаптируем разные форматы данных
+    let normalizedMove: IMemoryMove;
+    
+    if (typeof move === 'object' && move.cardId !== undefined) {
+      normalizedMove = move;
+    } else if (typeof move === 'object' && move.action && move.value !== undefined) {
+      // Старый формат {action, value}
+      normalizedMove = { cardId: move.value };
+    } else if (typeof move === 'number') {
+      // Прямое число - cardId
+      normalizedMove = { cardId: move };
+    } else {
+      throw new Error('Invalid move format for Memory game');
+    }
+    
+    console.log(`🃏 [MEMORY GAME] flipCard called`, {
+      playerId,
+      originalMove: move,
+      normalizedMove,
+      currentPlayer: this.currentPlayerId
+    });
+    
+    return this.makeMove(playerId, normalizedMove);
+  }
+  
   // Переопределяем getState для специфичных данных Memory
   public getState(): IMemoryState {
     return {
@@ -395,16 +422,7 @@ export class MemoryGameNew extends TurnBasedGame<IMemoryState, IMemoryMove> {
     const totalPairs = this._getCardPairs().length / 2;
     return totalPairs - this._matchedPairs.length;
   }
-  
-  // Методы совместимости со старым socket кодом
-  public flipCard(playerId: string, cardIndex: number): any {
-    try {
-      const state = this.makeMove(playerId, { cardId: cardIndex });
-      return { success: true, state };
-    } catch (error: any) {
-      return { error: error.message };
-    }
-  }
+
   
   public getGameState(): any {
     return this.getState();

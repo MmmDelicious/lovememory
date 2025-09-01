@@ -179,13 +179,37 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
     setShowRebuyModal(false);
   };
   const handleAction = (action: string, value = 0) => {
+    console.log(`🎯 [POKER FRONTEND] Player action triggered`, {
+      timestamp: new Date().toISOString(),
+      userId,
+      action,
+      value,
+      gameStage: stage,
+      currentPlayerId,
+      isMyTurn: currentPlayerId === userId,
+      validActions,
+      minRaise,
+      maxRaise,
+      callAmount,
+      playerStack: currentPlayer?.stack,
+      showdownPhase
+    });
+
     if (action === 'raise') {
       if (value < minRaise || value > maxRaise) {
+        console.warn(`❌ [POKER FRONTEND] Invalid raise amount`, {
+          value,
+          minRaise,
+          maxRaise,
+          reason: value < minRaise ? 'Below minimum' : 'Above maximum'
+        });
         toast.warning(`Некорректная сумма рейза. Допустимый диапазон: ${minRaise} - ${maxRaise}`, 'Некорректная ставка');
         return;
       }
+      console.log(`✅ [POKER FRONTEND] Raise amount validated`, { value, range: `${minRaise}-${maxRaise}` });
     }
     
+    console.log(`📤 [POKER FRONTEND] Sending action to server via onAction callback`, { action, value });
     onAction(action, value);
   };
   // Логика показа баннера buy-in
@@ -351,22 +375,6 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
       {}
       {isPlayerTurn && gameState && status !== 'finished' && !showdownPhase && (
         <div className={styles.actions}>
-          {/* Отладочная информация */}
-          <div style={{ 
-            position: 'absolute', 
-            top: '-30px', 
-            left: '50%', 
-            transform: 'translateX(-50%)',
-            fontSize: '12px',
-            color: 'red',
-            background: 'rgba(0,0,0,0.8)',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            whiteSpace: 'nowrap'
-          }}>
-            Debug: validActions=[{validActions.join(', ')}], callAmount={callAmount}, minRaise={minRaise}, maxRaise={maxRaise}
-          </div>
-          
           {(validActions || []).includes('fold') && <Button onClick={() => handleAction('fold')}>Сбросить</Button>}
           {(validActions || []).includes('check') && <Button onClick={() => handleAction('check')}>Чек</Button>}
           {(validActions || []).includes('call') && callAmount > 0 && (

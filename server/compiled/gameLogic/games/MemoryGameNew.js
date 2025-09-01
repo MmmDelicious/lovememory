@@ -128,6 +128,32 @@ class MemoryGameNew extends TurnBasedGame_1.TurnBasedGame {
         }
         return validMoves;
     }
+    // Совместимость со старым API - flipCard метод
+    flipCard(playerId, move) {
+        // Адаптируем разные форматы данных
+        let normalizedMove;
+        if (typeof move === 'object' && move.cardId !== undefined) {
+            normalizedMove = move;
+        }
+        else if (typeof move === 'object' && move.action && move.value !== undefined) {
+            // Старый формат {action, value}
+            normalizedMove = { cardId: move.value };
+        }
+        else if (typeof move === 'number') {
+            // Прямое число - cardId
+            normalizedMove = { cardId: move };
+        }
+        else {
+            throw new Error('Invalid move format for Memory game');
+        }
+        console.log(`🃏 [MEMORY GAME] flipCard called`, {
+            playerId,
+            originalMove: move,
+            normalizedMove,
+            currentPlayer: this.currentPlayerId
+        });
+        return this.makeMove(playerId, normalizedMove);
+    }
     // Переопределяем getState для специфичных данных Memory
     getState() {
         return {
@@ -309,16 +335,6 @@ class MemoryGameNew extends TurnBasedGame_1.TurnBasedGame {
     getRemainingPairs() {
         const totalPairs = this._getCardPairs().length / 2;
         return totalPairs - this._matchedPairs.length;
-    }
-    // Методы совместимости со старым socket кодом
-    flipCard(playerId, cardIndex) {
-        try {
-            const state = this.makeMove(playerId, { cardId: cardIndex });
-            return { success: true, state };
-        }
-        catch (error) {
-            return { error: error.message };
-        }
     }
     getGameState() {
         return this.getState();

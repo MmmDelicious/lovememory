@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { GameRoom, User } = require('../models');
 const gameService = require('../services/game.service');
 const economyService = require('../services/economy.service');
-const GameManager = require('../compiled/gameLogic/GameManagerNew');
+const GameManager = require('../compiled/gameLogic/GameManagerNew').default;
 
 const quizUpdateIntervals = new Map();
 
@@ -61,39 +61,129 @@ function initSocket(server, app) {
 
     socket.on('join_room', async (roomId) => {
         try {
+            console.log(`🚪 [SOCKET] Player joining room`, {
+              timestamp: new Date().toISOString(),
+              roomId,
+              userId: socket.user.id,
+              userEmail: socket.user.email
+            });
+
             const room = await GameRoom.findByPk(roomId);
             if (!room) {
+                console.error(`❌ [SOCKET] Room not found`, {
+                  timestamp: new Date().toISOString(),
+                  roomId,
+                  userId: socket.user.id
+                });
                 socket.emit('error', 'Room not found.');
                 return;
             }
 
+            console.log(`🏠 [SOCKET] Room found`, {
+              timestamp: new Date().toISOString(),
+              roomId: room.id,
+              gameType: room.gameType,
+              status: room.status,
+              maxPlayers: room.maxPlayers,
+              bet: room.bet
+            });
+
             const allSocketsInRoom = await io.in(roomId).fetchSockets();
             const isRoomFull = allSocketsInRoom.length >= room.maxPlayers;
 
+            console.log(`👥 [SOCKET] Checking room capacity`, {
+              timestamp: new Date().toISOString(),
+              roomId,
+              currentPlayers: allSocketsInRoom.length,
+              maxPlayers: room.maxPlayers,
+              isRoomFull
+            });
+
             if (isRoomFull) {
+                console.error(`❌ [SOCKET] Room is full`, {
+                  timestamp: new Date().toISOString(),
+                  roomId,
+                  currentPlayers: allSocketsInRoom.length,
+                  maxPlayers: room.maxPlayers
+                });
                 socket.emit('error', 'Room is already full.');
                 return;
             }
 
             const economyType = economyService.getEconomyType(room.gameType);
+            console.log(`💰 [SOCKET] Checking economy type`, {
+              timestamp: new Date().toISOString(),
+              roomId,
+              gameType: room.gameType,
+              economyType,
+              roomStatus: room.status
+            });
+
             if (economyType === 'standard' && room.status === 'waiting') {
+                console.log(`💸 [SOCKET] Reserving player bet for standard game`, {
+                  timestamp: new Date().toISOString(),
+                  roomId,
+                  userId: socket.user.id,
+                  bet: room.bet
+                });
+
                 const betResult = await economyService.reservePlayerBet(socket.user.id, roomId, room.bet);
                 if (!betResult.success) {
+                    console.error(`❌ [SOCKET] Failed to reserve bet`, {
+                      timestamp: new Date().toISOString(),
+                      roomId,
+                      userId: socket.user.id,
+                      reason: betResult.reason
+                    });
                     socket.emit('error', betResult.reason);
                     return;
                 }
+
+                console.log(`✅ [SOCKET] Bet reserved successfully`, {
+                  timestamp: new Date().toISOString(),
+                  roomId,
+                  userId: socket.user.id,
+                  newBalance: betResult.newBalance
+                });
                 socket.emit('update_coins', betResult.newBalance);
+            } else {
+                console.log(`⏭️  [SOCKET] Skipping bet reservation`, {
+                  timestamp: new Date().toISOString(),
+                  roomId,
+                  economyType,
+                  roomStatus: room.status,
+                  reason: economyType === 'poker' ? 'Poker uses buy-in system' : 'Game already in progress'
+                });
             }
 
             await socket.join(roomId);
             userRooms.add(roomId);
             
+            console.log(`🔗 [SOCKET] Player joined room successfully`, {
+              timestamp: new Date().toISOString(),
+              roomId,
+              userId: socket.user.id
+            });
+
             socket.emit('room_info', {
                 id: room.id,
                 gameType: room.gameType,
                 status: room.status,
                 bet: room.bet,
                 maxPlayers: room.maxPlayers
+            });
+
+            console.log(`📤 [SOCKET] Sent room_info to player`, {
+              timestamp: new Date().toISOString(),
+              roomId,
+              userId: socket.user.id,
+              roomInfo: {
+                id: room.id,
+                gameType: room.gameType,
+                status: room.status,
+                bet: room.bet,
+                maxPlayers: room.maxPlayers
+              }
             });
             
             const currentSockets = await io.in(roomId).fetchSockets();
@@ -124,7 +214,22 @@ function initSocket(server, app) {
                 
                 const shouldCreateGame = currentSockets.length >= requiredPlayers;
                 
+                console.log(`🎮 [SOCKET] Checking game creation conditions`, {
+                  timestamp: new Date().toISOString(),
+                  roomId,
+                  gameType: room.gameType,
+                  currentPlayers: currentSockets.length,
+                  requiredPlayers,
+                  shouldCreateGame
+                });
+                
                 if (shouldCreateGame) {
+                    console.log(`🚀 [SOCKET] Creating game - conditions met!`, {
+                      timestamp: new Date().toISOString(),
+                      roomId,
+                      gameType: room.gameType,
+                      players: currentSockets.length
+                    });
                     if (room.gameType !== 'poker') {
                         await gameService.startGame(roomId);
                     }
@@ -178,30 +283,81 @@ function initSocket(server, app) {
                       gameFormat: room.gameFormat || '1v1'
                     };
 
-                    if (room.gameSettings) {
-                      Object.assign(gameOptions, room.gameSettings);
+                    if (room.settings) {
+                      Object.assign(gameOptions, room.settings);
                     }
 
+                    console.log(`🎲 [SOCKET] Creating game instance via GameManager`, {
+                      timestamp: new Date().toISOString(),
+                      roomId,
+                      gameType,
+                      playerCount: playerInfo.length,
+                      gameOptions: Object.keys(gameOptions)
+                    });
+
                     const game = GameManager.createGame(roomId, gameType, playerInfo, gameOptions);
+
+                    console.log(`✅ [SOCKET] Game instance created successfully`, {
+                      timestamp: new Date().toISOString(),
+                      roomId,
+                      gameType: game.gameType,
+                      status: game.status,
+                      playersInGame: game.players?.length || 0
+                    });
+
                     io.to(roomId).emit('game_start', { gameType, players: playerInfo, maxPlayers: room.maxPlayers });
 
+                    console.log(`📢 [SOCKET] Sent game_start event to room`, {
+                      timestamp: new Date().toISOString(),
+                      roomId,
+                      gameType,
+                      playersCount: playerInfo.length
+                    });
+
                     if (game.gameType === 'poker') {
-                        currentSockets.forEach(socket => {
-                            const existingPlayer = game.players.find(p => p.id === socket.user.id);
-                            if (!existingPlayer) {
-                                const user = usersMap.get(socket.user.id);
-                                const newPlayerInfo = {
-                                    id: socket.user.id,
-                                    name: user ? (user.first_name || user.email.split('@')[0]) : socket.user.email.split('@')[0],
-                                    gender: user ? user.gender : 'male'
-                                };
-                                game.addPlayer(newPlayerInfo);
-                            }
+                        console.log(`🃏 [SOCKET] Handling poker game initialization`, {
+                          timestamp: new Date().toISOString(),
+                          roomId,
+                          connectedUsers: currentSockets.length
                         });
 
-                        game.players.forEach(player => {
-                            const stateForPlayer = game.getStateForPlayer(player.id);
-                            io.to(player.id).emit('game_update', stateForPlayer);
+                        // Для покера добавляем игроков как observers (без buy-in)
+                        // Потом они смогут сделать buy-in через отдельный обработчик
+                        currentSockets.forEach(socketInRoom => {
+                            // Добавляем игрока как observer, если его еще нет в игре
+                            const playerInGame = game.getPlayer ? game.getPlayer(socketInRoom.user.id) : null;
+                            if (!playerInGame) {
+                                console.log(`👥 [SOCKET] Adding player as observer to poker game`, {
+                                  timestamp: new Date().toISOString(),
+                                  roomId,
+                                  userId: socketInRoom.user.id,
+                                  userName: socketInRoom.user.name || socketInRoom.user.email
+                                });
+                                
+                                // Добавляем игрока в poker engine как observer (без фишек)
+                                const addResult = game.addPlayer(socketInRoom.user.id, socketInRoom.user.name || socketInRoom.user.email, 0);
+                                if (!addResult) {
+                                    console.error(`❌ [SOCKET] Failed to add player as observer`, {
+                                      timestamp: new Date().toISOString(),
+                                      roomId,
+                                      userId: socketInRoom.user.id
+                                    });
+                                }
+                            }
+                            
+                            // Получаем состояние для каждого пользователя
+                            const stateForUser = game.getStateForPlayer(socketInRoom.user.id);
+                            
+                            console.log(`📤 [SOCKET] Sending poker state to user`, {
+                              timestamp: new Date().toISOString(),
+                              roomId,
+                              userId: socketInRoom.user.id,
+                              needsBuyIn: stateForUser?.needsBuyIn,
+                              hasBoughtIn: stateForUser?.hasBoughtIn,
+                              playersInGame: stateForUser?.players?.length || 0
+                            });
+
+                            io.to(socketInRoom.user.id).emit('game_update', stateForUser);
                         });
                     } else if (game.gameType === 'wordle') {
                         game.players.forEach(player => {
@@ -234,23 +390,13 @@ function initSocket(server, app) {
             } else if (room.status === 'in_progress') {
                 const game = GameManager.getGame(roomId);
                 if (game && game.gameType === 'poker') {
-                    const user = await User.findByPk(socket.user.id, { attributes: ['id', 'email', 'gender', 'first_name'] });
-                    const newPlayerInfo = {
-                        id: socket.user.id,
-                        name: user ? (user.first_name || user.email.split('@')[0]) : socket.user.email.split('@')[0],
-                        gender: user ? user.gender : 'male'
-                    };
+                    // Для покера НЕ добавляем игроков автоматически в активную игру
+                    // Пользователь подключается как наблюдатель
+                    // Если он хочет играть, должен сделать buy-in через отдельный обработчик
                     
-                    const existingPlayer = game.players.find(p => p.id === socket.user.id);
-                    if (existingPlayer) {
-                    } else {
-                        game.addPlayer(newPlayerInfo);
-                    }
-                    
-                    game.players.forEach(player => {
-                        const stateForPlayer = game.getStateForPlayer(player.id);
-                        io.to(player.id).emit('game_update', stateForPlayer);
-                    });
+                    // Отправляем текущее состояние игры пользователю (как наблюдателю)
+                    const stateForUser = game.getStateForPlayer(socket.user.id);
+                    io.to(socket.user.id).emit('game_update', stateForUser);
                 }
             }
         } catch (error) {
@@ -372,12 +518,37 @@ function initSocket(server, app) {
     });
 
     socket.on('make_move', async (data) => {
-      const { roomId, move } = data;
+      console.log(`🎯 [SOCKET] make_move received`, {
+        timestamp: new Date().toISOString(),
+        roomId: data.roomId,
+        userId: socket.user.id,
+        userEmail: socket.user.email,
+        data,
+        rawData: JSON.stringify(data)
+      });
+
+      // Обрабатываем и старый {action, value} и новый {move} форматы
+      const { roomId, action, value, move } = data;
+      
+      // Если есть move, то это новый формат, иначе старый {action, value}
+      let finalMove;
+      if (move !== undefined) {
+        finalMove = move;
+      } else {
+        finalMove = { action, value };
+      }
       const game = GameManager.getGame(roomId);
       if (!game) {
+        console.error(`❌ [SOCKET] Game not found for room ${roomId}`);
         socket.emit('move_error', { error: 'Game not found' });
         return;
       }
+
+      console.log(`🎮 [SOCKET] Game found for poker action`, {
+        gameType: game.gameType,
+        gameStatus: game.status,
+        playersCount: game.players?.length || 0
+      });
       
       try {
         const gameType = game.gameType;
@@ -385,16 +556,66 @@ function initSocket(server, app) {
         let moveResult;
         if (gameType === 'memory') {
           try {
-            moveResult = game.flipCard(socket.user.id, move);
+            // Для memory используем специальный flipCard метод
+            moveResult = game.flipCard(socket.user.id, finalMove);
           } catch (error) {
             console.error(`[MEMORY] Error in flipCard:`, error.message);
             socket.emit('move_error', { error: error.message });
             return;
           }
+        } else if (gameType === 'poker') {
+          try {
+            // Для покера используем стандартный makeMove интерфейс  
+            const pokerMove = finalMove.action ? { action: finalMove.action, amount: finalMove.value } : finalMove;
+            console.log(`🃏 [SOCKET] Processing poker action`, {
+              timestamp: new Date().toISOString(),
+              roomId,
+              userId: socket.user.id,
+              originalMove: finalMove,
+              pokerMove,
+              gameStage: game.getGameState ? game.getGameState().stage : 'unknown',
+              currentTurnSeat: game.getGameState ? game.getGameState().currentTurnSeat : 'unknown'
+            });
+
+            // Проверяем валидность хода ПЕРЕД выполнением
+            const isValid = game.isValidMove ? game.isValidMove(socket.user.id, pokerMove) : true;
+            console.log(`🔍 [SOCKET] Move validation result:`, { isValid, move: pokerMove });
+
+            moveResult = game.makeMove(socket.user.id, pokerMove);
+            
+            console.log(`✅ [SOCKET] Poker move executed successfully`, {
+              move: pokerMove,
+              moveResultType: typeof moveResult,
+              hasResult: !!moveResult
+            });
+
+          } catch (error) {
+            console.error(`❌ [SOCKET] Error in poker makeMove:`, {
+              error: error.message,
+              stack: error.stack,
+              move: finalMove,
+              userId: socket.user.id,
+              roomId
+            });
+            socket.emit('move_error', { error: error.message });
+            return;
+          }
         } else {
           try {
-            moveResult = game.makeMove(socket.user.id, move);
+            console.log(`🎮 [SOCKET] Processing ${gameType} move:`, {
+              userId: socket.user.id,
+              originalData: data,
+              finalMove,
+              moveType: typeof finalMove
+            });
+            moveResult = game.makeMove(socket.user.id, finalMove);
           } catch (error) {
+            console.error(`❌ [SOCKET] Error in ${gameType} makeMove:`, {
+              error: error.message,
+              move: finalMove,
+              userId: socket.user.id,
+              gameType
+            });
             socket.emit('move_error', { error: error.message });
             return;
           }
@@ -407,9 +628,18 @@ function initSocket(server, app) {
 
         if (gameType === 'poker' || gameType === 'wordle') {
           if (gameType === 'poker') {
-            game.players.forEach(player => {
-              const stateForPlayer = game.getStateForPlayer(player.id);
-              io.to(player.id).emit('game_update', stateForPlayer);
+            // Для покера отправляем состояние всем игрокам в комнате
+            console.log(`📤 [SOCKET] Sending poker state updates to all players`);
+            const connectedSockets = await io.in(roomId).fetchSockets();
+            connectedSockets.forEach(socketInRoom => {
+              const stateForPlayer = game.getStateForPlayer(socketInRoom.user.id);
+              console.log(`📨 [SOCKET] Sending state to player ${socketInRoom.user.id}`, {
+                stage: stateForPlayer?.stage,
+                currentPlayerId: stateForPlayer?.currentPlayerId,
+                validActions: stateForPlayer?.validActions,
+                showdownPhase: stateForPlayer?.showdownPhase
+              });
+              io.to(socketInRoom.user.id).emit('game_update', stateForPlayer);
             });
           } else {
             game.players.forEach(playerId => {
