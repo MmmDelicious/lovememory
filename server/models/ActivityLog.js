@@ -45,11 +45,11 @@ const ActivityLog = sequelize.define('ActivityLog', {
   timestamps: false, // Используем только createdAt
   indexes: [
     {
-      fields: ['pair_id', 'createdAt'],
+      fields: ['pair_id', 'created_at'],
       name: 'idx_activity_logs_pair_created'
     },
     {
-      fields: ['user_id', 'createdAt'],
+      fields: ['user_id', 'created_at'],
       name: 'idx_activity_logs_user_created'
     },
     {
@@ -57,7 +57,7 @@ const ActivityLog = sequelize.define('ActivityLog', {
       name: 'idx_activity_logs_action'
     },
     {
-      fields: ['createdAt'],
+      fields: ['created_at'],
       name: 'idx_activity_logs_created'
     }
   ]
