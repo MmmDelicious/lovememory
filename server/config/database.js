@@ -9,6 +9,11 @@ const sequelize = new Sequelize(
     port: process.env.DB_PORT,
     dialect: 'postgres',
     logging: false,
+    define: {
+      underscored: true,        // snake_case для всех полей и таблиц
+      freezeTableName: false,   // разрешает pluralization (users, game_rooms)
+      timestamps: true          // created_at, updated_at
+    }
   }
 );
 module.exports = sequelize;
