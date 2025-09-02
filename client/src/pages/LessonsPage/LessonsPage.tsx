@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, BookOpen, BarChart3, ToggleLeft, ToggleRight, Users, User } from 'lucide-react';
+import { Calendar, BookOpen, ToggleLeft, ToggleRight, Users, User } from 'lucide-react';
 import DailyLesson from '../../components/DailyLesson/DailyLesson';
 import TodayTab from '../../components/TodayTab/TodayTab';
 import LessonProgress from '../../components/LessonProgress/LessonProgress';
@@ -8,10 +8,11 @@ import PsychologyTips from '../../components/PsychologyTips/PsychologyTips';
 import ThemesTab from '../../components/ThemesTab/ThemesTab';
 
 import { lessonService } from '../../services/lesson.service';
+import { lessonUtils, type Lesson } from '../../utils/lessonUtils';
 import styles from './LessonsPage.module.css';
 const LessonsPage: React.FC = () => {
-  // New tab structure: Today, Topics, Insights
-  const [activeTab, setActiveTab] = useState<'today' | 'topics' | 'insights'>('today');
+  // New tab structure: Today, Topics
+  const [activeTab, setActiveTab] = useState<'today' | 'topics'>('today');
   
   // Partner mode toggle
   const [viewMode, setViewMode] = useState<'my' | 'pair'>('my');
@@ -19,8 +20,6 @@ const LessonsPage: React.FC = () => {
   // Data states
   const [todayLesson, setTodayLesson] = useState(null);
   const [progress, setProgress] = useState(null);
-  const [topics, setTopics] = useState(null);
-  const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -38,19 +37,13 @@ const LessonsPage: React.FC = () => {
         setTodayLesson(lesson);
       } 
       
-      if (activeTab === 'insights') {
+      if (activeTab === 'today') {
         const progressData = await lessonService.getProgress();
         setProgress(progressData);
       }
       
       if (activeTab === 'topics') {
         // ThemesTab component handles its own data
-      }
-      
-      if (activeTab === 'insights') {
-        // TODO: Implement getInsights service method
-        const insightsData = null; // await lessonService.getInsights();
-        setInsights(insightsData);
       }
       
     } catch (err: any) {
@@ -74,6 +67,18 @@ const LessonsPage: React.FC = () => {
       setError(err.message || 'Не удалось выполнить урок');
     }
   };
+
+  const handleLessonCompleted = () => {
+    // Обновляем данные после завершения урока
+    setRefreshKey(prev => prev + 1);
+  };
+
+  const handleThemeSelect = (themeId: string) => {
+    // TODO: Переход к списку уроков темы
+    const themeLessons = lessonUtils.getLessonsByTheme(themeId);
+    console.log(`Выбрана тема ${themeId}, доступно ${themeLessons.length} уроков`);
+    alert(`Функция просмотра уроков темы будет добавлена в следующем обновлении!`);
+  };
   const tabVariants = {
     inactive: { opacity: 0.7, scale: 0.95 },
     active: { opacity: 1, scale: 1 }
@@ -86,8 +91,7 @@ const LessonsPage: React.FC = () => {
   // New tab structure with updated icons and labels
   const tabs = [
     { id: 'today', label: 'Today', icon: Calendar },
-    { id: 'topics', label: 'Темы', icon: BookOpen },
-    { id: 'insights', label: 'Insights', icon: BarChart3 }
+    { id: 'topics', label: 'Темы', icon: BookOpen }
   ];
   return (
     <div className={styles.container}>
@@ -167,9 +171,10 @@ const LessonsPage: React.FC = () => {
                 loading={loading}
                 completionStatus={todayLesson?.completionStatus}
                 viewMode={viewMode}
-                streakDays={progress?.streakDays || 3}
-                lessonsCompleted={progress?.completedLessons?.length || 12}
-                coinsEarned={progress?.totalCoins || 450}
+                streakDays={progress?.pair?.streak || progress?.user?.currentStreak || 3}
+                lessonsCompleted={progress?.user?.totalCompleted || 12}
+                coinsEarned={progress?.user?.totalCoinsEarned || 450}
+                onLessonCompleted={handleLessonCompleted}
               />
             </motion.div>
           )}
@@ -183,37 +188,12 @@ const LessonsPage: React.FC = () => {
               transition={{ duration: 0.3 }}
             >
               <ThemesTab
-                onThemeSelect={(themeId) => {
-                  // TODO: Navigate to theme lessons or open theme modal
-                }}
+                onThemeSelect={handleThemeSelect}
               />
             </motion.div>
           )}
 
-          {activeTab === 'insights' && (
-            <motion.div
-              key="insights"
-              variants={contentVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              transition={{ duration: 0.3 }}
-            >
-              <div className={styles.insightsRedirect}>
-                <div className={styles.redirectCard}>
-                  <div className={styles.redirectIcon}>📊</div>
-                  <h3>Аналитика обучения</h3>
-                  <p>Подробная аналитика ваших отношений доступна на отдельной странице</p>
-                  <button 
-                    className={styles.redirectButton}
-                    onClick={() => window.location.href = '/insights'}
-                  >
-                    Перейти к аналитике
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          )}
+
         </AnimatePresence>
       </div>
       {}

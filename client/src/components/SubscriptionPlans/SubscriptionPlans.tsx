@@ -10,8 +10,7 @@ import {
   Users,
   BarChart3,
   Gift,
-  Infinity,
-  Shield
+  Infinity
 } from 'lucide-react';
 import styles from './SubscriptionPlans.module.css';
 
@@ -29,9 +28,10 @@ interface SubscriptionPlan {
 
 interface SubscriptionPlansProps {
   onSelectPlan?: (planId: string) => void;
+  showHeader?: boolean;
 }
 
-const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onSelectPlan }) => {
+const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onSelectPlan, showHeader = true }) => {
   const plans: SubscriptionPlan[] = [
     {
       id: 'free',
@@ -96,20 +96,22 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onSelectPlan }) =
 
   return (
     <div className={styles.container}>
-      <motion.div
-        className={styles.header}
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className={styles.headerIcon}>
-          <Sparkles size={28} />
-        </div>
-        <h1 className={styles.title}>Выберите ваш план</h1>
-        <p className={styles.subtitle}>
-          Разблокируйте весь потенциал ваших отношений с персональной аналитикой и AI помощником
-        </p>
-      </motion.div>
+      {showHeader && (
+        <motion.div
+          className={styles.header}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className={styles.headerIcon}>
+            <Sparkles size={28} />
+          </div>
+          <h1 className={styles.title}>Выберите ваш план</h1>
+          <p className={styles.subtitle}>
+            Разблокируйте весь потенциал ваших отношений с персональной аналитикой и AI помощником
+          </p>
+        </motion.div>
+      )}
 
       <div className={styles.plansGrid}>
         {plans.map((plan, index) => (
@@ -170,20 +172,7 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onSelectPlan }) =
         ))}
       </div>
 
-      <motion.div
-        className={styles.guaranteeSection}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-      >
-        <div className={styles.guaranteeIcon}>
-          <Shield size={20} />
-        </div>
-        <div className={styles.guaranteeText}>
-          <span className={styles.guaranteeTitle}>30 дней гарантии возврата</span>
-          <span className={styles.guaranteeSubtitle}>Не подошло? Вернем деньги без вопросов</span>
-        </div>
-      </motion.div>
+
     </div>
   );
 };

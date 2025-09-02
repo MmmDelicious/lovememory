@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuthActions, useUser } from '../../store/hooks';
+import { useAuthActions, useAuthPageData } from '../../store/hooks';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useInteractiveMascot } from '../../hooks/useInteractiveMascot';
 import { useAuthForm } from '../../hooks/useAuthForm';
@@ -21,40 +21,73 @@ const mascotConfigs = {
     }
   },
   register: {
-    initialMessage: 'Давайте знакомиться! Заполните анкету для поиска партнера.',
+    initialMessage: 'Добро пожаловать в LoveMemory! Заполните анкету для создания аккаунта.',
     phrases: {
-      error: ['Ой! Кажется, такой email уже зарегистрирован.', 'Стоп! Проверьте все поля - что-то не так.', 'Хм, анкета заполнена некорректно. Попробуйте ещё раз!'],
-      idle: ['Не спешите, заполните анкету внимательно.'],
-      story: ['Отлично! Анкета заполнена!', 'Добро пожаловать в LoveMemory!']
+      error: ['Ой! Кажется, такой email уже зарегистрирован. Попробуйте другой или войдите в существующий аккаунт.', 'Стоп! Проверьте все поля - что-то не так.', 'Хм, анкета заполнена некорректно. Попробуйте ещё раз!'],
+      idle: ['Не спешите, заполните анкету внимательно.', 'LoveMemory поможет вам создавать особенные моменты вместе!'],
+      story: ['Отлично! Анкета заполнена!', 'Добро пожаловать в LoveMemory!', 'Готовы создавать незабываемые воспоминания?']
     }
   }
 };
 
 const AuthPage: React.FC = () => {
-  const [mode, setMode] = useState<AuthMode>('login');
+
+  const location = useLocation();
+
+  
+  const [mode, setMode] = useState<AuthMode>(() => {
+    const currentPath = location.pathname;
+    if (currentPath === '/register') {
+      return 'register';
+    } else {
+      return 'login';
+    }
+  });
   
   const { loginUser, registerUser } = useAuthActions();
-  const user = useUser();
-  const navigate = useNavigate();
-  const location = useLocation();
+
   
-  const { mascotMessage, handleAvatarClick, handleInteraction, triggerError } = useInteractiveMascot(mascotConfigs[mode]);
-  const { formData, fieldErrors, isError, handleInputChange, handleSubmit, handleError } = useAuthForm({
+  const { user } = useAuthPageData();
+  
+  const navigate = useNavigate();
+  
+  const mascotConfig = React.useMemo(() => {
+    return mascotConfigs[mode];
+  }, [mode]);
+  
+  const { mascotMessage, handleAvatarClick, handleInteraction, triggerError } = useInteractiveMascot(mascotConfig);
+
+  
+  // Мемоизируем onSubmit и onSuccess чтобы избежать ненужных ререндеров useAuthForm
+  const onSubmit = React.useMemo(() => {
+    return mode === 'login' ? loginUser : registerUser;
+  }, [mode, loginUser, registerUser]);
+  
+  const onSuccess = React.useCallback(() => {
+    navigate(mode === 'login' ? '/dashboard' : '/onboarding/interests');
+  }, [mode, navigate]);
+  
+  const stableTriggerError = React.useCallback(triggerError, [triggerError]);
+  const stableHandleInteraction = React.useCallback(handleInteraction, [handleInteraction]);
+  
+  const { formData, fieldErrors, isSubmitting, handleInputChange, handleSubmit } = useAuthForm({
     mode,
-    onSubmit: mode === 'login' ? loginUser : registerUser,
-    onSuccess: () => navigate(mode === 'login' ? '/dashboard' : '/onboarding/interests'),
-    triggerError,
-    handleInteraction
+    onSubmit,
+    onSuccess,
+    triggerError: stableTriggerError,
+    handleInteraction: stableHandleInteraction
   });
+  
+
 
   // Обработка Google OAuth ошибок
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('error') === 'google-auth-failed') {
-      handleError('Не удалось войти с помощью Google. Попробуйте снова.');
+      triggerError('Не удалось войти с помощью Google. Попробуйте снова.');
       navigate(`/${mode}`, { replace: true });
     }
-  }, [location, navigate, handleError, mode]);
+  }, [location.search, mode, navigate, triggerError]);
 
   // Редирект если пользователь уже авторизован
   React.useEffect(() => {
@@ -63,15 +96,15 @@ const AuthPage: React.FC = () => {
     }
   }, [user, navigate]);
 
-  // Определяем URL на основе текущего пути
   React.useEffect(() => {
     const currentPath = location.pathname;
+    
     if (currentPath === '/register' && mode !== 'register') {
       setMode('register');
     } else if (currentPath === '/login' && mode !== 'login') {
       setMode('login');
     }
-  }, [location.pathname, mode]);
+  }, [location.pathname, mode, setMode]);
 
   const handleGoogleSignIn = (): void => {
     const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -113,7 +146,7 @@ const AuthPage: React.FC = () => {
               message={mascotMessage}
               animationData={greetAnimation}
               onAvatarClick={handleAvatarClick}
-              isError={isError}
+              isError={!!fieldErrors.email || !!fieldErrors.password} // Пример: тряска при ошибках в полях
               mode={mode}
             />
           </div>
@@ -190,8 +223,8 @@ const AuthPage: React.FC = () => {
                     max="99"
                   />
                 </div>
-                <Button type="primary" submit size="sm" fullWidth>
-                  Отправить анкету
+                <Button type="primary" submit size="sm" fullWidth disabled={isSubmitting}>
+                  {isSubmitting ? 'Отправляем...' : 'Отправить анкету'}
                 </Button>
               </form>
             </div>
@@ -215,15 +248,15 @@ const AuthPage: React.FC = () => {
                   onChange={handleInputChange}
                 />
               </div>
-              <Button type="primary" submit size="sm" fullWidth>
-                Войти
+              <Button type="primary" submit size="sm" fullWidth disabled={isSubmitting}>
+                {isSubmitting ? 'Входим...' : 'Войти'}
               </Button>
             </form>
           )}
 
           <div className={`${styles.divider} ${mode === 'register' ? styles.register : ''}`}><span>ИЛИ</span></div>
 
-          <button className={styles.googleButton} type="button" onClick={handleGoogleSignIn}>
+          <button className={styles.googleButton} type="button" onClick={handleGoogleSignIn} disabled={isSubmitting}>
             <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18">
               <path d="M16.51 8.25H9.03v3.44h4.15c-.16 1.12-1.29 2.5-4.15 2.5-2.49 0-4.5-2.02-4.5-4.5s2.01-4.5 4.5-4.5c1.23 0 2.22.45 2.97 1.15l2.76-2.76C14.01 1.25 11.66 0 9.03 0 4.05 0 0 4.05 0 9s4.05 9 9.03 9c5.04 0 8.78-3.67 8.78-8.75 0-.62-.07-1.22-.19-1.8z" fill="#FFF" />
             </svg>

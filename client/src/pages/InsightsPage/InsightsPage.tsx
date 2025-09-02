@@ -279,16 +279,20 @@ const InsightsPage: React.FC = () => {
   return (
     <div className={styles.insightsPage}>
 
-      <nav className={styles.navigation}>
-        <div className={styles.pageHeader}>
-          <div className={styles.pageTitle}>
-            <BarChart3 size={28} className={styles.pageIcon} />
-            <div>
-              <h1>Аналитика отношений</h1>
-              <p>Полный обзор ваших отношений с персональными инсайтами</p>
+      <nav className={`${styles.navigation} ${!isBasicOrHigher ? styles.navigationHidden : ''}`}>
+        {isBasicOrHigher && (
+          <div className={styles.pageHeader}>
+            <div className={styles.pageTitle}>
+              <BarChart3 size={28} className={styles.pageIcon} />
+              <div>
+                <h1>Аналитика отношений</h1>
+                <p>Полный обзор ваших отношений с персональными инсайтами</p>
+              </div>
             </div>
           </div>
-          
+        )}
+        
+        {isBasicOrHigher && (
           <div className={styles.filters}>
             <div className={styles.timeFilter}>
               <Filter size={16} />
@@ -303,7 +307,7 @@ const InsightsPage: React.FC = () => {
               </select>
             </div>
           </div>
-        </div>
+        )}
       </nav>
       <main className={styles.mainContent}>
         {renderAnalytics()}

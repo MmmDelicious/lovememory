@@ -76,9 +76,43 @@ export const setUserInterest = async (userId, interestId, preference = 'like', i
  */
 export const setMultipleUserInterests = async (userId, interests) => {
   try {
-    const response = await api.post(`/interests/users/${userId}/batch`, {
-      interests
+
+    
+    // Валидация данных
+    if (!userId || typeof userId !== 'string') {
+      throw new Error('Invalid userId provided');
+    }
+    
+    if (!Array.isArray(interests)) {
+      throw new Error('Interests must be an array');
+    }
+    
+    // Фильтруем и очищаем данные
+    const validInterests = interests.filter(interest => {
+      const isValid = interest && 
+                     typeof interest.interest_id === 'string' && 
+                     interest.interest_id.trim() !== '' &&
+                     ['love', 'like', 'neutral', 'dislike'].includes(interest.preference) &&
+                     typeof interest.intensity === 'number' &&
+                     interest.intensity >= 1 && 
+                     interest.intensity <= 10;
+      
+
+      
+      return isValid;
     });
+    
+
+    
+    if (validInterests.length === 0) {
+      return [];
+    }
+    
+    const response = await api.post(`/interests/users/${userId}/batch`, {
+      interests: validInterests
+    });
+    
+
     
     // Очищаем кэш пользовательских интересов после изменения
     clearUserInterestsCache(userId);

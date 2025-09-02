@@ -93,42 +93,20 @@ api.interceptors.response.use(
 
     // Обработка 401 ошибок - сразу на логин (упрощенная версия)
     if (error.response?.status === 401) {
+      console.log('🟡 API: Got 401 error, but skipping redirect for debugging');
       clearAuthToken();
-      
-      // Перенаправляем на логин только если не уже на странице логина
-      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 1000);
-      }
       return Promise.reject(error);
     }
 
     // Обработка серверных ошибок (5xx)
     if (error.response?.status >= 500) {
-      const errorInfo = encodeURIComponent(JSON.stringify({
-        errorCode: error.response.status,
-        errorMessage: 'Ошибка сервера. Попробуйте позже.'
-      }));
-      
-      setTimeout(() => {
-        if (!window.location.pathname.includes('/error')) {
-          window.location.href = `/error?error=${errorInfo}`;
-        }
-      }, 2000);
+      console.log('🟡 API: Got 5xx error, but skipping redirect for debugging');
       return Promise.reject(error);
     }
 
     // Обработка сетевых ошибок
     if (!error.response && error.code !== 'ERR_CANCELED') {
-      const errorInfo = encodeURIComponent(JSON.stringify({
-        errorCode: 0,
-        errorMessage: 'Проблемы с подключением к серверу'
-      }));
-      
-      if (!window.location.pathname.includes('/error')) {
-        window.location.href = `/error?error=${errorInfo}`;
-      }
+      console.log('🟡 API: Got network error, but skipping redirect for debugging');
       return Promise.reject(error);
     }
 

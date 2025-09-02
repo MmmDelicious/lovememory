@@ -15,25 +15,12 @@ const sendAuthResponse = (res, user, token) => {
     maxAge: 24 * 60 * 60 * 1000
   });
   
-  res.json({ token, user });
+  // Отправляем только данные пользователя, так как токен теперь в httpOnly cookie
+  res.json({ user });
 };
 const register = async (req, res, next) => {
   try {
-    // Дополнительная валидация на стороне сервера
-    const { email, password, first_name, gender, city, age } = req.body;
-    
-    if (!email || !password || !first_name || !gender || !city || !age) {
-      return res.status(400).json({
-        message: 'Все поля обязательны для заполнения'
-      });
-    }
-    
-    if (age < 18 || age > 99) {
-      return res.status(400).json({
-        message: 'Возраст должен быть от 18 до 99 лет'
-      });
-    }
-    
+    // Вся валидация была удалена и перенесена в middleware и модель
     const { user } = await authService.register(req.body);
     const fullUser = await userService.getProfile(user.id);
     
@@ -61,13 +48,8 @@ const register = async (req, res, next) => {
 };
 const login = async (req, res, next) => {
   try {
+    // Валидация была удалена, теперь она выполняется в middleware
     const { email, password } = req.body;
-    
-    if (!email || !password) {
-      return res.status(400).json({
-        message: 'Email и пароль обязательны'
-      });
-    }
     
     const { user } = await authService.login({ email, password });
     const fullUser = await userService.getProfile(user.id);
@@ -79,7 +61,7 @@ const login = async (req, res, next) => {
     sendAuthResponse(res, fullUser, token);
   } catch (error) {
     // Обработка специфичных ошибок входа
-    if (error.message.includes('Invalid credentials') || error.message.includes('User not found') || error.message.includes('Неверный email или пароль')) {
+    if (error.message.includes('Неверный email или пароль')) {
       return res.status(401).json({
         status: 'error',
         statusCode: 401,
@@ -90,14 +72,10 @@ const login = async (req, res, next) => {
     next(error);
   }
 };
-const logout = (req, res, next) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.clearCookie('authToken');
-    res.status(200).json({ message: 'Logged out successfully' });
-  });
+const logout = (req, res) => {
+  // Убираем req.logout(), так как сессии не используются для JWT аутентификации
+  res.clearCookie('authToken');
+  res.status(200).json({ message: 'Logged out successfully' });
 };
 const googleCallback = async (req, res, next) => {
   try {

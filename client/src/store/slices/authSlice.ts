@@ -37,6 +37,9 @@ export interface AuthSliceState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  // Состояние ошибок валидации формы
+  fieldErrors: Record<string, boolean>;
+  isFormError: boolean;
 }
 
 const initialState: AuthSliceState = {
@@ -44,6 +47,8 @@ const initialState: AuthSliceState = {
   isAuthenticated: false,
   isLoading: true,
   error: null,
+  fieldErrors: {},
+  isFormError: false,
 };
 
 // Async thunks
@@ -51,20 +56,16 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials: LoginCredentials, { rejectWithValue, dispatch }) => {
     try {
-      const data = await authService.login(credentials.email, credentials.password);
-      
-      const userData = {
-        ...data.user,
-        token: data.token
-      };
+      // Сервер теперь возвращает { user }, токен находится в httpOnly cookie
+      const { user } = await authService.login(credentials.email, credentials.password);
 
       // Обновляем монеты в currencySlice
-      if (userData.coins !== undefined) {
+      if (user.coins !== undefined) {
         const { setCoins } = await import('./currencySlice');
-        dispatch(setCoins(userData.coins));
+        dispatch(setCoins(user.coins));
       }
       
-      return userData;
+      return user; // Возвращаем только данные пользователя
     } catch (error: any) {
       // Более детальная обработка ошибок
       let errorMessage = 'Ошибка входа';
@@ -92,20 +93,16 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async (credentials: RegisterCredentials, { rejectWithValue, dispatch }) => {
     try {
-      const data = await authService.register(credentials);
+      // ТЕСТ: Включаем настоящий API вызов
+      const { user } = await authService.register(credentials);
       
-      const userData = {
-        ...data.user,
-        token: data.token
-      };
-
       // Обновляем монеты в currencySlice
-      if (userData.coins !== undefined) {
+      if (user.coins !== undefined) {
         const { setCoins } = await import('./currencySlice');
-        dispatch(setCoins(userData.coins));
+        dispatch(setCoins(user.coins));
       }
       
-      return userData;
+      return user; // Возвращаем только данные пользователя
     } catch (error: any) {
       // Более детальная обработка ошибок регистрации
       let errorMessage = 'Ошибка регистрации';
@@ -127,6 +124,20 @@ export const registerUser = createAsyncThunk(
       }
       
       return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  'auth/logout',
+  async (_, { rejectWithValue }) => {
+    try {
+      await authService.logout();
+      return;
+    } catch (error: any) {
+      console.warn('Logout failed on server, clearing client session anyway:', error);
+      // Продолжаем logout на клиенте даже если сервер недоступен
+      return;
     }
   }
 );
@@ -167,13 +178,19 @@ const authSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;
-      
-      // Очищаем только localStorage (httpOnly cookie очищает сервер)
-      try {
-        localStorage.removeItem('authToken');
-      } catch (error) {
-        console.warn('Failed to clear token from localStorage during logout:', error);
-      }
+      state.fieldErrors = {};
+      state.isFormError = false;
+    },
+    // Actions для управления ошибками валидации формы
+    setFieldErrors: (state, action: PayloadAction<Record<string, boolean>>) => {
+      state.fieldErrors = action.payload;
+    },
+    setFormError: (state, action: PayloadAction<boolean>) => {
+      state.isFormError = action.payload;
+    },
+    clearFormErrors: (state) => {
+      state.fieldErrors = {};
+      state.isFormError = false;
     },
   },
   extraReducers: (builder) => {
@@ -187,12 +204,9 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.isAuthenticated = true;
         state.error = null;
-        
-        // Токен теперь автоматически сохраняется в httpOnly cookie сервером
-        // localStorage используется только для совместимости
-        if (action.payload.token) {
-          localStorage.setItem('authToken', action.payload.token);
-        }
+        state.fieldErrors = {};
+        state.isFormError = false;
+        // Логика с localStorage удалена, так как токен управляется httpOnly cookie
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -207,16 +221,29 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.isAuthenticated = true;
         state.error = null;
-        
-        // Токен теперь автоматически сохраняется в httpOnly cookie сервером
-        // localStorage используется только для совместимости
-        if (action.payload.token) {
-          localStorage.setItem('authToken', action.payload.token);
-        }
+        state.fieldErrors = {};
+        state.isFormError = false;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+        state.error = null;
+        state.fieldErrors = {};
+        state.isFormError = false;
+        state.isLoading = false;
+      })
+      .addCase(logoutUser.rejected, (state) => {
+        // Даже если logout на сервере неуспешен, очищаем состояние клиента
+        state.user = null;
+        state.isAuthenticated = false;
+        state.error = null;
+        state.fieldErrors = {};
+        state.isFormError = false;
+        state.isLoading = false;
       });
   },
 });
@@ -228,7 +255,14 @@ export const {
   setError, 
   updateUser, 
   logout,
-  syncCoinsWithCurrency 
+  syncCoinsWithCurrency,
+  setFieldErrors,
+  setFormError,
+  clearFormErrors
 } = authSlice.actions;
+
+// Селекторы для ошибок валидации формы
+export const selectFieldErrors = (state: { auth: AuthSliceState }) => state.auth.fieldErrors;
+export const selectIsFormError = (state: { auth: AuthSliceState }) => state.auth.isFormError;
 
 export default authSlice.reducer;

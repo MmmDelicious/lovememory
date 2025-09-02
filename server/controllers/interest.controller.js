@@ -161,12 +161,22 @@ exports.setMultipleUserInterests = async (req, res, next) => {
     const { userId } = req.params;
     const { interests } = req.body; // [{ interest_id, preference, intensity }]
     
+
+    
     // Проверяем права доступа
     if (userId !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;
     }
+    
+    // Проверяем существование пользователя
+    const user = await User.findByPk(userId);
+    if (!user) {
+      const error = new NotFoundError('User not found');
+      throw error;
+    }
+
     
     if (!Array.isArray(interests) || interests.length === 0) {
       const error = new ValidationError('interests array is required');
@@ -179,16 +189,22 @@ exports.setMultipleUserInterests = async (req, res, next) => {
     for (const interestData of interests) {
       const { interest_id, preference, intensity } = interestData;
       
+
+      
       // Валидация каждого интереса
       if (!interest_id || !preference) {
+
         continue; // Пропускаем некорректные данные
       }
       
       // Проверяем существование интереса
       const interest = await Interest.findByPk(interest_id);
       if (!interest || !interest.is_active) {
+
         continue; // Пропускаем несуществующие интересы
       }
+      
+
       
       const [userInterest, created] = await UserInterest.upsert({
         user_id: userId,
@@ -198,6 +214,7 @@ exports.setMultipleUserInterests = async (req, res, next) => {
         metadata: {}
       });
       
+
       results.push(userInterest);
       
       // Увеличиваем популярность интереса
@@ -205,6 +222,8 @@ exports.setMultipleUserInterests = async (req, res, next) => {
         interestIds.push(interest_id);
       }
     }
+    
+
     
     // Массово увеличиваем популярность
     for (const interestId of interestIds) {
@@ -223,8 +242,10 @@ exports.setMultipleUserInterests = async (req, res, next) => {
       }]
     });
     
+
     res.status(201).json(fullUserInterests);
   } catch (error) {
+
     next(error);
   }
 };

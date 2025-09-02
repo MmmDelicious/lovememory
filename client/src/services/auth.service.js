@@ -1,27 +1,17 @@
-import api, { setAuthToken, clearAuthToken } from './api';
+import api, { clearAuthToken } from './api';
 
 const login = async (email, password) => {
   const response = await api.post('/auth/login', {
     email,
     password,
   });
-  
-  // Безопасно сохраняем токен
-  if (response.data.token) {
-    setAuthToken(response.data.token);
-  }
-  
+  // Логика setAuthToken удалена, так как токен теперь в httpOnly cookie
   return response.data;
 };
 
 const register = async (userData) => {
   const response = await api.post('/auth/register', userData);
-  
-  // Безопасно сохраняем токен
-  if (response.data.token) {
-    setAuthToken(response.data.token);
-  }
-  
+  // Логика setAuthToken удалена
   return response.data;
 };
 
@@ -52,9 +42,7 @@ const getMe = async () => {
 const refreshToken = async () => {
   try {
     const response = await api.post('/auth/refresh');
-    if (response.data.token) {
-      setAuthToken(response.data.token);
-    }
+    // Логика setAuthToken удалена, так как новый токен также будет в cookie
     return response.data;
   } catch (error) {
     clearAuthToken();

@@ -7,8 +7,16 @@ import { askAI } from '../services/ai.service';
 import { MASCOT_CONFIG } from '../config/mascot.config.js';
 import smartMascotService from '../services/smartMascot.service';
 import { useUser } from '../store/hooks';
-const MascotContext = createContext();
-export const useMascot = () => useContext(MascotContext);
+const MascotContext = createContext(undefined); // Инициализируем с undefined
+export const useMascot = () => {
+  const context = useContext(MascotContext);
+  if (context === undefined) {
+    // Эта ошибка будет выведена, если компонент, использующий хук,
+    // не находится внутри MascotProvider.
+    throw new Error('useMascot must be used within a MascotProvider');
+  }
+  return context;
+};
 const generateMessage = (page, data, user = null, partner = null) => {
   if (user) {
     smartMascotService.updateUserContext(user, partner);
@@ -76,6 +84,13 @@ export const MascotProvider = ({ children }) => {
   }, [moveGlobalMascotToPosition, setGlobalMascotMessage]);
   const showMascot = useCallback((config) => {
     if (isMobile || !config.element) return;
+
+    // Добавляем проверку, что элемент все еще в DOM
+    if (!config.element.isConnected) {
+      console.warn('Mascot target element is no longer in the DOM. Aborting showMascot.');
+      return;
+    }
+    
     let helperAnimation, mascotType;
     if (config.type === 'flyer') { helperAnimation = flyerAnimation; mascotType = 'flyer'; }
     else if (config.type === 'greeter') { helperAnimation = greetAnimation; mascotType = 'greeter'; }
@@ -91,6 +106,11 @@ export const MascotProvider = ({ children }) => {
     }
     hideMascot();
     setTimeout(() => {
+      // Дополнительная проверка на случай, если элемент исчез за 100мс таймаута
+      if (!config.element.isConnected) {
+        console.warn('Mascot target element disappeared during the showMascot timeout.');
+        return;
+      }
       const message = config.message || generateMessage(config.page, config.data, user, user?.partner);
       const elementRect = config.element.getBoundingClientRect();
       const finalConfig = { ...config, message, animationData: helperAnimation, mascotType, isTumbling: config.isTumbling ?? (mascotType === 'flyer' && Math.random() > 0.5), side: config.side ?? (elementRect.left < window.innerWidth / 2 ? 'right' : 'left'), };

@@ -110,12 +110,38 @@ class SmartMascotService {
   generateContextualMessage(context = {}) {
     const { user, partner, relationshipStats } = this.userContext;
     const userName = user?.name || 'дорогой';
-    const partnerName = partner?.name || 'ваш партнер';
+    const partnerName = partner?.name || 'ваш близкий человек';
+    
+    // Определяем контекст страницы
+    const currentPage = context.page || this.detectCurrentPage();
+    
     const contextTemplates = {
+      // Основные состояния
       idle: [
-        `${userName}, давненько не видел вас с ${partnerName} здесь! Как дела? Может, время запланировать что-то особенное? 💭`,
-        `Соскучился по вашим с ${partnerName} приключениям! ${userName}, что нового в ваших отношениях? 😊`,
-        `${userName}, помните, что лучшие отношения требуют внимания. Когда в последний раз вы с ${partnerName} делали что-то спонтанное? ✨`,
+        `${userName}, давненько не видел вас здесь! Как дела? Может, время запланировать что-то особенное? 💭`,
+        `Соскучился по вашим приключениям! ${userName}, что нового в отношениях? 😊`,
+        `${userName}, помните, что лучшие отношения требуют внимания. Когда в последний раз делали что-то спонтанное? ✨`,
+      ],
+      // Контексты для конкретных страниц
+      dashboard: [
+        `${userName}, отличный способ начать день - посмотреть на ваши воспоминания! 🌅`,
+        `Какие планы на сегодня? Может, добавим что-то особенное в календарь? 📅`,
+        `${userName}, LoveMemory помогает создавать моменты. Что будем планировать? ✨`,
+      ],
+      games: [
+        `${userName}, игры вместе - отличный способ повеселиться и сблизиться! 🎮`,
+        `Готовы к веселью? Игры помогают лучше узнать друг друга! 😄`,
+        `${userName}, а давайте проверим совместимость в играх? 🎯`,
+      ],
+      insights: [
+        `${userName}, аналитика отношений может открыть много интересного! 📊`,
+        `Давайте изучим ваши паттерны общения и близости! 🔍`,
+        `${userName}, данные помогают понять, как сделать отношения еще лучше! 💡`,
+      ],
+      profile: [
+        `${userName}, профиль - это ваша история в LoveMemory! ✨`,
+        `Не забывайте обновлять информацию о себе! 📝`,
+        `${userName}, как идут дела с достижениями? 🏆`,
       ],
       active: [
         `${userName}, вы с ${partnerName} просто молодцы! Столько активности - отношения процветают! 🌟`,
@@ -133,10 +159,29 @@ class SmartMascotService {
         `${userName}, рост отношений - это путешествие. Куда бы вы хотели отправиться вместе с ${partnerName}? 🗺️`,
       ]
     };
-    const contextType = context.type || this.determineContextType();
-    const templates = contextTemplates[contextType] || contextTemplates.growth;
+    // Сначала пробуем найти специфичные для страницы фразы
+    let templates = contextTemplates[currentPage];
+    
+    // Если нет специфичных фраз для страницы, используем общий контекст
+    if (!templates) {
+      const contextType = context.type || this.determineContextType();
+      templates = contextTemplates[contextType] || contextTemplates.growth;
+    }
+    
     const styleIndex = this.getStyleBasedIndex(templates.length);
     return templates[styleIndex];
+  }
+
+  // Определяем текущую страницу по URL
+  detectCurrentPage() {
+    const path = window.location.pathname;
+    if (path.includes('/dashboard')) return 'dashboard';
+    if (path.includes('/games')) return 'games';
+    if (path.includes('/insights')) return 'insights';
+    if (path.includes('/profile')) return 'profile';
+    if (path.includes('/lessons')) return 'lessons';
+    if (path.includes('/calendar')) return 'calendar';
+    return 'general';
   }
   determineContextType() {
     const { recentEvents, lastInteractions } = this.userContext;
@@ -166,7 +211,7 @@ class SmartMascotService {
       const title = event.title.toLowerCase();
       const description = (event.description || '').toLowerCase();
       const content = title + ' ' + description;
-      if (content.includes('свидание') || content.includes('вместе') || 
+      if (content.includes('время вместе') || content.includes('вместе') || 
           content.includes('поход') || content.includes('кино') ||
           content.includes('прогулка') || content.includes('путешествие')) {
         loveLanguageAnalysis.quality_time += 2;

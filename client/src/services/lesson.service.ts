@@ -75,13 +75,48 @@ class LessonService {
   }
   async completeLesson(lessonId: string, feedback?: string): Promise<any> {
     try {
-      const response = await api.post(`/lessons/${lessonId}/complete`, {
+      // Получаем данные текущего пользователя
+      const userResponse = await api.get('/auth/me');
+      const user = userResponse.data.user || userResponse.data;
+      
+      if (!user?.id) {
+        throw new Error('Пользователь не найден');
+      }
+
+      // Получаем pair_id из профиля пользователя или партнера
+      let pairId = user.pair_id || user.partner?.pair_id;
+      
+      // Если pair_id нет, попробуем получить из профиля
+      if (!pairId) {
+        try {
+          const profileResponse = await api.get('/user/profile');
+          const profile = profileResponse.data.user || profileResponse.data;
+          pairId = profile.pair_id || profile.partner?.pair_id;
+        } catch (profileError) {
+          console.warn('Could not fetch user profile for pair_id:', profileError);
+        }
+      }
+
+      const requestData = {
         feedback,
-        completionTime: Date.now()
-      });
+        completionTime: Date.now(),
+        completed_by_user_id: user.id,
+        ...(pairId && { pair_id: pairId })
+      };
+
+      console.log('🔄 Completing lesson with data:', requestData);
+
+      const response = await api.post(`/lessons/${lessonId}/complete`, requestData);
       return response.data.data;
     } catch (error: unknown) {
       console.error('❌ LessonService: Failed to complete lesson:', error);
+      
+      // Более детальная обработка ошибок
+      if (error.response?.status === 400) {
+        const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Неверные данные запроса';
+        throw new Error(`Ошибка валидации: ${errorMessage}`);
+      }
+      
       throw new Error(error.response?.data?.message || 'Не удалось выполнить урок');
     }
   }

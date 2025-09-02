@@ -5,18 +5,41 @@ import { usePairing } from '../../hooks/usePairing';
 import { useEvents } from '../../hooks/useEvents';
 import styles from './ProfilePage.module.css';
 import userService from '../../services/user.service';
-import ActivityFeed from '../../components/Profile/ActivityFeed';
-import PairingWidget from '../../components/Profile/PairingWidget';
+import interestService from '../../services/interest.service';
+import pairService from '../../services/pair.service';
 import { 
   FaUser, FaEnvelope, FaMapMarkerAlt, FaBirthdayCake, 
   FaCoins, FaCalendarAlt, FaGamepad, FaCommentDots, FaChartLine,
-  FaHeart, FaStar, FaEdit, FaShare
+  FaHeart, FaStar, FaEdit, FaShare, FaUsers, FaPlus
 } from 'react-icons/fa';
 import manAvatar from '../../assets/man.png';
 import womanAvatar from '../../assets/woman.png';
 import defaultAvatar from '../../assets/react.svg';
 
-type ExtendedUser = any; // Временно используем any для упрощения
+interface UserInterest {
+  id: string;
+  interest_id: string;
+  preference: 'love' | 'like' | 'neutral' | 'dislike';
+  intensity: number;
+  Interest: {
+    id: string;
+    name: string;
+    category: string;
+    emoji?: string;
+  };
+}
+
+interface ExtendedUser {
+  id: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  gender?: 'male' | 'female';
+  avatarUrl?: string;
+  city?: string;
+  age?: number;
+  coins?: number;
+}
 const ProfilePage: React.FC = () => {
   const user = useUser();
   const isAuthLoading = useAuthLoading();
@@ -34,6 +57,13 @@ const ProfilePage: React.FC = () => {
     coins: 0,
   });
   const [isStatsLoading, setIsStatsLoading] = useState(true);
+  const [userInterests, setUserInterests] = useState<UserInterest[]>([]);
+  const [isInterestsLoading, setIsInterestsLoading] = useState(true);
+  const [interestsError, setInterestsError] = useState<string | null>(null);
+  const [partnerEmail, setPartnerEmail] = useState('');
+  const [isPairingModalOpen, setIsPairingModalOpen] = useState(false);
+  const [pairingError, setPairingError] = useState<string | null>(null);
+  const [isPairingSubmitting, setIsPairingSubmitting] = useState(false);
   const getAvatar = (targetUser: ExtendedUser | null = user): string => {
     if (targetUser?.avatarUrl) return targetUser.avatarUrl;
     if (targetUser?.gender === 'male') return manAvatar;
@@ -55,6 +85,53 @@ const ProfilePage: React.FC = () => {
     };
     loadStats();
   }, [userId]);
+
+  // Загрузка интересов пользователя
+  useEffect(() => {
+    const loadUserInterests = async () => {
+      if (!userId) return;
+      setIsInterestsLoading(true);
+      setInterestsError(null);
+      try {
+        const response = await interestService.getUserInterests(userId);
+        setUserInterests(response || []);
+        
+        if (!response || response.length === 0) {
+          setInterestsError('Интересы не найдены. Вы можете добавить их в настройках.');
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки интересов:', error);
+        setInterestsError('Не удалось загрузить интересы. Попробуйте обновить страницу.');
+      } finally {
+        setIsInterestsLoading(false);
+      }
+    };
+    loadUserInterests();
+  }, [userId]);
+
+  // Функция отправки запроса на создание пары
+  const handleSendPairRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!partnerEmail.trim()) return;
+    
+    setIsPairingSubmitting(true);
+    setPairingError(null);
+    
+    try {
+      await sendRequest(partnerEmail.trim());
+      setPartnerEmail('');
+      setIsPairingModalOpen(false);
+      // Показать уведомление об успехе
+    } catch (error: any) {
+      console.error('Ошибка отправки запроса:', error);
+      setPairingError(
+        error.response?.data?.message || 
+        'Не удалось отправить запрос. Проверьте email и попробуйте снова.'
+      );
+    } finally {
+      setIsPairingSubmitting(false);
+    }
+  };
   
   // AppRoutes уже обрабатывает случай отсутствия пользователя
   if (!user) {
@@ -210,6 +287,41 @@ const ProfilePage: React.FC = () => {
                   <p>Активная пара</p>
                 </div>
               </div>
+              <button 
+                className={styles.contactPartnerButton}
+                onClick={() => {
+                  // Открыть чат с партнером или перейти к чату
+                  window.location.href = '/chat'; // Можно заменить на нужный маршрут
+                }}
+              >
+                <FaCommentDots />
+                Написать сообщение
+              </button>
+            </motion.div>
+          )}
+
+          {/* Pairing Section - если нет партнера */}
+          {!partner && (
+            <motion.div 
+              className={styles.sidebarPairingCard}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9, duration: 0.5 }}
+            >
+              <h3 className={styles.sidebarTitle}>
+                <FaUsers />
+                Найти пару
+              </h3>
+              <p className={styles.pairingDescription}>
+                Пригласите свою вторую половинку чтобы начать совместное путешествие!
+              </p>
+              <button 
+                className={styles.invitePartnerButton}
+                onClick={() => setIsPairingModalOpen(true)}
+              >
+                <FaPlus />
+                Пригласить партнера
+              </button>
             </motion.div>
           )}
         </motion.div>
@@ -258,24 +370,87 @@ const ProfilePage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
           >
-            <h2 className={styles.sectionTitle}>
-              <FaStar className={styles.titleIcon} />
-              Интересы и увлечения
-            </h2>
-            <div className={styles.tagGrid}>
-              {['Семья', 'Путешествия', 'Хобби', 'Романтика', 'Игры', 'Кулинария', 'Спорт', 'Музыка'].map((tag, index) => (
-                <motion.div 
-                  key={tag}
-                  className={styles.tagCard}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.9 + index * 0.1, duration: 0.3 }}
-                  whileHover={{ scale: 1.05, y: -2 }}
-                >
-                  <span className={styles.tagName}>{tag}</span>
-                </motion.div>
-              ))}
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>
+                <FaStar className={styles.titleIcon} />
+                Интересы и увлечения
+              </h2>
+              <button 
+                className={styles.editInterestsButton}
+                onClick={() => window.location.href = '/onboarding/interests?mode=edit'}
+                title="Редактировать интересы"
+              >
+                <FaEdit />
+              </button>
             </div>
+            
+            {isInterestsLoading ? (
+              <div className={styles.loadingContainer}>
+                <div className={styles.spinner}></div>
+                <p>Загрузка интересов...</p>
+              </div>
+            ) : interestsError ? (
+              <div className={styles.errorContainer}>
+                <p className={styles.errorText}>{interestsError}</p>
+                <button 
+                  className={styles.retryButton}
+                  onClick={() => window.location.reload()}
+                >
+                  Обновить страницу
+                </button>
+              </div>
+            ) : userInterests.length > 0 ? (
+              <div className={styles.tagGrid}>
+                {userInterests.map((userInterest, index) => {
+                  const interest = userInterest.Interest;
+                  const preferenceColor = {
+                    'love': '#FF6B5A',
+                    'like': '#3B82F6', 
+                    'neutral': '#6B7280',
+                    'dislike': '#EF4444'
+                  }[userInterest.preference];
+                  
+                  return (
+                    <motion.div 
+                      key={userInterest.id}
+                      className={styles.tagCard}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.9 + index * 0.1, duration: 0.3 }}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      style={{ borderColor: preferenceColor }}
+                    >
+                      <span className={styles.tagName}>
+                        {interest.emoji && <span className={styles.tagEmoji}>{interest.emoji}</span>}
+                        {interest.name}
+                      </span>
+                      <div className={styles.tagIntensity}>
+                        {Array.from({ length: 5 }, (_, i) => (
+                          <span 
+                            key={i} 
+                            className={`${styles.intensityDot} ${i < Math.ceil(userInterest.intensity / 2) ? styles.active : ''}`}
+                            style={{ backgroundColor: i < Math.ceil(userInterest.intensity / 2) ? preferenceColor : '#E5E7EB' }}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className={styles.emptyContainer}>
+                <FaPlus className={styles.emptyIcon} />
+                <p className={styles.emptyText}>
+                  У вас пока нет добавленных интересов
+                </p>
+                <button 
+                  className={styles.addInterestsButton}
+                  onClick={() => window.location.href = '/onboarding/interests'}
+                >
+                  Добавить интересы
+                </button>
+              </div>
+            )}
           </motion.div>
 
           {/* Activity Feed */}
@@ -352,6 +527,65 @@ const ProfilePage: React.FC = () => {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Модальное окно для приглашения партнера */}
+      {isPairingModalOpen && (
+        <div className={styles.modal} onClick={() => setIsPairingModalOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>Пригласить партнера</h2>
+              <button 
+                className={styles.modalCloseButton}
+                onClick={() => setIsPairingModalOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <form onSubmit={handleSendPairRequest} className={styles.pairingForm}>
+              <div className={styles.formGroup}>
+                <label htmlFor="partnerEmail" className={styles.formLabel}>
+                  Email партнера
+                </label>
+                <input
+                  id="partnerEmail"
+                  type="email"
+                  value={partnerEmail}
+                  onChange={(e) => setPartnerEmail(e.target.value)}
+                  placeholder="partner@example.com"
+                  className={styles.formInput}
+                  required
+                  disabled={isPairingSubmitting}
+                />
+              </div>
+              
+              {pairingError && (
+                <div className={styles.errorMessage}>
+                  {pairingError}
+                </div>
+              )}
+              
+              <div className={styles.modalActions}>
+                <button 
+                  type="button" 
+                  className={styles.secondaryButton}
+                  onClick={() => setIsPairingModalOpen(false)}
+                  disabled={isPairingSubmitting}
+                >
+                  Отмена
+                </button>
+                <button 
+                  type="submit" 
+                  className={styles.primaryButton}
+                  disabled={isPairingSubmitting || !partnerEmail.trim()}
+                >
+                  {isPairingSubmitting ? 'Отправляем...' : 'Отправить приглашение'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

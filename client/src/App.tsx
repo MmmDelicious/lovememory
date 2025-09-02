@@ -7,9 +7,9 @@ import { MascotProvider } from './context/MascotContext';
 import AppRoutes from './AppRoutes';
 import GlobalMascot from './components/GlobalMascot/GlobalMascot';
 import AIChatInterface from './components/AIChatInterface/AIChatInterface';
-import { setupGlobalErrorHandler } from './utils/errorHandler';
+// import { setupGlobalErrorHandler } from './utils/errorHandler'; // Уже инициализирован в main.tsx
 import { useAuthActions, useCurrencyActions } from './store/hooks';
-import { getAuthToken, clearAuthToken } from './services/api';
+import { clearAuthToken } from './services/api';
 import { authService } from './services';
 
 const AppInitializer: React.FC = () => {
@@ -20,27 +20,23 @@ const AppInitializer: React.FC = () => {
     const checkAuthStatus = async () => {
       setLoading(true);
       
-      const token = getAuthToken();
-      
-      if (token) {
-        try {
-          const userData = await authService.getMe();
-          
-          setUser({
-            ...userData,
-            token: token
-          });
-          
-          if (userData.coins !== undefined && userData.coins !== null) {
-            setCoins(userData.coins);
-          } else {
-            setCoins(1000);
-          }
-        } catch (error) {
-          console.warn('Failed to get user info during app init:', error);
-          clearAuthToken();
-          resetCurrency();
+      try {
+        // Всегда проверяем сервер независимо от localStorage
+        // так как токен теперь в httpOnly cookie
+        const userData = await authService.getMe();
+        
+        setUser(userData);
+        
+        if (userData.coins !== undefined && userData.coins !== null) {
+          setCoins(userData.coins);
+        } else {
+          setCoins(1000);
         }
+      } catch (error) {
+        console.warn('User not authenticated during app init:', error);
+        // Очищаем только localStorage, httpOnly cookie управляется сервером
+        clearAuthToken();
+        resetCurrency();
       }
       
       setLoading(false);
@@ -53,9 +49,7 @@ const AppInitializer: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  useEffect(() => {
-    setupGlobalErrorHandler();
-  }, []);
+  // setupGlobalErrorHandler() уже вызван в main.tsx
 
   return (
     <Provider store={store}>

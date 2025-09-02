@@ -1,5 +1,6 @@
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import { useMemo } from 'react';
+import { createSelector } from '@reduxjs/toolkit';
 import type { RootState, AppDispatch } from './index';
 import { 
   fetchRooms, 
@@ -44,6 +45,7 @@ import {
   logout,
   loginUser,
   registerUser,
+  logoutUser,
   syncCoinsWithCurrency
 } from './slices/authSlice';
 import {
@@ -98,6 +100,22 @@ export const useUser = () => useAppSelector((state) => state.auth.user);
 export const useIsAuthenticated = () => useAppSelector((state) => state.auth.isAuthenticated);
 export const useAuthLoading = () => useAppSelector((state) => state.auth.isLoading);
 export const useAuthError = () => useAppSelector((state) => state.auth.error);
+
+// Мемоизированный селектор для AuthPage - предотвращает ререндеры
+const selectAuthPageData = createSelector(
+  [(state: RootState) => state.auth.user, (state: RootState) => state.auth.isAuthenticated],
+  (user, isAuthenticated) => ({ user, isAuthenticated })
+);
+
+export const useAuthPageData = () => useAppSelector(selectAuthPageData);
+
+// Мемоизированный селектор для AppRoutes - добавляем isLoading для корректного роутинга
+const selectAppRoutesData = createSelector(
+  [(state: RootState) => state.auth.user, (state: RootState) => state.auth.isAuthenticated, (state: RootState) => state.auth.isLoading],
+  (user, isAuthenticated, isLoading) => ({ user, isAuthenticated, isLoading })
+);
+
+export const useAppRoutesData = () => useAppSelector(selectAppRoutesData);
 
 // Специализированные хуки для Currency
 export const useCurrency = () => useAppSelector((state) => state.currency);
@@ -248,7 +266,7 @@ export const useAuthActions = () => {
     setLoading: (loading: boolean) => dispatch(setLoading(loading)),
     setError: (error: string) => dispatch(setError(error)),
     updateUser: (updates: any) => dispatch(updateUser(updates)),
-    logout: () => dispatch(logout()),
+    logout: () => dispatch(logoutUser()),
     loginUser: (credentials: { email: string; password: string }) => dispatch(loginUser(credentials)),
     registerUser: (userData: { email: string; password: string; first_name: string; gender: 'male' | 'female' | 'other'; city: string; age: number }) => dispatch(registerUser(userData)),
     syncCoinsWithCurrency: (coins: number) => dispatch(syncCoinsWithCurrency(coins))

@@ -1,9 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Lottie from 'lottie-react';
-import { ChevronRight, Filter } from 'lucide-react';
+import { ChevronRight, Filter, BookOpen, Target } from 'lucide-react';
 import styles from './ThemesTab.module.css';
 import { themes as lessonThemes, getLessonAnimation } from '../../assets/lessons';
+import { lessonService } from '../../services/lesson.service';
+import { lessonUtils } from '../../utils/lessonUtils';
 
 interface Theme {
   id: string;
@@ -20,9 +22,20 @@ interface ThemesTabProps {
   onThemeSelect?: (themeId: string) => void;
 }
 
+interface ThemeProgress {
+  user: number;
+  partner: number;
+  total: number;
+  percentage: number;
+  lastCompleted?: string;
+}
+
 const ThemesTab: React.FC<ThemesTabProps> = ({ onThemeSelect }) => {
   const [filter, setFilter] = useState<'all' | 'popular' | 'new' | 'recommended'>('all');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [themeProgress, setThemeProgress] = useState<{ [key: string]: ThemeProgress }>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Маппинг для цветов и категорий тем
   const themeColors = {
@@ -59,18 +72,55 @@ const ThemesTab: React.FC<ThemesTabProps> = ({ onThemeSelect }) => {
     creative_time: 'Developer discussing different options.json'
   };
 
-  // Генерируем случайные завершенные уроки только один раз
+  // Загружаем прогресс по темам из API
+  useEffect(() => {
+    const loadThemeProgress = async () => {
+      try {
+        setLoading(true);
+        const progressData = await lessonService.getProgress();
+        setThemeProgress(progressData.themes || {});
+      } catch (error) {
+        console.error('Ошибка загрузки прогресса тем:', error);
+        setError('Не удалось загрузить прогресс. Показаны тестовые данные.');
+        // Fallback: используем тестовые данные
+        const fallbackProgress: { [key: string]: ThemeProgress } = {};
+        Object.keys(lessonThemes).forEach(themeId => {
+          const totalLessons = lessonThemes[themeId as keyof typeof lessonThemes].count;
+          fallbackProgress[themeId] = {
+            user: Math.floor(Math.random() * totalLessons),
+            partner: Math.floor(Math.random() * totalLessons),
+            total: totalLessons,
+            percentage: Math.floor(Math.random() * 100),
+            lastCompleted: new Date().toISOString()
+          };
+        });
+        setThemeProgress(fallbackProgress);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadThemeProgress();
+  }, []);
+
+  // Создаем темы с реальными данными прогресса
   const themes: Theme[] = useMemo(() => 
-    Object.entries(lessonThemes).map(([key, theme]) => ({
-      id: key,
-      title: theme.name,
-      description: theme.description,
-      color: themeColors[key as keyof typeof themeColors] || '#DFF6FF',
-      animation: getLessonAnimation(themeAnimations[key as keyof typeof themeAnimations] || 'Love.json'),
-      totalLessons: theme.count,
-      completedLessons: Math.floor(Math.random() * theme.count), // TODO: заменить на реальные данные из API
-      category: (themeCategories[key as keyof typeof themeCategories] || 'new') as 'popular' | 'new' | 'recommended'
-    })), [lessonThemes]
+    Object.entries(lessonThemes).map(([key, theme]) => {
+      const progress = themeProgress[key];
+      const userCompleted = progress?.user || 0;
+      const totalLessons = theme.count;
+      
+      return {
+        id: key,
+        title: theme.name,
+        description: theme.description,
+        color: themeColors[key as keyof typeof themeColors] || '#DFF6FF',
+        animation: getLessonAnimation(themeAnimations[key as keyof typeof themeAnimations] || 'Love.json'),
+        totalLessons,
+        completedLessons: userCompleted,
+        category: (themeCategories[key as keyof typeof themeCategories] || 'new') as 'popular' | 'new' | 'recommended'
+      };
+    }), [lessonThemes, themeProgress]
   );
 
   const filteredThemes = themes.filter(theme => {
@@ -93,8 +143,27 @@ const ThemesTab: React.FC<ThemesTabProps> = ({ onThemeSelect }) => {
     handleThemeClick(themeId);
   };
 
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loadingState}>
+          <div className={styles.loadingSpinner}></div>
+          <h3>Загружаем ваш прогресс по темам...</h3>
+          <p>Пожалуйста, подождите</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
+      {error && (
+        <div className={styles.errorBanner}>
+          <span className={styles.errorIcon}>⚠️</span>
+          <span>{error}</span>
+        </div>
+      )}
+      
       {/* Header */}
       <div className={styles.header}>
         <h1 className={styles.title}>

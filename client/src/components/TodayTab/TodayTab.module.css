@@ -792,3 +792,66 @@
     text-align: center;
   }
 }
+
+/* Additional styles for enhanced lesson completion */
+.rewardTotal {
+  margin-left: 8px;
+  padding: 4px 8px;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.rewardItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rewardItem small {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.completionSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feedbackInput {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-family: var(--font-family);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 60px;
+  transition: border-color 0.3s ease;
+}
+
+.feedbackInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(217, 122, 108, 0.1);
+}
+
+.completingSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

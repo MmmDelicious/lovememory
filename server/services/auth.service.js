@@ -4,134 +4,41 @@ const { User } = require('../models');
 class AuthService {
   async register(userData) {
     const { email, password, first_name, gender, age, city } = userData;
+    // Вся валидация была удалена, так как она обрабатывается
+    // middleware на уровне маршрутизации и валидацией модели Sequelize.
 
-    if (!email || !password) {
-      const error = new Error('Email и пароль обязательны.');
-      error.statusCode = 400;
-      throw error;
-    }
-    
-    // For regular registration, all fields are required
-    if (!gender || !age || !city) {
-      const error = new Error('Все поля обязательны для регистрации.');
-      error.statusCode = 400;
-      throw error;
-    }
-    
-    if (password.length < 6) {
-      const error = new Error('Пароль должен быть не менее 6 символов.');
-      error.statusCode = 400;
-      throw error;
-    }
-
-    if (!['male', 'female', 'other'].includes(gender)) {
-      const error = new Error('Недопустимое значение пола.');
-      error.statusCode = 400;
-      throw error;
-    }
-
-    const ageNum = parseInt(age, 10);
-    if (isNaN(ageNum) || ageNum < 18 || ageNum > 99) {
-      const error = new Error('Возраст должен быть от 18 до 99 лет.');
-      error.statusCode = 400;
-      throw error;
-    }
-
-    if (city.length > 100) {
-      const error = new Error('Название города слишком длинное.');
-      error.statusCode = 400;
-      throw error;
-    }
-
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-      const error = new Error('Пользователь с таким email уже существует.');
-      error.statusCode = 400;
-      throw error;
-    }
-    
+    // Проверка на существующего пользователя будет обработана
+    // ограничением уникальности в базе данных, и ошибка будет перехвачена в контроллере.
     const user = await User.create({
       email,
       password_hash: password, // Будет автоматически захеширован в beforeCreate хуке
       first_name,
-      display_name: first_name, // По умолчанию display_name = first_name
-      locale: 'ru', // По умолчанию русская локаль
+      display_name: first_name,
+      locale: 'ru',
       gender,
-      age: ageNum,
+      age: parseInt(age, 10),
       city,
     });
 
-    const payload = {
-      userId: user.id,
-      email: user.email,
-    };
-
-    const token = jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    return {
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        first_name: user.first_name,
-        display_name: user.display_name || user.first_name, // Приоритет display_name
-        locale: user.locale || 'ru',
-        gender: user.gender,
-        age: user.age,
-        city: user.city,
-        coins: user.coins,
-        role: user.role,
-      }
-    };
+    // Сервис больше не генерирует токен, это ответственность контроллера.
+    // Возвращаем только созданного пользователя.
+    return { user };
   }
 
   async login(credentials) {
     const { email, password } = credentials;
     const user = await User.findOne({ where: { email } });
 
-    if (!user) {
+    // Объединяем проверки, чтобы избежать тайминг-атак
+    if (!user || !(await user.validPassword(password))) {
       const error = new Error('Неверный email или пароль');
       error.statusCode = 401;
       throw error;
     }
 
-    const isMatch = await user.validPassword(password);
-    if (!isMatch) {
-      const error = new Error('Неверный email или пароль');
-      error.statusCode = 401;
-      throw error;
-    }
-
-    const payload = {
-      userId: user.id,
-      email: user.email,
-    };
-
-    const token = jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    return {
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        first_name: user.first_name,
-        display_name: user.display_name || user.first_name, // Приоритет display_name
-        locale: user.locale || 'ru',
-        gender: user.gender,
-        age: user.age,
-        city: user.city,
-        coins: user.coins,
-        role: user.role,
-      }
-    };
+    // Сервис больше не генерирует токен, это ответственность контроллера.
+    // Возвращаем только найденного пользователя.
+    return { user };
   }
 }
 

@@ -1,4 +1,9 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import React from 'react'; // Added missing import for React.useEffect
+import { useDispatch, useSelector } from 'react-redux';
+import { setFieldErrors, selectFieldErrors } from '../store/slices/authSlice';
+
+type AuthMode = 'login' | 'register';
 
 interface AuthFormData {
   name?: string;
@@ -19,6 +24,11 @@ interface UseAuthFormProps {
 }
 
 export const useAuthForm = ({ mode, onSubmit, onSuccess, triggerError, handleInteraction }: UseAuthFormProps) => {
+  const dispatch = useDispatch();
+  
+  // Получаем состояние ошибок из Redux store
+  const fieldErrors = useSelector(selectFieldErrors);
+  
   const [formData, setFormData] = useState<AuthFormData>({
     name: '',
     email: '',
@@ -29,28 +39,12 @@ export const useAuthForm = ({ mode, onSubmit, onSuccess, triggerError, handleInt
     age: ''
   });
 
-  const [fieldErrors, setFieldErrors] = useState<Record<string, boolean>>({});
-  const [isError, setIsError] = useState(false);
-
-  const handleError = (message: string) => {
-    console.group('useAuthForm: handleError called');
-    console.log('Error message:', message);
-    console.log('Setting isError to true');
-    
-    setIsError(true);
-    
-    console.log('Calling triggerError with message:', message);
-    triggerError(message);
-    
-    console.log('Setting timeout to clear error state in 1000ms');
-    setTimeout(() => {
-      console.log('Clearing error state (isError = false)');
-      setIsError(false);
-    }, 1000);
-    
-    console.log('handleError completed');
-    console.groupEnd();
-  };
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Функции для обновления состояния ошибок через Redux
+  const updateFieldErrors = useCallback((newFieldErrors: Record<string, boolean>) => {
+    dispatch(setFieldErrors(newFieldErrors));
+  }, [dispatch]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: any } }) => {
     const fieldName = e.target.name;
@@ -59,7 +53,7 @@ export const useAuthForm = ({ mode, onSubmit, onSuccess, triggerError, handleInt
     setFormData((prev) => ({ ...prev, [fieldName]: value }));
     
     if (fieldErrors[fieldName]) {
-      setFieldErrors(prev => ({ ...prev, [fieldName]: false }));
+      updateFieldErrors({ ...fieldErrors, [fieldName]: false });
     }
     
     handleInteraction();
@@ -112,121 +106,93 @@ export const useAuthForm = ({ mode, onSubmit, onSuccess, triggerError, handleInt
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
-    setFieldErrors({});
-    const { isValid, errors, errorMessage } = validateForm();
+    // Защита от повторных отправок
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    updateFieldErrors({});
+    
+    const { isValid, errors, errorMessage: validationErrorMessage } = validateForm();
 
     if (!isValid) {
-      setFieldErrors(errors);
-      return handleError(errorMessage);
+      updateFieldErrors(errors);
+      setIsSubmitting(false);
+      triggerError(validationErrorMessage); // Прямой вызов triggerError
+      return;
     }
 
     try {
-      if (mode === 'register') {
-        await onSubmit({
-          email: formData.email,
-          password: formData.password,
-          first_name: formData.name,
-          gender: formData.gender,
-          city: formData.city,
-          age: parseInt(formData.age!)
-        }).unwrap();
-      } else {
-        await onSubmit({
-          email: formData.email,
-          password: formData.password
-        }).unwrap();
+      const result = await onSubmit(mode === 'register' ? {
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.name,
+        gender: formData.gender,
+        city: formData.city,
+        age: parseInt(formData.age!)
+      } : {
+        email: formData.email,
+        password: formData.password
+      });
+
+      // Правильная обработка Redux Toolkit async thunk результата
+      if (result.meta?.requestStatus === 'rejected') {
+        const errorPayload = result.payload || result.error?.message || (mode === 'register' ? 'Registration failed' : 'Login failed');
+        throw errorPayload;
+      } else if (result.type?.endsWith('/rejected')) {
+        // Fallback для старого формата
+        const errorPayload = result.payload || result.error || (mode === 'register' ? 'Registration failed' : 'Login failed');
+        throw errorPayload;
       }
 
+      // Если дошли сюда - успех
       onSuccess();
     } catch (err: any) {
-      console.group('useAuthForm: Handling error');
-      console.error('Original error:', err);
-      console.error('Error type:', typeof err);
-      console.error('Error response:', err?.response);
-      console.error('Error data:', err?.response?.data);
-      console.error('Current mode:', mode);
+      // Извлекаем сообщение об ошибке из разных возможных структур
+      const serverMessage = typeof err === 'string' ? err : (err?.response?.data?.message || err?.data?.message || err?.message || '');
       
-      // ВАЖНО: предотвращаем любые перезагрузки
-      try {
-        let errorMessage: string;
-        let mascotMessage: string;
-        
-        // Извлекаем сообщение об ошибке из разных возможных структур
-        const serverMessage = err?.response?.data?.message || err?.data?.message || err?.message || '';
-        console.log('Extracted server message:', serverMessage);
-        
-        // Определяем тип ошибки и создаем соответствующие сообщения
-        if (mode === 'register') {
-          if (serverMessage.toLowerCase().includes('email') || serverMessage.toLowerCase().includes('exists') || serverMessage.toLowerCase().includes('зарегистрирован')) {
-            errorMessage = 'Пользователь с таким email уже существует';
-            mascotMessage = 'Ой! Кажется, такой email уже зарегистрирован. Попробуйте другой или войдите в существующий аккаунт.';
-          } else if (serverMessage.toLowerCase().includes('validation') || serverMessage.toLowerCase().includes('required')) {
-            errorMessage = 'Пожалуйста, заполните все обязательные поля';
-            mascotMessage = 'Стоп! Проверьте все поля - что-то не заполнено или заполнено неправильно.';
-          } else {
-            errorMessage = serverMessage || 'Ошибка регистрации';
-            mascotMessage = 'Хм, анкета заполнена некорректно. Проверьте данные и попробуйте ещё раз!';
-          }
-        } else {
-          if (serverMessage.toLowerCase().includes('not found') || serverMessage.toLowerCase().includes('найден')) {
-            errorMessage = 'Пользователь с таким email не найден';
-            mascotMessage = 'Стоп! Такого пользователя не существует. Проверьте email или зарегистрируйтесь.';
-          } else if (serverMessage.toLowerCase().includes('password') || serverMessage.toLowerCase().includes('пароль') || serverMessage.toLowerCase().includes('invalid')) {
-            errorMessage = 'Неверный пароль';
-            mascotMessage = 'Ой-ой! Кажется, пароль неправильный. Попробуйте ещё раз!';
-          } else {
-            errorMessage = serverMessage || 'Неверный email или пароль';
-            mascotMessage = 'Эй, что-то не так! Проверьте email и пароль - один из них неверный.';
-          }
-        }
-        
-        console.log('Final messages:', { errorMessage, mascotMessage });
-        
-        // Определяем какие поля подсвечивать на основе ошибки
-        const serverErrors: Record<string, boolean> = {};
-        const lowerErrorMsg = errorMessage.toLowerCase();
-        
-        if (lowerErrorMsg.includes('email') || lowerErrorMsg.includes('пользователь') || lowerErrorMsg.includes('найден')) {
+      let mascotMessage: string;
+      const serverErrors: Record<string, boolean> = {};
+
+      // Определяем тип ошибки и создаем соответствующие сообщения
+      if (mode === 'register') {
+        if (serverMessage.toLowerCase().includes('email') || serverMessage.toLowerCase().includes('exists') || serverMessage.toLowerCase().includes('зарегистрирован')) {
+          mascotMessage = 'Ой! Кажется, такой email уже зарегистрирован. Попробуйте другой или войдите в существующий аккаунт.';
           serverErrors.email = true;
+        } else {
+          mascotMessage = 'Хм, анкета заполнена некорректно. Проверьте данные и попробуйте ещё раз!';
         }
-        if (lowerErrorMsg.includes('пароль') || lowerErrorMsg.includes('password')) {
+      } else {
+        if (serverMessage.toLowerCase().includes('not found') || serverMessage.toLowerCase().includes('найден')) {
+          mascotMessage = 'Стоп! Такого пользователя не существует. Проверьте email или зарегистрируйтесь.';
+          serverErrors.email = true;
+        } else if (serverMessage.toLowerCase().includes('password') || serverMessage.toLowerCase().includes('пароль') || serverMessage.toLowerCase().includes('invalid')) {
+          mascotMessage = 'Ой-ой! Кажется, пароль неправильный. Попробуйте ещё раз!';
+          serverErrors.password = true;
+        } else {
+          mascotMessage = 'Эй, что-то не так! Проверьте email и пароль - один из них неверный.';
+          serverErrors.email = true;
           serverErrors.password = true;
         }
-        if (lowerErrorMsg.includes('возраст')) {
-          serverErrors.age = true;
-        }
-        if (lowerErrorMsg.includes('город')) {
-          serverErrors.city = true;
-        }
-        if (lowerErrorMsg.includes('имя')) {
-          serverErrors.name = true;
-        }
-
-        console.log('Setting field errors:', serverErrors);
-        setFieldErrors(serverErrors);
-        
-        console.log('Calling handleError with mascot message:', mascotMessage);
-        handleError(mascotMessage);
-        
-        console.log('useAuthForm: Error handling completed successfully');
-      } catch (handlingError) {
-        console.error('Error while handling auth error:', handlingError);
-        // Fallback обработка
-        setFieldErrors({});
-        handleError('Произошла ошибка. Попробуйте снова.');
       }
       
-      console.groupEnd();
+      updateFieldErrors(serverErrors);
+      triggerError(mascotMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  // Очистка ошибок при смене режима отключена для сохранения состояния
 
   return {
     formData,
     fieldErrors,
-    isError,
+    isSubmitting,
     handleInputChange,
     handleSubmit,
-    handleError
   };
 };

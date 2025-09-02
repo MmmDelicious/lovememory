@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
 import { Lightbulb } from 'lucide-react';
@@ -21,18 +21,28 @@ interface MascotConfig {
   };
 }
 
-const mascotConfig: MascotConfig = {
-  initialMessage: 'Расскажите о ваших интересах! Это поможет создать персональные рекомендации для ваших свиданий.',
+// Конфигурация маскота для разных режимов
+const getMascotConfig = (isEditMode: boolean): MascotConfig => ({
+  initialMessage: isEditMode 
+    ? 'Редактируйте свои интересы! Вы можете добавить новые, убрать ненужные или изменить интенсивность.'
+    : 'Расскажите о ваших интересах! Это поможет создать персональные рекомендации для совместного времяпрепровождения.',
   phrases: { 
     error: ['Что-то пошло не так. Попробуйте еще раз!'], 
-    idle: [
+    idle: isEditMode ? [
+      'Можно убрать то, что уже не интересно, и добавить новые увлечения!',
+      'Отмечайте то, что действительно вас волнует сейчас.',
+      'Интенсивность можно изменить — вкусы меняются!'
+    ] : [
       'Выбирайте честно — алгоритм учтет даже то, что вам не нравится.',
       'Используйте шкалу интенсивности для точной настройки предпочтений.',
-      'Чем больше интересов выберете, тем точнее будут рекомендации.'
+      'Чем больше интересов выберете, тем точнее будут рекомендации.',
+      'Интересы помогут подобрать активности для укрепления ваших отношений.'
     ],
-    success: ['Отлично! Теперь мы знаем ваши предпочтения и сможем предлагать идеальные места для свиданий.']
+    success: isEditMode 
+      ? ['Прекрасно! Ваши интересы обновлены. Теперь рекомендации станут ещё точнее!']
+      : ['Отлично! Теперь мы знаем ваши предпочтения и сможем предлагать идеальные активности для вас двоих.']
   }
-};
+});
 
 const OnboardingInterestsPage: React.FC = () => {
   const [interests, setInterests] = useState<Interest[]>([]);
@@ -43,12 +53,17 @@ const OnboardingInterestsPage: React.FC = () => {
   
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
+  const [searchParams] = useSearchParams();
   
-  const { mascotMessage, handleAvatarClick, handleInteraction, triggerError } = useInteractiveMascot(mascotConfig);
+  // Определяем режим: редактирование или первоначальный выбор
+  const isEditMode = searchParams.get('mode') === 'edit';
+  const [originalInterests, setOriginalInterests] = useState<UserInterest[]>([]);
+  
+  const { mascotMessage, handleAvatarClick, handleInteraction, triggerError } = useInteractiveMascot(getMascotConfig(isEditMode));
 
   useEffect(() => {
     loadInterests();
-  }, []);
+  }, [isEditMode, user?.id]);
 
   const loadInterests = async () => {
     try {
@@ -56,6 +71,27 @@ const OnboardingInterestsPage: React.FC = () => {
       setError(null);
       const data = await interestService.getAllInterests();
       setInterests(data);
+      
+      // В режиме редактирования загружаем существующие интересы пользователя
+      if (isEditMode && user?.id) {
+        try {
+          const userInterestsResponse = await interestService.getUserInterests(user.id);
+          if (userInterestsResponse && userInterestsResponse.length > 0) {
+            // Преобразуем в формат UserInterest для selectedInterests
+            const formattedInterests: UserInterest[] = userInterestsResponse.map(ui => ({
+              interest_id: ui.interest_id,
+              preference: ui.preference,
+              intensity: ui.intensity
+            }));
+            setSelectedInterests(formattedInterests);
+            setOriginalInterests(formattedInterests);
+
+          }
+        } catch (userInterestsError) {
+          console.error('Error loading user interests:', userInterestsError);
+          // Не прерываем основную загрузку, только логируем
+        }
+      }
     } catch (error) {
       console.error('Error loading interests:', error);
       
@@ -117,9 +153,15 @@ const OnboardingInterestsPage: React.FC = () => {
   };
 
   const handleContinue = async () => {
-    if (selectedInterests.length < 5) {
-      triggerError('Выберите минимум 5 интересов');
+    // Проверяем минимальное количество интересов
+    if (selectedInterests.length === 0) {
+      triggerError('Пожалуйста, выберите хотя бы один интерес или нажмите "Пропустить".');
       return;
+    }
+    
+    if (selectedInterests.length < 5) {
+      triggerError('Рекомендуем выбрать минимум 5 интересов для лучших рекомендаций. Но вы можете продолжить с ' + selectedInterests.length + '.');
+      // Не возвращаемся, позволяем продолжить
     }
 
     if (!user?.id) {
@@ -131,14 +173,53 @@ const OnboardingInterestsPage: React.FC = () => {
     try {
       setIsSaving(true);
       
-      await interestService.setMultipleUserInterests(user.id, selectedInterests);
+      console.log('=== CLIENT: Saving interests ===');
+      console.log('User ID:', user.id);
+      console.log('Is edit mode:', isEditMode);
+      console.log('Selected interests:', selectedInterests);
+      
+      if (isEditMode) {
+        // В режиме редактирования: умное обновление
+        const originalIds = originalInterests.map(oi => oi.interest_id);
+        const selectedIds = selectedInterests.map(si => si.interest_id);
+        
+        // Найдем интересы для удаления
+        const toRemove = originalIds.filter(id => !selectedIds.includes(id));
+        
+        console.log('Original IDs:', originalIds);
+        console.log('Selected IDs:', selectedIds);
+        console.log('To remove:', toRemove);
+        
+        // Удаляем ненужные интересы
+        for (const interestId of toRemove) {
+          try {
+            await interestService.removeUserInterest(user.id, interestId);
+            console.log('Removed interest:', interestId);
+          } catch (removeError) {
+            console.error(`Error removing interest ${interestId}:`, removeError);
+          }
+        }
+        
+        // Обновляем/добавляем выбранные интересы
+        if (selectedInterests.length > 0) {
+
+          await interestService.setMultipleUserInterests(user.id, selectedInterests);
+        }
+        
+
+      } else {
+        // Первоначальное сохранение интересов
+        if (selectedInterests.length > 0) {
+
+          await interestService.setMultipleUserInterests(user.id, selectedInterests);
+        }
+      }
       
       // Показываем сообщение об успехе
-      // Используем handleInteraction для показа успешного сообщения
       handleInteraction();
       
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate(isEditMode ? '/profile' : '/dashboard');
       }, 1500);
       
     } catch (error) {
@@ -157,15 +238,24 @@ const OnboardingInterestsPage: React.FC = () => {
         errorMessage = 'Проблемы с подключением к серверу.';
       }
       
-      triggerError(errorMessage + ' Попробуйте еще раз.');
+      triggerError(errorMessage + ' Попробуйте ещё раз.');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleSkip = () => {
-    // Пользователь может пропустить этот шаг
-    navigate('/dashboard');
+  const handleSkip = async () => {
+    // Пользователь может пропустить этот шаг даже с 0 интересами
+    console.log('Пользователь пропустил выбор интересов');
+    
+    // Показываем сообщение о том, что интересы можно добавить потом
+    if (selectedInterests.length === 0) {
+      triggerError('Вы можете добавить интересы позже в настройках профиля.');
+    }
+    
+    setTimeout(() => {
+      navigate('/dashboard');
+    }, 1000);
   };
 
   if (isLoading) {
@@ -195,14 +285,17 @@ const OnboardingInterestsPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.mascotSection}>
-        <StaticMascot 
-          bubbleKey={mascotMessage} 
-          message={mascotMessage} 
-          animationData={congratsAnimation} 
-          onAvatarClick={handleAvatarClick} 
-        />
-      </div>
+      {/* Маскот только для первоначального онбординга */}
+      {!isEditMode && (
+        <div className={styles.mascotSection}>
+          <StaticMascot 
+            bubbleKey={mascotMessage} 
+            message={mascotMessage} 
+            animationData={congratsAnimation} 
+            onAvatarClick={handleAvatarClick} 
+          />
+        </div>
+      )}
 
       <motion.div 
         className={styles.content}
@@ -210,12 +303,21 @@ const OnboardingInterestsPage: React.FC = () => {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className={styles.progress}>
-          <div className={styles.progressBar}>
-            <div className={styles.progressFill} style={{ width: '100%' }}></div>
+        {!isEditMode && (
+          <div className={styles.progress}>
+            <div className={styles.progressBar}>
+              <div className={styles.progressFill} style={{ width: '100%' }}></div>
+            </div>
+            <span className={styles.progressText}>Шаг 2 из 2</span>
           </div>
-          <span className={styles.progressText}>Шаг 2 из 2</span>
-        </div>
+        )}
+        
+        {isEditMode && (
+          <div className={styles.editHeader}>
+            <h1 className={styles.editTitle}>Редактирование интересов</h1>
+            <p className={styles.editSubtitle}>Обновите свои интересы чтобы получать более точные рекомендации</p>
+          </div>
+        )}
 
         <InterestSelector
           interests={interests}
@@ -228,22 +330,45 @@ const OnboardingInterestsPage: React.FC = () => {
         />
 
         <div className={styles.actions}>
-          <Button 
-            type="secondary" 
-            onClick={handleSkip}
-            disabled={isSaving}
-          >
-            Пропустить
-          </Button>
-          
-          <Button 
-            type="primary" 
-            onClick={handleContinue}
-            disabled={selectedInterests.length < 5 || isSaving}
-            loading={isSaving}
-          >
-            {isSaving ? 'Сохраняем...' : 'Завершить регистрацию'}
-          </Button>
+          {isEditMode ? (
+            <>
+              <Button 
+                type="secondary" 
+                onClick={() => navigate('/profile')}
+                disabled={isSaving}
+              >
+                Отмена
+              </Button>
+              
+              <Button 
+                type="primary" 
+                onClick={handleContinue}
+                disabled={isSaving}
+                loading={isSaving}
+              >
+                {isSaving ? 'Сохраняем...' : 'Сохранить изменения'}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button 
+                type="secondary" 
+                onClick={handleSkip}
+                disabled={isSaving}
+              >
+                Пропустить
+              </Button>
+              
+              <Button 
+                type="primary" 
+                onClick={handleContinue}
+                disabled={selectedInterests.length < 5 || isSaving}
+                loading={isSaving}
+              >
+                {isSaving ? 'Сохраняем...' : 'Завершить регистрацию'}
+              </Button>
+            </>
+          )}
         </div>
 
         <motion.div 

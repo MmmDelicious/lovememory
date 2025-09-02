@@ -1,25 +1,24 @@
-/* Insights Page - Based on TodayTab Design Quality */
+/* Insights Page - Modern Design */
 
 .insightsPage {
   width: 100%;
-  height: 100vh;
-  padding: 1rem;
+  min-height: 100vh;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  background: transparent;
+  gap: 0;
+  background: var(--color-background);
   font-family: var(--font-family-body);
 }
   
 /* Modern Header */
 .header {
-  margin-bottom: 32px;
-  background: white;
-  border-radius: 20px;
-  padding: 24px 32px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
+  margin-bottom: var(--space-8);
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-6) var(--space-8);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
 }
 
 .headerContent {
@@ -36,20 +35,20 @@
 }
 
 .pageTitle {
-  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 2.25rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin: 0 0 8px;
+  gap: var(--space-4);
+  margin: 0 0 var(--space-2);
   letter-spacing: -0.025em;
 }
 
 .pageTitle svg {
   color: var(--color-primary);
-  filter: drop-shadow(0 2px 4px rgba(217, 122, 108, 0.2));
+  filter: drop-shadow(0 2px 4px var(--color-primary-light));
 }
 
 .pageSubtitle {
@@ -57,6 +56,7 @@
   color: var(--color-text-secondary);
   margin: 0;
   font-weight: 500;
+  line-height: 1.5;
 }
   
 .headerActions {
@@ -91,15 +91,15 @@
 .upgradeSection {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   color: white;
-  padding: 12px 20px;
-  border-radius: 12px;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--border-radius-md);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(217, 122, 108, 0.3);
+  box-shadow: var(--shadow-md);
   border: none;
   font-size: 0.875rem;
   letter-spacing: 0.01em;
@@ -107,16 +107,21 @@
 
 .upgradeSection:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(217, 122, 108, 0.4);
+  box-shadow: var(--shadow-lg);
   background: linear-gradient(135deg, var(--color-primary-hover) 0%, #B8675A 100%);
 }
   
 /* Navigation - Clean Design */
 .navigation {
-  margin-bottom: 2rem;
-  padding: 0 0.5rem;
-  border-bottom: 1px solid #E2E8F0;
-  padding-bottom: 1.5rem;
+  margin-bottom: var(--space-8);
+  padding: 0 var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-6);
+}
+
+/* Hide navigation for free users */
+.navigationHidden {
+  display: none;
 }
 
 .pageHeader {
@@ -133,18 +138,18 @@
 }
 
 .pageIcon {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   color: white;
-  padding: 0.75rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
+  padding: var(--space-3);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
 }
 
 .pageTitle h1 {
   font-family: var(--font-family-heading);
   font-size: 1.75rem;
   font-weight: 700;
-  color: #2D3748;
+  color: var(--color-text-primary);
   margin: 0;
   line-height: 1.2;
 }
@@ -152,8 +157,8 @@
 .pageTitle p {
   font-family: var(--font-family-body);
   font-size: 0.875rem;
-  color: #718096;
-  margin: 0.25rem 0 0;
+  color: var(--color-text-secondary);
+  margin: var(--space-1) 0 0;
   line-height: 1.4;
 }
   
@@ -165,19 +170,19 @@
 .timeFilter {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: white;
-  border: 1px solid #F3F4F6;
-  border-radius: 12px;
-  padding: 8px 16px;
-  color: #6B7280;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  gap: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-2) var(--space-4);
+  color: var(--color-text-secondary);
+  box-shadow: var(--shadow-sm);
 }
 
 .filterSelect {
   background: transparent;
   border: none;
-  color: #374151;
+  color: var(--color-text-primary);
   cursor: pointer;
   outline: none;
   font-weight: 500;
@@ -188,39 +193,39 @@
 /* Analytics Toggle */
 .analyticsToggle {
   display: flex;
-  gap: 4px;
-  background: white;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  border-radius: 12px;
-  padding: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  gap: var(--space-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-1);
+  box-shadow: var(--shadow-sm);
 }
 
 .toggleButton {
   background: transparent;
   border: none;
-  border-radius: 8px;
-  padding: 8px 12px;
-  color: #64748b;
+  border-radius: var(--border-radius-md);
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-2);
   font-weight: 500;
   font-size: 0.8rem;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-family-body);
 }
 
 .toggleButton:hover {
-  color: #334155;
-  background: rgba(100, 116, 139, 0.05);
+  color: var(--color-text-primary);
+  background: var(--color-primary-light);
 }
 
 .toggleActive {
   background: var(--color-primary);
   color: white;
-  box-shadow: 0 1px 4px rgba(217, 122, 108, 0.25);
+  box-shadow: var(--shadow-sm);
 }
   
 /* Main Content */
@@ -228,28 +233,30 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
+  padding: 0;
+  margin: 0;
 }
 
 /* Modern Overview Grid */
 .overviewGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-  gap: 24px;
+  gap: var(--space-6);
 }
 
-/* Clean Cards - TodayTab Style */
+/* Clean Cards - Modern Style */
 .harmonyCard,
 .activitiesCard,
 .factorsCard,
 .quoteCard,
 .modernCard {
-  background: white;
-  border: 1px solid #F3F4F6;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s ease;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -263,7 +270,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #FF6B5A 0%, #FF8A75 50%, #F59E0B 100%);
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-hover) 50%, var(--color-secondary) 100%);
 }
 
 .harmonyCard:hover,
@@ -271,26 +278,27 @@
 .factorsCard:hover,
 .quoteCard:hover,
 .modernCard:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-color: #E5E7EB;
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary-light);
+  transform: translateY(-2px);
 }
   
 .cardHeader {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
 }
 
 .cardIcon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #FEF3F2 0%, #FDF2F8 100%);
-  border-radius: 12px;
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-secondary) 100%);
+  border-radius: var(--border-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FF6B5A;
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
@@ -298,43 +306,43 @@
   font-family: var(--font-family-heading);
   font-size: 1.25rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text-primary);
   margin: 0;
   line-height: 1.2;
 }
 
 .cardHeader p {
-  color: #6B7280;
-  margin: 4px 0 0;
+  color: var(--color-text-secondary);
+  margin: var(--space-1) 0 0;
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.4;
 }
   
   .premiumBadge {
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    color: white;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--border-radius);
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-left: auto;
-  }
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: white;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: auto;
+}
   
   .premiumNote {
-    color: var(--color-primary);
-    font-weight: 600;
-    font-size: 0.8rem;
-  }
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
   
-/* Clean Harmony Score - TodayTab Style */
+/* Clean Harmony Score - Modern Style */
 .scoreDisplay {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-8);
 }
 
 .scoreCircle {
@@ -344,22 +352,22 @@
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
-    #FF6B5A 0deg,
-    #FF6B5A calc(var(--progress, 87) * 3.6deg),
-    #F3F4F6 calc(var(--progress, 87) * 3.6deg),
-    #F3F4F6 360deg
+    var(--color-primary) 0deg,
+    var(--color-primary) calc(var(--progress, 87) * 3.6deg),
+    var(--color-border) calc(var(--progress, 87) * 3.6deg),
+    var(--color-border) 360deg
   );
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(255, 107, 90, 0.2);
+  box-shadow: var(--shadow-md);
 }
 
 .scoreCircle::before {
   content: '';
   position: absolute;
   inset: 8px;
-  background: white;
+  background: var(--color-surface);
   border-radius: 50%;
 }
 
@@ -373,15 +381,15 @@
   font-family: var(--font-family-heading);
   font-size: 2rem;
   font-weight: 700;
-  color: #FF6B5A;
+  color: var(--color-primary);
   line-height: 1;
 }
 
 .scoreMax {
   font-size: 0.75rem;
-  color: #6B7280;
+  color: var(--color-text-secondary);
   font-weight: 500;
-  margin-top: 2px;
+  margin-top: var(--space-1);
 }
 
 @keyframes rotateIn {
@@ -398,71 +406,71 @@
 .scoreTrend {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #10b981;
+  gap: var(--space-2);
+  color: var(--color-success);
   font-weight: 600;
-  background: rgba(16, 185, 129, 0.1);
-  padding: 8px 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: rgba(76, 175, 80, 0.1);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(76, 175, 80, 0.2);
   font-size: 0.875rem;
 }
   
-  /* Comparison Section */
   .comparisonSection {
-    border-top: 1px solid var(--color-border);
-    padding-top: var(--space-4);
-  }
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
   
   .comparisonSection h4 {
-    font-family: var(--font-family-heading);
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin: 0 0 var(--space-3);
-  }
+  font-family: var(--font-family-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-3);
+}
   
   .rankDisplay {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    color: var(--color-primary);
-    font-weight: 700;
-    font-size: 1.1rem;
-    margin-bottom: var(--space-2);
-  }
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: var(--space-2);
+}
   
   .rankDescription {
-    color: var(--color-text-secondary);
-    font-size: 0.9rem;
-    margin: 0;
-  }
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
   
-/* Clean Activities Grid - TodayTab Style */
+/* Clean Activities Grid - Modern Style */
 .activitiesGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .activityItem {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.25rem;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #F3F4F6;
-  transition: all 0.2s ease;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .activityItem:hover {
-  border-color: #E5E7EB;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: var(--color-primary-light);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .activityItem svg {
-  color: #FF6B5A;
+  color: var(--color-primary);
   width: 24px;
   height: 24px;
 }
@@ -476,22 +484,22 @@
   font-family: var(--font-family-heading);
   font-size: 1.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text-primary);
   line-height: 1;
-  margin-bottom: 2px;
+  margin-bottom: var(--space-1);
 }
 
 .activityLabel {
   display: block;
-  color: #6B7280;
+  color: var(--color-text-secondary);
   font-size: 0.875rem;
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .activityRank {
   display: inline-block;
-  color: #FF6B5A;
+  color: var(--color-primary);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -1970,20 +1978,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  padding: 64px 32px;
+  gap: var(--space-6);
+  padding: var(--space-10) var(--space-8);
   text-align: center;
-  background: white;
-  border-radius: 20px;
-  border: 1px solid rgba(226, 232, 240, 0.6);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
 }
 
 .loadingState h3 {
-  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.25rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 

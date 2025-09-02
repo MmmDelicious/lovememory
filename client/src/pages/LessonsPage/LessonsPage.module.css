@@ -499,24 +499,7 @@
   font-weight: 500;
 }
 
-/* Insights Tab Layout */
-.insightsContainer {
-  margin: var(--lessons-space-6) 0;
-}
 
-.insightsGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--lessons-space-8);
-}
-
-.analyticsSection,
-.tipsSection {
-  background: var(--lessons-surface);
-  border-radius: var(--lessons-radius-xl);
-  padding: var(--lessons-space-6);
-  border: 1px solid var(--lessons-border-light);
-}
 
 /* Mobile adjustments for header row */
 @media (max-width: 768px) {
@@ -542,20 +525,14 @@
     justify-content: center;
   }
   
-  .insightsGrid {
-    gap: var(--lessons-space-6);
-  }
+
   
   .placeholderFeatures {
     grid-template-columns: 1fr;
   }
 }
 
-@media (min-width: 1024px) {
-  .insightsGrid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
+
 
 @media (max-width: 480px) {
   .headerRow {
@@ -583,71 +560,4 @@
     padding: var(--lessons-space-1) var(--lessons-space-2);
     font-size: 0.8rem;
   }
-}
-
-/* Insights Redirect Component */
-.insightsRedirect {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-  padding: var(--lessons-space-8);
-}
-
-.redirectCard {
-  text-align: center;
-  background: var(--lessons-surface);
-  border: 1px solid var(--lessons-border);
-  border-radius: var(--lessons-radius-xl);
-  padding: var(--lessons-space-12);
-  max-width: 400px;
-  box-shadow: var(--lessons-shadow-lg);
-  transition: all 0.3s ease;
-}
-
-.redirectCard:hover {
-  box-shadow: 0 12px 24px rgba(42, 39, 35, 0.15);
-  transform: translateY(-2px);
-}
-
-.redirectIcon {
-  font-size: 3rem;
-  margin-bottom: var(--lessons-space-6);
-  display: block;
-}
-
-.redirectCard h3 {
-  font-family: var(--lessons-font-heading);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--lessons-text-primary);
-  margin: 0 0 var(--lessons-space-4);
-  line-height: 1.3;
-}
-
-.redirectCard p {
-  color: var(--lessons-text-secondary);
-  margin: 0 0 var(--lessons-space-8);
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-.redirectButton {
-  background: linear-gradient(135deg, var(--lessons-primary) 0%, var(--lessons-primary-hover) 100%);
-  color: white;
-  border: none;
-  border-radius: var(--lessons-radius-md);
-  padding: var(--lessons-space-4) var(--lessons-space-8);
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: var(--lessons-font-body);
-  box-shadow: 0 4px 12px rgba(217, 122, 108, 0.25);
-}
-
-.redirectButton:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(217, 122, 108, 0.3);
-  background: linear-gradient(135deg, var(--lessons-primary-hover) 0%, #B8675A 100%);
 }

@@ -5,6 +5,14 @@ import InterceptedMascot from '../InterceptedMascot/InterceptedMascot';
 import { useMascot } from '../../context/MascotContext';
 
 const GlobalMascot = () => {
+  const mascotContext = useMascot();
+
+  // Добавляем проверку, чтобы избежать падения, если контекст по какой-то причине undefined
+  if (!mascotContext) {
+    // Можно вернуть null или какой-то заглушечный UI
+    return null;
+  }
+
   const { 
     mascot, 
     hideMascot, 
@@ -13,7 +21,7 @@ const GlobalMascot = () => {
     globalMascotAnimation,
     isAIVisible,
     toggleAIMascot 
-  } = useMascot();
+  } = mascotContext;
   
   const location = useLocation();
 

@@ -205,16 +205,6 @@ const Calendar: React.FC<CalendarProps> = ({
     };
   }, [stopMascotLoop, clearMascotTargets]);
 
-
-  useEffect(() => {
-    return () => {
-      stopMascotLoop();
-      clearMascotTargets();
-    };
-  }, [stopMascotLoop, clearMascotTargets]);
-
-
-
   const openStoryMode = useCallback((date: string) => {
     const dayEvents = events.filter(event => 
       event.start.split('T')[0] === date
@@ -261,18 +251,34 @@ const Calendar: React.FC<CalendarProps> = ({
     
     const allEvents = calendarApi.getEvents();
     const targets = allEvents.reduce<any[]>((acc, event) => {
-      const elementId = cellMap.get(event.startStr.split('T')[0]);
-      if (elementId) {
-        acc.push({
-          page: 'dashboard',
-          data: { event: event.extendedProps.rawEvent },
-          element: document.getElementById(elementId),
-          containerRef: calendarContainerRef,
-          onActionClick: () => {
-            const eventDate = event.startStr.split('T')[0];
-            openStoryMode(eventDate);
-          },
-        });
+      const eventDate = new Date(event.startStr);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      eventDate.setHours(0, 0, 0, 0);
+
+      const isPastEvent = eventDate < today;
+      const eventType = event.extendedProps?.rawEvent?.event_type;
+      const memoryEventTypes = ['memory', 'anniversary', 'birthday', 'travel', 'date', 'gift'];
+
+      // Маскот будет появляться только для прошедших событий, которые могут быть воспоминаниями.
+      if (isPastEvent && eventType && memoryEventTypes.includes(eventType)) {
+        const elementId = cellMap.get(event.startStr.split('T')[0]);
+        if (elementId) {
+          const targetElement = document.getElementById(elementId);
+          // Дополнительная проверка, что элемент существует в DOM
+          if (targetElement) {
+            acc.push({
+              page: 'dashboard',
+              data: { event: event.extendedProps.rawEvent },
+              element: targetElement,
+              containerRef: calendarContainerRef,
+              onActionClick: () => {
+                const dateStr = event.startStr.split('T')[0];
+                openStoryMode(dateStr);
+              },
+            });
+          }
+        }
       }
       return acc;
     }, []);

@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useUser, useAuthLoading } from './store/hooks';
+import { useAppRoutesData } from './store/hooks';
 
 import MainLayout from './layouts/MainLayout/MainLayout';
 import GameLayout from './layouts/GameLayout/GameLayout';
@@ -48,31 +48,12 @@ const LoadingFallback = () => (
 );
 
 const AppRoutes: React.FC = () => {
-  const user = useUser();
-  const isLoading = useAuthLoading();
+  const { user, isLoading } = useAppRoutesData();
 
-
-
+  // Показываем загрузку пока определяется статус аутентификации
+  // Это предотвращает преждевременные редиректы
   if (isLoading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        background: 'var(--color-background, #f5f5f5)',
-        fontSize: '18px',
-        color: 'var(--color-text, #333)'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ 
-            marginBottom: '16px',
-            fontSize: '48px'
-          }}>💕</div>
-          <div>Загрузка LoveMemory...</div>
-        </div>
-      </div>
-    );
+    return <LoadingFallback />;
   }
 
   if (!user) {
@@ -118,10 +99,11 @@ const AppRoutes: React.FC = () => {
           
           <Route path="/error" element={<ErrorPage />} />
 
-          <Route path="/login" element={<Navigate to="/dashboard" />} />
-          <Route path="/register" element={<Navigate to="/dashboard" />} />
-          <Route path="/auth/callback" element={<Navigate to="/dashboard" />} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/register" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/auth/callback" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

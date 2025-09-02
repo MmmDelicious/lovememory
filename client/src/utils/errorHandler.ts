@@ -55,6 +55,7 @@ export const setupGlobalErrorHandler = () => {
     }
   }, true);
   window.addEventListener('unhandledrejection', (event) => {
+    console.log('🟡 UNHANDLED REJECTION DETECTED!');
     console.group('🚨 UNHANDLED PROMISE REJECTION 🚨');
     console.error('Reason:', event.reason);
     console.error('Message:', event.reason?.message || 'Ошибка промиса');
@@ -68,9 +69,31 @@ export const setupGlobalErrorHandler = () => {
       console.error('Data:', event.reason.response?.data);
     }
     console.groupEnd();
+    
+    // Проверяем, нужно ли исключить эту ошибку из автоматического перенаправления
+    const isValidationError = event.reason?.response?.status === 409 || 
+                             event.reason?.response?.status === 400 ||
+                             event.reason?.response?.status === 422;
+    
+    const isAuthError = window.location.pathname.includes('/login') || 
+                       window.location.pathname.includes('/register');
+    
+    console.log('🟡 Validation error?', isValidationError);
+    console.log('🟡 Auth page?', isAuthError);
+    console.log('🟡 Current pathname:', window.location.pathname);
+    
+    // Не перенаправляем пользователя для ошибок валидации на страницах авторизации
+    if (isValidationError && isAuthError) {
+      console.log('🟢 Ignoring validation error on auth page, not redirecting');
+      event.preventDefault();
+      return;
+    }
+    
+    console.log('🔴 Will redirect to error page in 2 seconds...');
     event.preventDefault();
     logError(event.reason, 'Unhandled promise rejection');
     setTimeout(() => {
+      console.log('🔴 REDIRECTING TO ERROR PAGE NOW!');
       const errorInfo = encodeURIComponent(JSON.stringify({
         errorCode: 500,
         errorMessage: 'Ошибка при выполнении операции',

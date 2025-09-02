@@ -22,7 +22,7 @@ const FreeAnalytics: React.FC<FreeAnalyticsProps> = ({
 
   return (
     <div className={styles.subscriptionContainer}>
-      <SubscriptionPlans onSelectPlan={handleSelectPlan} />
+      <SubscriptionPlans onSelectPlan={handleSelectPlan} showHeader={false} />
     </div>
   );
 };

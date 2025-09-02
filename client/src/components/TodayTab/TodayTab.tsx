@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, Star, Heart, Coffee, MessageCircle, Target, Users, Coins, Calendar, Share2 } from 'lucide-react';
+import { Clock, Star, Heart, Coffee, MessageCircle, Target, Users, Coins, Calendar, Share2, CheckCircle } from 'lucide-react';
 import Lottie from 'lottie-react';
 import { getLessonAnimation } from '../../assets/lessons';
+import { lessonUtils, type Lesson } from '../../utils/lessonUtils';
+import { lessonService } from '../../services/lesson.service';
 import styles from './TodayTab.module.css';
 
 interface TodayTabProps {
-  lesson?: any;
+  lesson?: Lesson;
   onComplete: (feedback: string) => void;
   loading?: boolean;
   completionStatus?: {
@@ -17,6 +19,7 @@ interface TodayTabProps {
   streakDays?: number;
   lessonsCompleted?: number;
   coinsEarned?: number;
+  onLessonCompleted?: () => void;
 }
 
 interface RecommendationCard {
@@ -42,23 +45,40 @@ const TodayTab: React.FC<TodayTabProps> = ({
   viewMode = 'my',
   streakDays = 0,
   lessonsCompleted = 0,
-  coinsEarned = 0
+  coinsEarned = 0,
+  onLessonCompleted
 }) => {
   const [isStarting, setIsStarting] = useState(false);
   const [animationData, setAnimationData] = useState<any>(null);
   const [showSteps, setShowSteps] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [completionFeedback, setCompletionFeedback] = useState('');
+  const [coinReward, setCoinReward] = useState<{
+    baseCoins: number;
+    streakBonus: number;
+    partnerBonus: number;
+    totalCoins: number;
+  } | null>(null);
 
-  // Загружаем анимацию Lottie
+  // Загружаем анимацию Lottie для урока
   useEffect(() => {
-    // Список доступных анимаций для попытки загрузки
-    const animationFiles = [
+    if (lesson?.animation_file) {
+      const animation = getLessonAnimation(lesson.animation_file);
+      if (animation) {
+        setAnimationData(animation);
+        return;
+      }
+    }
+    
+    // Fallback анимации
+    const fallbackAnimations = [
       'Couple sharing and caring love.json',
       'Love.json', 
       'Relationship.json',
       'Lover People Sitting on Garden Banch.json'
     ];
     
-    for (const filename of animationFiles) {
+    for (const filename of fallbackAnimations) {
       const animation = getLessonAnimation(filename);
       if (animation) {
         setAnimationData(animation);
@@ -67,25 +87,72 @@ const TodayTab: React.FC<TodayTabProps> = ({
     }
     
     console.warn('🎭 No animations found!');
-  }, []);
+  }, [lesson]);
 
-  const [steps, setSteps] = useState<LessonStep[]>([
-    {
-      id: 'read',
-      title: 'Прочитайте стихотворение',
-      completed: false
-    },
-    {
-      id: 'hide',
-      title: 'Скройте текст',
-      completed: false
-    },
-    {
-      id: 'recite',
-      title: 'Расскажите наизусть',
-      completed: false
+  // Вычисляем награду за урок
+  useEffect(() => {
+    if (lesson) {
+      const reward = lessonUtils.calculateLessonReward(
+        lesson,
+        streakDays,
+        completionStatus?.partnerCompleted || false
+      );
+      setCoinReward(reward);
     }
-  ]);
+  }, [lesson, streakDays, completionStatus?.partnerCompleted]);
+
+  // Генерируем шаги на основе типа урока
+  const generateStepsForLesson = (lesson: Lesson): LessonStep[] => {
+    switch (lesson.interactive_type) {
+      case 'prompt':
+        return [
+          { id: 'read', title: 'Прочитайте задание', completed: false },
+          { id: 'execute', title: 'Выполните действие', completed: false },
+          { id: 'reflect', title: 'Поделитесь впечатлениями', completed: false }
+        ];
+      case 'chat':
+        return [
+          { id: 'read', title: 'Изучите тему для разговора', completed: false },
+          { id: 'discuss', title: 'Обсудите с партнером', completed: false },
+          { id: 'complete', title: 'Завершите беседу', completed: false }
+        ];
+      case 'quiz':
+        return [
+          { id: 'prepare', title: 'Подготовьте вопросы', completed: false },
+          { id: 'play', title: 'Проведите викторину', completed: false },
+          { id: 'results', title: 'Обсудите результаты', completed: false }
+        ];
+      case 'photo':
+        return [
+          { id: 'prepare', title: 'Подготовьте материалы', completed: false },
+          { id: 'create', title: 'Создайте/сфотографируйте', completed: false },
+          { id: 'share', title: 'Поделитесь результатом', completed: false }
+        ];
+      case 'choice':
+        return [
+          { id: 'read', title: 'Изучите варианты', completed: false },
+          { id: 'choose', title: 'Сделайте выбор', completed: false },
+          { id: 'execute', title: 'Выполните выбранное', completed: false }
+        ];
+      default:
+        return [
+          { id: 'read', title: 'Прочитайте урок', completed: false },
+          { id: 'execute', title: 'Выполните задание', completed: false },
+          { id: 'complete', title: 'Завершите урок', completed: false }
+        ];
+    }
+  };
+
+  const [steps, setSteps] = useState<LessonStep[]>(
+    lesson ? generateStepsForLesson(lesson) : []
+  );
+
+  // Обновляем шаги при изменении урока
+  useEffect(() => {
+    if (lesson) {
+      setSteps(generateStepsForLesson(lesson));
+    }
+  }, [lesson]);
 
   const recommendations: RecommendationCard[] = [
     {
@@ -165,13 +232,36 @@ const TodayTab: React.FC<TodayTabProps> = ({
     ));
   };
 
-  const handleMarkComplete = () => {
+  const handleMarkComplete = async () => {
     const allCompleted = steps.every(step => step.completed);
-    if (allCompleted) {
-      onComplete('Урок завершен через чеклист');
-    } else {
+    
+    if (!allCompleted) {
       // Отметить все шаги как выполненные
       setSteps(prev => prev.map(step => ({ ...step, completed: true })));
+      return;
+    }
+
+    if (!lesson) return;
+
+    setIsCompleting(true);
+    
+    try {
+      // Отправляем завершение урока на сервер
+      await lessonService.completeLesson(lesson.id, completionFeedback);
+      
+      // Уведомляем родительский компонент
+      onComplete(completionFeedback || 'Урок завершен успешно!');
+      
+      // Обновляем данные
+      if (onLessonCompleted) {
+        onLessonCompleted();
+      }
+      
+    } catch (error) {
+      console.error('Ошибка при завершении урока:', error);
+      alert('Произошла ошибка при сохранении урока. Попробуйте еще раз.');
+    } finally {
+      setIsCompleting(false);
     }
   };
 
@@ -222,21 +312,21 @@ const TodayTab: React.FC<TodayTabProps> = ({
             </div>
             
             <h2 className={styles.lessonTitle}>
-              {lesson?.title || 'Запомните короткое стихотворение'}
+              {lesson?.title || 'Урок дня загружается...'}
             </h2>
             
             <p className={styles.lessonDescription}>
-              {lesson?.description || 'Выучите краткий стих наизусть'}
+              {lesson?.text || 'Описание урока будет доступно после загрузки'}
             </p>
 
             <div className={styles.lessonMeta}>
               <div className={styles.metaItem}>
                 <Clock size={16} />
-                <span>{lesson?.duration || '7'} мин</span>
+                <span>{lesson?.difficulty_level ? `${lesson.difficulty_level * 2 + 3}` : '7'} мин</span>
               </div>
               <div className={styles.metaItem}>
                 <Star size={16} />
-                <span>{lesson?.difficulty || '3'}/3</span>
+                <span>{lesson?.difficulty_level || 2}/5</span>
               </div>
               <div className={styles.metaItem}>
                 <div className={styles.avatars}>
@@ -269,16 +359,34 @@ const TodayTab: React.FC<TodayTabProps> = ({
             </div>
 
             <div className={styles.shareSection}>
-              <span className={styles.shareLabel}>Поделиться</span>
+              <span className={styles.shareLabel}>Награда за урок</span>
               <div className={styles.shareRewards}>
-                <div className={styles.rewardItem}>
-                  <Heart size={16} />
-                  <span>3</span>
-                </div>
-                <div className={styles.rewardItem}>
-                  <Coins size={16} />
-                  <span>20</span>
-                </div>
+                {coinReward && (
+                  <>
+                    <div className={styles.rewardItem}>
+                      <Coins size={16} />
+                      <span>{coinReward.baseCoins}</span>
+                      <small>базовая</small>
+                    </div>
+                    {coinReward.streakBonus > 0 && (
+                      <div className={styles.rewardItem}>
+                        <Star size={16} />
+                        <span>+{coinReward.streakBonus}</span>
+                        <small>стрик</small>
+                      </div>
+                    )}
+                    {coinReward.partnerBonus > 0 && (
+                      <div className={styles.rewardItem}>
+                        <Heart size={16} />
+                        <span>+{coinReward.partnerBonus}</span>
+                        <small>вместе</small>
+                      </div>
+                    )}
+                    <div className={styles.rewardTotal}>
+                      <strong>Итого: {coinReward.totalCoins}</strong>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -323,12 +431,41 @@ const TodayTab: React.FC<TodayTabProps> = ({
                   ))}
                 </div>
                 
-                <button 
-                  className={styles.markCompleteButton}
-                  onClick={handleMarkComplete}
-                >
-                  {steps.every(step => step.completed) ? 'Завершить урок' : 'Отметить как завершенное'}
-                </button>
+                {!steps.every(step => step.completed) ? (
+                  <button 
+                    className={styles.markCompleteButton}
+                    onClick={handleMarkComplete}
+                  >
+                    Отметить все как выполненное
+                  </button>
+                ) : (
+                  <div className={styles.completionSection}>
+                    <textarea
+                      className={styles.feedbackInput}
+                      placeholder="Поделитесь впечатлениями от урока (необязательно)..."
+                      value={completionFeedback}
+                      onChange={(e) => setCompletionFeedback(e.target.value)}
+                      rows={3}
+                    />
+                    <button 
+                      className={styles.markCompleteButton}
+                      onClick={handleMarkComplete}
+                      disabled={isCompleting}
+                    >
+                      {isCompleting ? (
+                        <>
+                          <div className={styles.completingSpinner}></div>
+                          Сохраняем...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle size={16} />
+                          Завершить урок
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
              )}
         </div>
