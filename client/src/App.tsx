@@ -33,7 +33,7 @@ const AppInitializer: React.FC = () => {
           setCoins(1000);
         }
       } catch (error) {
-        console.warn('User not authenticated during app init:', error);
+        // Это нормальное поведение когда пользователь не авторизован
         // Очищаем только localStorage, httpOnly cookie управляется сервером
         clearAuthToken();
         resetCurrency();

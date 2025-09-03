@@ -111,6 +111,8 @@ const User = sequelize.define('User', {
     allowNull: true,
     defaultValue: {}
   }
+}, {
+  tableName: 'users'
 });
 User.beforeCreate(async (user) => {
   if (user.password_hash && user.password_hash.length < 60) { // Only hash if it's not already hashed
@@ -126,14 +128,14 @@ User.prototype.validPassword = async function(password) {
 };
 User.associate = (models) => {
   User.hasMany(models.Event, { foreignKey: 'userId', onDelete: 'CASCADE' });
-  User.hasMany(models.GameRoom, { foreignKey: 'hostId', as: 'HostedRooms' });
+  User.hasMany(models.GameRoom, { foreignKey: 'host_id', as: 'HostedRooms' });
   User.hasMany(models.Pair, {
-    foreignKey: 'user1Id',
+    foreignKey: 'user1_id',
     as: 'SentPairRequests',
     onDelete: 'CASCADE',
   });
   User.hasMany(models.Pair, {
-    foreignKey: 'user2Id',
+    foreignKey: 'user2_id',
     as: 'ReceivedPairRequests',
     onDelete: 'CASCADE',
   });

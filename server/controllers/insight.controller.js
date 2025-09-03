@@ -17,7 +17,7 @@ exports.getInsightsForPair = async (req, res, next) => {
       throw error;
     }
     
-    if (pair.user1Id !== req.user.id && pair.user2Id !== req.user.id) {
+    if (pair.user1_id !== req.user.id && pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;
@@ -57,7 +57,7 @@ exports.generateInsights = async (req, res, next) => {
       throw error;
     }
     
-    if (pair.user1Id !== req.user.id && pair.user2Id !== req.user.id) {
+    if (pair.user1_id !== req.user.id && pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;
@@ -90,7 +90,7 @@ exports.getInsightStats = async (req, res, next) => {
       throw error;
     }
     
-    if (pair.user1Id !== req.user.id && pair.user2Id !== req.user.id) {
+    if (pair.user1_id !== req.user.id && pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;
@@ -158,7 +158,7 @@ exports.deleteInsight = async (req, res, next) => {
     }
     
     // Проверяем права доступа
-    if (insight.Pair.user1Id !== req.user.id && insight.Pair.user2Id !== req.user.id) {
+    if (insight.Pair.user1_id !== req.user.id && insight.Pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;
@@ -187,7 +187,7 @@ exports.getInsightRecommendations = async (req, res, next) => {
       throw error;
     }
     
-    if (pair.user1Id !== req.user.id && pair.user2Id !== req.user.id) {
+    if (pair.user1_id !== req.user.id && pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;

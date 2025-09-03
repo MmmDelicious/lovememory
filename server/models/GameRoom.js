@@ -35,11 +35,11 @@ const GameRoom = sequelize.define('GameRoom', {
     allowNull: false,
     defaultValue: 2,
   },
-  hostId: {
+  host_id: {
     type: DataTypes.UUID,
     allowNull: false,
     references: {
-      model: 'Users',
+      model: 'users',
       key: 'id',
     },
   },
@@ -67,7 +67,7 @@ const GameRoom = sequelize.define('GameRoom', {
     type: DataTypes.UUID,
     allowNull: true, // Nullable для обратной совместимости
     references: {
-      model: 'Pairs',
+      model: 'pairs',
       key: 'id',
     },
   },
@@ -80,12 +80,13 @@ const GameRoom = sequelize.define('GameRoom', {
     },
   }
 }, {
+  tableName: 'game_rooms',
   timestamps: true, // Включаем timestamps для createdAt и updatedAt
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 });
 GameRoom.associate = (models) => {
-  GameRoom.belongsTo(models.User, { as: 'Host', foreignKey: 'hostId' });
+  GameRoom.belongsTo(models.User, { as: 'Host', foreignKey: 'host_id' });
   GameRoom.belongsTo(models.Pair, { 
     foreignKey: 'pair_id', 
     as: 'Pair',

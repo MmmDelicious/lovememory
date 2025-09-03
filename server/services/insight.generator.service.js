@@ -64,12 +64,12 @@ class InsightGeneratorService {
     try {
       // Получаем интересы обоих пользователей
       const user1Interests = await UserInterest.findAll({
-        where: { user_id: pair.user1Id },
+        where: { user_id: pair.user1_id },
         include: [{ model: Interest, as: 'Interest' }]
       });
       
       const user2Interests = await UserInterest.findAll({
-        where: { user_id: pair.user2Id },
+        where: { user_id: pair.user2_id },
         include: [{ model: Interest, as: 'Interest' }]
       });
       
@@ -275,7 +275,7 @@ class InsightGeneratorService {
       // Получаем общие интересы, которых нет в недавних событиях
       const user1Interests = await UserInterest.findAll({
         where: { 
-          user_id: pair.user1Id,
+          user_id: pair.user1_id,
           preference: ['love', 'like']
         },
         include: [{ model: Interest, as: 'Interest' }]
@@ -283,7 +283,7 @@ class InsightGeneratorService {
       
       const user2Interests = await UserInterest.findAll({
         where: { 
-          user_id: pair.user2Id,
+          user_id: pair.user2_id,
           preference: ['love', 'like']
         },
         include: [{ model: Interest, as: 'Interest' }]

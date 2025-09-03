@@ -101,7 +101,7 @@ class UserService {
       GameRoom.count({
         where: {
           [Op.or]: [
-            { hostId: userId },
+            { host_id: userId },
             { players: { [Op.contains]: [userId] } }
           ],
           status: 'finished'

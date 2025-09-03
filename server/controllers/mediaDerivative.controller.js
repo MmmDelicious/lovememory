@@ -63,7 +63,7 @@ class MediaDerivativeController {
     // Проверяем доступ через Event -> Pair
     if (media.Event && media.Event.Pair) {
       const pair = media.Event.Pair;
-      if (pair.user1Id !== userId && pair.user2Id !== userId) {
+      if (pair.user1_id !== userId && pair.user2_id !== userId) {
         throw new Error('Access denied to this media');
       }
     } else if (media.Event && media.Event.userId !== userId) {
@@ -333,7 +333,7 @@ class MediaDerivativeController {
       const media = derivative.SourceMedia;
       if (media && media.Event && media.Event.Pair) {
         const pair = media.Event.Pair;
-        if (pair.user1Id !== userId && pair.user2Id !== userId) {
+        if (pair.user1_id !== userId && pair.user2_id !== userId) {
           return res.status(403).json({ error: 'Access denied' });
         }
       } else if (media && media.Event && media.Event.userId !== userId) {

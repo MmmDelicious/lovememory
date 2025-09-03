@@ -34,7 +34,7 @@ exports.createFeedback = async (req, res, next) => {
     }
     
     // Проверяем права доступа (пользователь должен быть в паре)
-    if (pair.user1Id !== req.user.id && pair.user2Id !== req.user.id) {
+    if (pair.user1_id !== req.user.id && pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;
@@ -77,7 +77,7 @@ exports.getFeedbackForPair = async (req, res, next) => {
       throw error;
     }
     
-    if (pair.user1Id !== req.user.id && pair.user2Id !== req.user.id) {
+    if (pair.user1_id !== req.user.id && pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;
@@ -121,7 +121,7 @@ exports.getFeedbackStats = async (req, res, next) => {
       throw error;
     }
     
-    if (pair.user1Id !== req.user.id && pair.user2Id !== req.user.id) {
+    if (pair.user1_id !== req.user.id && pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;
@@ -270,7 +270,7 @@ exports.getPendingFeedback = async (req, res, next) => {
       throw error;
     }
     
-    if (pair.user1Id !== req.user.id && pair.user2Id !== req.user.id) {
+    if (pair.user1_id !== req.user.id && pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;

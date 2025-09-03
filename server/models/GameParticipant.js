@@ -11,7 +11,7 @@ const GameParticipant = sequelize.define('GameParticipant', {
     type: DataTypes.UUID,
     allowNull: true,
     references: {
-      model: 'GameRooms',
+      model: 'game_rooms',
       key: 'id',
     },
   },
@@ -19,7 +19,7 @@ const GameParticipant = sequelize.define('GameParticipant', {
     type: DataTypes.UUID,
     allowNull: false,
     references: {
-      model: 'Users',
+      model: 'users',
       key: 'id',
     },
   },

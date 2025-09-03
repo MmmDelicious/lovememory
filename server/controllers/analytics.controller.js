@@ -18,7 +18,7 @@ exports.getEventSourceStats = async (req, res, next) => {
       throw error;
     }
     
-    if (pair.user1Id !== req.user.id && pair.user2Id !== req.user.id) {
+    if (pair.user1_id !== req.user.id && pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;
@@ -111,7 +111,7 @@ exports.getAIConversionStats = async (req, res, next) => {
       throw error;
     }
     
-    if (pair.user1Id !== req.user.id && pair.user2Id !== req.user.id) {
+    if (pair.user1_id !== req.user.id && pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;
@@ -183,7 +183,7 @@ exports.getTimeBasedStats = async (req, res, next) => {
       throw error;
     }
     
-    if (pair.user1Id !== req.user.id && pair.user2Id !== req.user.id) {
+    if (pair.user1_id !== req.user.id && pair.user2_id !== req.user.id) {
       const error = new Error('Access denied');
       error.statusCode = 403;
       throw error;

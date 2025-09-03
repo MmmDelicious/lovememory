@@ -34,8 +34,8 @@ class ActivityService {
       const pair = await Pair.findOne({
         where: {
           [Op.or]: [
-            { user1Id: userId },
-            { user2Id: userId }
+            { user1_id: userId },
+            { user2_id: userId }
           ],
           status: 'active'
         }

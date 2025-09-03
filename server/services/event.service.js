@@ -6,14 +6,14 @@ class EventService {
     const activePair = await Pair.findOne({
       where: {
         status: 'active',
-        [Op.or]: [{ user1Id: userId }, { user2Id: userId }],
+        [Op.or]: [{ user1_id: userId }, { user2_id: userId }],
       },
     });
 
     let whereClause = { userId: userId };
 
     if (activePair) {
-      const partnerId = activePair.user1Id === userId ? activePair.user2Id : activePair.user1Id;
+      const partnerId = activePair.user1_id === userId ? activePair.user2_id : activePair.user1_id;
       whereClause = {
         [Op.or]: [
           { userId: userId },
@@ -38,7 +38,7 @@ class EventService {
     const activePair = await Pair.findOne({
       where: {
         status: 'active',
-        [Op.or]: [{ user1Id: userId }, { user2Id: userId }],
+        [Op.or]: [{ user1_id: userId }, { user2_id: userId }],
       },
     });
 
@@ -128,11 +128,11 @@ class EventService {
     const activePair = await Pair.findOne({
         where: {
             status: 'active',
-            [Op.or]: [{ user1Id: userId }, { user2Id: userId }]
+            [Op.or]: [{ user1_id: userId }, { user2_id: userId }]
         }
     });
     
-    const partnerId = activePair ? (activePair.user1Id === userId ? activePair.user2Id : activePair.user1Id) : null;
+    const partnerId = activePair ? (activePair.user1_id === userId ? activePair.user2_id : activePair.user1_id) : null;
 
     if (event.userId !== userId && event.userId !== partnerId) {
         const error = new Error('У вас нет доступа к медиа этого события');

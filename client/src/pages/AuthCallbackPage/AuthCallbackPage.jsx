@@ -9,17 +9,16 @@ const AuthCallbackPage = () => {
       const userString = params.get('user');
       if (token && userString) {
         const user = JSON.parse(decodeURIComponent(userString));
-        const authData = { token, user };
-        localStorage.setItem('auth', JSON.stringify(authData));
+        // Токен уже установлен в httpOnly cookie сервером
+        // Просто сообщаем родительскому окну об успехе
         if (window.opener) {
           window.opener.postMessage({
             type: 'auth-success',
-            payload: authData
+            payload: { user }
           }, import.meta.env.VITE_SERVER_URL);
         }
       } else {
         console.error('Auth callback failed: Missing token or user data in URL hash.');
-        localStorage.setItem('auth_error', 'Google Sign-In failed.');
         if (window.opener) {
           window.opener.postMessage({
             type: 'auth-error',
@@ -29,7 +28,6 @@ const AuthCallbackPage = () => {
       }
     } catch (error) {
       console.error('Error processing auth callback:', error);
-      localStorage.setItem('auth_error', 'An error occurred during Google Sign-In.');
       if (window.opener) {
         window.opener.postMessage({
           type: 'auth-error',

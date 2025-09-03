@@ -6,19 +6,19 @@ const Pair = sequelize.define('Pair', {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  user1Id: {
+  user1_id: {
     type: DataTypes.UUID,
     allowNull: true, // Делаем nullable для новой архитектуры
     references: {
-      model: 'Users',
+      model: 'users',
       key: 'id',
     },
   },
-  user2Id: {
+  user2_id: {
     type: DataTypes.UUID,
     allowNull: true, // Делаем nullable для новой архитектуры
     references: {
-      model: 'Users',
+      model: 'users',
       key: 'id',
     },
   },
@@ -42,15 +42,17 @@ const Pair = sequelize.define('Pair', {
     allowNull: false,
     defaultValue: {},
   },
+}, {
+  tableName: 'pairs'
 });
 Pair.associate = (models) => {
   Pair.belongsTo(models.User, {
     as: 'Requester',
-    foreignKey: 'user1Id',
+    foreignKey: 'user1_id',
   });
   Pair.belongsTo(models.User, {
     as: 'Receiver',
-    foreignKey: 'user2Id',
+    foreignKey: 'user2_id',
   });
   // Новая ассоциация many-to-many через UserPair
   Pair.hasMany(models.UserPair, {

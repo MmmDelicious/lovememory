@@ -17,7 +17,7 @@ class SessionController {
         
         // Проверяем, что пользователь является частью пары
         // Это можно доработать через UserPair если нужно
-        if (pair.user1Id !== createdByUserId && pair.user2Id !== createdByUserId) {
+        if (pair.user1_id !== createdByUserId && pair.user2_id !== createdByUserId) {
           return res.status(403).json({ error: 'Access denied to this pair' });
         }
       }
@@ -46,7 +46,7 @@ class SessionController {
       // Если указана пара, проверяем доступ
       if (pair_id) {
         const pair = await Pair.findByPk(pair_id);
-        if (!pair || (pair.user1Id !== userId && pair.user2Id !== userId)) {
+        if (!pair || (pair.user1_id !== userId && pair.user2_id !== userId)) {
           return res.status(403).json({ error: 'Access denied to this pair' });
         }
       }
@@ -56,7 +56,7 @@ class SessionController {
       // Фильтруем сессии для пользователя
       const filteredSessions = sessions.filter(session => {
         if (!session.Pair) return false;
-        return session.Pair.user1Id === userId || session.Pair.user2Id === userId;
+        return session.Pair.user1_id === userId || session.Pair.user2_id === userId;
       });
 
       res.status(200).json({ data: filteredSessions });
@@ -74,7 +74,7 @@ class SessionController {
 
       // Проверяем доступ к паре
       const pair = await Pair.findByPk(pairId);
-      if (!pair || (pair.user1Id !== userId && pair.user2Id !== userId)) {
+      if (!pair || (pair.user1_id !== userId && pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this pair' });
       }
 
@@ -111,7 +111,7 @@ class SessionController {
 
       // Проверяем доступ
       if (!session.Pair || 
-          (session.Pair.user1Id !== userId && session.Pair.user2Id !== userId)) {
+          (session.Pair.user1_id !== userId && session.Pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this session' });
       }
 
@@ -141,7 +141,7 @@ class SessionController {
 
       // Проверяем доступ
       if (!session.Pair || 
-          (session.Pair.user1Id !== userId && session.Pair.user2Id !== userId)) {
+          (session.Pair.user1_id !== userId && session.Pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this session' });
       }
 
@@ -171,7 +171,7 @@ class SessionController {
 
       // Проверяем доступ
       if (!session.Pair || 
-          (session.Pair.user1Id !== userId && session.Pair.user2Id !== userId)) {
+          (session.Pair.user1_id !== userId && session.Pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this session' });
       }
 
@@ -202,7 +202,7 @@ class SessionController {
 
       // Проверяем доступ
       if (!session.Pair || 
-          (session.Pair.user1Id !== userId && session.Pair.user2Id !== userId)) {
+          (session.Pair.user1_id !== userId && session.Pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this session' });
       }
 
@@ -233,7 +233,7 @@ class SessionController {
 
       // Проверяем доступ
       if (!session.Pair || 
-          (session.Pair.user1Id !== userId && session.Pair.user2Id !== userId)) {
+          (session.Pair.user1_id !== userId && session.Pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this session' });
       }
 
@@ -264,7 +264,7 @@ class SessionController {
 
       // Проверяем доступ
       if (!session.Pair || 
-          (session.Pair.user1Id !== userId && session.Pair.user2Id !== userId)) {
+          (session.Pair.user1_id !== userId && session.Pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this session' });
       }
 
@@ -292,7 +292,7 @@ class SessionController {
 
       // Проверяем доступ
       if (!session.Pair || 
-          (session.Pair.user1Id !== userId && session.Pair.user2Id !== userId)) {
+          (session.Pair.user1_id !== userId && session.Pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this session' });
       }
 
@@ -320,7 +320,7 @@ class SessionController {
 
       // Проверяем доступ
       if (!session.Pair || 
-          (session.Pair.user1Id !== userId && session.Pair.user2Id !== userId)) {
+          (session.Pair.user1_id !== userId && session.Pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this session' });
       }
 
@@ -340,7 +340,7 @@ class SessionController {
 
       // Проверяем доступ к паре
       const pair = await Pair.findByPk(pairId);
-      if (!pair || (pair.user1Id !== userId && pair.user2Id !== userId)) {
+      if (!pair || (pair.user1_id !== userId && pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this pair' });
       }
 
@@ -394,7 +394,7 @@ class SessionController {
 
       // Проверяем доступ
       if (!session.Pair || 
-          (session.Pair.user1Id !== userId && session.Pair.user2Id !== userId)) {
+          (session.Pair.user1_id !== userId && session.Pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this session' });
       }
 
@@ -429,7 +429,7 @@ class SessionController {
       if (pair_id) {
         // Проверяем доступ к паре
         const pair = await Pair.findByPk(pair_id);
-        if (!pair || (pair.user1Id !== userId && pair.user2Id !== userId)) {
+        if (!pair || (pair.user1_id !== userId && pair.user2_id !== userId)) {
           return res.status(403).json({ error: 'Access denied to this pair' });
         }
         whereClause.pair_id = pair_id;
@@ -438,8 +438,8 @@ class SessionController {
         const userPairs = await Pair.findAll({
           where: {
             [Op.or]: [
-              { user1Id: userId },
-              { user2Id: userId }
+              { user1_id: userId },
+              { user2_id: userId }
             ]
           },
           attributes: ['id']
@@ -494,7 +494,7 @@ class SessionController {
 
       // Проверяем доступ к паре
       const pair = await Pair.findByPk(pairId);
-      if (!pair || (pair.user1Id !== userId && pair.user2Id !== userId)) {
+      if (!pair || (pair.user1_id !== userId && pair.user2_id !== userId)) {
         return res.status(403).json({ error: 'Access denied to this pair' });
       }
 

@@ -154,7 +154,7 @@ class GameService {
     }
 
     const roomCreateData = {
-      hostId,
+      host_id: hostId,
       bet,
       gameType,
       maxPlayers,

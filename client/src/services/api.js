@@ -81,7 +81,8 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Логирование ошибок только в dev режиме
-    if (import.meta.env.DEV) {
+    // Не логируем 401 ошибки для /auth/me - это нормальное поведение
+    if (import.meta.env.DEV && !(error.response?.status === 401 && error.config?.url?.includes('/auth/me'))) {
       console.group('API ERROR');
       console.error('Request URL:', error.config?.url);
       console.error('Request Method:', error.config?.method);
@@ -91,9 +92,12 @@ api.interceptors.response.use(
       console.groupEnd();
     }
 
-    // Обработка 401 ошибок - сразу на логин (упрощенная версия)
+    // Обработка 401 ошибок - пользователь не авторизован
     if (error.response?.status === 401) {
-      console.log('🟡 API: Got 401 error, but skipping redirect for debugging');
+      // Не логируем 401 ошибки для /auth/me - это нормальное поведение
+      if (!error.config?.url?.includes('/auth/me')) {
+        console.log('🟡 API: Got 401 error, user not authenticated');
+      }
       clearAuthToken();
       return Promise.reject(error);
     }
