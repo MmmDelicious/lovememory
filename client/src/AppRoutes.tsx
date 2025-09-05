@@ -57,24 +57,23 @@ const AppRoutes: React.FC = () => {
     return <LoadingFallback />;
   }
 
-  // ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ТЕСТИРОВАНИЯ - см. AUTH_DISABLE.md для возврата
-  // if (!user) {
-  //   return (
-  //     <ErrorBoundary>
-  //       <Suspense fallback={<LoadingFallback />}>
-  //         <Routes>
-  //           <Route path="/about" element={<AboutPage />} />
-  //           <Route path="/login" element={<AuthPage />} />
-  //           <Route path="/register" element={<AuthPage />} />
-  //           <Route path="/auth/callback" element={<AuthCallbackPage />} />
-  //           <Route path="/error" element={<ErrorPage />} />
-  //           <Route path="/" element={<AboutPage />} />
-  //           <Route path="*" element={<Navigate to="/about" />} />
-  //         </Routes>
-  //       </Suspense>
-  //     </ErrorBoundary>
-  //   );
-  // }
+  if (!user) {
+    return (
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/register" element={<AuthPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/error" element={<ErrorPage />} />
+            <Route path="/" element={<AboutPage />} />
+            <Route path="*" element={<Navigate to="/about" />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>
@@ -103,14 +102,11 @@ const AppRoutes: React.FC = () => {
           
           <Route path="/error" element={<ErrorPage />} />
 
-          {/* ВРЕМЕННОЕ ИЗМЕНЕНИЕ: добавляем About страницу доступную всегда */}
-          <Route path="/about" element={<AboutPage />} />
-          
-          <Route path="/" element={<Navigate to="/about" replace />} />
-          <Route path="/login" element={<Navigate to="/about" replace />} />
-          <Route path="/register" element={<Navigate to="/about" replace />} />
-          <Route path="/auth/callback" element={<Navigate to="/about" replace />} />
-          <Route path="*" element={<Navigate to="/about" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/register" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/auth/callback" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>
