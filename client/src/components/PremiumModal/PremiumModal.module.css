@@ -62,7 +62,7 @@
 .header {
   text-align: center;
   padding: 2rem 2rem 1rem;
-  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  background: var(--gradient-button-dark); /* WCAG compliant for white text */
   color: white;
   border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
 }
@@ -83,7 +83,7 @@
 .aiGlow {
   position: absolute;
   inset: -4px;
-  background: linear-gradient(45deg, #10B981, #059669, #10B981);
+  background: linear-gradient(45deg, var(--color-accent-emerald-darker), var(--color-accent-emerald-dark), var(--color-accent-emerald-darker)); /* WCAG compliant */
   border-radius: 50%;
   z-index: -1;
   animation: aiPulse 2s ease-in-out infinite;
@@ -158,7 +158,7 @@
 }
 
 .highlightFeature:hover {
-  border-color: #10B981;
+  border-color: var(--color-accent-emerald-darker); /* WCAG compliant */
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(16, 185, 129, 0.2);
 }
@@ -173,7 +173,7 @@
   height: 44px;
   background: linear-gradient(135deg, #FEF3F2 0%, #FDF2F8 100%);
   border-radius: 12px;
-  color: #FF6B5A;
+  color: var(--color-primary-dark); /* WCAG compliant */
   transition: all 0.3s ease;
   overflow: hidden;
 }
@@ -181,7 +181,7 @@
 .featureGlow {
   position: absolute;
   inset: -2px;
-  background: linear-gradient(45deg, #10B981, #059669, #10B981);
+  background: linear-gradient(45deg, var(--color-accent-emerald-darker), var(--color-accent-emerald-dark), var(--color-accent-emerald-darker)); /* WCAG compliant */
   border-radius: 14px;
   z-index: -1;
   animation: featurePulse 2s ease-in-out infinite;
@@ -226,7 +226,7 @@
 }
 
 .priceCard {
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  background: linear-gradient(135deg, var(--color-accent-emerald-darker) 0%, var(--color-accent-emerald-dark) 100%); /* WCAG compliant */
   color: white;
   padding: 1.5rem;
   border-radius: var(--border-radius);

@@ -404,7 +404,7 @@ const ProfilePage: React.FC = () => {
                 {userInterests.map((userInterest, index) => {
                   const interest = userInterest.Interest;
                   const preferenceColor = {
-                    'love': '#FF6B5A',
+                    'love': 'var(--color-primary-dark)', /* WCAG compliant */
                     'like': '#3B82F6', 
                     'neutral': '#6B7280',
                     'dislike': '#EF4444'

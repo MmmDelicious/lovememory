@@ -8,6 +8,7 @@ import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 
 // Lazy loading для основных страниц
 const AuthPage = React.lazy(() => import('./pages/AuthPage/AuthPage'));
+const AboutPage = React.lazy(() => import('./pages/AboutPage'));
 const DashboardPage = React.lazy(() => import('./pages/DashboardPage/DashboardPage'));
 const DayDetailPage = React.lazy(() => import('./pages/DayDetailPage/DayDetailPage'));
 const ProfilePage = React.lazy(() => import('./pages/ProfilePage/ProfilePage'));
@@ -56,21 +57,24 @@ const AppRoutes: React.FC = () => {
     return <LoadingFallback />;
   }
 
-  if (!user) {
-    return (
-      <ErrorBoundary>
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/register" element={<AuthPage />} />
-            <Route path="/auth/callback" element={<AuthCallbackPage />} />
-            <Route path="/error" element={<ErrorPage />} />
-            <Route path="*" element={<Navigate to="/login" />} />
-          </Routes>
-        </Suspense>
-      </ErrorBoundary>
-    );
-  }
+  // ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ТЕСТИРОВАНИЯ - см. AUTH_DISABLE.md для возврата
+  // if (!user) {
+  //   return (
+  //     <ErrorBoundary>
+  //       <Suspense fallback={<LoadingFallback />}>
+  //         <Routes>
+  //           <Route path="/about" element={<AboutPage />} />
+  //           <Route path="/login" element={<AuthPage />} />
+  //           <Route path="/register" element={<AuthPage />} />
+  //           <Route path="/auth/callback" element={<AuthCallbackPage />} />
+  //           <Route path="/error" element={<ErrorPage />} />
+  //           <Route path="/" element={<AboutPage />} />
+  //           <Route path="*" element={<Navigate to="/about" />} />
+  //         </Routes>
+  //       </Suspense>
+  //     </ErrorBoundary>
+  //   );
+  // }
 
   return (
     <ErrorBoundary>
@@ -99,11 +103,14 @@ const AppRoutes: React.FC = () => {
           
           <Route path="/error" element={<ErrorPage />} />
 
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/register" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/auth/callback" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          {/* ВРЕМЕННОЕ ИЗМЕНЕНИЕ: добавляем About страницу доступную всегда */}
+          <Route path="/about" element={<AboutPage />} />
+          
+          <Route path="/" element={<Navigate to="/about" replace />} />
+          <Route path="/login" element={<Navigate to="/about" replace />} />
+          <Route path="/register" element={<Navigate to="/about" replace />} />
+          <Route path="/auth/callback" element={<Navigate to="/about" replace />} />
+          <Route path="*" element={<Navigate to="/about" replace />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

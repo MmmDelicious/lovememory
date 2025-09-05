@@ -52,8 +52,8 @@ const GAME_CONFIGS: Record<string, any> = {
     name: 'Квиз',
     description: 'Проверьте свои знания',
     icon: '🧠',
-    color: '#10B981',
-    gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+    color: 'var(--color-accent-emerald-darker)', /* WCAG compliant */
+    gradient: 'linear-gradient(135deg, var(--color-accent-emerald-darker) 0%, var(--color-accent-emerald-dark) 100%)',
   },
   'codenames': {
     name: 'Codenames',

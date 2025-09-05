@@ -1,0 +1,11 @@
+/* ScrollReveal.module.css */
+
+.scrollReveal {
+  will-change: transform, opacity;
+}
+
+/* Performance optimization */
+.scrollReveal * {
+  backface-visibility: hidden;
+  perspective: 1000px;
+}

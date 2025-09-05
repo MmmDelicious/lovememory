@@ -17,32 +17,46 @@ const AppInitializer: React.FC = () => {
   const { setCoins, resetCurrency } = useCurrencyActions();
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      setLoading(true);
-      
-      try {
-        // Всегда проверяем сервер независимо от localStorage
-        // так как токен теперь в httpOnly cookie
-        const userData = await authService.getMe();
-        
-        setUser(userData);
-        
-        if (userData.coins !== undefined && userData.coins !== null) {
-          setCoins(userData.coins);
-        } else {
-          setCoins(1000);
-        }
-      } catch (error) {
-        // Это нормальное поведение когда пользователь не авторизован
-        // Очищаем только localStorage, httpOnly cookie управляется сервером
-        clearAuthToken();
-        resetCurrency();
-      }
-      
-      setLoading(false);
-    };
+    // ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ТЕСТИРОВАНИЯ - см. AUTH_DISABLE.md для возврата
+    // const checkAuthStatus = async () => {
+    //   setLoading(true);
+    //   
+    //   try {
+    //     // Всегда проверяем сервер независимо от localStorage
+    //     // так как токен теперь в httpOnly cookie
+    //     const userData = await authService.getMe();
+    //     
+    //     setUser(userData);
+    //     
+    //     if (userData.coins !== undefined && userData.coins !== null) {
+    //       setCoins(userData.coins);
+    //     } else {
+    //       setCoins(1000);
+    //     }
+    //   } catch (error) {
+    //     // Это нормальное поведение когда пользователь не авторизован
+    //     // Очищаем только localStorage, httpOnly cookie управляется сервером
+    //     clearAuthToken();
+    //     resetCurrency();
+    //   }
+    //   
+    //   setLoading(false);
+    // };
 
-    checkAuthStatus();
+    // checkAuthStatus();
+    
+    // ТЕСТОВАЯ ЗАГЛУШКА: устанавливаем фейкового пользователя
+    setLoading(true);
+    setTimeout(() => {
+      setUser({
+        id: 'test-user-id',
+        email: 'test@example.com',
+        first_name: 'Тест',
+        last_name: 'Пользователь'
+      });
+      setCoins(1000);
+      setLoading(false);
+    }, 1000);
   }, [setUser, setCoins, setLoading, resetCurrency]);
 
   return null;

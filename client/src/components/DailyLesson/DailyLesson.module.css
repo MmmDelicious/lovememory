@@ -264,7 +264,7 @@
 .completeButton {
   width: 100%;
   padding: var(--space-4);
-  background: #10B981;
+  background: var(--color-accent-emerald-darker); /* WCAG compliant */
   color: white;
   border: none;
   border-radius: var(--border-radius-lg);
@@ -309,7 +309,7 @@
 .completedMessage {
   text-align: center;
   padding: var(--space-6);
-  background: #10B981;
+  background: var(--color-accent-emerald-darker); /* WCAG compliant */
   color: white;
   border-radius: var(--border-radius-lg);
   margin-top: var(--space-4);
@@ -373,7 +373,7 @@
 }
 
 .streakBonus {
-  background: #10B981;
+  background: var(--color-accent-emerald-darker); /* WCAG compliant */
   color: white;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--border-radius-md);
@@ -407,7 +407,7 @@
 
 .statusItem.completed {
   background: rgba(16, 185, 129, 0.2);
-  color: #10B981;
+  color: var(--color-accent-emerald-darker); /* WCAG compliant */
 }
 
 .statusIcon {

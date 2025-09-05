@@ -88,7 +88,7 @@
 .statNumber {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #FF6B5A;
+  color: var(--color-primary-dark); /* WCAG compliant */
   line-height: 1;
 }
 
@@ -144,7 +144,7 @@
 }
 
 .startButton {
-  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  background: var(--gradient-button-dark); /* WCAG compliant for white text */
   color: white;
   border: none;
   border-radius: 16px;
@@ -209,7 +209,7 @@
 .shareButton:hover {
   background: #F9FAFB;
   border-color: #D1D5DB;
-  color: #FF6B5A;
+  color: var(--color-primary-dark); /* WCAG compliant */
 }
 
 /* Share Section */
@@ -241,7 +241,7 @@
 }
 
 .rewardItem svg {
-  color: #FF6B5A;
+  color: var(--color-primary-dark); /* WCAG compliant */
 }
 
 /* Avatars */
@@ -256,7 +256,7 @@
   height: 24px;
   border-radius: 50%;
   border: 2px solid white;
-  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  background: var(--gradient-button-dark); /* WCAG compliant for white text */
 }
 
 .avatar:nth-child(2) {
@@ -345,7 +345,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #FF6B5A 0%, #FF8A75 50%, #F59E0B 100%);
+  background: linear-gradient(90deg, var(--color-primary-dark) 0%, var(--color-accent-coral) 50%, var(--color-accent-orange-dark) 100%); /* WCAG compliant */
 }
 
 .stepsTitle {
@@ -383,7 +383,7 @@
 }
 
 .stepItem:hover {
-  border-color: #FF6B5A;
+  border-color: var(--color-primary-dark); /* WCAG compliant */
   box-shadow: 0 2px 8px rgba(255, 107, 90, 0.1);
 }
 
@@ -403,8 +403,8 @@
 }
 
 .stepCheckbox.completed {
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-  border-color: #10B981;
+  background: linear-gradient(135deg, var(--color-accent-emerald-darker) 0%, var(--color-accent-emerald-dark) 100%); /* WCAG compliant */
+  border-color: var(--color-accent-emerald-darker); /* WCAG compliant */
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
@@ -422,7 +422,7 @@
 }
 
 .markCompleteButton {
-  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  background: var(--gradient-button-dark); /* WCAG compliant for white text */
   color: white;
   border: none;
   border-radius: 12px;
@@ -493,7 +493,7 @@
   position: absolute;
   width: 40px;
   height: 30px;
-  background: #FF6B5A;
+  background: var(--color-primary-dark); /* WCAG compliant */
   border-radius: 4px;
   bottom: 60px;
   left: 50%;
@@ -524,7 +524,7 @@
 
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, #10B981 0%, #059669 100%);
+  background: linear-gradient(90deg, var(--color-accent-emerald-darker) 0%, var(--color-accent-emerald-dark) 100%); /* WCAG compliant */
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -575,7 +575,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FF6B5A;
+  color: var(--color-primary-dark); /* WCAG compliant */
 }
 
 .recContent {
@@ -620,8 +620,8 @@
 }
 
 .recButton:hover {
-  background: #FF6B5A;
-  border-color: #FF6B5A;
+  background: var(--color-primary-dark); /* WCAG compliant */
+  border-color: var(--color-primary-dark); /* WCAG compliant */
   color: white;
 }
 
@@ -633,7 +633,7 @@
 }
 
 .inviteButton {
-  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  background: var(--gradient-button-dark); /* WCAG compliant for white text */
   color: white;
   border: none;
   border-radius: 12px;
@@ -667,7 +667,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid #F3F4F6;
-  border-top: 3px solid #FF6B5A;
+  border-top: 3px solid var(--color-primary-dark); /* WCAG compliant */
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

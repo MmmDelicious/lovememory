@@ -43,7 +43,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #FF6B5A 0%, #FF8A75 100%);
+  background: var(--gradient-button-dark); /* WCAG compliant */
   pointer-events: none;
 }
 
@@ -51,7 +51,7 @@
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  border: 3px solid #FF6B5A;
+  border: 3px solid var(--color-primary-dark); /* WCAG compliant */
   object-fit: cover;
   margin: 0 auto 0.875rem;
   display: block;
@@ -99,7 +99,7 @@
   font-size: 1.125rem;
   font-weight: 700;
   display: block;
-  color: #FF6B5A;
+  color: var(--color-primary-dark); /* WCAG compliant */
 }
 
 .quickStatItem:nth-child(2n) .quickStatNumber {
@@ -124,7 +124,7 @@
 }
 
 .primaryButton {
-  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  background: var(--gradient-button-dark); /* WCAG compliant for white text */
   color: white;
   border: none;
   border-radius: 10px;
@@ -210,7 +210,7 @@
 }
 
 .contactIcon {
-  color: #FF6B5A;
+  color: var(--color-primary-dark); /* WCAG compliant */
   font-size: 0.8rem;
   width: 14px;
   text-align: center;
@@ -286,7 +286,7 @@
 }
 
 .titleIcon {
-  color: #FF6B5A;
+  color: var(--color-primary-dark); /* WCAG compliant */
   font-size: 1.125rem;
 }
 
@@ -350,7 +350,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #FF6B5A 0%, #FF8A75 100%);
+  background: var(--gradient-button-dark); /* WCAG compliant */
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
@@ -365,9 +365,9 @@
 }
 
 .statCard:hover .statIcon {
-  background: #FF6B5A;
+  background: var(--color-primary-dark); /* WCAG compliant */
   color: white;
-  border-color: #FF6B5A;
+  border-color: var(--color-primary-dark); /* WCAG compliant */
 }
 
 .statCard:nth-child(2n):hover .statIcon {
@@ -466,8 +466,8 @@
 }
 
 .tagCard:hover {
-  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
-  border-color: #FF6B5A;
+  background: var(--gradient-button-dark); /* WCAG compliant for white text */
+  border-color: var(--color-primary-dark); /* WCAG compliant */
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(255, 107, 90, 0.25);
 }
@@ -517,9 +517,9 @@
 }
 
 .activityCard:hover .activityIcon {
-  background: #FF6B5A;
+  background: var(--color-primary-dark); /* WCAG compliant */
   color: white;
-  border-color: #FF6B5A;
+  border-color: var(--color-primary-dark); /* WCAG compliant */
 }
 
 .activityCard:nth-child(2n):hover .activityIcon {
@@ -531,7 +531,7 @@
 /* Pairing and Partner Styles */
 .contactPartnerButton {
   width: 100%;
-  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  background: var(--gradient-button-dark); /* WCAG compliant for white text */
   color: white;
   border: none;
   border-radius: 10px;
@@ -628,7 +628,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid #F1F5F9;
-  border-top: 3px solid #FF6B5A;
+  border-top: 3px solid var(--color-primary-dark); /* WCAG compliant */
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -646,7 +646,7 @@
 }
 
 .retryButton, .addInterestsButton {
-  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  background: var(--gradient-button-dark); /* WCAG compliant for white text */
   color: white;
   border: none;
   border-radius: 8px;
@@ -767,7 +767,7 @@
 
 .formInput:focus {
   outline: none;
-  border-color: #FF6B5A;
+  border-color: var(--color-primary-dark); /* WCAG compliant */
   box-shadow: 0 0 0 3px rgba(255, 107, 90, 0.1);
 }
 
@@ -804,7 +804,7 @@
 }
 
 .primaryButton {
-  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  background: var(--gradient-button-dark); /* WCAG compliant for white text */
   color: white;
 }
 
@@ -906,7 +906,7 @@
   width: 20px;
   height: 20px;
   border: 2px solid #F3F4F6;
-  border-top: 2px solid #FF6B5A;
+  border-top: 2px solid var(--color-primary-dark); /* WCAG compliant */
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

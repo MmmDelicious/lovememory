@@ -21,12 +21,12 @@
 }
 
 .primary {
-  background-color: var(--color-primary);
-  color: var(--color-surface);
+  background-color: var(--color-primary-dark); /* WCAG compliant for white text */
+  color: white;
 }
 
 .primary:hover {
-  background-color: var(--color-primary-hover);
+  background-color: var(--color-primary-darker);
 }
 
 .primary:disabled,
@@ -40,22 +40,25 @@
 
 .secondary {
   background-color: var(--color-surface);
-  color: var(--color-primary);
+  color: var(--color-primary-foreground); /* Better contrast */
   border: 1px solid var(--color-border);
 }
 
 .secondary:hover {
    border-color: var(--color-primary);
+   color: var(--color-primary-dark);
 }
 
 .outline {
   background-color: transparent;
-  color: var(--color-primary);
+  color: var(--color-primary-dark); /* Better contrast */
   border: 1px solid var(--color-primary);
 }
 
 .outline:hover {
-  background-color: color-mix(in oklab, var(--color-primary) 8%, transparent);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-darker);
+  border-color: var(--color-primary-dark);
 }
 
 .sm {

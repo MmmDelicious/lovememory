@@ -479,7 +479,7 @@
 }
 
 .statusBadge.waiting {
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  background: linear-gradient(135deg, var(--color-accent-emerald-darker) 0%, var(--color-accent-emerald-dark) 100%); /* WCAG compliant */
   color: white;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
