@@ -54,6 +54,12 @@
   box-shadow: var(--shadow-md);
 }
 
+.logoImage {
+  height: 100px;
+  width: 200px;
+  object-fit: contain;
+}
+
 .logoText {
   font-family: var(--font-family-heading);
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
@@ -274,43 +280,7 @@
   z-index: 1;
 }
 
-/* Background Elements */
-.backgroundElements {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: hidden;
-}
-
-.floatingHeart {
-  position: absolute;
-  font-size: 1.5rem;
-  opacity: 0.1;
-  animation: floatHeart 15s ease-in-out infinite;
-  animation-delay: var(--delay);
-}
-
-.floatingHeart:nth-child(1) {
-  top: 20%;
-  left: 10%;
-  animation-duration: 20s;
-}
-
-.floatingHeart:nth-child(2) {
-  top: 60%;
-  right: 15%;
-  animation-duration: 25s;
-}
-
-.floatingHeart:nth-child(3) {
-  bottom: 30%;
-  left: 60%;
-  animation-duration: 18s;
-}
+/* Background Elements - REMOVED! Only pictures now */
 
 /* Animations */
 @keyframes coinGlow {
@@ -331,24 +301,6 @@
   }
 }
 
-@keyframes floatHeart {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-    opacity: 0.1;
-  }
-  25% {
-    transform: translateY(-20px) rotate(90deg);
-    opacity: 0.2;
-  }
-  50% {
-    transform: translateY(-10px) rotate(180deg);
-    opacity: 0.1;
-  }
-  75% {
-    transform: translateY(-30px) rotate(270deg);
-    opacity: 0.15;
-  }
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {

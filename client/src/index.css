@@ -1,7 +1,8 @@
 /* client/src/index.css */
 
-/* --- Imports (оставил ваши) --- */
+/* --- Imports --- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Varela+Round:wght@400&family=Mulish:wght@300;400;500;600;700;800;900&display=swap');
 @import './styles/utilities.css';
 @import './styles/animations.css';
 @import './styles/components.css';
@@ -14,8 +15,9 @@
    =========================================================== */
 :root {
   /* Fonts */
-  --font-family-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-family-heading: 'Poppins', sans-serif;
+  --font-family-body: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-heading: 'Varela Round', sans-serif;
+  --font-family-secondary: 'Inter', sans-serif;
 
   /* Font weights (added) */
   --font-weight-300: 300;
@@ -26,47 +28,58 @@
   --font-weight-800: 800;
   --font-weight-900: 900;
 
-  /* BALANCED MODERN PALETTE - BASED ON TODAYTAB */
-  --color-background: #F8FAFC; /* Light slate background */
-  --color-surface: #FFFFFF;    /* Pure white for cards */
-  --color-primary: #FF6B5A;    /* Coral primary from TodayTab (accent) */
-  --color-primary-hover: #FF5A47; /* Slightly darker for hover accents */
-  --color-primary-dark: #BF5043; /* Dark coral for white text (WCAG compliant) */
-  --color-primary-darker: #A8463C; /* Even darker for borders */
+  /* LOVEMEMORY CLEAN DESIGN SYSTEM */
+  --color-background: #FFFFFF;     /* Pure white background */
+  --color-surface: #FFFFFF;        /* Pure white for cards */
+  
+  /* MAIN PALETTE - More neutral, less pink */
+  --color-primary: #FF6B5A;        /* Coral red - warm but not pink */
+  --color-primary-hover: #FF5722;  /* Deeper coral for hover */
+  --color-primary-dark: #D84315;   /* Dark coral for white text (WCAG) */
+  --color-primary-darker: #BF360C; /* Even darker for borders */
   --color-primary-light: rgba(255, 107, 90, 0.1); /* Light coral backgrounds */
-  --color-primary-foreground: #111827; /* Safe text color on primary backgrounds */
-  --color-secondary: #F1F5F9;  /* Light slate accent */
-
-  /* HARMONIOUS ACCENT COLORS */
-  --color-accent-coral: #FF8A75;    /* Light coral */
-  --color-accent-orange: #F59E0B;   /* Golden orange from TodayTab */
-  --color-accent-orange-dark: #D97706; /* Dark orange for white text (WCAG) */
-  --color-accent-emerald: #10B981;  /* Emerald green from TodayTab */
-  --color-accent-emerald-dark: #059669; /* Darker emerald */
-  --color-accent-emerald-darker: #047857; /* Even darker for white text (WCAG) */
-  --color-accent-slate: #64748B;    /* Medium slate */
-  --color-accent-warm: #FEF3F2;     /* Warm background tint */
+  --color-primary-foreground: #000000; /* Black text on primary backgrounds */
+  
+  --color-secondary: #64B5F6;      /* Nice blue - clean and modern */
+  --color-secondary-hover: #42A5F5;
+  --color-secondary-dark: #1976D2; /* Dark blue for white text */
+  --color-secondary-light: rgba(100, 181, 246, 0.1);
+  
+  /* ACCENT COLORS */
+  --color-accent-yellow: #FFF59D;   /* Picasso - bright yellow */
+  --color-accent-yellow-dark: #F57F17; /* Dark yellow for contrast */
+  --color-accent-purple: #B39DDB;   /* Cold Purple */
+  --color-accent-purple-dark: #512DA8; /* Dark purple for white text */
+  
+  /* NEUTRALS */
+  --color-neutral-50: #FAFAFA;
+  --color-neutral-100: #F5F5F5;
+  --color-neutral-200: #E0E0E0;
+  --color-neutral-300: #BDBDBD;
+  --color-neutral-400: #9E9E9E;
+  --color-neutral-500: #757575;
+  --color-neutral-600: #616161;
+  --color-neutral-700: #424242;
+  --color-neutral-800: #212121;
+  --color-neutral-900: #000000;
+  
+  /* SEMANTIC COLORS */
+  --color-success: #4CAF50;
+  --color-warning: #FF9800;
+  --color-error: #F44336;
+  --color-info: #2196F3;
 
   /* FOREGROUND COLORS FOR ACCESSIBILITY (kept explicit) */
   --color-orange-foreground: #111827; /* Safe text on orange backgrounds */
   --color-emerald-foreground: #111827; /* Safe text on emerald backgrounds */
 
-  /* REFINED GRADIENTS */
-  --gradient-hero: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
-  --gradient-card: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
-  --gradient-button: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
-  --gradient-button-dark: linear-gradient(135deg, #BF5043 0%, #A8463C 100%); /* WCAG-friendly for white text */
-  --gradient-text: linear-gradient(135deg, #FF6B5A 0%, #F59E0B 100%);
-  --gradient-accent: linear-gradient(135deg, #FF8A75 0%, #F59E0B 100%);
-  --gradient-steps: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
 
-  --color-text-primary: #111827; /* Deep slate from TodayTab */
-  --color-text-secondary: #6B7280; /* Medium gray from TodayTab */
-  --color-text-tertiary: #9CA3AF; /* Light gray from TodayTab */
-  --color-border: #E5E7EB;      /* Light border from TodayTab */
-  --color-border-light: #F3F4F6; /* Very light border from TodayTab */
-  --color-error: #D35D5D;
-  --color-success: #4CAF50;
+  --color-text-primary: var(--color-neutral-900);   /* Pure black for text */
+  --color-text-secondary: var(--color-neutral-500); /* Medium gray */
+  --color-text-tertiary: var(--color-neutral-400);  /* Light gray */
+  --color-border: var(--color-neutral-200);         /* Light border */
+  --color-border-light: var(--color-neutral-100);   /* Very light border */
+  --color-border-dark: var(--color-neutral-700);    /* Dark border for shadows */
 
   /* Shadows & Borders */
   --shadow-sm: 0 4px 8px -2px rgba(103, 56, 46, 0.05);
@@ -111,11 +124,10 @@
   --text-5xl: 3rem;
   --text-6xl: 3.75rem;
 
-  /* Custom cursor (kept, but you can remove if conflicts) */
-  --cursor-default: url("data:image/svg+xml;charset=utf8,%3Csvg fill='%23D97A6C' height='32' viewBox='0 0 32 32' width='32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m2 2v28l7-7h21z'/%3E%3C/svg%3E") 4 4, auto;
-  --cursor-pointer: url("data:image/svg+xml;charset=utf8,%3Csvg fill='%23C96A5C' height='32' viewBox='0 0 32 32' width='32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 6L8 8l4 4-4 4 2 2 4-4 4 4 2-2-4-4 4-4-2-2-4 4z'/%3E%3C/svg%3E") 16 16, pointer;
+  /* Custom cursor handled by CustomCursor component */
 }
 
+/* Cursor handled by CustomCursor component */
 /* Dark theme overrides (kept as in original) */
 :root[data-theme='dark'] {
   --color-background: #2A2220;
@@ -194,23 +206,24 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 4px;
 }
 
-/* Scrollbar (kept) */
+/* HIDE SCROLLBAR - NO UGLY BARS */
 ::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-surface);
+  width: 0px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--color-border);
-  border-radius: 10px;
-  border: 2px solid var(--color-surface);
+  background: transparent;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-secondary);
+/* For Firefox */
+html {
+  scrollbar-width: none;
+}
+
+/* For IE and Edge */
+body {
+  -ms-overflow-style: none;
 }
 
 /* Motion sensitivity (kept) */
@@ -468,22 +481,22 @@ button {
 
 .toast.toast--success {
   border-left: 4px solid var(--color-success);
-  background: linear-gradient(135deg, var(--color-surface) 0%, rgba(76, 175, 80, 0.02) 100%);
+  background: var(--color-surface);
 }
 
 .toast.toast--error {
   border-left: 4px solid var(--color-error);
-  background: linear-gradient(135deg, var(--color-surface) 0%, rgba(211, 93, 93, 0.02) 100%);
+  background: var(--color-surface);
 }
 
 .toast.toast--warning {
   border-left: 4px solid #ff9800;
-  background: linear-gradient(135deg, var(--color-surface) 0%, rgba(255, 152, 0, 0.02) 100%);
+  background: var(--color-surface);
 }
 
 .toast.toast--info {
   border-left: 4px solid var(--color-primary);
-  background: linear-gradient(135deg, var(--color-surface) 0%, rgba(217, 122, 108, 0.02) 100%);
+  background: var(--color-surface);
 }
 
 .toast-icon {
@@ -570,19 +583,10 @@ button {
   .toast-close { width: 20px; height: 20px; font-size: 16px; }
 }
 
-/* ===========================================================
-   Modern design-system additions (kept, merged)
-   =========================================================== */
-/* Custom Cursor */
-* { cursor: var(--cursor-default); }
-a, button, [role="button"], .clickable { cursor: var(--cursor-pointer); }
 
 /* Remove default link styling */
 a { text-decoration: none; color: inherit; }
 
-/* Modern Button System - Maggie Style
-   NOTE: changed .btn-modern--primary to use --color-primary-dark
-   so white foreground is WCAG-compliant. */
 .btn-modern {
   display: inline-flex;
   align-items: center;
@@ -606,8 +610,6 @@ a { text-decoration: none; color: inherit; }
 .btn-modern:hover { transform: translate(-1px, 1px); box-shadow: -2px 2px 0px 0px var(--color-primary); }
 .btn-modern:active { transform: translate(0px, 0px); box-shadow: -1px 1px 0px 0px var(--color-primary); }
 
-/* Button Variants */
-/* CHANGED: use primary-dark so white text meets contrast */
 .btn-modern--primary {
   background: var(--color-primary-dark);
   color: var(--color-surface);
@@ -616,7 +618,6 @@ a { text-decoration: none; color: inherit; }
 }
 .btn-modern--primary:hover { box-shadow: -2px 2px 0px 0px var(--color-primary-darker); }
 
-/* Secondary kept as before (light background + dark text) */
 .btn-modern--secondary {
   background: var(--color-secondary);
   color: var(--color-text-primary);
@@ -700,40 +701,129 @@ a { text-decoration: none; color: inherit; }
   66% { transform: translateY(5px) rotate(-1deg); }
 }
 
-/* Nature Elements */
-.nature-element { position: absolute; opacity: 0.6; pointer-events: none; z-index: 0; }
-.nature-leaf { width: 24px; height: 24px; animation: leafFloat 12s ease-in-out infinite; }
-.nature-leaf--1 { top: 20%; right: 15%; animation-delay: 0s; }
-.nature-leaf--2 { top: 60%; left: 10%; animation-delay: -4s; }
-.nature-leaf--3 { top: 80%; right: 25%; animation-delay: -8s; }
-.nature-petal { width: 16px; height: 16px; animation: petalFloat 15s ease-in-out infinite; }
-.nature-petal--1 { top: 30%; left: 20%; animation-delay: -2s; }
-.nature-petal--2 { top: 70%; right: 30%; animation-delay: -6s; }
+/* Nature Elements - REMOVED! Only pictures now */
 
-@keyframes leafFloat {
-  0%,100% { transform: translateY(0px) rotate(0deg) scale(1); opacity: 0.6; }
-  25% { transform: translateY(-20px) rotate(90deg) scale(1.1); opacity: 0.8; }
-  50% { transform: translateY(-10px) rotate(180deg) scale(0.9); opacity: 0.4; }
-  75% { transform: translateY(-30px) rotate(270deg) scale(1.05); opacity: 0.7; }
+/* LOVEMEMORY PROTOTYPE STYLE BUTTONS */
+.btn-prototype {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: var(--color-primary);
+  border: 1px solid var(--color-border-dark);
+  border-radius: 100px;
+  font-family: var(--font-family-body);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: white;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: -3px 3px 0px 0px var(--color-border-dark);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  min-height: 44px;
 }
 
-@keyframes petalFloat {
-  0%,100% { transform: translateY(0px) translateX(0px) rotate(0deg); opacity: 0.5; }
-  33% { transform: translateY(-15px) translateX(10px) rotate(120deg); opacity: 0.8; }
-  66% { transform: translateY(-25px) translateX(-5px) rotate(240deg); opacity: 0.3; }
+.btn-prototype:hover {
+  transform: translate(-1px, 1px);
+  box-shadow: -2px 2px 0px 0px var(--color-border-dark);
 }
 
-/* 3D App Store Style Buttons - WCAG Compliant */
-.btn-app-style {
+.btn-prototype:active {
+  transform: translate(0px, 0px);
+  box-shadow: -1px 1px 0px 0px var(--color-border-dark);
+}
+
+/* Button Variants */
+.btn-prototype--secondary {
+  background: var(--color-secondary);
+  color: white;
+  border-color: var(--color-border-dark);
+}
+
+.btn-prototype--yellow {
+  background: var(--color-accent-yellow);
+  color: var(--color-neutral-900);
+  border-color: var(--color-border-dark);
+}
+
+.btn-prototype--purple {
+  background: var(--color-accent-purple);
+  color: white;
+  border-color: var(--color-border-dark);
+}
+
+.btn-prototype--outline {
+  background: white;
+  color: var(--color-neutral-700);
+  border-color: var(--color-border-dark);
+}
+
+/* App Store Style Prototype Buttons */
+.btn-app-prototype {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 24px; /* Improved touch target */
+  padding: 12px 24px;
+  background: var(--color-accent-yellow);
+  border: 1px solid var(--color-border-dark);
+  border-radius: 100px;
+  font-family: var(--font-family-body);
+  font-weight: 600;
+  color: var(--color-neutral-900);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: -3px 3px 0px 0px var(--color-border-dark);
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.btn-app-prototype:hover {
+  transform: translate(-1px, 1px);
+  box-shadow: -2px 2px 0px 0px var(--color-border-dark);
+}
+
+.btn-app-prototype__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.btn-app-prototype__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.btn-app-prototype__subtitle {
+  font-size: 9px;
+  line-height: 1;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.btn-app-prototype__title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* Keep old button styles for backward compatibility */
+.btn-app-style-legacy {
+
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
   background: var(--color-surface);
   border: 3px solid var(--color-primary);
   border-radius: 100px;
   font-family: var(--font-family-body);
-  font-weight: var(--font-weight-600); /* was var(...) undefined - now defined */
+  font-weight: var(--font-weight-600);
   font-size: var(--text-base);
   color: var(--color-primary-foreground);
   text-decoration: none;
@@ -821,7 +911,7 @@ a { text-decoration: none; color: inherit; }
 
 /* Gradient Text - Accessible fallback */
 .gradient-text {
-  background: var(--gradient-text);
+  background: var(--color-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -830,7 +920,106 @@ a { text-decoration: none; color: inherit; }
 }
 @supports (background-clip: text) { .gradient-text { color: transparent; } }
 
-/* Tilt Cards */
+/* LOVEMEMORY PROTOTYPE CARDS */
+.card-prototype {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid var(--color-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-prototype:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.card-prototype__image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.card-prototype__title {
+  font-family: var(--font-family-body);
+  font-weight: 600;
+  font-size: var(--text-lg);
+  color: var(--color-text-primary);
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.card-prototype__subtitle {
+  font-family: var(--font-family-body);
+  font-weight: 400;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+}
+
+.card-prototype__button {
+  margin-top: auto;
+}
+
+/* Feature Cards with Icons */
+.feature-card-prototype {
+  background: white;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid var(--color-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card-prototype:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 16px 40px rgba(244, 143, 177, 0.15);
+}
+
+.feature-card-prototype::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--color-primary);
+  transition: all 0.3s ease;
+}
+
+.feature-card-prototype:hover::before {
+  height: 6px;
+}
+
+.feature-card-prototype__icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  background: var(--color-primary-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  font-size: 24px;
+  transition: all 0.3s ease;
+}
+
+.feature-card-prototype:hover .feature-card-prototype__icon {
+  transform: scale(1.1);
+  background: var(--color-primary);
+  color: white;
+}
+
+/* Tilt Cards - keeping for compatibility */
 .tilt-card { transform-style: preserve-3d; transition: transform 0.3s ease; }
 .tilt-card:hover { transform: perspective(1000px) rotateY(10deg) rotateX(5deg) scale(1.02); }
 
@@ -888,7 +1077,7 @@ a { text-decoration: none; color: inherit; }
 /* Tilted CTA hero pattern (kept example) */
 .hero {
   display: grid; align-items: center; gap: 24px; padding: 64px 16px; border-radius: var(--border-radius);
-  background: linear-gradient(135deg, var(--color-surface) 0%, rgba(248,250,252,0.6) 100%);
+  background: var(--color-surface);
   box-shadow: 0 20px 40px -20px rgba(103,56,46,0.06);
 }
 .hero h1 { font-size: var(--text-3xl); line-height: 1.05; }
@@ -906,6 +1095,31 @@ a,button,input,select,textarea { font-family: inherit; }
 }
 
 /* Dark theme kept earlier */
+
+/* SOUND EFFECTS */
+.sound-enabled {
+  position: relative;
+}
+
+/* BIRD CHIRPING AUDIO */
+.birds-audio {
+  position: fixed;
+  top: -100px;
+  left: -100px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* INTERACTIVE SOUND TRIGGERS */
+.sound-trigger {
+  position: relative;
+}
+
+.sound-trigger:hover {
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+}
 
 /* Small helpful defaults for content blocks */
 .header { height: var(--header-height); display:flex; align-items:center; padding: 0 var(--space-4); background: transparent; }

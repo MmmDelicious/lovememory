@@ -162,6 +162,30 @@ const ShopPage: React.FC = () => {
               <span className={styles.coinLabel}>монеток</span>
             </div>
           </div>
+          
+          {/* Decorative floating elements */}
+          <div className={styles.decorativeElements}>
+            <img 
+              src="/src/assets/pictures/small-pastel-pink-ribbon-bow--flat-vector-style--i.png"
+              alt=""
+              className={`${styles.floatingDecor} ${styles.ribbon1}`}
+            />
+            <img 
+              src="/src/assets/pictures/tiny-envelope-with-heart-seal--minimal-flat-vector.png"
+              alt=""
+              className={`${styles.floatingDecor} ${styles.envelope1}`}
+            />
+            <img 
+              src="/src/assets/pictures/single-3d-heart--glossy--pastel-pink--soft-shadows.png"
+              alt=""
+              className={`${styles.floatingDecor} ${styles.heart1}`}
+            />
+            <img 
+              src="/src/assets/pictures/small-pastel-pink-ribbon-bow--flat-vector-style--i.png"
+              alt=""
+              className={`${styles.floatingDecor} ${styles.ribbon2}`}
+            />
+          </div>
         </div>
         {}
         <div className={styles.categoryFilter}>

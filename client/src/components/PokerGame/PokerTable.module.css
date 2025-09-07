@@ -464,39 +464,35 @@
 
 .decoHeart {
     position: absolute;
-    width: 20px;
-    height: 20px;
-    background-color: var(--primary-accent);
-    transform: rotate(-45deg);
+    width: 30px;
+    height: 30px;
+    background-image: url('../../assets/pictures/single-3d-heart--glossy--pastel-pink--soft-shadows.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .decoHeart::before,
 .decoHeart::after {
-    content: '';
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background-color: var(--primary-accent);
-    border-radius: 50%;
+    display: none;
 }
 
-.decoHeart::before { top: -10px; left: 0; }
-.decoHeart::after { top: 0; left: 10px; }
-
-.heart1 { top: 80px; left: 80px; transform: rotate(-45deg) scale(1.5); opacity: 0.4; }
-.heart2 { top: 120px; left: 120px; transform: rotate(-45deg) scale(1.2); opacity: 0.3; }
-.heart3 { top: 180px; right: 100px; transform: rotate(-45deg) scale(0.9); opacity: 0.2; }
-.heart4 { top: 80px; right: 80px; transform: rotate(25deg) scale(1.4); opacity: 0.35; }
-.heart5 { top: 50%; left: 40px; transform: rotate(-20deg) scale(1.1); opacity: 0.4; }
-.heart6 { bottom: 80px; left: 150px; transform: rotate(15deg) scale(1.3); opacity: 0.38; }
+.heart1 { top: 80px; left: 80px; transform: rotate(0deg) scale(1.8); opacity: 0.5; }
+.heart2 { top: 120px; left: 120px; transform: rotate(0deg) scale(1.5); opacity: 0.4; }
+.heart3 { top: 180px; right: 100px; transform: rotate(0deg) scale(1.2); opacity: 0.3; }
+.heart4 { top: 80px; right: 80px; transform: rotate(0deg) scale(1.6); opacity: 0.45; }
+.heart5 { top: 50%; left: 40px; transform: rotate(0deg) scale(1.4); opacity: 0.5; }
+.heart6 { bottom: 80px; left: 150px; transform: rotate(0deg) scale(1.6); opacity: 0.48; }
 
 .rose {
     position: absolute;
     top: 100px;
     right: 50px;
-    width: 100px;
+    color: var(--color-primary);
     transform: rotate(20deg);
     z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .likesCounter {
@@ -509,7 +505,15 @@
     z-index: 20;
 }
 
-.heartIcon { font-size: 39px; color: var(--text-color); }
+.heartIcon { 
+    width: 39px; 
+    height: 39px; 
+    background-image: url('../../assets/pictures/tiny-single-ecg-line-with-heart-peak--pastel-pink-.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: inline-block;
+}
 .count { font-weight: bold; font-size: 23px; color: var(--text-color); }
 
 .balanceDisplay {

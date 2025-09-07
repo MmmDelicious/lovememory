@@ -11,7 +11,8 @@ import {
   Crown,
   Brain,
   Sparkles,
-  Zap
+  Zap,
+  Gamepad2
 } from 'lucide-react';
 import styles from './MobileGames.module.css';
 interface Game {
@@ -115,7 +116,9 @@ const MobileGames: React.FC = () => {
     <div className={styles.mobileGames}>
       {}
       <div className={styles.header}>
-        <h1>Игры для двоих 🎮</h1>
+        <h1>
+          Игры для двоих <Gamepad2 size={24} style={{verticalAlign: 'middle', marginLeft: '8px'}} />
+        </h1>
         <p>Играйте вместе и укрепляйте отношения</p>
       </div>
       {}
@@ -225,7 +228,9 @@ const MobileGames: React.FC = () => {
       {}
       {filteredGames.length === 0 && (
         <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>🎮</div>
+          <div className={styles.emptyIcon}>
+            <Gamepad2 size={48} />
+          </div>
           <h3>Игры не найдены</h3>
           <p>Попробуйте изменить фильтры или поисковый запрос</p>
         </div>

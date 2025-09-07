@@ -104,7 +104,6 @@ class LessonService {
         ...(pairId && { pair_id: pairId })
       };
 
-      console.log('🔄 Completing lesson with data:', requestData);
 
       const response = await api.post(`/lessons/${lessonId}/complete`, requestData);
       return response.data.data;

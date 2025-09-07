@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Check, X, Trash2 } from 'lucide-react';
+import { Check, X, Trash2 } from 'lucide-react';
 import styles from './NotificationDropdown.module.css';
 interface Notification {
   id: string;
@@ -84,7 +84,11 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Уведомления"
       >
-        <Bell size={20} />
+        <img 
+          src="/src/assets/pictures/tiny-envelope-with-heart-seal--minimal-flat-vector.png"
+          alt="Уведомления"
+          className={styles.notificationIcon}
+        />
         {unreadCount > 0 && (
           <span className={styles.notificationBadge}>{unreadCount}</span>
         )}
@@ -106,7 +110,11 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
           <div className={styles.notificationsList}>
             {notificationList.length === 0 ? (
               <div className={styles.emptyState}>
-                <Bell size={24} />
+                <img 
+                  src="/src/assets/pictures/tiny-envelope-with-heart-seal--minimal-flat-vector.png"
+                  alt=""
+                  className={styles.emptyStateIcon}
+                />
                 <p>Нет уведомлений</p>
               </div>
             ) : (

@@ -39,7 +39,29 @@
 .calendarTitle { display: flex; align-items: center; gap: var(--space-4); }
 .calendarTitle h1 { font-size: 24px; font-weight: 700; color: var(--color-text-primary); text-transform: capitalize; margin: 0; }
 .calendarActions { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
-.mainNav { display: flex; }
+.mainNav { display: flex; gap: 4px; }
+
+.navArrow {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  /* cursor handled by CustomCursor */
+}
+
+.navArrow:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 
 .btn { padding: 8px 16px; border: none; border-radius: var(--border-radius-md); font-weight: 500; font-size: 14px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 6px; }
 .btnPrimary { background: var(--color-primary); color: white; }

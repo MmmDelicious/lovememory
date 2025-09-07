@@ -782,7 +782,7 @@ const Calendar: React.FC<CalendarProps> = ({
               </button>
             </div>
             
-            <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={goToday}>
+            <button className="btn-prototype btn-prototype--outline" onClick={goToday}>
               Сегодня
             </button>
             
@@ -802,7 +802,7 @@ const Calendar: React.FC<CalendarProps> = ({
               <FaListUl />
             </button>
             
-            <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleAddQuick}>
+            <button className="btn-prototype" onClick={handleAddQuick}>
               <FaPlus /> Добавить
             </button>
           </div>

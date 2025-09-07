@@ -74,9 +74,7 @@ const LessonsPage: React.FC = () => {
   };
 
   const handleThemeSelect = (themeId: string) => {
-    // TODO: Переход к списку уроков темы
     const themeLessons = lessonUtils.getLessonsByTheme(themeId);
-    console.log(`Выбрана тема ${themeId}, доступно ${themeLessons.length} уроков`);
     alert(`Функция просмотра уроков темы будет добавлена в следующем обновлении!`);
   };
   const tabVariants = {

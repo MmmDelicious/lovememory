@@ -11,7 +11,8 @@ import {
   BarChart3,
   ChevronLeft,
   Clock,
-  MapPin
+  MapPin,
+  Footprints
 } from 'lucide-react';
 import styles from './MobileDashboard.module.css';
 const MobileDashboard: React.FC = () => {
@@ -157,7 +158,7 @@ const MobileDashboard: React.FC = () => {
                   <h4>{event.title}</h4>
                   <div className={styles.eventMeta}>
                     <span className={styles.eventType}>
-                      {event.type === 'date' ? '💕' : event.type === 'game' ? '🎮' : '🚶'}
+                      {event.type === 'date' ? <Heart size={12} /> : event.type === 'game' ? <Gamepad2 size={12} /> : <Footprints size={12} />}
                     </span>
                     <span className={styles.eventLocation}>
                       <MapPin size={12} />
@@ -268,8 +269,22 @@ const MobileDashboard: React.FC = () => {
                 <h3>{event.title}</h3>
                 <div className={styles.eventMeta}>
                   <span className={styles.eventType}>
-                    {event.type === 'date' ? '💕 Свидание' : 
-                     event.type === 'game' ? '🎮 Игра' : '🚶 Прогулка'}
+                    {event.type === 'date' ? (
+                      <>
+                        <Heart size={12} />
+                        Свидание
+                      </>
+                    ) : event.type === 'game' ? (
+                      <>
+                        <Gamepad2 size={12} />
+                        Игра
+                      </>
+                    ) : (
+                      <>
+                        <Footprints size={12} />
+                        Прогулка
+                      </>
+                    )}
                   </span>
                   <span className={styles.eventLocation}>
                     <MapPin size={12} />

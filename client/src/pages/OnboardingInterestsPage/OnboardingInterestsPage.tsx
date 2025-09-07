@@ -173,10 +173,6 @@ const OnboardingInterestsPage: React.FC = () => {
     try {
       setIsSaving(true);
       
-      console.log('=== CLIENT: Saving interests ===');
-      console.log('User ID:', user.id);
-      console.log('Is edit mode:', isEditMode);
-      console.log('Selected interests:', selectedInterests);
       
       if (isEditMode) {
         // В режиме редактирования: умное обновление
@@ -186,15 +182,11 @@ const OnboardingInterestsPage: React.FC = () => {
         // Найдем интересы для удаления
         const toRemove = originalIds.filter(id => !selectedIds.includes(id));
         
-        console.log('Original IDs:', originalIds);
-        console.log('Selected IDs:', selectedIds);
-        console.log('To remove:', toRemove);
         
         // Удаляем ненужные интересы
         for (const interestId of toRemove) {
           try {
             await interestService.removeUserInterest(user.id, interestId);
-            console.log('Removed interest:', interestId);
           } catch (removeError) {
             console.error(`Error removing interest ${interestId}:`, removeError);
           }
@@ -246,7 +238,6 @@ const OnboardingInterestsPage: React.FC = () => {
 
   const handleSkip = async () => {
     // Пользователь может пропустить этот шаг даже с 0 интересами
-    console.log('Пользователь пропустил выбор интересов');
     
     // Показываем сообщение о том, что интересы можно добавить потом
     if (selectedInterests.length === 0) {

@@ -5,10 +5,10 @@
    ============================== */
 :root {
   /* Brand Colors */
-  --games-primary: #D97A6C;
-  --games-primary-hover: #C8685A;
-  --games-primary-light: rgba(217, 122, 108, 0.1);
-  --games-primary-soft: rgba(217, 122, 108, 0.05);
+  --games-primary: var(--color-primary);
+  --games-primary-hover: var(--color-primary-hover);
+  --games-primary-light: var(--color-primary-light);
+  --games-primary-soft: rgba(255, 107, 90, 0.05);
   
   /* Neutrals */
   --games-background: #FFFCFA;
@@ -85,7 +85,7 @@
   position: absolute;
   width: 120px;
   height: 120px;
-  background: linear-gradient(135deg, var(--games-primary), transparent);
+  background: var(--games-primary);
   border-radius: 50%;
   opacity: 0.015; /* Значительно уменьшена заметность */
   animation: float 30s ease-in-out infinite;

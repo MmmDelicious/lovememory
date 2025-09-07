@@ -86,7 +86,6 @@ const TodayTab: React.FC<TodayTabProps> = ({
       }
     }
     
-    console.warn('🎭 No animations found!');
   }, [lesson]);
 
   // Вычисляем награду за урок
@@ -339,7 +338,7 @@ const TodayTab: React.FC<TodayTabProps> = ({
 
             <div className={styles.actionButtons}>
               <motion.button
-                className={styles.startButton}
+                className="btn-prototype"
                 onClick={handleStart}
                 disabled={isStarting || isCompleted}
                 whileHover={{ scale: 1.02 }}
@@ -348,11 +347,11 @@ const TodayTab: React.FC<TodayTabProps> = ({
                 {isStarting ? 'Запуск...' : isCompleted ? 'Завершено' : 'Начать'}
               </motion.button>
               
-              <button className={styles.scheduleButton} onClick={handleSchedule}>
+              <button className="btn-prototype btn-prototype--outline" onClick={handleSchedule}>
                 Запланировать
               </button>
               
-              <button className={styles.shareButton} onClick={handleShare}>
+              <button className="btn-prototype btn-prototype--outline" onClick={handleShare}>
                 <Share2 size={16} />
                 Поделиться
               </button>
@@ -433,7 +432,7 @@ const TodayTab: React.FC<TodayTabProps> = ({
                 
                 {!steps.every(step => step.completed) ? (
                   <button 
-                    className={styles.markCompleteButton}
+                    className="btn-prototype"
                     onClick={handleMarkComplete}
                   >
                     Отметить все как выполненное
@@ -448,7 +447,7 @@ const TodayTab: React.FC<TodayTabProps> = ({
                       rows={3}
                     />
                     <button 
-                      className={styles.markCompleteButton}
+                      className="btn-prototype"
                       onClick={handleMarkComplete}
                       disabled={isCompleting}
                     >
@@ -518,7 +517,7 @@ const TodayTab: React.FC<TodayTabProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <button className={styles.inviteButton}>
+        <button className="btn-prototype btn-prototype--outline">
           <Users size={20} />
           Пригласить партнера
         </button>

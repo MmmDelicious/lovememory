@@ -7,7 +7,6 @@ import { MascotProvider } from './context/MascotContext';
 import AppRoutes from './AppRoutes';
 import GlobalMascot from './components/GlobalMascot/GlobalMascot';
 import AIChatInterface from './components/AIChatInterface/AIChatInterface';
-// import { setupGlobalErrorHandler } from './utils/errorHandler'; // Уже инициализирован в main.tsx
 import { useAuthActions, useCurrencyActions } from './store/hooks';
 import { clearAuthToken } from './services/api';
 import { authService } from './services';
@@ -49,7 +48,6 @@ const AppInitializer: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  // setupGlobalErrorHandler() уже вызван в main.tsx
 
   return (
     <Provider store={store}>

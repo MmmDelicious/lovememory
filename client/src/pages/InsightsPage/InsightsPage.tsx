@@ -283,7 +283,13 @@ const InsightsPage: React.FC = () => {
         {isBasicOrHigher && (
           <div className={styles.pageHeader}>
             <div className={styles.pageTitle}>
-              <BarChart3 size={28} className={styles.pageIcon} />
+              <div className={styles.pageIconContainer}>
+                <img 
+                  src="/src/assets/pictures/tiny-single-ecg-line-with-heart-peak--pastel-pink-.png"
+                  alt="Heart Analytics"
+                  className={styles.pageIcon}
+                />
+              </div>
               <div>
                 <h1>Аналитика отношений</h1>
                 <p>Полный обзор ваших отношений с персональными инсайтами</p>

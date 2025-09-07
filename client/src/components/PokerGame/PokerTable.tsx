@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { ArmChair, Flower, Coins, Dices } from 'lucide-react';
 import PlayingCard from '../PlayingCard/PlayingCard';
 import Button from '../Button/Button';
 import { useCoins } from '../../store/hooks';
@@ -206,13 +207,10 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
         toast.warning(`Некорректная сумма рейза. Допустимый диапазон: ${minRaise} - ${maxRaise}`, 'Некорректная ставка');
         return;
       }
-      console.log(`✅ [POKER FRONTEND] Raise amount validated`, { value, range: `${minRaise}-${maxRaise}` });
     }
     
-    console.log(`📤 [POKER FRONTEND] Sending action to server via onAction callback`, { action, value });
     onAction(action, value);
   };
-  // Логика показа баннера buy-in
   const needsBuyIn = Boolean(gameState?.needsBuyIn);
   const hasBoughtIn = Boolean(gameState?.hasBoughtIn);
   const showBuyInBanner = needsBuyIn && !hasBoughtIn && gameState;
@@ -298,7 +296,7 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
             ) : (
               <div className={styles.emptySeat}> 
                 <div className={styles.emptyAvatar}> 
-                  <span role="img" aria-label="empty">🪑</span>
+                  <ArmChair size={24} />
                 </div>
                 <div className={styles.emptyText}>Свободно</div>
               </div>
@@ -313,20 +311,22 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
         <div className={`${styles.decoHeart} ${styles.heart4}`}></div>
         <div className={`${styles.decoHeart} ${styles.heart5}`}></div>
         <div className={`${styles.decoHeart} ${styles.heart6}`}></div>
-        <div className={styles.rose}>🌹</div>
+        <div className={styles.rose}>
+          <Flower size={24} />
+        </div>
       </div>
       <div className={styles.likesCounter}>
-        <span className={styles.heartIcon}>♡</span>
+        <div className={styles.heartIcon}></div>
         <span className={styles.count}>10</span>
       </div>
       <div className={styles.balanceDisplay}>
         <div className={styles.balanceItem}>
-          <span className={styles.balanceIcon}>🪙</span>
+          <Coins size={18} className={styles.balanceIcon} />
           <span className={styles.balanceAmount}>{coins}</span>
           <span className={styles.balanceLabel}>Монеты</span>
         </div>
         <div className={styles.balanceItem}>
-          <span className={styles.balanceIcon}>🎰</span>
+          <Dices size={18} className={styles.balanceIcon} />
           <span className={styles.balanceAmount}>{mainPlayerStack}</span>
           <span className={styles.balanceLabel}>Стек</span>
         </div>

@@ -10,7 +10,7 @@
   min-height: 100vh;
   display: flex;
   align-items: center;
-  background: var(--gradient-hero);
+  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
   position: relative;
   overflow: hidden;
 }
@@ -120,7 +120,9 @@
 }
 
 .sectionAlt {
-  background: var(--gradient-card);
+  background: #F8FAFC;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .sectionContent {
@@ -254,7 +256,7 @@
   font-size: var(--text-xl);
   font-weight: 800;
   color: white;
-  background: var(--gradient-button);
+  background: var(--color-primary);
   border-radius: 50%;
   width: 60px;
   height: 60px;
@@ -299,7 +301,7 @@
 
 /* CTA Section */
 .ctaSection {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent-purple) 100%);
+  background: var(--color-primary);
   padding: var(--space-10) 0;
   color: var(--color-surface);
   position: relative;
@@ -325,9 +327,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.05) 0%, transparent 40%);
+  background: none;
   pointer-events: none;
 }
 
@@ -491,5 +491,156 @@
 @media (max-width: 768px) {
   .heroSection {
     background-attachment: scroll; /* Fixed causes issues on mobile */
+  }
+}
+
+/* 3D AI Cards */
+.aiCardsContainer {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  perspective: 1500px;
+  padding: 40px 20px;
+  flex-wrap: wrap;
+}
+
+.aiCard {
+  width: 220px;
+  height: 200px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(135deg, #f0f0f0 0%, #ffffff 100%);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  
+  /* DOMINO EFFECT - карточка наклонена боком */
+  transform: rotateY(-30deg) rotateX(15deg);
+  transition: transform 0.4s ease-out, box-shadow 0.4s ease-out;
+  transition-delay: var(--delay, 0s);
+  
+  position: relative;
+  overflow: hidden;
+}
+
+/* Gradient border effect */
+.aiCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary), var(--color-accent-yellow));
+  border-radius: 24px;
+  padding: 2px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: exclude;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.aiCard:hover {
+  /* DOMINO HOVER - выпрямляется и немного увеличивается */
+  transform: rotateY(0) rotateX(0) scale(1.1);
+  
+  /* Более выразительная тень */
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.aiCard:hover::before {
+  opacity: 1;
+}
+
+.aiCardIcon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary-light), rgba(244, 143, 177, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.aiCard:hover .aiCardIcon {
+  transform: scale(1.1);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+  box-shadow: 0 10px 20px rgba(244, 143, 177, 0.3);
+}
+
+.aiCardTitle {
+  margin: 0 0 8px 0;
+  color: var(--color-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--font-family-heading);
+  position: relative;
+  z-index: 1;
+}
+
+.aiCardText {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.4;
+  font-family: var(--font-family-body);
+  position: relative;
+  z-index: 1;
+}
+
+/* Мобильная адаптация для 3D карточек */
+@media (max-width: 1024px) {
+  .aiCardsContainer {
+    gap: 24px;
+    perspective: 1200px;
+  }
+  
+  .aiCard {
+    width: 240px;
+    height: 240px;
+    transform: rotateY(-20deg) rotateX(8deg);
+  }
+  
+  .aiCard:hover {
+    transform: rotateY(0) rotateX(0) scale(1.05);
+  }
+}
+
+@media (max-width: 768px) {
+  .aiCardsContainer {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    perspective: none;
+  }
+  
+  .aiCard {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    min-height: 220px;
+    transform: none;
+    padding: 24px;
+  }
+  
+  .aiCard:hover {
+    transform: translateY(-4px) scale(1.02);
+  }
+  
+  .aiCardIcon {
+    width: 60px;
+    height: 60px;
+    font-size: 30px;
+    margin-bottom: 16px;
   }
 }

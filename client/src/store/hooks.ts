@@ -202,7 +202,6 @@ export const useMascotActions = () => {
               const root = createRoot(modalContainer);
               
               const handleSelectDate = (option: any) => {
-                // TODO: Интеграция с календарем
                 root.unmount();
                 document.body.removeChild(modalContainer);
                 dispatch(setAIResponse(`Отличный выбор! Свидание "${option.title}" можно добавить в календарь 📅`));

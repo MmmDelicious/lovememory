@@ -30,75 +30,58 @@ const ScrollElements: React.FC = () => {
         style={{ width: `${progress * 100}%` }}
       />
       
-      {/* Simplified Floating Elements */}
+
+      {/* New floating decorative images */}
       <div 
-        className={`${styles.geoShape} ${styles.shape1}`}
+        className={`${styles.floatingIcon} ${styles.icon4}`}
         style={{ 
-          transform: `translateY(${scrollY * 0.1}px)`,
-          opacity: 0.3
+          transform: `translateY(${scrollY * 0.25}px) translateX(${Math.sin(scrollY * 0.015) * 40}px)`,
         }}
       >
-        <div className={styles.circle}></div>
+        <img 
+          src="/src/assets/pictures/single-3d-heart--glossy--pastel-pink--soft-shadows.png" 
+          alt="" 
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        />
       </div>
 
+      <div 
+        className={`${styles.floatingIcon} ${styles.icon5}`}
+        style={{ 
+          transform: `translateY(${scrollY * -0.2}px) translateX(${Math.cos(scrollY * 0.01) * 30}px)`,
+        }}
+      >
+        <img 
+          src="/src/assets/pictures/small-5-petal-flower--vector-style--pastel-pink--i.png" 
+          alt="" 
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        />
+      </div>
 
-      {/* Floating Icons with Scroll Physics */}
       <div 
-        className={`${styles.floatingIcon} ${styles.icon1}`}
+        className={`${styles.floatingIcon} ${styles.icon6}`}
         style={{ 
-          transform: `translateY(${scrollY * 0.4}px) translateX(${Math.sin(scrollY * 0.01) * 30}px) rotate(${scrollY * 0.15}deg)`,
+          transform: `translateY(${scrollY * 0.18}px) translateX(${Math.sin(scrollY * 0.009) * 35}px) scale(${1 - progress * 0.1})`,
         }}
       >
-        <svg viewBox="0 0 24 24" fill="none">
-          <path 
-            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" 
-            fill="url(#heartGradient)"
-          />
-          <defs>
-            <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="var(--color-primary)" />
-              <stop offset="100%" stopColor="var(--color-accent-coral)" />
-            </linearGradient>
-          </defs>
-        </svg>
+        <img 
+          src="/src/assets/pictures/single-tiny-pixelated-heart--pastel-red--isolated-.png" 
+          alt="" 
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        />
       </div>
-      
+
       <div 
-        className={`${styles.floatingIcon} ${styles.icon2}`}
+        className={`${styles.floatingIcon} ${styles.icon7}`}
         style={{ 
-          transform: `translateY(${scrollY * -0.3}px) translateX(${Math.cos(scrollY * 0.008) * 25}px) rotate(${scrollY * -0.1}deg)`,
+          transform: `translateY(${scrollY * -0.15}px) translateX(${Math.cos(scrollY * 0.007) * 25}px)`,
         }}
       >
-        <svg viewBox="0 0 24 24" fill="none">
-          <path 
-            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" 
-            fill="url(#starGradient)"
-          />
-          <defs>
-            <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="var(--color-accent-orange)" />
-              <stop offset="100%" stopColor="var(--color-accent-emerald)" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-      
-      <div 
-        className={`${styles.floatingIcon} ${styles.icon3}`}
-        style={{ 
-          transform: `translateY(${scrollY * 0.35}px) translateX(${Math.sin(scrollY * 0.012) * 20}px) scale(${1 + progress * 0.2})`,
-        }}
-      >
-        <svg viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="url(#circleGradient)" strokeWidth="2" fill="none"/>
-          <circle cx="12" cy="12" r="6" fill="url(#circleGradient)" opacity="0.6"/>
-          <defs>
-            <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="var(--color-accent-slate)" />
-              <stop offset="100%" stopColor="var(--color-accent-emerald)" />
-            </linearGradient>
-          </defs>
-        </svg>
+        <img 
+          src="/src/assets/pictures/thin-pastel-lavender-glowing-ring--3d-style--isola.png" 
+          alt="" 
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        />
       </div>
 
     </div>
