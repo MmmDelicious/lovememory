@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { store } from './store';
-import { ToastProvider } from './context/ToastContext';
-import { MascotProvider } from './context/MascotContext';
+import { store } from './store/index';
+import { ToastProvider } from './shared/hooks/useToast';
+import { MascotProvider } from './shared/mascot/context/MascotContext';
 import AppRoutes from './AppRoutes';
-import GlobalMascot from './components/GlobalMascot/GlobalMascot';
-import AIChatInterface from './components/AIChatInterface/AIChatInterface';
+import GlobalMascot from './shared/mascot/GlobalMascot/GlobalMascot';
+import AIChatInterface from './modules/ai/components/AIChatInterface/AIChatInterface';
 import { useAuthActions } from './store/hooks';
-import { clearAuthToken } from './services/api';
-import { authService } from './services';
+import { clearAuthToken } from './shared/services/api';
+import { authService } from './modules/auth/services/auth.service.js';
 
 const AppInitializer: React.FC = () => {
   const { setUser, setLoading } = useAuthActions();
