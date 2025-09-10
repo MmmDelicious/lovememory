@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, Clock, CheckCircle } from 'lucide-react';
 import Lottie from 'lottie-react';
 import { getLessonAnimation } from '../../assets/lessons';
-import { useDevice } from '../../hooks/useDevice';
+// Removed useDevice import - hook was deleted
 import styles from './DailyLesson.module.css';
 
 import type { Lesson } from '../../../types/common';
@@ -30,7 +30,7 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
   const [isCompleting, setIsCompleting] = useState(false);
   const [animationData, setAnimationData] = useState<any>(null);
   const [startTime] = useState(Date.now());
-  const { isMobile } = useDevice();
+  const isMobile = false; // useDevice removed - default to desktop
   
   
   const getAnimationSize = () => {
@@ -63,7 +63,6 @@ const DailyLesson: React.FC<DailyLessonProps> = ({
       if (animation) {
         setAnimationData(animation);
       } else {
-        console.error('Animation not found:', animationFile);
       }
     }
   }, [lesson?.Lesson?.animation_file, lesson?.animation_file]);

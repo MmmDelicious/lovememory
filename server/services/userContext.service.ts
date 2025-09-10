@@ -77,7 +77,6 @@ class UserContextService implements IUserContextService {
       return context;
 
     } catch (error) {
-      console.error('❌ UserContextService: Error building context:', error);
       throw new ContextBuildError(`Failed to build user context: ${error.message}`, { userId, error });
     }
   }
@@ -158,7 +157,6 @@ class UserContextService implements IUserContextService {
       return partner ? partner.toJSON() as PartnerData : undefined;
 
     } catch (error) {
-      console.warn('Warning: Could not fetch partner data:', error.message);
       return undefined;
     }
   }
@@ -186,7 +184,6 @@ class UserContextService implements IUserContextService {
       return events.map((event: any) => event.toJSON() as EventData);
 
     } catch (error) {
-      console.warn('Warning: Could not fetch recent events:', error.message);
       return [];
     }
   }
@@ -217,7 +214,6 @@ class UserContextService implements IUserContextService {
       }));
 
     } catch (error) {
-      console.warn('Warning: Could not fetch AI interaction history:', error.message);
       return [];
     }
   }
@@ -246,7 +242,6 @@ class UserContextService implements IUserContextService {
       return logs.map((log: any) => log.toJSON() as ActivityLogData);
 
     } catch (error) {
-      console.warn('Warning: Could not fetch activity logs:', error.message);
       return [];
     }
   }
@@ -273,7 +268,6 @@ class UserContextService implements IUserContextService {
       return pairData ? pairData.toJSON() as PairData : undefined;
 
     } catch (error) {
-      console.warn('Warning: Could not fetch pair data:', error.message);
       return undefined;
     }
   }
@@ -291,7 +285,6 @@ class UserContextService implements IUserContextService {
       return profile.toJSON() as IRelationshipProfile;
 
     } catch (error) {
-      console.error('Error getting relationship profile:', error);
       // Возвращаем базовый профиль
       return {
         id: `temp-${userId}`,
@@ -387,7 +380,6 @@ class UserContextService implements IUserContextService {
       }
 
     } catch (error) {
-      console.error('Error saving AI interaction:', error);
     }
   }
 }

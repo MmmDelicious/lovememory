@@ -151,23 +151,11 @@ User.associate = (models) => {
     as: 'GameParticipations',
     onDelete: 'CASCADE',
   });
-  // Ассоциация с согласиями
-  User.hasOne(models.Consent, {
-    foreignKey: 'user_id',
-    as: 'Consent',
-    onDelete: 'CASCADE',
-  });
   // Ассоциация с токенами уведомлений
   User.hasMany(models.NotificationToken, {
     foreignKey: 'user_id',
     as: 'NotificationTokens',
     onDelete: 'CASCADE',
-  });
-  // Ассоциация с транзакциями
-  User.hasMany(models.Transaction, {
-    foreignKey: 'user_id',
-    as: 'Transactions',
-    onDelete: 'SET NULL',
   });
   // Ассоциация с завершенными уроками (новая структура)
   User.hasMany(models.UserLessonProgress, {
@@ -202,11 +190,5 @@ User.associate = (models) => {
     onDelete: 'CASCADE',
   });
   
-  // Ассоциация с обратной связью по рекомендациям
-  User.hasMany(models.RecommendationFeedback, {
-    foreignKey: 'user_id',
-    as: 'RecommendationFeedbacks',
-    onDelete: 'CASCADE',
-  });
 };
 module.exports = User;

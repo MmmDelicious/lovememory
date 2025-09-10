@@ -18,8 +18,6 @@ const TournamentsPage = React.lazy(() => import('./pages/TournamentsPage').then(
 const TournamentPage = React.lazy(() => import('./pages/TournamentPage/TournamentPage').then(module => ({ default: module.TournamentPage })));
 
 const GameLobbyPage = React.lazy(() => import('./pages/GameLobbyPage/GameLobbyPage'));
-const InsightsPage = React.lazy(() => import('./pages/InsightsPage/InsightsPage'));
-const ShopPage = React.lazy(() => import('./pages/ShopPage/ShopPage'));
 const GameRoomPage = React.lazy(() => import('./pages/GameRoomPage/GameRoomPage'));
 const PokerPage = React.lazy(() => import('./pages/PokerPage/PokerPage'));
 const ErrorPage = React.lazy(() => import('./pages/ErrorPage/ErrorPage'));
@@ -84,8 +82,6 @@ const AppRoutes: React.FC = () => {
           
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/insights" element={<InsightsPage />} />
-            <Route path="/shop" element={<ShopPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/games" element={<GamesPage />} />
             <Route path="/games/:gameType" element={<GameLobbyPage />} />

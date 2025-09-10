@@ -78,24 +78,6 @@ Pair.associate = (models) => {
     as: 'GameRooms',
     onDelete: 'SET NULL',
   });
-  // Ассоциация с транзакциями
-  Pair.hasMany(models.Transaction, {
-    foreignKey: 'pair_id',
-    as: 'Transactions',
-    onDelete: 'CASCADE',
-  });
-  // Ассоциация с подарками
-  Pair.hasMany(models.Gift, {
-    foreignKey: 'recipient_pair_id',
-    as: 'ReceivedGifts',
-    onDelete: 'SET NULL',
-  });
-  // Ассоциация с инсайтами
-  Pair.hasMany(models.Insight, {
-    foreignKey: 'pair_id',
-    as: 'Insights',
-    onDelete: 'CASCADE',
-  });
   // Ассоциация с прогрессом уроков
   Pair.hasMany(models.UserLessonProgress, {
     foreignKey: 'pair_id',
@@ -115,11 +97,5 @@ Pair.associate = (models) => {
     onDelete: 'CASCADE',
   });
   
-  // Ассоциация с обратной связью по рекомендациям
-  Pair.hasMany(models.RecommendationFeedback, {
-    foreignKey: 'pair_id',
-    as: 'RecommendationFeedbacks',
-    onDelete: 'CASCADE',
-  });
 };
 module.exports = Pair;

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../../store/hooks';
-import { useCoins } from '../../store/hooks';
 import PokerTable from '../../components/PokerGame/PokerTable';
 import PokerModal from '../../components/PokerModal/PokerModal';
 import LeaveGameButton from '../../components/LeaveGameButton/LeaveGameButton';
@@ -28,7 +27,6 @@ interface RoomData {
 const PokerPage: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const user = useUser();
-  const coins = useCoins();
   const navigate = useNavigate();
   
   // Состояния

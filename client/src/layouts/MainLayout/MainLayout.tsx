@@ -5,13 +5,9 @@ import DashboardPage from '../../pages/DashboardPage/DashboardPage';
 import MobileDashboard from '../../pages/MobileDashboard/MobileDashboard';
 import GamesPage from '../../pages/GamesPage/GamesPage';
 import MobileGames from '../../pages/GamesPage/MobileGames';
-import InsightsPage from '../../pages/InsightsPage/InsightsPage';
-import MobileInsights from '../../pages/InsightsPage/MobileInsights';
 import ProfilePage from '../../pages/ProfilePage/ProfilePage';
 import NotificationDropdown from '../../components/NotificationDropdown/NotificationDropdown';
 import UserDropdown from '../../components/UserDropdown/UserDropdown';
-import GiftDisplay from '../../components/GiftDisplay/GiftDisplay';
-import { useGifts } from '../../hooks/useGifts';
 import { 
   Home, 
   Calendar, 
@@ -19,7 +15,6 @@ import {
   Gamepad2, 
   Settings,
   Heart,
-  Coins,
   Bell,
   Menu,
   X,
@@ -29,22 +24,18 @@ import {
   Trophy
 } from 'lucide-react';
 import styles from './MainLayout.module.css';
-import { useUser, useCoins, useAuthActions, useCurrencyActions } from '../../store/hooks';
+import { useUser, useAuthActions } from '../../store/hooks';
 const MainLayout: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isMobile, setIsMobile] = React.useState(false);
   const user = useUser();
-  const coins = useCoins();
-  const { receivedGift, isGiftVisible, closeGift } = useGifts();
   const { logout: logoutUser } = useAuthActions();
-  const { resetCurrency } = useCurrencyActions();
   const navigate = useNavigate();
   
   const handleLogout = () => {
-            logoutUser();
-        resetCurrency();
-            navigate('/login');
+    logoutUser();
+    navigate('/login');
   };
   
   const handleNavigate = (path: string) => {
@@ -79,18 +70,6 @@ const MainLayout: React.FC = () => {
       active: location.pathname.startsWith('/lessons')
     },
     {
-      path: '/shop',
-      icon: <Gift size={20} />,
-      label: 'Магазин',
-      active: location.pathname === '/shop'
-    },
-    {
-      path: '/insights',
-      icon: <BarChart3 size={20} />,
-      label: 'Аналитика',
-      active: location.pathname === '/insights'
-    },
-    {
       path: '/profile',
       icon: <User size={20} />,
       label: 'Профиль',
@@ -108,10 +87,6 @@ const MainLayout: React.FC = () => {
         case '/games':
           return <MobileGames />;
 
-        case '/shop':
-          return <Outlet />;
-        case '/insights':
-          return <MobileInsights />;
         case '/profile':
           return <ProfilePage />;
         default:
@@ -157,8 +132,7 @@ const MainLayout: React.FC = () => {
             <div className={styles.userSection}>
               {}
               <div className={styles.coinsDisplay}>
-                <Coins size={18} />
-                <span>{coins.toLocaleString()}</span>
+                <span className="text-sm font-medium text-gray-700">💰 {user?.coins || 1000}</span>
               </div>
               {}
               <NotificationDropdown />
@@ -214,10 +188,6 @@ const MainLayout: React.FC = () => {
         <div className={styles.floatingHeart} style={{ '--delay': '3s' } as React.CSSProperties}>💖</div>
         <div className={styles.floatingHeart} style={{ '--delay': '6s' } as React.CSSProperties}>💝</div>
       </div>
-      {}
-      {isGiftVisible && receivedGift && (
-        <GiftDisplay gift={receivedGift} onClose={closeGift} />
-      )}
     </div>
   );
 };

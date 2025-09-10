@@ -1,8 +1,5 @@
 import api from './api';
 import placesService from './places.service';
-import timeRouteHelper from './timeRouteHelper.service';
-import placeEnhancer from './placeEnhancer.service';
-import eventsAfisha from './eventsAfisha.service';
 const relationshipGraphData = {
   nodes: [
     {
@@ -214,7 +211,6 @@ class DateGeneratorService {
       this.addReasoning("✅ Анализ завершен! Теперь ищу актуальные места и события в вашем городе...");
       return this.userPreferences;
     } catch (error) {
-      console.error('Error analyzing user data:', error);
       this.addReasoning("⚠️ Не удалось получить все данные, но я подберу варианты на основе общих предпочтений...");
       this.userPreferences = {
         location: { city: 'Москва', coordinates: null },
@@ -357,7 +353,6 @@ class DateGeneratorService {
         }
       }
     } catch (error) {
-      console.error('Error getting real places data:', error);
       this.addReasoning("🔄 Не удалось получить актуальные данные, использую проверенные варианты...");
     }
     if (!selectedActivity || !selectedRestaurant) {
@@ -490,7 +485,6 @@ class DateGeneratorService {
         description: placeEnhancer.generatePlaceDescription(activity)
       }));
     } catch (error) {
-      console.error('Error getting additional activities:', error);
       return [];
     }
   }
@@ -626,7 +620,6 @@ class DateGeneratorService {
       const response = await api.post('/events', eventData);
       return response.data;
     } catch (error) {
-      console.error('Error creating date event:', error);
       throw error;
     }
   }

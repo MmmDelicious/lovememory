@@ -6,7 +6,7 @@ import eventService from '../../services/event.service';
 import styles from './DayDetailPage.module.css';
 import { toast } from '../../context/ToastContext';
 import Button from '../../components/Button/Button';
-import StoryViewer from '../../components/StoryViewer/StoryViewer';
+// Removed StoryViewer import - component was deleted
 import { 
   FaCalendarPlus, FaImage, FaHeart, FaBirthdayCake, FaPlane, FaGift, FaStar, 
   FaCommentDots, FaCalendarCheck, FaGlassCheers, FaUsers, FaArrowLeft,
@@ -49,7 +49,7 @@ const DayDetailPage = () => {
   const [draggedMedia, setDraggedMedia] = useState(null);
   const [dragOverEvent, setDragOverEvent] = useState(null);
   const [uploadingMedia, setUploadingMedia] = useState({});
-  const [storyViewerOpen, setStoryViewerOpen] = useState(false);
+  // Removed storyViewerOpen state - StoryViewer was deleted
   const [expandedEvents, setExpandedEvents] = useState({});
   const [eventReactions, setEventReactions] = useState({});
   const [partnerComments, setPartnerComments] = useState({});
@@ -223,11 +223,10 @@ const DayDetailPage = () => {
       toast.warning('Нет событий для показа', 'Story mode');
       return;
     }
-    setStoryViewerOpen(true);
+    // StoryViewer removed - showing toast instead
+    toast.info('Просмотр истории дня');
   };
-  const closeStoryMode = () => {
-    setStoryViewerOpen(false);
-  };
+  // Removed closeStoryMode - StoryViewer was deleted
   const handleEditEvent = (eventId) => {
     navigate(`/event/edit/${eventId}`);
   };
@@ -621,12 +620,7 @@ const DayDetailPage = () => {
         style={{ display: 'none' }}
         onChange={(e) => handleFileSelect('bulk', e.target.files)}
       />
-      <StoryViewer
-        date={date}
-        isOpen={storyViewerOpen}
-        onClose={closeStoryMode}
-        onExport={handleExportDay}
-        onShare={handleShareDay}
+      {/* StoryViewer removed */}
       />
       {}
       {selectedImage && (

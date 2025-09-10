@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X, Coins, DollarSign, RefreshCw } from 'lucide-react';
-import { useCoins } from '../../store/hooks';
 import styles from './PokerModal.module.css';
 interface PokerModalProps {
   isOpen: boolean;
@@ -30,7 +29,7 @@ const PokerModal: React.FC<PokerModalProps> = ({
   sliderStep = 10,
   maxAmountFallback = 1000
 }) => {
-  const coins = useCoins();
+  const coins = 1000; // Default coins value
   const [amount, setAmount] = useState(Math.min(maxAmount, coins, defaultAmount));
   const actualMax = Math.min(maxAmount, coins);
   const minAmount = Math.min(propMinAmount, actualMax);
