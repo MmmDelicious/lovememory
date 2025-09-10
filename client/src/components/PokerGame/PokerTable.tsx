@@ -2,7 +2,6 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { ArmChair, Flower, Coins, Dices } from 'lucide-react';
 import PlayingCard from '../PlayingCard/PlayingCard';
 import Button from '../Button/Button';
-import { useCoins } from '../../store/hooks';
 import PokerModal from '../PokerModal/PokerModal';
 import styles from './PokerTable.module.css';
 import Player from './Player/Player';
@@ -25,7 +24,7 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
   const [showRebuyModal, setShowRebuyModal] = useState(false);
   const [winnerAnimation, setWinnerAnimation] = useState<string | null>(null);
   const [turnTimer, setTurnTimer] = useState(30);
-  const coins = useCoins();
+  const coins = 1000; // Default coins value
   const { 
     players = [], 
     communityCards = [], 
@@ -126,12 +125,10 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
     if (!winnersInfo || winnersInfo.length === 0) return [null, new Set()];
     const primary = winnersInfo[0];
     if (!primary || !primary.handCards || primary.handCards.length === 0) {
-      console.warn('[PokerTable] No handCards in winnersInfo:', primary);
       return [primary?.player?.id || null, new Set()];
     }
     const set = new Set(primary.handCards.map(c => {
       if (!c || !c.rank || !c.suit) {
-        console.warn('[PokerTable] Invalid card in handCards:', c);
         return '';
       }
       return `${c.rank}-${c.suit}`;
@@ -165,7 +162,6 @@ const PokerTable: React.FC<PokerTableProps> = ({ gameState, onAction, onRebuy, u
       }
       return seats;
     } catch (error) {
-      console.error('[PokerTable] Error in getPlayerSeatMap:', error);
       return Array(5).fill(null);
     }
   };

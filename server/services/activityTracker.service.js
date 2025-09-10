@@ -43,7 +43,6 @@ class ActivityTrackerService {
       
       return tracker;
     } catch (error) {
-      console.error('Error getting/creating tracker:', error);
       throw error;
     }
   }
@@ -82,7 +81,6 @@ class ActivityTrackerService {
       };
 
     } catch (error) {
-      console.error('Error updating daily activity:', error);
       throw error;
     }
   }
@@ -194,7 +192,6 @@ class ActivityTrackerService {
       });
 
     } catch (error) {
-      console.error('Error updating relationship analytics:', error);
     }
   }
 
@@ -296,7 +293,6 @@ class ActivityTrackerService {
       };
 
     } catch (error) {
-      console.error('Error getting user stats:', error);
       throw error;
     }
   }

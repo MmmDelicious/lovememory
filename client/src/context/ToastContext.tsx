@@ -1,5 +1,4 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import useToast from '../hooks/useToast';
 import { ToastContainer } from '../components/Toast';
 interface ToastContextType {
   showSuccess: (message: string, title?: string, duration?: number) => string;
@@ -13,15 +12,39 @@ interface ToastProviderProps {
   children: ReactNode;
 }
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
-  const {
-    toasts,
-    removeToast,
-    showSuccess,
-    showError,
-    showWarning,
-    showInfo,
-    clearAllToasts,
-  } = useToast();
+  const [toasts, setToasts] = React.useState<any[]>([]);
+  
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+  
+  const showSuccess = (message: string, title?: string, duration?: number) => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, message, title, type: 'success', duration }]);
+    return id;
+  };
+  
+  const showError = (message: string, title?: string, duration?: number) => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, message, title, type: 'error', duration }]);
+    return id;
+  };
+  
+  const showWarning = (message: string, title?: string, duration?: number) => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, message, title, type: 'warning', duration }]);
+    return id;
+  };
+  
+  const showInfo = (message: string, title?: string, duration?: number) => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, message, title, type: 'info', duration }]);
+    return id;
+  };
+  
+  const clearAllToasts = () => {
+    setToasts([]);
+  };
   const contextValue: ToastContextType = {
     showSuccess,
     showError,
@@ -55,35 +78,30 @@ export const toast = {
     if (globalToastContext) {
       return globalToastContext.showSuccess(message, title, duration);
     }
-    console.warn('Toast context not initialized');
     return '';
   },
   error: (message: string, title?: string, duration?: number) => {
     if (globalToastContext) {
       return globalToastContext.showError(message, title, duration);
     }
-    console.warn('Toast context not initialized');
     return '';
   },
   warning: (message: string, title?: string, duration?: number) => {
     if (globalToastContext) {
       return globalToastContext.showWarning(message, title, duration);
     }
-    console.warn('Toast context not initialized');
     return '';
   },
   info: (message: string, title?: string, duration?: number) => {
     if (globalToastContext) {
       return globalToastContext.showInfo(message, title, duration);
     }
-    console.warn('Toast context not initialized');
     return '';
   },
   clear: () => {
     if (globalToastContext) {
       globalToastContext.clearAllToasts();
     }
-    console.warn('Toast context not initialized');
   }
 };
 

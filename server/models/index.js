@@ -7,18 +7,12 @@ const Pair = require('./Pair');
 const UserPair = require('./UserPair');
 const GameRoom = require('./GameRoom');
 const GameParticipant = require('./GameParticipant');
-const Gift = require('./Gift');
-const ShopItem = require('./ShopItem');
-const Transaction = require('./Transaction');
-const Consent = require('./Consent');
-const Insight = require('./Insight');
 const NotificationToken = require('./NotificationToken');
 const Achievement = require('./Achievement');
 const Tournament = require('./Tournament');
 const TournamentMatch = require('./TournamentMatch');
 const MediaDerivative = require('./MediaDerivative');
 const Session = require('./Session');
-const RelationshipMetrics = require('./RelationshipMetrics');
 const Lesson = require('./Lesson');
 const UserLessonProgress = require('./UserLessonProgress');
 const PairDailyLesson = require('./PairDailyLesson');
@@ -26,7 +20,6 @@ const ActivityLog = require('./ActivityLog');
 const ActivityTracker = require('./ActivityTracker');
 const Interest = require('./Interest');
 const UserInterest = require('./UserInterest');
-const RecommendationFeedback = require('./RecommendationFeedback');
 
 let RelationshipProfile = null;
 const models = {
@@ -38,18 +31,12 @@ const models = {
   UserPair,
   GameRoom,
   GameParticipant,
-  Gift,
-  ShopItem,
-  Transaction,
-  Consent,
-  Insight,
   NotificationToken,
   Achievement,
   Tournament,
   TournamentMatch,
   MediaDerivative,
   Session,
-  RelationshipMetrics,
   Lesson,
   UserLessonProgress,
   PairDailyLesson,
@@ -57,7 +44,6 @@ const models = {
   ActivityTracker,
   Interest,
   UserInterest,
-  RecommendationFeedback,
 };
 
 // Добавляем TS модели если они загрузились (пока отключено)

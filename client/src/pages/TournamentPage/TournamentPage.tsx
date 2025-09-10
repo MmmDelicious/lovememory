@@ -5,7 +5,6 @@ import { tournamentService } from '../../services';
 import { TournamentBracket } from '../../components/Tournament/TournamentBracket';
 import { TournamentLobby } from '../../components/Tournament/TournamentLobby';
 import { TournamentHeader } from '../../components/Tournament/TournamentHeader';
-import { Skeleton } from '../../components/Skeleton';
 import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay';
 import { Tournament, TournamentMatch, GameParticipant } from '../../types/models';
 import { ArrowLeft, Trophy, Users, Clock } from 'lucide-react';

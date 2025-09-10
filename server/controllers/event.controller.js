@@ -1,6 +1,5 @@
 const eventService = require('../services/event.service');
 const activityService = require('../services/activity.service');
-const { triggerAnalysisOnEvent } = require('./queue.controller');
 exports.getEvents = async (req, res, next) => {
   try {
     const events = await eventService.getEventsForUser(req.user.id);
@@ -22,12 +21,6 @@ exports.createEvent = async (req, res, next) => {
       pairId: newEvent.pair_id
     });
 
-    // Автоматически запускаем фоновый анализ (если Redis доступен)
-    try {
-      await triggerAnalysisOnEvent(req.user.id, newEvent.id);
-    } catch (error) {
-      // Пропускаем ошибки - не должны влиять на создание события
-    }
     
     res.status(201).json(newEvent);
   } catch (error) {

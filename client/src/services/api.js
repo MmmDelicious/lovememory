@@ -1,19 +1,16 @@
 import axios from 'axios';
 
-// Создаем базовый URL с fallback
-// В режиме разработки используем прокси Vite, в продакшене - полный URL
 const baseURL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'http://localhost:5000/api');
 
 const api = axios.create({
   baseURL,
   withCredentials: true,
-  timeout: 30000, // 30 секунд таймаут
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Переменная для отслеживания активных запросов на обновление токена
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -31,8 +28,6 @@ const processQueue = (error, token = null) => {
 
 api.interceptors.request.use(
   (config) => {
-    // Не добавляем Authorization header - полагаемся на httpOnly cookies
-    // которые автоматически отправляются через withCredentials: true
     return config;
   },
   (error) => {
@@ -40,8 +35,6 @@ api.interceptors.request.use(
   }
 );
 
-// Поскольку токен теперь в httpOnly cookie, мы не можем его читать из JS
-// Эти функции оставляем для совместимости, но они работают только с localStorage
 const getAuthToken = () => {
   try {
     return localStorage.getItem('authToken');
@@ -51,7 +44,6 @@ const getAuthToken = () => {
   }
 };
 
-// Сохраняем токен в localStorage для совместимости (например для других API вызовов)
 const setAuthToken = (token) => {
   try {
     if (token) {
@@ -64,11 +56,9 @@ const setAuthToken = (token) => {
   }
 };
 
-// Функция для очистки токена - очищаем localStorage и просим сервер очистить cookie
 const clearAuthToken = () => {
   try {
     localStorage.removeItem('authToken');
-    // Не можем напрямую очистить httpOnly cookie - сервер должен это сделать
   } catch (error) {
     console.warn('Failed to clear auth token:', error);
   }
@@ -80,9 +70,9 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Логирование ошибок только в dev режиме
-    // Не логируем 401 ошибки для /auth/me - это нормальное поведение
-    if (import.meta.env.DEV && !(error.response?.status === 401 && error.config?.url?.includes('/auth/me'))) {
+    if (import.meta.env.DEV && 
+        !(error.response?.status === 401 && error.config?.url?.includes('/auth/me')) &&
+        !(!error.response && error.config?.url?.includes('/auth/me'))) {
       console.group('API ERROR');
       console.error('Request URL:', error.config?.url);
       console.error('Request Method:', error.config?.method);
@@ -92,9 +82,7 @@ api.interceptors.response.use(
       console.groupEnd();
     }
 
-    // Обработка 401 ошибок - пользователь не авторизован
     if (error.response?.status === 401) {
-      // Не логируем 401 ошибки для /auth/me - это нормальное поведение
       if (!error.config?.url?.includes('/auth/me')) {
         console.log('🟡 API: Got 401 error, user not authenticated');
       }
@@ -102,15 +90,15 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Обработка серверных ошибок (5xx)
     if (error.response?.status >= 500) {
       console.log('🟡 API: Got 5xx error, but skipping redirect for debugging');
       return Promise.reject(error);
     }
 
-    // Обработка сетевых ошибок
     if (!error.response && error.code !== 'ERR_CANCELED') {
-      console.log('🟡 API: Got network error, but skipping redirect for debugging');
+      if (!error.config?.url?.includes('/auth/me')) {
+        console.log('🟡 API: Network error - server may be down');
+      }
       return Promise.reject(error);
     }
 
@@ -118,6 +106,5 @@ api.interceptors.response.use(
   }
 );
 
-// Экспортируем API и утилиты для работы с токенами
 export { getAuthToken, setAuthToken, clearAuthToken };
 export default api;

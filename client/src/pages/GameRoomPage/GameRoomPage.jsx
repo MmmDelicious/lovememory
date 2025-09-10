@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import LottiePlayer from 'react-lottie-player';
-import { useUser, useCurrencyActions } from '../../store/hooks';
+import { useUser } from '../../store/hooks';
 import { useGameSocket } from '../../hooks/useGameSocket';
 import QuizGame from '../../components/QuizGame/QuizGame';
 import ChessGame from '../../components/ChessGame/ChessGameEnhanced';
@@ -15,9 +15,8 @@ const GameRoomPage = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const user = useUser();
-  const { setCoins } = useCurrencyActions();
   const token = user?.token;
-  const { gameState, makeMove } = useGameSocket(roomId, token, setCoins);
+  const { gameState, makeMove } = useGameSocket(roomId, token, () => {});
   const [isMakingMove, setIsMakingMove] = React.useState(false);
   const handleReturnToLobby = () => {
     const gameType = gameState?.gameType || 'unknown';

@@ -10,7 +10,6 @@ let bot;
 
 const startBot = () => {
   if (!token) {
-    console.warn('TELEGRAM_BOT_TOKEN не найден. Телеграм-бот не будет запущен.');
     return;
   }
 
@@ -26,20 +25,17 @@ const startBot = () => {
   });
 
   bot.on('polling_error', (error) => {
-    console.error('Telegram polling error:', error.code);
   });
   
   };
 
 const sendMessage = (chatId, message) => {
   if (!bot) {
-    console.error('Бот не инициализирован. Невозможно отправить сообщение.');
     return;
   }
   try {
     bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
   } catch(error) {
-    console.error(`Не удалось отправить сообщение в чат ${chatId}:`, error.message);
   }
 };
 
@@ -83,7 +79,6 @@ const sendDailyReminders = async () => {
       sendMessage(chatId, message);
     }
     } catch (error) {
-    console.error('Error sending daily reminders:', error);
   }
 };
 

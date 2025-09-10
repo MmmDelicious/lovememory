@@ -11,13 +11,10 @@ const tournamentRoutes = require('./tournament.routes');
 const sessionRoutes = require('./session.routes');
 const aiRoutes = require('./ai.routes');
 const intelligenceRoutes = require('./intelligence.routes');
-const giftRoutes = require('./gift.routes');
 const lessonRoutes = require('./lesson.routes');
 const activityTrackerRoutes = require('./activityTracker.routes');
 const interestRoutes = require('./interest.routes');
 const feedbackRoutes = require('./feedback.routes');
-const analyticsRoutes = require('./analytics.routes');
-const insightRoutes = require('./insight.routes');
 
 const router = Router();
 
@@ -33,12 +30,9 @@ router.use('/tournaments', tournamentRoutes);
 router.use('/sessions', sessionRoutes);
 router.use('/ai', aiRoutes);
 router.use('/intelligence', intelligenceRoutes);
-router.use('/gifts', giftRoutes);
 router.use('/lessons', lessonRoutes);
 router.use('/activity-tracker', activityTrackerRoutes);
 router.use('/interests', interestRoutes);
 router.use('/feedback', feedbackRoutes);
-router.use('/analytics', analyticsRoutes);
-router.use('/insights', insightRoutes);
 
 module.exports = router;

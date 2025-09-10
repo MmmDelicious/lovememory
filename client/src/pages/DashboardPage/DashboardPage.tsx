@@ -26,17 +26,10 @@ const DashboardPage: React.FC = () => {
     return <div className={styles.loader}>Пользователь не найден...</div>;
   }
 
-  const handleCreateTemplate = () => {
-    };
-
-  const handleEditTemplate = (template: any) => {
-    };
-
-  const handleDeleteTemplate = (template: any) => {
-    };
-
-  const handleDuplicateTemplate = (template: any) => {
-    };
+  const handleCreateTemplate = () => {};
+  const handleEditTemplate = (template: any) => {};
+  const handleDeleteTemplate = (template: any) => {};
+  const handleDuplicateTemplate = (template: any) => {};
 
   return (
     <>

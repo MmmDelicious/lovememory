@@ -94,12 +94,6 @@ Tournament.associate = (models) => {
     onDelete: 'SET NULL'
   });
 
-  // Связь с транзакциями (призовые)
-  Tournament.hasMany(models.Transaction, {
-    foreignKey: 'tournament_id',
-    as: 'Transactions',
-    onDelete: 'SET NULL'
-  });
 
   // Связь с матчами турнира
   Tournament.hasMany(models.TournamentMatch, {
@@ -127,7 +121,6 @@ Tournament.createTournament = async function(data) {
 
     return tournament;
   } catch (error) {
-    console.error('Error creating tournament:', error);
     throw error;
   }
 };

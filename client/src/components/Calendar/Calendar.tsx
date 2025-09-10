@@ -5,8 +5,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
 import type { EventDropArg, EventClickArg, EventContentArg } from '@fullcalendar/core';
 import Sidebar from '../Sidebar/Sidebar';
-import StoryViewer from '../StoryViewer/StoryViewer';
-import { FaChevronLeft, FaChevronRight, FaFilter, FaListUl, FaPlus } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaFilter, FaListUl, FaPlus, FaHeart } from 'react-icons/fa';
 import { useMascot } from '../../context/MascotContext';
 import { toast } from '../../context/ToastContext';
 import styles from './Calendar.module.css';
@@ -16,6 +15,8 @@ import { EVENT_TYPE_COLORS } from '../../hooks/useEvents';
 import { getHueFromHex, darken } from '../../utils/color';
 import type { EventTemplateData } from '../EventTemplateModal/EventTemplateModal';
 import memoriesService from '../../services/memories.service';
+import DateGeneratorModal from '../DateGeneratorModal/DateGeneratorModal';
+import StoryViewer from '../StoryViewer/StoryViewer';
 
 interface CalendarEvent {
   id: string;
@@ -121,11 +122,19 @@ const Calendar: React.FC<CalendarProps> = ({
   const customTemplatesRef = useRef<HTMLDivElement>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showList, setShowList] = useState(false);
-  const [storyViewerOpen, setStoryViewerOpen] = useState(false);
-  const [storyDate, setStoryDate] = useState<string>('');
-  const [memoryStoryData, setMemoryStoryData] = useState<any>(null);
+  const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
+  const [storyViewerDate, setStoryViewerDate] = useState<string | null>(null);
+  const [isDateGeneratorOpen, setIsDateGeneratorOpen] = useState(false);
   
   const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useMascot();
+  
+  const handleDateGenerated = (event: any) => {
+    if (event && onCreateEvent) {
+      onCreateEvent(event);
+      setIsDateGeneratorOpen(false);
+      toast.success('Свидание успешно добавлено в календарь!');
+    }
+  };
   
   const TYPE_LABELS: Record<string, string> = {
     plan: 'План',
@@ -215,16 +224,13 @@ const Calendar: React.FC<CalendarProps> = ({
       return;
     }
     
-    setStoryDate(date);
-    setStoryViewerOpen(true);
+    setStoryViewerDate(date);
+    setIsStoryViewerOpen(true);
   }, [events, toast]);
 
   const closeStoryMode = useCallback(() => {
-    setStoryViewerOpen(false);
-    setTimeout(() => {
-      setStoryDate('');
-      setMemoryStoryData(null);
-    }, 300);
+    setIsStoryViewerOpen(false);
+    setStoryViewerDate(null);
   }, []);
 
   const updateMascotTargets = useCallback(() => {
@@ -364,10 +370,8 @@ const Calendar: React.FC<CalendarProps> = ({
       if (!memoryCollection || memoryCollection.length === 0) return;
       
       try {
-        const memoryStory = await memoriesService.createMemoryStory(memoryCollection);
-        setMemoryStoryData(memoryStory);
-        setStoryDate('');
-        setStoryViewerOpen(true);
+        // StoryViewer removed - showing simple toast
+        toast.success('Воспоминание создано!');
       } catch (error) {
         toast.error('Не удалось загрузить воспоминание', 'Ошибка');
       }
@@ -802,6 +806,15 @@ const Calendar: React.FC<CalendarProps> = ({
               <FaListUl />
             </button>
             
+            <button 
+              className={`${styles.btn} ${styles.btnPrimary}`} 
+              title="Сгенерировать свидание" 
+              onClick={() => setIsDateGeneratorOpen(true)}
+            >
+              <FaHeart />
+              Свидание
+            </button>
+            
             <button className="btn-prototype" onClick={handleAddQuick}>
               <FaPlus /> Добавить
             </button>
@@ -924,10 +937,15 @@ const Calendar: React.FC<CalendarProps> = ({
       />
       
       <StoryViewer
-        date={storyDate}
-        memoryData={memoryStoryData}
-        isOpen={storyViewerOpen}
+        date={storyViewerDate}
+        isOpen={isStoryViewerOpen}
         onClose={closeStoryMode}
+      />
+      
+      <DateGeneratorModal
+        isOpen={isDateGeneratorOpen}
+        onClose={() => setIsDateGeneratorOpen(false)}
+        onEventCreated={handleDateGenerated}
       />
     </div>
   );

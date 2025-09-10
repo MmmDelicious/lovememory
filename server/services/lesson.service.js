@@ -1,6 +1,5 @@
 const { Op } = require('sequelize');
 const { 
-  RelationshipMetrics, 
   Lesson, 
   UserLessonProgress, 
   PairDailyLesson, 
@@ -16,11 +15,11 @@ class LessonService {
     try {
       const targetDate = date || new Date().toISOString().split('T')[0];
       
-      // 1. Получаем метрики отношений пары
-      const relationshipMetrics = await this.getOrCreateRelationshipMetrics(userId, partnerId);
+      // RelationshipMetrics removed - using simplified logic
+      const relationshipId = `${Math.min(userId, partnerId)}_${Math.max(userId, partnerId)}`;
       
       // 2. Проверяем, не назначен ли уже урок на этот день
-      const existingLesson = await PairDailyLesson.getTodaysLesson(relationshipMetrics.id, targetDate);
+      const existingLesson = await PairDailyLesson.getTodaysLesson(relationshipId, targetDate);
       if (existingLesson) {
         return existingLesson;
       }
@@ -30,62 +29,30 @@ class LessonService {
       const partnerStreak = await this.getUserLessonStreak(partnerId);
       const avgStreak = (userStreak + partnerStreak) / 2;
       
-      const gapDays = await this.getGapDaysSinceLastActivity(relationshipMetrics);
+      const gapDays = 0; // Simplified - no relationship metrics
       
-      // 4. Получаем подходящие уроки
-      const candidateLessons = await this.getCandidateLessons(relationshipMetrics, avgStreak);
+      // 4. Получаем подходящие уроки - simplified
+      const candidateLessons = await Lesson.findAll({
+        where: { difficulty_level: { [Op.lte]: Math.min(avgStreak + 1, 5) } },
+        limit: 10
+      });
       
-      // 5. Фильтруем по триггерам
-      const filteredLessons = candidateLessons.filter(lesson => 
-        lesson.checkTriggers(relationshipMetrics, avgStreak, gapDays)
-      );
+      // 5. Simplified filtering
+      const filteredLessons = candidateLessons;
       
       if (filteredLessons.length === 0) {
-        // Fallback: случайный урок из primary language
-        return await this.getFallbackLesson(relationshipMetrics, targetDate);
+        // Fallback: random lesson
+        const anyLesson = await Lesson.findOne({ order: [['id', 'ASC']] });
+        return anyLesson;
       }
       
-      // 6. Вычисляем скоры и выбираем лучший
-      const scoredLessons = filteredLessons.map(lesson => ({
-        lesson,
-        score: lesson.calculateMatchScore(relationshipMetrics, avgStreak, gapDays)
-      }));
+      // 6. Simplified scoring - just take first lesson
+      const selectedLesson = filteredLessons[0];
       
-      // Сортируем по скору и добавляем немного рандомности
-      scoredLessons.sort((a, b) => b.score - a.score);
-      
-      // Выбираем из топ-3 с элементом случайности
-      const topLessons = scoredLessons.slice(0, Math.min(3, scoredLessons.length));
-      const selectedIndex = Math.floor(Math.random() * topLessons.length);
-      const selectedLesson = topLessons[selectedIndex];
-      
-      // 7. Сохраняем назначение урока
-      const dailyLesson = await PairDailyLesson.create({
-        relationship_id: relationshipMetrics.id,
-        date: targetDate,
-        lesson_id: selectedLesson.lesson.id,
-        selection_algorithm_version: 'v1.0',
-        selection_score: selectedLesson.score,
-        selection_metadata: {
-          candidatesCount: candidateLessons.length,
-          filteredCount: filteredLessons.length,
-          userStreak,
-          partnerStreak,
-          gapDays,
-          heatScore: relationshipMetrics.heat_score
-        }
-      });
-      
-      // Загружаем полную информацию
-      return await PairDailyLesson.findByPk(dailyLesson.id, {
-        include: [
-          { model: Lesson, as: 'Lesson' },
-          { model: RelationshipMetrics, as: 'Relationship' }
-        ]
-      });
+      // Return the selected lesson directly
+      return selectedLesson;
       
     } catch (error) {
-      console.error('Error in selectDailyLesson:', error);
       throw new Error('Failed to select daily lesson');
     }
   }
@@ -96,14 +63,8 @@ class LessonService {
   async completeLesson(userId, lessonId, feedback = null) {
     try {
       // 1. Проверяем, есть ли метрики отношений (в паре ли пользователь)
-      const relationshipMetrics = await RelationshipMetrics.findOne({
-        where: {
-          [Op.or]: [
-            { user_id: userId },
-            { partner_id: userId }
-          ]
-        }
-      });
+      // RelationshipMetrics removed - simplified check
+      const relationshipMetrics = null;
       
       // 2. Находим урок
       const lesson = await Lesson.findByPk(lessonId);
@@ -132,9 +93,8 @@ class LessonService {
       const streakBonus = this.calculateStreakBonus(currentStreak + 1);
       const totalCoins = lesson.base_coins_reward + streakBonus;
       
-      const partnerId = relationshipMetrics ? 
-        (relationshipMetrics.user_id === userId ? relationshipMetrics.partner_id : relationshipMetrics.user_id) : 
-        null;
+      // Simplified - no partner logic
+      const partnerId = null;
       
       // 5. Сохраняем прогресс
       const progress = await UserLessonProgress.create({
@@ -190,11 +150,10 @@ class LessonService {
         totalReward: totalCoins,
         newStreak: currentStreak + 1,
         lesson,
-        relationshipMetrics: relationshipMetrics || null
+        relationshipMetrics: null
       };
       
     } catch (error) {
-      console.error('Error in completeLesson:', error);
       throw error;
     }
   }
@@ -203,32 +162,21 @@ class LessonService {
    * Получает или создает метрики отношений для пары
    */
   async getOrCreateRelationshipMetrics(userId, partnerId) {
-    let metrics = await RelationshipMetrics.findOne({
-      where: {
-        [Op.or]: [
-          { user_id: userId, partner_id: partnerId },
-          { user_id: partnerId, partner_id: userId }
-        ]
-      }
-    });
-    
-    if (!metrics) {
-      metrics = await RelationshipMetrics.create({
-        user_id: userId,
-        partner_id: partnerId,
-        scores: {
-          words: 0,
-          acts: 0,
-          gifts: 0,
-          time: 0,
-          touch: 0
-        },
-        heat_score: 50.0,
-        relationship_stage: 'new'
-      });
-    }
-    
-    return metrics;
+    // RelationshipMetrics removed - return simplified mock object
+    return {
+      id: `${Math.min(userId, partnerId)}_${Math.max(userId, partnerId)}`,
+      user_id: userId,
+      partner_id: partnerId,
+      scores: {
+        words: 0,
+        acts: 0,
+        gifts: 0,
+        time: 0,
+        touch: 0
+      },
+      heat_score: 50.0,
+      relationship_stage: 'new'
+    };
   }
   
   /**
@@ -390,36 +338,22 @@ class LessonService {
    */
   async getTodaysLesson(userId) {
     try {
-      // Сначала проверяем, есть ли у пользователя партнер
-      const relationshipMetrics = await RelationshipMetrics.findOne({
-        where: {
-          [Op.or]: [
-            { user_id: userId },
-            { partner_id: userId }
-          ]
-        }
+      // RelationshipMetrics removed - simplified lesson fetching
+      const user = await User.findByPk(userId);
+      
+      // Simplified: always return a random lesson
+      const randomLesson = await Lesson.findOne({ 
+        order: [['id', 'ASC']], 
+        limit: 1 
       });
       
-      if (relationshipMetrics) {
-        // Если пользователь в паре - используем парный алгоритм
-        const partnerId = relationshipMetrics.user_id === userId 
-          ? relationshipMetrics.partner_id 
-          : relationshipMetrics.user_id;
-        
-        const dailyLesson = await this.selectDailyLesson(userId, partnerId);
-        const completionStatus = dailyLesson.getCompletionStatus(userId, relationshipMetrics);
-        
-        return {
-          ...dailyLesson.toJSON(),
-          completionStatus
-        };
-      } else {
-        // Если пользователь одиночка - даем персональный урок
-        return await this.getSingleUserLesson(userId);
+      if (!randomLesson) {
+        throw new Error('No lessons found');
       }
       
+      return randomLesson;
+      
     } catch (error) {
-      console.error('Error in getTodaysLesson:', error);
       throw error;
     }
   }
@@ -506,7 +440,6 @@ class LessonService {
       };
       
     } catch (error) {
-      console.error('Error in getSingleUserLesson:', error);
       throw error;
     }
   }
@@ -567,7 +500,6 @@ class LessonService {
       };
       
     } catch (error) {
-      console.error('Error in getSingleUserProgress:', error);
       throw error;
     }
   }

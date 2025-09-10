@@ -57,38 +57,6 @@ const AIChatInterface = () => {
     };
   };
 
-  const handleContextMenuAction = (actionId) => {
-    const context = createContext();
-    
-    switch (actionId) {
-      case 'chat':
-        toggleChat();
-        break;
-      case 'joke':
-        sendMessageToAI('Расскажи мне смешную шутку или анекдот', context);
-        break;
-      case 'dance':
-        sendMessageToAI('Потанцуй для меня! Покажи свои лучшие движения!', context);
-        break;
-      case 'advice':
-        sendMessageToAI('Дай мне мудрый совет на сегодня', context);
-        break;
-      case 'weather':
-        sendMessageToAI('Расскажи мне о погоде и как лучше провести день', context);
-        break;
-      case 'mood':
-        sendMessageToAI('Подними мне настроение! Расскажи что-нибудь позитивное', context);
-        break;
-      case 'generateDate':
-        sendMessageToAI('Создай умное свидание с реальными местами!', context);
-        break;
-      case 'hide':
-        toggleAI();
-        break;
-      default:
-        break;
-    }
-  };
 
   const handleEventCreated = (event) => {
   };
@@ -101,7 +69,6 @@ const AIChatInterface = () => {
           animationData={globalMascot.animationData}
           onClick={toggleChat}
           isAILoading={isLoading}
-          onContextMenuAction={handleContextMenuAction}
         />
       )}
       <div style={aiInterfaceContainerStyle}>

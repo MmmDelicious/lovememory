@@ -58,12 +58,6 @@ export const loginUser = createAsyncThunk(
     try {
       // Сервер теперь возвращает { user }, токен находится в httpOnly cookie
       const { user } = await authService.login(credentials.email, credentials.password);
-
-      // Обновляем монеты в currencySlice
-      if (user.coins !== undefined) {
-        const { setCoins } = await import('./currencySlice');
-        dispatch(setCoins(user.coins));
-      }
       
       return user; // Возвращаем только данные пользователя
     } catch (error: any) {
@@ -95,12 +89,6 @@ export const registerUser = createAsyncThunk(
     try {
       // ТЕСТ: Включаем настоящий API вызов
       const { user } = await authService.register(credentials);
-      
-      // Обновляем монеты в currencySlice
-      if (user.coins !== undefined) {
-        const { setCoins } = await import('./currencySlice');
-        dispatch(setCoins(user.coins));
-      }
       
       return user; // Возвращаем только данные пользователя
     } catch (error: any) {
@@ -166,12 +154,6 @@ const authSlice = createSlice({
     updateUser: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
-      }
-    },
-    // Новый редьюсер для синхронизации монет
-    syncCoinsWithCurrency: (state, action: PayloadAction<number>) => {
-      if (state.user) {
-        state.user.coins = action.payload;
       }
     },
     logout: (state) => {
@@ -255,7 +237,6 @@ export const {
   setError, 
   updateUser, 
   logout,
-  syncCoinsWithCurrency,
   setFieldErrors,
   setFormError,
   clearFormErrors

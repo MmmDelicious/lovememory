@@ -14,7 +14,6 @@ const { startBot, startCronJobs } = require('./services/telegram.service');
 const { initSocket } = require('./socket');
 const errorHandler = require('./middleware/errorHandler.middleware');
 const apiRouter = require('./routes');
-const queueService = require('./services/queue.service');
 const { checkRedisHealth } = require('./config/redis');
 require('./config/passport');
 
@@ -107,7 +106,6 @@ const startServer = async () => {
     try {
       const redisHealthy = await checkRedisHealth();
       if (redisHealthy) {
-        await queueService.initialize();
 
       } else {
 

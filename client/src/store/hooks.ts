@@ -46,15 +46,7 @@ import {
   loginUser,
   registerUser,
   logoutUser,
-  syncCoinsWithCurrency
 } from './slices/authSlice';
-import {
-  setCoins,
-  addCoins,
-  subtractCoins,
-  resetCurrency,
-  refreshCoins
-} from './slices/currencySlice';
 
 // Типизированные хуки для использования в компонентах
 export const useAppDispatch = () => useDispatch<AppDispatch>();
@@ -117,11 +109,6 @@ const selectAppRoutesData = createSelector(
 
 export const useAppRoutesData = () => useAppSelector(selectAppRoutesData);
 
-// Специализированные хуки для Currency
-export const useCurrency = () => useAppSelector((state) => state.currency);
-export const useCoins = () => useAppSelector((state) => state.currency.coins);
-export const useCurrencyLoading = () => useAppSelector((state) => state.currency.isLoading);
-export const useCurrencyError = () => useAppSelector((state) => state.currency.error);
 
 // Селекторы для вычисляемых значений с memoization
 export const useGameStats = () => {
@@ -268,19 +255,7 @@ export const useAuthActions = () => {
     logout: () => dispatch(logoutUser()),
     loginUser: (credentials: { email: string; password: string }) => dispatch(loginUser(credentials)),
     registerUser: (userData: { email: string; password: string; first_name: string; gender: 'male' | 'female' | 'other'; city: string; age: number }) => dispatch(registerUser(userData)),
-    syncCoinsWithCurrency: (coins: number) => dispatch(syncCoinsWithCurrency(coins))
   }), [dispatch]);
 };
 
-export const useCurrencyActions = () => {
-  const dispatch = useAppDispatch();
-  
-  return useMemo(() => ({
-    setCoins: (coins: number) => dispatch(setCoins(coins)),
-    addCoins: (amount: number) => dispatch(addCoins(amount)),
-    subtractCoins: (amount: number) => dispatch(subtractCoins(amount)),
-    resetCurrency: () => dispatch(resetCurrency()),
-    refreshCoins: () => dispatch(refreshCoins())
-  }), [dispatch]);
-};
 

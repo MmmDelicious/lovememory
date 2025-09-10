@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import styles from './WordleGame.module.css';
-// import { ENGLISH_WORDS, RUSSIAN_WORDS } from '../../utils/dictionaries'; // Убираем клиентскую проверку словаря
 interface WordleGameProps {
   gameState: any;
   user: { id: string; email: string };

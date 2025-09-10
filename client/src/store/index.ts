@@ -3,7 +3,6 @@ import gameReducer from './slices/gameSlice';
 import mascotReducer from './slices/mascotSlice';
 import eventMascotReducer from './slices/eventMascotSlice';
 import authReducer from './slices/authSlice';
-import currencyReducer from './slices/currencySlice';
 
 const store = configureStore({
   reducer: {
@@ -11,7 +10,6 @@ const store = configureStore({
     mascot: mascotReducer,
     eventMascot: eventMascotReducer,
     auth: authReducer,
-    currency: currencyReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

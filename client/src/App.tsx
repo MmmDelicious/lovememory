@@ -7,13 +7,12 @@ import { MascotProvider } from './context/MascotContext';
 import AppRoutes from './AppRoutes';
 import GlobalMascot from './components/GlobalMascot/GlobalMascot';
 import AIChatInterface from './components/AIChatInterface/AIChatInterface';
-import { useAuthActions, useCurrencyActions } from './store/hooks';
+import { useAuthActions } from './store/hooks';
 import { clearAuthToken } from './services/api';
 import { authService } from './services';
 
 const AppInitializer: React.FC = () => {
   const { setUser, setLoading } = useAuthActions();
-  const { setCoins, resetCurrency } = useCurrencyActions();
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -25,24 +24,17 @@ const AppInitializer: React.FC = () => {
         const userData = await authService.getMe();
         
         setUser(userData);
-        
-        if (userData.coins !== undefined && userData.coins !== null) {
-          setCoins(userData.coins);
-        } else {
-          setCoins(1000);
-        }
       } catch (error) {
         // Это нормальное поведение когда пользователь не авторизован
         // Очищаем только localStorage, httpOnly cookie управляется сервером
         clearAuthToken();
-        resetCurrency();
       }
       
       setLoading(false);
     };
 
     checkAuthStatus();
-  }, [setUser, setCoins, setLoading, resetCurrency]);
+  }, [setUser, setLoading]);
 
   return null;
 };

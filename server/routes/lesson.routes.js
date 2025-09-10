@@ -22,7 +22,6 @@ router.get('/daily', authenticateToken, async (req, res) => {
       data: dailyLesson
     });
   } catch (error) {
-    console.error('Error getting daily lesson:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to get daily lesson'
@@ -58,7 +57,6 @@ router.post('/:lessonId/complete', authenticateToken, async (req, res) => {
       message: `Lesson completed! Got ${result.totalReward} coins.`
     });
   } catch (error) {
-    console.error('Error completing lesson:', error);
     res.status(400).json({
       success: false,
       message: error.message || 'Failed to complete lesson'
@@ -79,8 +77,8 @@ router.get('/progress', authenticateToken, async (req, res) => {
     const pair = await Pair.findOne({
       where: {
         [Op.or]: [
-          { user1Id: userId },
-          { user2Id: userId }
+          { user1_id: userId },
+          { user2_id: userId }
         ],
         status: 'active'
       }
@@ -88,7 +86,7 @@ router.get('/progress', authenticateToken, async (req, res) => {
     
     if (pair) {
       // If there's a partner - return pair progress
-      const partnerId = pair.user1Id === userId ? pair.user2Id : pair.user1Id;
+      const partnerId = pair.user1_id === userId ? pair.user2_id : pair.user1_id;
       const progress = await lessonService.getPairProgress(userId, partnerId);
       
       res.json({
@@ -105,7 +103,6 @@ router.get('/progress', authenticateToken, async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Error getting lesson progress:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to get lesson progress'
@@ -156,7 +153,6 @@ router.get('/history', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error getting lesson history:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to get lesson history'
@@ -189,7 +185,6 @@ router.get('/stats', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error getting lesson stats:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to get lesson stats'
@@ -226,7 +221,6 @@ router.get('/themes', async (req, res) => {
       data: themeProgress
     });
   } catch (error) {
-    console.error('Error getting theme progress:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to get theme progress'
@@ -253,8 +247,8 @@ router.post('/relationship/metrics', async (req, res) => {
     const pair = await Pair.findOne({
       where: {
         [Op.or]: [
-          { user1Id: userId },
-          { user2Id: userId }
+          { user1_id: userId },
+          { user2_id: userId }
         ],
         status: 'active'
       }
@@ -267,7 +261,7 @@ router.post('/relationship/metrics', async (req, res) => {
       });
     }
     
-    const partnerId = pair.user1Id === userId ? pair.user2Id : pair.user1Id;
+    const partnerId = pair.user1_id === userId ? pair.user2_id : pair.user1_id;
     const relationshipMetrics = await lessonService.getOrCreateRelationshipMetrics(userId, partnerId);
     
     // Update metrics
@@ -285,7 +279,6 @@ router.post('/relationship/metrics', async (req, res) => {
       message: 'Relationship metrics updated'
     });
   } catch (error) {
-    console.error('Error updating relationship metrics:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to update relationship metrics'
@@ -307,8 +300,8 @@ router.get('/weekly', async (req, res) => {
     const pair = await Pair.findOne({
       where: {
         [Op.or]: [
-          { user1Id: userId },
-          { user2Id: userId }
+          { user1_id: userId },
+          { user2_id: userId }
         ],
         status: 'active'
       }
@@ -321,7 +314,7 @@ router.get('/weekly', async (req, res) => {
       });
     }
     
-    const partnerId = pair.user1Id === userId ? pair.user2Id : pair.user1Id;
+    const partnerId = pair.user1_id === userId ? pair.user2_id : pair.user1_id;
     const relationshipMetrics = await lessonService.getOrCreateRelationshipMetrics(userId, partnerId);
     
     const { PairDailyLesson } = require('../models');
@@ -332,7 +325,6 @@ router.get('/weekly', async (req, res) => {
       data: weeklyLessons
     });
   } catch (error) {
-    console.error('Error getting weekly lessons:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to get weekly lessons'

@@ -7,7 +7,6 @@ import gameService from './game.service';
 import tournamentService from './tournament.service';
 import sessionService from './session.service';
 import mediaService from './media.service';
-import * as aiService from './ai.service';
 export {
   api,
   authService,
@@ -18,5 +17,4 @@ export {
   tournamentService,
   sessionService,
   mediaService,
-  aiService
 };

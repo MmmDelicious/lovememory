@@ -115,8 +115,7 @@ PairDailyLesson.getTodaysLesson = async function(relationshipId, date = null) {
       as: 'Lesson',
       attributes: ['id', 'title', 'text', 'source', 'tags', 'triggers', 'effect', 'theme', 'interactive_type', 'difficulty_level', 'required_streak', 'animation_file', 'base_coins_reward', 'is_active']
     }, {
-      model: sequelize.models.RelationshipMetrics,
-      as: 'Relationship'
+      // RelationshipMetrics model removed
     }]
   });
 };
@@ -212,10 +211,6 @@ PairDailyLesson.getProgressStats = async function(relationshipId) {
   };
 };
 PairDailyLesson.associate = (models) => {
-  PairDailyLesson.belongsTo(models.RelationshipMetrics, {
-    foreignKey: 'relationship_id',
-    as: 'Relationship'
-  });
   PairDailyLesson.belongsTo(models.Lesson, {
     foreignKey: 'lesson_id',
     as: 'Lesson'
