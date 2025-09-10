@@ -2,14 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Lottie from 'lottie-react';
 import { Volume2, VolumeX, Star, User, Apple, Smartphone, Heart } from 'lucide-react';
-import NatureElements from '../../components/NatureElements';
-import ScrollElements from '../../components/NatureElements/ScrollElements';
+import NatureElements from '../../effects/NatureElements/NatureElements';
+import ScrollElements from '../../effects/NatureElements/ScrollElements';
 import styles from './AboutPage.module.css';
 
 
-import loveAnimation from '../../assets/lessons/Love.json';
-import relationshipAnimation from '../../assets/lessons/Relationship.json';
-import coupleAnimation from '../../assets/lessons/Couple sharing and caring love.json';
+import loveAnimation from '../../../modules/education/assets/lessons/Love.json';
+import relationshipAnimation from '../../../modules/education/assets/lessons/Relationship.json';
+import coupleAnimation from '../../../modules/education/assets/lessons/Couple sharing and caring love.json';
 
 
 const AboutPage: React.FC = () => {

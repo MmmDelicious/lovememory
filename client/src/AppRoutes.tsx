@@ -8,7 +8,7 @@ import { ErrorBoundary } from './shared/components/ErrorBoundary/ErrorBoundary';
 
 // Lazy loading для основных страниц
 const AuthPage = React.lazy(() => import('./modules/auth/pages/AuthPage/AuthPage'));
-// const AboutPage = React.lazy(() => import('./pages/AboutPage')); // TODO: Create AboutPage or find it
+const AboutPage = React.lazy(() => import('./shared/components/AboutPage/AboutPage'));
 const DashboardPage = React.lazy(() => import('./modules/dashboard/pages/DashboardPage/DashboardPage'));
 const DayDetailPage = React.lazy(() => import('./modules/events/pages/DayDetailPage/DayDetailPage'));
 const ProfilePage = React.lazy(() => import('./modules/users/pages/ProfilePage/ProfilePage'));
@@ -60,7 +60,7 @@ const AppRoutes: React.FC = () => {
       <ErrorBoundary>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
-            {/* <Route path="/about" element={<AboutPage />} /> */}
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<AuthPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
@@ -89,6 +89,7 @@ const AppRoutes: React.FC = () => {
             <Route path="/tournaments/:id" element={<TournamentPage />} />
             <Route path="/lessons" element={<LessonsPage />} />
             <Route path="/day/:date" element={<DayDetailPage />} />
+            <Route path="/about" element={<AboutPage />} />
           </Route>
           
           <Route element={<GameLayout />}>
