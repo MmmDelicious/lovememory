@@ -179,7 +179,7 @@ export const useMascotActions = () => {
         
             if (response.intent === 'GENERATE_DATE' && response.data?.options) {
               
-              const { default: DateGenerationResult } = await import('../components/DateGenerationResult/DateGenerationResult');
+              const { default: DateGenerationResult } = await import('../modules/events/components/DateGenerationResult/DateGenerationResult');
               
           
               const modalContainer = document.createElement('div');

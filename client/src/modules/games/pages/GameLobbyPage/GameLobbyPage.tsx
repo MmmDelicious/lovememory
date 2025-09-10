@@ -5,7 +5,7 @@ import { Search, Users, Coins, ArrowLeft, Plus, Gamepad2, Trophy, Clock, Star, C
 import styles from './GameLobbyPage.module.css';
 import { useGameLobby } from '../../hooks/useGameLobby';
 import CreateRoomModal from '../../components/CreateRoomModal/CreateRoomModal';
-import { toast } from '../../context/ToastContext';
+import { toast } from '../../../../context/ToastContext';
 
 interface GameLobbyPageProps {
   gameType?: string;

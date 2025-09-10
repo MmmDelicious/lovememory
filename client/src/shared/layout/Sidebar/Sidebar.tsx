@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './Sidebar.module.css';
-import Button from '../Button/Button';
-import eventService from '../../services/event.service';
-import RecurrenceSelector from '../Calendar/RecurrenceSelector';
-import { toast } from '../../context/ToastContext';
+import Button from '../../components/Button/Button';
+import eventService from '../../../modules/events/services/event.service';
+import RecurrenceSelector from '../../../modules/events/components/Calendar/RecurrenceSelector';
+import { toast } from '../../../context/ToastContext';
 import { 
   FaTasks, FaBookmark, FaHeart, FaBirthdayCake, 
   FaPlane, FaWineGlass, FaGift, FaStar, FaChevronDown,

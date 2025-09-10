@@ -2,28 +2,28 @@ import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAppRoutesData } from './store/hooks';
 
-import MainLayout from './layouts/MainLayout/MainLayout';
-import GameLayout from './layouts/GameLayout/GameLayout';
-import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import MainLayout from './shared/layout/MainLayout/MainLayout';
+import GameLayout from './shared/layout/GameLayout/GameLayout';
+import { ErrorBoundary } from './shared/components/ErrorBoundary/ErrorBoundary';
 
 // Lazy loading для основных страниц
-const AuthPage = React.lazy(() => import('./pages/AuthPage/AuthPage'));
-const AboutPage = React.lazy(() => import('./pages/AboutPage'));
-const DashboardPage = React.lazy(() => import('./pages/DashboardPage/DashboardPage'));
-const DayDetailPage = React.lazy(() => import('./pages/DayDetailPage/DayDetailPage'));
-const ProfilePage = React.lazy(() => import('./pages/ProfilePage/ProfilePage'));
-const GamesPage = React.lazy(() => import('./pages/GamesPage/GamesPage'));
-const LessonsPage = React.lazy(() => import('./pages/LessonsPage/LessonsPage'));
-const TournamentsPage = React.lazy(() => import('./pages/TournamentsPage').then(module => ({ default: module.TournamentsPage })));
-const TournamentPage = React.lazy(() => import('./pages/TournamentPage/TournamentPage').then(module => ({ default: module.TournamentPage })));
+const AuthPage = React.lazy(() => import('./modules/auth/pages/AuthPage/AuthPage'));
+// const AboutPage = React.lazy(() => import('./pages/AboutPage')); // TODO: Create AboutPage or find it
+const DashboardPage = React.lazy(() => import('./modules/dashboard/pages/DashboardPage/DashboardPage'));
+const DayDetailPage = React.lazy(() => import('./modules/events/pages/DayDetailPage/DayDetailPage'));
+const ProfilePage = React.lazy(() => import('./modules/users/pages/ProfilePage/ProfilePage'));
+const GamesPage = React.lazy(() => import('./modules/games/pages/GamesPage/GamesPage'));
+const LessonsPage = React.lazy(() => import('./modules/education/pages/LessonsPage/LessonsPage'));
+const TournamentsPage = React.lazy(() => import('./modules/games/pages/TournamentsPage/TournamentsPage'));
+const TournamentPage = React.lazy(() => import('./modules/games/pages/TournamentPage/TournamentPage'));
 
-const GameLobbyPage = React.lazy(() => import('./pages/GameLobbyPage/GameLobbyPage'));
-const GameRoomPage = React.lazy(() => import('./pages/GameRoomPage/GameRoomPage'));
-const PokerPage = React.lazy(() => import('./pages/PokerPage/PokerPage'));
-const ErrorPage = React.lazy(() => import('./pages/ErrorPage/ErrorPage'));
+const GameLobbyPage = React.lazy(() => import('./modules/games/pages/GameLobbyPage/GameLobbyPage'));
+const GameRoomPage = React.lazy(() => import('./modules/games/pages/GameRoomPage/GameRoomPage'));
+const PokerPage = React.lazy(() => import('./modules/games/pages/PokerPage/PokerPage'));
+// const ErrorPage = React.lazy(() => import('./pages/ErrorPage/ErrorPage')); // TODO: Create ErrorPage
 
-const AuthCallbackPage = React.lazy(() => import('./pages/AuthCallbackPage/AuthCallbackPage'));
-const OnboardingInterestsPage = React.lazy(() => import('./pages/OnboardingInterestsPage/OnboardingInterestsPage'));
+const AuthCallbackPage = React.lazy(() => import('./modules/auth/pages/AuthCallbackPage/AuthCallbackPage'));
+const OnboardingInterestsPage = React.lazy(() => import('./modules/users/pages/OnboardingInterestsPage/OnboardingInterestsPage'));
 
 // Компонент загрузки
 const LoadingFallback = () => (
@@ -60,12 +60,12 @@ const AppRoutes: React.FC = () => {
       <ErrorBoundary>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
-            <Route path="/about" element={<AboutPage />} />
+            {/* <Route path="/about" element={<AboutPage />} /> */}
             <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<AuthPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
-            <Route path="/error" element={<ErrorPage />} />
-            <Route path="/" element={<AboutPage />} />
+            {/* <Route path="/error" element={<ErrorPage />} /> */}
+            <Route path="/" element={<AuthPage />} />
             <Route path="*" element={<Navigate to="/about" />} />
           </Routes>
         </Suspense>
@@ -96,7 +96,7 @@ const AppRoutes: React.FC = () => {
             <Route path="/games/poker/:roomId" element={<PokerPage />} />
           </Route>
           
-          <Route path="/error" element={<ErrorPage />} />
+          {/* <Route path="/error" element={<ErrorPage />} /> */}
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login" element={<Navigate to="/dashboard" replace />} />

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useUser } from '../../store/hooks';
+import { useUser } from '../../../../store/hooks';
 import styles from './DashboardPage.module.css';
-import Calendar from '../../components/Calendar/Calendar';
-import { useEvents } from '../../hooks/useEvents';
-import { useEventTemplates } from '../../hooks/useEventTemplates';
+import Calendar from '../../../events/components/Calendar/Calendar';
+import { useEvents } from '../../../events/hooks/useEvents';
+import { useEventTemplates } from '../../../events/hooks/useEventTemplates';
 
 const DashboardPage: React.FC = () => {
   const user = useUser();

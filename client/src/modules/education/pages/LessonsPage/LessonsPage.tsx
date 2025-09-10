@@ -7,8 +7,8 @@ import LessonProgress from '../../components/LessonProgress/LessonProgress';
 import PsychologyTips from '../../components/PsychologyTips/PsychologyTips';
 import ThemesTab from '../../components/ThemesTab/ThemesTab';
 
-import { lessonService } from '../../services/lesson.service';
-import { lessonUtils, type Lesson } from '@shared/utils/lessonUtils';
+import { lessonService } from '../../../../services/lesson.service';
+import { lessonUtils, type Lesson } from '../../../../shared/utils/lessonUtils';
 import styles from './LessonsPage.module.css';
 const LessonsPage: React.FC = () => {
   // New tab structure: Today, Topics

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import React from 'react'; // Added missing import for React.useEffect
 import { useDispatch, useSelector } from 'react-redux';
-import { setFieldErrors, selectFieldErrors } from '../store/slices/authSlice';
+import { setFieldErrors, selectFieldErrors } from '../../../store/slices/authSlice';
 
 type AuthMode = 'login' | 'register';
 

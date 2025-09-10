@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import eventService from '../services/event.service';
-import { toast } from '../context/ToastContext';
+import { toast } from '../../../context/ToastContext';
 
 interface StorySlide {
   type: 'dayHeader' | 'event' | 'media';

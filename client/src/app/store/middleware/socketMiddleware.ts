@@ -1,6 +1,6 @@
 import { createListenerMiddleware } from '@reduxjs/toolkit';
-import { connectToGameSocket, setGameState, setConnectionStatus } from '../slices/gameSlice';
-import type { AppDispatch } from '../index';
+import { connectToGameSocket, setGameState, setConnectionStatus } from '../../../store/slices/gameSlice';
+import type { AppDispatch } from '../../../store/types';
 
 
 export const socketMiddleware = createListenerMiddleware<AppDispatch>();

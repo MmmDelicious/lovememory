@@ -1,7 +1,7 @@
 import React from 'react';
-import { useAIMascot, useMascotActions } from '../../store/hooks';
+import { useAIMascot, useMascotActions } from '../../../../store/hooks';
 import styles from './AIToggleButton.module.css';
-import mascotIcon from '../../assets/AI.json';
+import mascotIcon from '../../../../shared/assets/AI.json';
 import Lottie from 'lottie-react';
 
 const AIToggleButton = () => {

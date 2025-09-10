@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../../../services/api';
 
 // Кэш для интересов (простой in-memory кэш)
 let interestsCache = null;

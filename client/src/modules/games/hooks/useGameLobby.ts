@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useUser } from '../store/hooks';
+import { useUser } from '../../../store/hooks';
 import gameService from '../services/game.service';
-import type { GameRoom, UseGameLobbyReturn } from '../../types/game.types';
+import type { GameRoom, UseGameLobbyReturn } from '../../../types/game.types';
 const SOCKET_URL =
   import.meta.env.VITE_SOCKET_URL ||
   import.meta.env.VITE_SERVER_URL ||

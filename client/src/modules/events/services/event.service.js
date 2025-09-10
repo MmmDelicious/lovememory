@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../../../services/api';
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 const FILES_BASE_URL = API_BASE_URL.replace(/\/?api$/, '');
 const getEvents = () => {

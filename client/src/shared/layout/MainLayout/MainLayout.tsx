@@ -1,11 +1,11 @@
 import React from 'react';
 import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
-import MobileLayout from '../../layouts/MobileLayout/MobileLayout';
+import MobileLayout from '../MobileLayout/MobileLayout';
 import DashboardPage from '../../pages/DashboardPage/DashboardPage';
-import MobileDashboard from '../../pages/MobileDashboard/MobileDashboard';
+import MobileDashboard from '../../../modules/dashboard/pages/MobileDashboard/MobileDashboard';
 import GamesPage from '../../pages/GamesPage/GamesPage';
-import MobileGames from '../../pages/GamesPage/MobileGames';
-import ProfilePage from '../../pages/ProfilePage/ProfilePage';
+import MobileGames from '../../../modules/games/pages/GamesPage/MobileGames';
+import ProfilePage from '../../../modules/users/pages/ProfilePage/ProfilePage';
 import NotificationDropdown from '../../components/NotificationDropdown/NotificationDropdown';
 import UserDropdown from '../../components/UserDropdown/UserDropdown';
 import { 
@@ -24,7 +24,7 @@ import {
   Trophy
 } from 'lucide-react';
 import styles from './MainLayout.module.css';
-import { useUser, useAuthActions } from '../../store/hooks';
+import { useUser, useAuthActions } from '../../../store/hooks';
 const MainLayout: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);

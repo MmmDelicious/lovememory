@@ -29,4 +29,5 @@ const ToastContainer: React.FC<ToastContainerProps> = ({ toasts, onRemoveToast }
     </div>
   );
 };
+export { ToastContainer };
 export default ToastContainer;

@@ -4,19 +4,19 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin, { Draggable } from '@fullcalendar/interaction';
 import type { EventDropArg, EventClickArg, EventContentArg } from '@fullcalendar/core';
-import Sidebar from '../Sidebar/Sidebar';
+import Sidebar from '../../../../shared/layout/Sidebar/Sidebar';
 import { FaChevronLeft, FaChevronRight, FaFilter, FaListUl, FaPlus, FaHeart } from 'react-icons/fa';
-import { useMascot } from '../../context/MascotContext';
-import { toast } from '../../context/ToastContext';
+import { useMascot } from '../../../../context/MascotContext';
+import { toast } from '../../../../context/ToastContext';
 import styles from './Calendar.module.css';
 import CalendarFilters from './SearchAndFilter';
 import CalendarSidebar from './CalendarSidebar';
 import { EVENT_TYPE_COLORS } from '../../hooks/useEvents';
-import { getHueFromHex, darken } from '@shared/utils/color';
+import { getHueFromHex, darken } from '../../../../shared/utils/color';
 import type { EventTemplateData } from '../EventTemplateModal/EventTemplateModal';
 import memoriesService from '../../services/memories.service';
 import DateGeneratorModal from '../DateGeneratorModal/DateGeneratorModal';
-import StoryViewer from '../StoryViewer/StoryViewer';
+import StoryViewer from '../../../../shared/components/StoryViewer/StoryViewer';
 
 interface CalendarEvent {
   id: string;

@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../../../services/api';
 class PlacesService {
   constructor() {
     this.cache = new Map();

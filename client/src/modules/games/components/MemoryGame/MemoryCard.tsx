@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './MemoryCard.module.css';
-import '../../index.css';
+import '../../../../index.css';
 
 interface MemoryCardProps {
   id: number;

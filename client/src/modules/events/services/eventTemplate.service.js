@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../../../services/api';
 const BASE_URL = '/event-templates';
 export const eventTemplateService = {
   getTemplates: async () => {

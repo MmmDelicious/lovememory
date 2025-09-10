@@ -1,5 +1,5 @@
-import lessonsData from '@assets/lessons/lessons.json';
-import { themes as lessonThemes } from '@assets/lessons';
+import lessonsData from '../../modules/education/assets/lessons/lessons.json';
+import { themes as lessonThemes } from '../../modules/education/assets/lessons';
 
 export interface Lesson {
   id: string;

@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../../../services/api';
 import placesService from './places.service';
 const relationshipGraphData = {
   nodes: [

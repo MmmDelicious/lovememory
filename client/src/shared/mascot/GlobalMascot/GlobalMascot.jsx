@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import LottieMascot from '../LottieMascot/LottieMascot';
 import InterceptedMascot from '../InterceptedMascot/InterceptedMascot';
-import { useMascot } from '../../context/MascotContext';
+import { useMascot } from '../../../context/MascotContext';
 
 const GlobalMascot = () => {
   const mascotContext = useMascot();

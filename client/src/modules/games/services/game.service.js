@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../../../services/api';
 const getRooms = async (gameType) => {
   const response = await api.get('/games', { params: { gameType } });
   return response.data;

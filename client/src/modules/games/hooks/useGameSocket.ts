@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import type { GameState, GameMove, UseGameSocketReturn } from '../../types/game.types';
-import { toast } from '../context/ToastContext';
+import { toast } from '../../../context/ToastContext';
 const SOCKET_URL =
   import.meta.env.VITE_SOCKET_URL ||
   import.meta.env.VITE_SERVER_URL ||

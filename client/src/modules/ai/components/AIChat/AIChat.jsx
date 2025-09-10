@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useAIMascot, useMascotActions, useUser } from '../../store/hooks';
-import { usePairing } from '../../hooks/usePairing';
+import { useAIMascot, useMascotActions, useUser } from '../../../../store/hooks';
+import { usePairing } from '../../../users/hooks/usePairing';
 import styles from './AIChat.module.css';
 
 const MAX_PROMPT_LENGTH = 500;

@@ -1,6 +1,6 @@
 import React from 'react';
-import maleAvatar from '../../assets/man.png';
-import femaleAvatar from '../../assets/woman.png';
+import maleAvatar from '../../../../shared/assets/man.png';
+import femaleAvatar from '../../../../shared/assets/woman.png';
 import styles from './GenderSelector.module.css';
 const GenderSelector = ({ selectedGender, onGenderChange }) => {
   return (

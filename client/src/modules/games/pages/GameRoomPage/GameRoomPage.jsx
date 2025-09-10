@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import LottiePlayer from 'react-lottie-player';
-import { useUser } from '../../store/hooks';
+import { useUser } from '../../../../store/hooks';
 import { useGameSocket } from '../../hooks/useGameSocket';
 import QuizGame from '../../components/QuizGame/QuizGame';
 import ChessGame from '../../components/ChessGame/ChessGameEnhanced';
@@ -9,8 +9,8 @@ import WordleGame from '../../components/WordleGame/WordleGame';
 import CodenamesGame from '../../components/CodenamesGame/CodenamesGame';
 import MemoryGameComponent from '../../components/MemoryGame/MemoryGameComponent';
 import styles from './GameRoomPage.module.css';
-import victoryAnimation from '../../assets/victory.json';
-import defeatAnimation from '../../assets/defeat.json';
+import victoryAnimation from '../../../../shared/assets/victory.json';
+import defeatAnimation from '../../../../shared/assets/defeat.json';
 const GameRoomPage = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();

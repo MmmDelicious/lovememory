@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { Clock, Star, Heart, Coffee, MessageCircle, Target, Users, Coins, Calendar, Share2, CheckCircle } from 'lucide-react';
 import Lottie from 'lottie-react';
 import { getLessonAnimation } from '../../assets/lessons';
-import { lessonUtils, type Lesson } from '@shared/utils/lessonUtils';
-import { lessonService } from '../../services/lesson.service';
+import { lessonUtils, type Lesson } from '../../../../shared/utils/lessonUtils';
+import { lessonService } from '../../../../services/lesson.service';
 import styles from './TodayTab.module.css';
 
 interface TodayTabProps {

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useAuthActions, useAuthPageData } from '../../store/hooks';
+import { useAuthActions, useAuthPageData } from '../../../../store/hooks';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useInteractiveMascot } from '../../hooks/useInteractiveMascot';
+import { useInteractiveMascot } from '../../../../shared/mascot/hooks/useInteractiveMascot';
 import { useAuthForm } from '../../hooks/useAuthForm';
-import Button from '../../components/Button/Button';
-import StaticMascot from '../../components/StaticMascot/StaticMascot';
-import GenderSelector from '../../components/GenderSelector/GenderSelector';
-import greetAnimation from '../../assets/greet.json';
+import Button from '../../../../shared/components/Button/Button';
+import StaticMascot from '../../../../shared/mascot/StaticMascot/StaticMascot';
+import GenderSelector from '../../../users/components/GenderSelector/GenderSelector';
+import greetAnimation from '../../../../shared/assets/greet.json';
 import styles from './AuthPage.module.css';
 
 type AuthMode = 'login' | 'register';

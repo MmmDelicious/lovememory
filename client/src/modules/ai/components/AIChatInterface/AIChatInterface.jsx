@@ -1,10 +1,10 @@
 import React from 'react';
-import { useAIMascot, useMascotActions, useGlobalMascot, useUser } from '../../store/hooks';
-import { usePairing } from '../../hooks/usePairing';
+import { useAIMascot, useMascotActions, useGlobalMascot, useUser } from '../../../../store/hooks';
+import { usePairing } from '../../../users/hooks/usePairing';
 import AIChat from '../AIChat/AIChat';
 import AIToggleButton from '../AIToggleButton/AIToggleButton';
-import FreeRoamMascot from '../FreeRoamMascot/FreeRoamMascot';
-import DateGeneratorModal from '../DateGeneratorModal/DateGeneratorModal';
+import FreeRoamMascot from '../../../../shared/mascot/FreeRoamMascot/FreeRoamMascot';
+import DateGeneratorModal from '../../../events/components/DateGeneratorModal/DateGeneratorModal';
 
 const AIChatInterface = () => {
   const { isVisible, isChatOpen, isLoading } = useAIMascot();

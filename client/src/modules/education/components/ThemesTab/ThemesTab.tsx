@@ -4,8 +4,8 @@ import Lottie from 'lottie-react';
 import { ChevronRight, Filter, BookOpen, Target } from 'lucide-react';
 import styles from './ThemesTab.module.css';
 import { themes as lessonThemes, getLessonAnimation } from '../../assets/lessons';
-import { lessonService } from '../../services/lesson.service';
-import { lessonUtils } from '@shared/utils/lessonUtils';
+import { lessonService } from '../../../../services/lesson.service';
+import { lessonUtils } from '../../../../shared/utils/lessonUtils';
 
 interface Theme {
   id: string;
