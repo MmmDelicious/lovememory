@@ -3,11 +3,11 @@ import styles from './AuthCallbackPage.module.css';
 const AuthCallbackPage = () => {
   useEffect(() => {
     try {
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      const token = params.get('token');
-      const userString = params.get('user');
-      if (token && userString) {
+      // Читаем параметры из query string вместо hash
+      const urlParams = new URLSearchParams(window.location.search);
+      const userString = urlParams.get('user');
+      
+      if (userString) {
         const user = JSON.parse(decodeURIComponent(userString));
         // Токен уже установлен в httpOnly cookie сервером
         // Просто сообщаем родительскому окну об успехе
@@ -18,7 +18,7 @@ const AuthCallbackPage = () => {
           }, import.meta.env.VITE_SERVER_URL);
         }
       } else {
-        console.error('Auth callback failed: Missing token or user data in URL hash.');
+        console.error('Auth callback failed: Missing user data in URL.');
         if (window.opener) {
           window.opener.postMessage({
             type: 'auth-error',

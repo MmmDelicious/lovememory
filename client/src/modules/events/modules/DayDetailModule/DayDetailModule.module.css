@@ -1,0 +1,386 @@
+.dayDetailModule {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f8f9fa;
+}
+
+.loading,
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  font-size: 16px;
+  color: #6c757d;
+}
+
+.error {
+  color: #dc3545;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.titleSection {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.meta {
+  display: flex;
+  gap: 16px;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.eventCount {
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.emptyIcon {
+  font-size: 64px;
+  color: #adb5bd;
+  margin-bottom: 20px;
+}
+
+.emptyState h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 32px 0;
+  max-width: 500px;
+  line-height: 1.4;
+}
+
+.quickTemplates {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Timeline */
+.timeline {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.timeGroup {
+  margin-bottom: 40px;
+}
+
+.timeGroupHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.timelineNode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #007bff;
+  color: white;
+  border-radius: 50%;
+  font-size: 16px;
+  z-index: 1;
+}
+
+.timeGroupTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #495057;
+  margin: 0;
+}
+
+.timeGroupEvents {
+  margin-left: 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+.timeGroupEvents::before {
+  content: '';
+  position: absolute;
+  left: -32px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e9ecef;
+}
+
+/* Event Card Customizations */
+.eventCard {
+  position: relative;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.eventCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Media Section */
+.mediaSection {
+  margin-top: 16px;
+  padding: 12px;
+  border: 2px dashed #e9ecef;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.mediaSection.dragOver {
+  border-color: #007bff;
+  background: #e3f2fd;
+}
+
+.mediaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.mediaItem {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.mediaItem:hover {
+  transform: scale(1.05);
+}
+
+.mediaImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mediaOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.emptyMediaHint {
+  text-align: center;
+  color: #6c757d;
+  font-size: 14px;
+  padding: 20px;
+}
+
+.uploadingIndicator {
+  text-align: center;
+  color: #007bff;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* Reactions */
+.eventReactions {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e9ecef;
+}
+
+.reactionButtons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.reactionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f8f9fa;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.reactionButton:hover {
+  background: #e9ecef;
+  transform: scale(1.1);
+}
+
+.reactionsList {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.reactionItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+}
+
+.moreReactions {
+  font-size: 12px;
+  color: #6c757d;
+  margin-left: 4px;
+}
+
+/* Image Modal */
+.imageModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.fullSizeImage {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  cursor: default;
+}
+
+.closeModalButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeModalButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px 20px;
+  }
+  
+  .titleSection {
+    text-align: center;
+  }
+  
+  .title {
+    font-size: 24px;
+  }
+  
+  .actions {
+    justify-content: center;
+  }
+  
+  .content {
+    padding: 20px 16px;
+  }
+  
+  .timeGroupEvents {
+    margin-left: 0;
+  }
+  
+  .timeGroupEvents::before {
+    display: none;
+  }
+  
+  .timeGroupHeader {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .mediaGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .reactionButtons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .quickTemplates {
+    flex-direction: column;
+    width: 100%;
+    max-width: 280px;
+  }
+  
+  .mediaGrid {
+    grid-template-columns: 1fr;
+  }
+}

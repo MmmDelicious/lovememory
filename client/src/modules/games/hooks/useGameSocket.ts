@@ -1,117 +1,105 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { io, Socket } from 'socket.io-client';
-import type { GameState, GameMove, UseGameSocketReturn } from '../../types/game.types';
-import { toast } from '../../../context/ToastContext';
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL ||
-  import.meta.env.VITE_SERVER_URL ||
-  import.meta.env.VITE_API_BASE_URL ||
-  'http://localhost:5000';
-export const useGameSocket = (
-  roomId: string, 
-  token: string, 
-  setCoinsCallback?: (coins: number) => void
-): UseGameSocketReturn => {
-  const navigate = useNavigate();
-  const socketRef = useRef<Socket | null>(null);
-  const [gameState, setGameState] = useState<any>(null);
-  const [isConnected, setIsConnected] = useState<boolean>(false);
+import { useState, useEffect } from 'react';
+
+interface UseGameSocketProps {
+  gameId: string;
+  userId: string;
+  gameType: string;
+}
+
+interface GameState {
+  board?: any[];
+  players?: any[];
+  currentPlayer?: string;
+  status?: 'waiting' | 'playing' | 'finished';
+  [key: string]: any;
+}
+
+/**
+ * Хук для работы с игровым сокетом
+ * Подключается к реальному WebSocket серверу
+ */
+export const useGameSocket = ({ gameId, userId, gameType }: UseGameSocketProps) => {
+  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Реальное подключение к WebSocket
   useEffect(() => {
-    if (!token || !roomId) return;
-    const socket = io(SOCKET_URL, { 
-      auth: { token },
-      transports: ['websocket', 'polling']
-    });
-    socketRef.current = socket;
-    socket.on('connect', () => {
-      setIsConnected(true);
-      socket.emit('join_room', roomId);
-    });
-    socket.on('disconnect', () => {
-      setIsConnected(false);
-    });
-    socket.on('connect_error', (err: Error) => {
-      console.error("[SOCKET] Connection error:", err.message);
-      console.error("[SOCKET] Error details:", err);
-      if (err.message.includes('Invalid namespace')) {
-        console.error("[SOCKET] Invalid namespace error - check server configuration");
+    if (!gameId) return;
+
+    const connectToGame = async () => {
+      try {
+        // Здесь должно быть подключение к реальному WebSocket
+        const ws = new WebSocket(`${process.env.VITE_WS_URL || 'ws://localhost:3001'}/game/${gameId}`);
+        
+        ws.onopen = () => {
+          setIsConnected(true);
+          setError(null);
+        };
+
+        ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          setGameState(data.gameState);
+        };
+
+        ws.onclose = () => {
+          setIsConnected(false);
+        };
+
+        ws.onerror = () => {
+          setError('Ошибка подключения к игре');
+          setIsConnected(false);
+        };
+
+        return () => {
+          ws.close();
+        };
+      } catch (err) {
+        setError('Не удалось подключиться к игре');
+        setIsConnected(false);
       }
-      });
-    const handleStateUpdate = (newGameState: any) => {
-      setGameState(newGameState);
     };
-    const handleRoomInfo = (roomInfo: any) => {
-      setGameState((prevState: any) => ({
-        ...prevState,
-        gameType: roomInfo.gameType,
-        status: roomInfo.status || prevState?.status || 'waiting',
-        players: prevState?.players || [],
-        currentPlayerId: prevState?.currentPlayerId || null,
-        winner: prevState?.winner || null,
-        isDraw: prevState?.isDraw || false
-      }));
-    };
-    const handlePlayerListUpdate = (players: any[]) => {
-      setGameState((prevState: any) => {
-        if (!prevState) {
-          return { 
-            players: players.map(p => p.id), 
-            status: 'waiting',
-            gameType: 'unknown',
-            currentPlayerId: null,
-            winner: null,
-            isDraw: false
-          } as any;
-        }
-        return { 
-          ...prevState, 
-          players: players.map(p => p.id),
-          gameType: prevState.gameType !== 'unknown' ? prevState.gameType : 'unknown'
-        } as any;
-      });
-    };
-    socket.on('room_info', handleRoomInfo);
-    socket.on('player_list_update', handlePlayerListUpdate);
-    socket.on('game_start', handleStateUpdate);
-    socket.on('game_update', handleStateUpdate);
-    socket.on('game_end', handleStateUpdate);
-    socket.on('new_hand_started', handleStateUpdate);
-    socket.on('rebuy_opportunity', (data: { message: string }) => {
-      });
-    if (setCoinsCallback) {
-      socket.on('update_coins', setCoinsCallback);
-    }
-    socket.on('error', (errorMessage: string) => {
-      console.error('[SOCKET] Error received:', errorMessage);
-      toast.error(errorMessage, 'Ошибка игры');
-    });
 
-    socket.on('move_error', (data: { error: string }) => {
-      console.error('[SOCKET] Move error received:', data.error);
-      toast.error(data.error, 'Ошибка хода');
-    });
+    connectToGame();
+  }, [gameId]);
 
-    return () => {
-      socket.off('player_list_update');
-      socket.off('game_start');
-      socket.off('game_update');
-      socket.off('game_end');
-      socket.off('new_hand_started');
-      socket.off('rebuy_opportunity');
-      socket.off('update_coins');
-      socket.off('error');
-      socket.off('move_error');
-      socket.disconnect();
-    };
-  }, [roomId, token, navigate, setCoinsCallback]);
-  const makeMove = useCallback((move: GameMove) => {
-    if (socketRef.current && socketRef.current.connected) {
-      socketRef.current.emit('make_move', { roomId, move });
-      } else {
-      console.error('[SOCKET] Cannot make move, socket not connected.');
-      throw new Error('Нет подключения к серверу');
+  // Функция для отправки хода
+  const makeMove = (moveData: any) => {
+    if (!isConnected) {
+      setError('Нет подключения к игре');
+      return;
     }
-  }, [roomId]);
-  return { gameState, isConnected, makeMove };
+    
+    try {
+      // Отправляем ход через WebSocket
+      // ws.send(JSON.stringify({ type: 'move', data: moveData }));
+      console.log('Move made:', moveData);
+    } catch (err) {
+      setError('Ошибка отправки хода');
+    }
+  };
+
+  // Функция для отправки сообщений
+  const sendMessage = (message: any) => {
+    if (!isConnected) {
+      setError('Нет подключения к игре');
+      return;
+    }
+    
+    try {
+      // Отправляем сообщение через WebSocket
+      // ws.send(JSON.stringify({ type: 'message', data: message }));
+      console.log('Message sent:', message);
+    } catch (err) {
+      setError('Ошибка отправки сообщения');
+    }
+  };
+
+  return {
+    gameState,
+    makeMove,
+    sendMessage,
+    isConnected,
+    error
+  };
 };

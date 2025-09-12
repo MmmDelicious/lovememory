@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useUser } from '../../store/hooks';
-import { tournamentService } from '../../services';
+import { useUser } from '@/store';
+import { tournamentService } from '../../services/tournament.service';
 import { TournamentBracket } from '../../components/Tournament/TournamentBracket';
 import { TournamentLobby } from '../../components/Tournament/TournamentLobby';
 import { TournamentHeader } from '../../components/Tournament/TournamentHeader';
-import ErrorDisplay from '../../components/ErrorDisplay/ErrorDisplay';
+import ErrorDisplay from '@/shared/components/ErrorDisplay/ErrorDisplay';
 import { Tournament, TournamentMatch, GameParticipant } from '../../types/models';
 import { ArrowLeft, Trophy, Users, Clock } from 'lucide-react';
 import styles from './TournamentPage.module.css';

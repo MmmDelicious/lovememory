@@ -56,7 +56,7 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials: LoginCredentials, { rejectWithValue, dispatch }) => {
     try {
-      // Сервер теперь возвращает { user }, токен находится в httpOnly cookie
+      // Сервер возвращает { user }, токен автоматически устанавливается в httpOnly cookie
       const { user } = await authService.login(credentials.email, credentials.password);
       
       return user; // Возвращаем только данные пользователя
@@ -188,7 +188,7 @@ const authSlice = createSlice({
         state.error = null;
         state.fieldErrors = {};
         state.isFormError = false;
-        // Логика с localStorage удалена, так как токен управляется httpOnly cookie
+        // Токен автоматически сохраняется в httpOnly cookie сервером
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;

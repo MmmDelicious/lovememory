@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { EventDropArg, EventClickArg } from '@fullcalendar/core';
-import { EVENT_TYPE_COLORS } from '@/shared';
-import { getHueFromHex, darken } from '@/shared';
+import { EVENT_TYPE_COLORS } from './useEvents';
+import { getHueFromHex, darken } from '../../../shared/utils/color';
 
 interface CalendarEvent {
   id: string;

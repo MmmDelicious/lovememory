@@ -1,395 +1,122 @@
-.gameRoomContainer {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100vw;
-  height: 100vh;
-  padding: 1.5rem;
-  box-sizing: border-box;
-  background: linear-gradient(135deg, #fdedde 0%, #f8e6d3 100%);
-  background-attachment: fixed;
-  color: #443a32;
-  text-align: center;
-  overflow: hidden;
-  position: relative;
-  font-family: 'Lora', serif;
+/* Очищенные стили GameRoomPage */
+
+.gameRoom {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
 }
 
-.gameRoomContainer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('https://www.transparenttextures.com/patterns/noise.png');
-  opacity: 0.03;
-  pointer-events: none;
-  z-index: 1;
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding: 0 20px;
 }
 
-.gameArea {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
+.gameInfo {
   flex: 1;
-  width: 100%;
-  height: 100%;
-}
-
-.exitButton {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: 'Lora', serif;
-  color: #443a32;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 244, 239, 0.9) 100%);
-  backdrop-filter: blur(8px);
-  border: 2px solid rgba(203, 116, 89, 0.3);
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 100;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.exitButton:hover {
-  border-color: #e8826b;
-  color: #e8826b;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(232, 130, 107, 0.3);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(248, 244, 239, 1) 100%);
 }
 
 .title {
-  font-family: var(--font-family-heading);
-  font-size: 2.5rem;
-  color: var(--color-text-primary);
-  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #1f2937);
+  margin: 0 0 8px 0;
 }
 
 .status {
-  font-size: 1.3rem;
-  margin-bottom: 1.5rem;
-  min-height: 25px;
-  font-weight: 600;
-  font-family: 'Playfair Display', serif;
-  color: #443a32;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-  z-index: 2;
-  position: relative;
+  font-size: 1rem;
+  color: var(--color-text-secondary, #6b7280);
+  font-weight: 500;
 }
 
-.ticTacToeBoard {
-  display: grid;
-  grid-template-columns: repeat(3, 120px);
-  grid-template-rows: repeat(3, 120px);
-  gap: 16px;
-  width: fit-content;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 244, 239, 0.9) 100%);
-  backdrop-filter: blur(10px);
-  padding: 30px;
-  border-radius: 20px;
-  border: 2px solid rgba(203, 116, 89, 0.3);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-  z-index: 2;
-  position: relative;
-}
-
-.cell {
-  width: 120px;
-  height: 120px;
-  background: linear-gradient(135deg, #fcefdf 0%, #f8e6d3 100%);
-  border: 2px solid rgba(203, 116, 89, 0.4);
-  border-radius: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Playfair Display', serif;
-  font-size: 4.5rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  user-select: none;
-  position: relative;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.cell:not(.filled):hover {
-  background: linear-gradient(135deg, #ffffff 0%, #fcefdf 100%);
-  border-color: #e8826b;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(232, 130, 107, 0.3);
-}
-
-.cell.filled {
-  cursor: not-allowed;
-}
-
-.cellX {
-  color: #e8826b;
-  text-shadow: 0 2px 4px rgba(232, 130, 107, 0.3);
-}
-
-.cellO {
-  color: #cb7459;
-  text-shadow: 0 2px 4px rgba(203, 116, 89, 0.3);
-}
-
-.cell.disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.cell.loading::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 30px;
-  height: 30px;
-  margin: -15px 0 0 -15px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(68, 58, 50, 0.9) 100%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.overlayContent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  text-align: center;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 244, 239, 0.95) 100%);
-  backdrop-filter: blur(15px);
-  padding: 3rem 2.5rem;
-  border-radius: 24px;
-  border: 2px solid rgba(203, 116, 89, 0.3);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  max-width: 450px;
-  width: 90%;
-  color: #443a32;
-  font-family: 'Lora', serif;
-}
-
-.lottieAnimation {
-  width: 400px;
-  height: 400px;
-  margin-bottom: -2rem;
-  pointer-events: none;
-}
-
-.coinsInfo {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin: var(--space-4) 0;
-  padding: var(--space-3) var(--space-4);
-  background: rgba(217, 122, 108, 0.1);
-  border: 1px solid rgba(217, 122, 108, 0.3);
-  border-radius: var(--border-radius);
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.coinsIcon {
-  font-size: 1.5rem;
-}
-
-.winnerText, .loserText, .drawText {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.8rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  text-shadow: 0px 4px 15px rgba(0,0,0,0.05);
-}
-
-.winnerText {
-  color: #4CAF50;
-  text-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
-}
-
-.loserText {
-  color: #e8826b;
-  text-shadow: 0 2px 4px rgba(232, 130, 107, 0.3);
-}
-
-.drawText {
-  color: #cb7459;
-  text-shadow: 0 2px 4px rgba(203, 116, 89, 0.3);
-}
-
-.lobbyButton {
-  border: none;
-  padding: 1rem 2.5rem;
-  border-radius: 16px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  font-family: 'Lora', serif;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: linear-gradient(135deg, #e8826b 0%, #cb7459 100%);
+.leaveButton {
+  padding: 10px 20px;
+  background: var(--color-danger, #ef4444);
   color: white;
-  box-shadow: 0 8px 25px rgba(232, 130, 107, 0.4);
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.lobbyButton:hover {
-  background: linear-gradient(135deg, #f39474 0%, #d67e63 100%);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(232, 130, 107, 0.5);
+.leaveButton:hover {
+  background: var(--color-danger-dark, #dc2626);
+  transform: translateY(-2px);
 }
 
+.gameContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.unknownGame {
+  text-align: center;
+  padding: 40px;
+}
+
+.unknownGame h3 {
+  font-size: 1.5rem;
+  color: var(--color-text-primary, #1f2937);
+  margin-bottom: 20px;
+}
+
+.returnButton {
+  padding: 12px 24px;
+  background: var(--color-primary, #667eea);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.returnButton:hover {
+  background: var(--color-primary-dark, #5a67d8);
+  transform: translateY(-2px);
+}
+
+.error {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.error h2 {
+  font-size: 2rem;
+  color: var(--color-text-primary, #1f2937);
+  margin-bottom: 24px;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-  .ticTacToeBoard {
-    grid-template-columns: repeat(3, 90px);
-    grid-template-rows: repeat(3, 90px);
-    gap: 12px;
+  .gameRoom {
     padding: 16px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .gameContent {
+    padding: 20px;
     border-radius: 16px;
   }
   
-  .cell {
-    width: 90px;
-    height: 90px;
-    font-size: 3.5rem;
-    border-radius: 10px;
-  }
-
   .title {
-    font-size: 2rem;
-  }
-
-  .status {
-    font-size: 1.1rem;
-  }
-
-  .exitButton {
-    top: 16px;
-    right: 16px;
-    padding: 8px 16px;
-    font-size: 0.9rem;
-  }
-}
-
-.boardPlaceholder {
-  text-align: center;
-  padding: 2rem;
-  color: var(--color-text-secondary);
-  font-style: italic;
-  background: var(--color-surface);
-  border-radius: var(--border-radius);
-  border: 2px dashed var(--color-border);
-  margin: 2rem auto;
-  max-width: 400px;
-}
-
-/* Стили для состояния ожидания */
-.gameRoomContainer.waiting .ticTacToeBoard {
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.gameRoomContainer.waiting .ticTacToeBoard .cell {
-  cursor: not-allowed !important;
-  opacity: 0.7;
-}
-
-.gameRoomContainer.waiting .ticTacToeBoard .cell:hover {
-  transform: none !important;
-  background-color: var(--color-background) !important;
-  border-color: var(--color-border) !important;
-}
-
-/* Стили для отображения ID комнаты */
-.roomIdDisplay {
-  position: fixed;
-  top: var(--space-6);
-  left: var(--space-6);
-  z-index: 99;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--border-radius-md);
-  padding: var(--space-2) var(--space-3);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-family-body);
-  font-size: 0.85rem;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
-  user-select: none;
-}
-
-.roomIdDisplay:hover {
-  background: var(--color-primary-light);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-.roomIdLabel {
-  font-weight: 500;
-  opacity: 0.8;
-}
-
-.roomIdValue {
-  font-family: 'Courier New', monospace;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-.copyIcon {
-  font-size: 0.9rem;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
-}
-
-.roomIdDisplay:hover .copyIcon {
-  opacity: 1;
-}
-
-/* Адаптация для мобильных */
-@media (max-width: 768px) {
-  .roomIdDisplay {
-    top: var(--space-4);
-    left: var(--space-4);
-    padding: var(--space-2);
-    font-size: 0.8rem;
-  }
-  
-  .roomIdValue {
-    max-width: 60px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 1.5rem;
   }
 }

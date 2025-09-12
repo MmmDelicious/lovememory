@@ -1,0 +1,172 @@
+.badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  background: white;
+  border: 2px solid;
+  transition: all 0.2s ease;
+  position: relative;
+  gap: 0.5rem;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.emoji {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.name {
+  font-weight: 500;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.preferenceIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Preference variants */
+.love {
+  border-color: #ef4444;
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.love .preferenceIcon {
+  color: #ef4444;
+}
+
+.like {
+  border-color: #10b981;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.like .preferenceIcon {
+  color: #10b981;
+}
+
+.neutral {
+  border-color: #6b7280;
+  color: #4b5563;
+  background: rgba(107, 114, 128, 0.05);
+}
+
+.neutral .preferenceIcon {
+  color: #6b7280;
+}
+
+.dislike {
+  border-color: #f59e0b;
+  color: #d97706;
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.dislike .preferenceIcon {
+  color: #f59e0b;
+}
+
+/* Sizes */
+.small {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.small .emoji {
+  font-size: 1rem;
+}
+
+.small .name {
+  font-size: 0.75rem;
+}
+
+.large {
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+}
+
+.large .emoji {
+  font-size: 1.5rem;
+}
+
+.large .name {
+  font-size: 1rem;
+}
+
+/* Intensity bars */
+.intensityContainer {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.intensityBar {
+  width: 4px;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  transition: background 0.2s ease;
+}
+
+.intensityBar.active {
+  background: currentColor;
+}
+
+/* Remove button */
+.removeButton {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.removeButton:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .badge {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .name {
+    font-size: 0.8rem;
+  }
+  
+  .emoji {
+    font-size: 1rem;
+  }
+}

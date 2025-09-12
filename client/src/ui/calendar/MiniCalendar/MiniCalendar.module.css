@@ -1,0 +1,112 @@
+.miniCalendar {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.navButton:hover {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.grid {
+  padding: 8px;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6c757d;
+  padding: 4px 0;
+}
+
+.dates {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.dateButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dateButton:hover {
+  background: #e9ecef;
+}
+
+.dateButton.otherMonth {
+  color: #adb5bd;
+}
+
+.dateButton.today {
+  background: #007bff;
+  color: white;
+}
+
+.dateButton.today:hover {
+  background: #0056b3;
+}
+
+.dateButton.selected {
+  background: #28a745;
+  color: white;
+}
+
+.dateButton.selected:hover {
+  background: #1e7e34;
+}

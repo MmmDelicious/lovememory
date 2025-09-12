@@ -1,0 +1,43 @@
+/* Перенесено из GamesPage.module.css */
+.filterSection {
+  padding: 32px 0;
+}
+
+.categoryFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.categoryChip {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  background: var(--color-surface, white);
+  color: var(--color-text-secondary, #6b7280);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.categoryChip:hover {
+  background: var(--color-primary-light, #f3f4f6);
+  color: var(--color-primary, #667eea);
+  transform: translateY(-2px);
+}
+
+.categoryChipActive {
+  background: var(--color-primary, #667eea);
+  color: white;
+  border-color: var(--color-primary, #667eea);
+}
+
+.categoryChipActive:hover {
+  background: var(--color-primary-dark, #5a67d8);
+  transform: translateY(-2px);
+}

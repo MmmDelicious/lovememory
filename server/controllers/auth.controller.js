@@ -15,22 +15,18 @@ const sendAuthResponse = (res, user, token) => {
     maxAge: 24 * 60 * 60 * 1000
   });
   
-  // Отправляем только данные пользователя, так как токен теперь в httpOnly cookie
   res.json({ user });
 };
 const register = async (req, res, next) => {
   try {
-    // Вся валидация была удалена и перенесена в middleware и модель
     const { user } = await authService.register(req.body);
     const fullUser = await userService.getProfile(user.id);
     
-    // Логируем регистрацию пользователя
     await activityService.logUserLogin(fullUser.id, {});
     
     const token = generateToken(fullUser);
     sendAuthResponse(res, fullUser, token);
   } catch (error) {
-    // Обработка специфичных ошибок регистрации
     if (error.name === 'SequelizeUniqueConstraintError') {
       return res.status(409).json({
         message: 'Пользователь с таким email уже существует'
@@ -48,7 +44,6 @@ const register = async (req, res, next) => {
 };
 const login = async (req, res, next) => {
   try {
-    // Валидация была удалена, теперь она выполняется в middleware
     const { email, password } = req.body;
     
     const { user } = await authService.login({ email, password });
@@ -60,7 +55,6 @@ const login = async (req, res, next) => {
     
     sendAuthResponse(res, fullUser, token);
   } catch (error) {
-    // Обработка специфичных ошибок входа
     if (error.message.includes('Неверный email или пароль')) {
       return res.status(401).json({
         status: 'error',
@@ -73,7 +67,6 @@ const login = async (req, res, next) => {
   }
 };
 const logout = (req, res) => {
-  // Убираем req.logout(), так как сессии не используются для JWT аутентификации
   res.clearCookie('authToken');
   res.status(200).json({ message: 'Logged out successfully' });
 };
@@ -92,9 +85,8 @@ const googleCallback = async (req, res, next) => {
       maxAge: 24 * 60 * 60 * 1000
     });
     
-    const tokenParam = encodeURIComponent(token);
     const userParam = encodeURIComponent(JSON.stringify(fullUser));
-    const redirectUrl = `${process.env.CLIENT_URL}/auth/callback#token=${tokenParam}&user=${userParam}`;
+    const redirectUrl = `${process.env.CLIENT_URL}/auth/callback?user=${userParam}`;
     res.redirect(redirectUrl);
   } catch(error) {
     next(error);

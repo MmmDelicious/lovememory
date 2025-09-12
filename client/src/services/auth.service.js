@@ -1,4 +1,4 @@
-import api, { clearAuthToken } from './api';
+import api from './api';
 
 const login = async (email, password) => {
   const response = await api.post('/auth/login', {
@@ -17,9 +17,10 @@ const register = async (userData) => {
 const logout = async () => {
   try {
     await api.post('/auth/logout');
+    // Сервер очистит httpOnly cookie, дополнительных действий не нужно
   } catch (error) {
-  } finally {
-    clearAuthToken();
+    // Даже если сервер недоступен, cookie должен быть очищен
+    console.warn('Logout request failed, but proceeding with client logout:', error);
   }
 };
 
@@ -28,7 +29,7 @@ const getMe = async () => {
     const response = await api.get('/auth/me');
     return response.data;
   } catch (error) {
-    clearAuthToken();
+    // httpOnly cookie будет обработан автоматически при 401 ошибке
     throw error;
   }
 };
@@ -38,7 +39,7 @@ const refreshToken = async () => {
     const response = await api.post('/auth/refresh');
     return response.data;
   } catch (error) {
-    clearAuthToken();
+    // httpOnly cookie будет обработан автоматически при ошибке
     throw error;
   }
 };

@@ -1,0 +1,138 @@
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: #f8f9fa;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.actionButton:hover:not(.disabled):not(.loading) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.actionButton:active:not(.disabled):not(.loading) {
+  transform: translateY(0);
+}
+
+.actionButton.disabled,
+.actionButton.loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Variants */
+.actionButton.primary {
+  background: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+.actionButton.primary:hover:not(.disabled):not(.loading) {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+.actionButton.secondary {
+  background: #6c757d;
+  border-color: #6c757d;
+  color: white;
+}
+
+.actionButton.secondary:hover:not(.disabled):not(.loading) {
+  background: #5a6268;
+  border-color: #5a6268;
+}
+
+.actionButton.outline {
+  background: transparent;
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.actionButton.outline:hover:not(.disabled):not(.loading) {
+  background: #007bff;
+  color: white;
+}
+
+.actionButton.ghost {
+  background: transparent;
+  border-color: transparent;
+  color: #007bff;
+}
+
+.actionButton.ghost:hover:not(.disabled):not(.loading) {
+  background: #f8f9fa;
+}
+
+.actionButton.danger {
+  background: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.actionButton.danger:hover:not(.disabled):not(.loading) {
+  background: #c82333;
+  border-color: #c82333;
+}
+
+/* Sizes */
+.actionButton.small {
+  padding: 4px 8px;
+  font-size: 12px;
+  gap: 4px;
+}
+
+.actionButton.large {
+  padding: 12px 24px;
+  font-size: 16px;
+  gap: 12px;
+}
+
+/* Modifiers */
+.actionButton.fullWidth {
+  width: 100%;
+}
+
+/* Elements */
+.icon {
+  font-size: 1em;
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

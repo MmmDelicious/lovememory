@@ -8,50 +8,33 @@ interface MobileLayoutProps {
 const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('calendar');
   useEffect(() => {
     const path = location.pathname;
-    if (path === '/dashboard' || path === '/') {
-      setActiveTab('dashboard');
-    } else if (path === '/dashboard' && path.includes('calendar')) {
+    if (path === '/dashboard' || path === '/' || path.startsWith('/calendar')) {
       setActiveTab('calendar');
-    } else if (path.startsWith('/games')) {
-      setActiveTab('games');
     } else if (path.startsWith('/lessons')) {
       setActiveTab('lessons');
-    } else if (path.startsWith('/shop')) {
-      setActiveTab('shop');
-    } else if (path.startsWith('/insights')) {
-      setActiveTab('insights');
     } else if (path.startsWith('/profile')) {
       setActiveTab('profile');
     } else {
-      setActiveTab('dashboard');
+      setActiveTab('calendar');
     }
   }, [location.pathname]);
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     switch (tab) {
-      case 'dashboard':
-        navigate('/dashboard');
-        break;
       case 'calendar':
-        navigate('/dashboard'); // Пока используем тот же роут, но с календарем
-        break;
-      case 'games':
-        navigate('/games');
+        navigate('/calendar');
         break;
       case 'lessons':
         navigate('/lessons');
         break;
-      case 'shop':
-        navigate('/shop');
-        break;
-      case 'insights':
-        navigate('/insights');
-        break;
       case 'profile':
         navigate('/profile');
+        break;
+      default:
+        navigate('/calendar');
         break;
     }
   };

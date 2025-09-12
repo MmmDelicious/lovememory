@@ -1,0 +1,376 @@
+/* Sidebar Partner Card */
+.sidebarPartnerCard {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 1px solid #BFDBFE;
+  border-radius: 12px;
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.sidebarTitle {
+  color: #3B82F6;
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.partnerInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.partnerAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #3B82F6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.partnerDetails h4 {
+  margin: 0 0 0.25rem;
+  color: #1E293B;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.partnerDetails p {
+  margin: 0;
+  color: #64748B;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.noPartnerText {
+  color: #64748B;
+  font-size: 0.8rem;
+  text-align: center;
+  margin: 0;
+  padding: 1rem 0;
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.statusIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.description {
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0 0 1.5rem 0;
+  font-size: 0.875rem;
+}
+
+/* Connected state */
+.connected {
+  border-color: #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.02) 0%, rgba(16, 185, 129, 0.05) 100%);
+}
+
+.connected .statusIcon {
+  background: #10b981;
+  color: white;
+}
+
+.heartIcon {
+  color: white;
+  animation: heartbeat 2s infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Pending state */
+.pending {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.02) 0%, rgba(245, 158, 11, 0.05) 100%);
+}
+
+.pending .statusIcon {
+  background: #f59e0b;
+  color: white;
+}
+
+/* Incoming request state */
+.incoming {
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, rgba(59, 130, 246, 0.05) 100%);
+}
+
+.incoming .statusIcon {
+  background: #3b82f6;
+  color: white;
+}
+
+/* Not connected state */
+.notConnected {
+  border-color: #9ca3af;
+  border-style: dashed;
+}
+
+.notConnected .statusIcon {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Partner info */
+.partnerInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 12px;
+}
+
+.partnerDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.partnerName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+  word-break: break-word;
+}
+
+.partnerEmail {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+  word-break: break-word;
+}
+
+/* Connection stats */
+.connectionStats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #10b981;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Buttons */
+.connectButton,
+.sendButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.connectButton:hover,
+.sendButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.connectButton:disabled,
+.sendButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.disconnectButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.disconnectButton:hover {
+  background: #fecaca;
+  transform: translateY(-1px);
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.acceptButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.acceptButton:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.rejectButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rejectButton:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.cancelButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: #e5e7eb;
+}
+
+/* Email form */
+.emailForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Error state */
+.error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #dc2626;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+/* Spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 1rem;
+  }
+  
+  .partnerInfo {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .actions,
+  .formActions {
+    flex-direction: column;
+  }
+  
+  .acceptButton,
+  .rejectButton,
+  .sendButton,
+  .cancelButton {
+    width: 100%;
+  }
+}

@@ -1,0 +1,46 @@
+.calendarFilters {
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.mainFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.separator {
+  height: 1px;
+  background: #e9ecef;
+  margin: 16px 0;
+}
+
+.typeFilters {
+  margin-top: 16px;
+}
+
+.sectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  margin: 0 0 12px 0;
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .mainFilters {
+    flex-direction: column;
+  }
+  
+  .filterGrid {
+    grid-template-columns: 1fr;
+  }
+}

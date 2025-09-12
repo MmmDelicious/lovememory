@@ -52,8 +52,58 @@ export const useAuthForm = ({ mode, onSubmit, onSuccess, triggerError, handleInt
     
     setFormData((prev) => ({ ...prev, [fieldName]: value }));
     
+    // Очистка ошибки поля при изменении
     if (fieldErrors[fieldName]) {
       updateFieldErrors({ ...fieldErrors, [fieldName]: false });
+    }
+    
+    // Реал-тайм валидация для лучшего UX
+    if (mode === 'register' && value) {
+      const currentErrors = { ...fieldErrors };
+      
+      // Валидация email
+      if (fieldName === 'email' && value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          currentErrors.email = true;
+          triggerError('Введите корректный email адрес');
+        } else if (currentErrors.email) {
+          currentErrors.email = false;
+        }
+      }
+      
+      // Валидация пароля
+      if (fieldName === 'password' && value) {
+        if (value.length < 6) {
+          currentErrors.password = true;
+          triggerError('Пароль должен быть не менее 6 символов');
+        } else if (currentErrors.password) {
+          currentErrors.password = false;
+        }
+      }
+      
+      // Валидация подтверждения пароля
+      if (fieldName === 'confirmPassword' && value) {
+        if (value !== formData.password) {
+          currentErrors.confirmPassword = true;
+          triggerError('Пароли не совпадают');
+        } else if (currentErrors.confirmPassword) {
+          currentErrors.confirmPassword = false;
+        }
+      }
+      
+      // Валидация возраста
+      if (fieldName === 'age' && value) {
+        const age = parseInt(value);
+        if (isNaN(age) || age < 18 || age > 99) {
+          currentErrors.age = true;
+          triggerError('Возраст должен быть от 18 до 99 лет');
+        } else if (currentErrors.age) {
+          currentErrors.age = false;
+        }
+      }
+      
+      updateFieldErrors(currentErrors);
     }
     
     handleInteraction();
@@ -64,36 +114,49 @@ export const useAuthForm = ({ mode, onSubmit, onSuccess, triggerError, handleInt
     let errorMessage = '';
 
     if (mode === 'register') {
+      // Поэтапная валидация с понятными сообщениями
       if (!formData.name?.trim()) {
         errors.name = true;
-        errorMessage = 'Введите ваше имя';
+        errorMessage = 'Пожалуйста, введите ваше имя';
       } else if (!formData.email?.trim()) {
         errors.email = true;
-        errorMessage = 'Введите email';
+        errorMessage = 'Пожалуйста, введите email адрес';
+      } else if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        errors.email = true;
+        errorMessage = 'Введите корректный email адрес';
       } else if (!formData.password) {
         errors.password = true;
-        errorMessage = 'Введите пароль';
+        errorMessage = 'Пожалуйста, введите пароль';
       } else if (formData.password.length < 6) {
         errors.password = true;
-        errorMessage = 'Пароль должен быть не менее 6 символов';
+        errorMessage = 'Пароль должен содержать минимум 6 символов';
+      } else if (!formData.confirmPassword) {
+        errors.confirmPassword = true;
+        errorMessage = 'Пожалуйста, подтвердите пароль';
       } else if (formData.password !== formData.confirmPassword) {
         errors.confirmPassword = true;
-        errorMessage = 'Пароли не совпадают';
+        errorMessage = 'Пароли должны совпадать';
       } else if (!formData.city?.trim()) {
         errors.city = true;
-        errorMessage = 'Введите ваш город';
-      } else if (!formData.age || isNaN(parseInt(formData.age)) || parseInt(formData.age) < 18 || parseInt(formData.age) > 99) {
+        errorMessage = 'Пожалуйста, укажите ваш город';
+      } else if (!formData.age) {
+        errors.age = true;
+        errorMessage = 'Пожалуйста, укажите ваш возраст';
+      } else if (isNaN(parseInt(formData.age)) || parseInt(formData.age) < 18 || parseInt(formData.age) > 99) {
         errors.age = true;
         errorMessage = 'Возраст должен быть от 18 до 99 лет';
       }
     } else {
-      // Login validation
+      // Login validation - более дружественные сообщения
       if (!formData.email?.trim()) {
         errors.email = true;
-        errorMessage = 'Введите email';
+        errorMessage = 'Пожалуйста, введите ваш email';
+      } else if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        errors.email = true;
+        errorMessage = 'Введите корректный email адрес';
       } else if (!formData.password) {
         errors.password = true;
-        errorMessage = 'Введите пароль';
+        errorMessage = 'Пожалуйста, введите ваш пароль';
       }
     }
 
@@ -118,11 +181,12 @@ export const useAuthForm = ({ mode, onSubmit, onSuccess, triggerError, handleInt
     
     const { isValid, errors, errorMessage: validationErrorMessage } = validateForm();
 
+    // Показываем ошибку через маскота БЕЗ отправки запроса
     if (!isValid) {
       updateFieldErrors(errors);
       setIsSubmitting(false);
-      triggerError(validationErrorMessage); // Прямой вызов triggerError
-      return;
+      triggerError(validationErrorMessage);
+      return; // Не отправляем запрос при ошибках валидации
     }
 
     try {

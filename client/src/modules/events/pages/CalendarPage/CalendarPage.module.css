@@ -1,0 +1,21 @@
+/* Стили для тонкой страницы CalendarPage */
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  font-size: 16px;
+  color: #dc3545;
+  text-align: center;
+}
+
+.calendarModule {
+  flex: 1;
+}

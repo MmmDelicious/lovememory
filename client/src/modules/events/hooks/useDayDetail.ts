@@ -1,104 +1,138 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { eventService } from '../services/event.service';
+import { eventService } from '../services';
 
-interface DayDetailState {
-  events: any[];
-  loading: boolean;
-  error: string | null;
-  selectedImage: string | null;
-  uploadingMedia: Record<string, boolean>;
+interface DayDetailEvent {
+  id: string;
+  title: string;
+  description?: string;
+  event_date: string;
+  end_date?: string;
+  event_type: string;
+  duration?: number;
+  location?: string;
+  isShared?: boolean;
+  isImportant?: boolean;
+  completed?: boolean;
+  media?: any[];
+  [key: string]: any;
 }
 
-export const useDayDetail = (date: string) => {
-  const navigate = useNavigate();
-  const [state, setState] = useState<DayDetailState>({
-    events: [],
-    loading: true,
-    error: null,
-    selectedImage: null,
-    uploadingMedia: {}
-  });
+/**
+ * Хук для управления детальной информацией о дне
+ * Загружает события дня, медиа, обрабатывает действия с событиями
+ */
+export const useDayDetail = (date: string, userId: string) => {
+  const [events, setEvents] = useState<DayDetailEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch events for the day
+  // Загрузка событий дня
   const fetchDayEvents = useCallback(async () => {
     try {
-      setState(prev => ({ ...prev, loading: true, error: null }));
+      setIsLoading(true);
+      setError(null);
       
       const response = await eventService.getEvents();
-      const dayEvents = response.data.filter(event => 
+      const allEvents = response.data;
+      
+      // Фильтруем события по дню
+      const dayEvents = allEvents.filter((event: any) => 
         new Date(event.event_date).toISOString().split('T')[0] === date
       );
       
-      // Process events with media
+      // Сортируем по времени
+      dayEvents.sort((a: any, b: any) => 
+        new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
+      );
+      
+      // Загружаем медиа для каждого события
       const eventsWithMedia = await Promise.all(
-        dayEvents.map(async (event) => {
+        dayEvents.map(async (event: any) => {
           try {
             const mediaResponse = await eventService.getMediaForEvent(event.id);
-            return { ...event, media: mediaResponse.data || [] };
-          } catch {
-            return { ...event, media: [] };
+            return {
+              ...event,
+              media: mediaResponse.data || []
+            };
+          } catch (error) {
+            console.warn(`Failed to load media for event ${event.id}:`, error);
+            return {
+              ...event,
+              media: []
+            };
           }
         })
       );
-
-      setState(prev => ({ 
-        ...prev, 
-        events: eventsWithMedia.sort((a, b) => 
-          new Date(a.event_date).getTime() - new Date(b.event_date).getTime()
-        ),
-        loading: false 
-      }));
+      
+      setEvents(eventsWithMedia);
     } catch (err) {
-      setState(prev => ({ 
-        ...prev, 
-        error: 'Не удалось загрузить события дня', 
-        loading: false 
-      }));
+      console.error('Error loading day events:', err);
+      setError('Не удалось загрузить события дня');
+    } finally {
+      setIsLoading(false);
     }
   }, [date]);
 
-  // Media upload
-  const uploadMedia = useCallback(async (eventId: string, files: FileList) => {
-    setState(prev => ({ 
-      ...prev, 
-      uploadingMedia: { ...prev.uploadingMedia, [eventId]: true }
-    }));
+  // Обновление события
+  const updateEvent = useCallback(async (eventId: string, updates: Partial<DayDetailEvent>) => {
+    const response = await eventService.updateEvent(eventId, updates);
+    
+    setEvents(prev => prev.map(event => 
+      event.id === eventId 
+        ? { ...event, ...response.data }
+        : event
+    ));
+    
+    return response.data;
+  }, []);
 
-    try {
-      await Promise.all(
-        Array.from(files).map(file => eventService.uploadFile(eventId, file))
-      );
-      await fetchDayEvents();
-    } finally {
-      setState(prev => ({ 
-        ...prev, 
-        uploadingMedia: { ...prev.uploadingMedia, [eventId]: false }
-      }));
-    }
-  }, [fetchDayEvents]);
-
-  // Event actions
+  // Удаление события
   const deleteEvent = useCallback(async (eventId: string) => {
     await eventService.deleteEvent(eventId);
+    
+    setEvents(prev => prev.filter(event => event.id !== eventId));
+  }, []);
+
+  // Загрузка медиа
+  const uploadMedia = useCallback(async (eventId: string, file: File) => {
+    const response = await eventService.uploadFile(eventId, file);
+    
+    // Обновляем событие с новым медиа
+    setEvents(prev => prev.map(event => 
+      event.id === eventId 
+        ? { 
+            ...event, 
+            media: [...(event.media || []), response.data]
+          }
+        : event
+    ));
+    
+    return response.data;
+  }, []);
+
+  // Перемещение медиа между событиями
+  const moveMedia = useCallback(async (mediaId: string, targetEventId: string) => {
+    await eventService.moveMediaToEvent(mediaId, targetEventId);
+    
+    // Перезагружаем события для обновления медиа
     await fetchDayEvents();
   }, [fetchDayEvents]);
 
-  const editEvent = useCallback((eventId: string) => {
-    navigate(`/event/edit/${eventId}`);
-  }, [navigate]);
-
+  // Загрузка при изменении даты
   useEffect(() => {
-    fetchDayEvents();
-  }, [fetchDayEvents]);
+    if (date && userId) {
+      fetchDayEvents();
+    }
+  }, [date, userId, fetchDayEvents]);
 
   return {
-    ...state,
-    uploadMedia,
+    events,
+    isLoading,
+    error,
+    updateEvent,
     deleteEvent,
-    editEvent,
-    setSelectedImage: (image: string | null) => 
-      setState(prev => ({ ...prev, selectedImage: image })),
-    refreshEvents: fetchDayEvents
+    uploadMedia,
+    moveMedia,
+    refetch: fetchDayEvents
   };
 };

@@ -61,7 +61,7 @@ function initSocket(server, app) {
 
     socket.on('join_room', async (roomId) => {
         try {
-            console.log(`🚪 [SOCKET] Player joining room`, {
+            console.log(`[SOCKET] Player joining room`, {
               timestamp: new Date().toISOString(),
               roomId,
               userId: socket.user.id,
@@ -111,7 +111,7 @@ function initSocket(server, app) {
             }
 
             const economyType = economyService.getEconomyType(room.gameType);
-            console.log(`💰 [SOCKET] Checking economy type`, {
+            console.log(`[SOCKET] Checking economy type`, {
               timestamp: new Date().toISOString(),
               roomId,
               gameType: room.gameType,
@@ -147,7 +147,7 @@ function initSocket(server, app) {
                 });
                 socket.emit('update_coins', betResult.newBalance);
             } else {
-                console.log(`⏭️  [SOCKET] Skipping bet reservation`, {
+                console.log(`[SOCKET] Skipping bet reservation`, {
                   timestamp: new Date().toISOString(),
                   roomId,
                   economyType,
@@ -214,7 +214,7 @@ function initSocket(server, app) {
                 
                 const shouldCreateGame = currentSockets.length >= requiredPlayers;
                 
-                console.log(`🎮 [SOCKET] Checking game creation conditions`, {
+                console.log(`[SOCKET] Checking game creation conditions`, {
                   timestamp: new Date().toISOString(),
                   roomId,
                   gameType: room.gameType,
@@ -224,7 +224,7 @@ function initSocket(server, app) {
                 });
                 
                 if (shouldCreateGame) {
-                    console.log(`🚀 [SOCKET] Creating game - conditions met!`, {
+                    console.log(`[SOCKET] Creating game - conditions met!`, {
                       timestamp: new Date().toISOString(),
                       roomId,
                       gameType: room.gameType,

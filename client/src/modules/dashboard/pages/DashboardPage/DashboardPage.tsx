@@ -1,47 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useUser } from '@/store';
 import styles from './DashboardPage.module.css';
-import Calendar from '@/modules/events/components/Calendar/Calendar';
-import { useEvents } from '@/modules/events/hooks/useEvents';
-import { useEventTemplates } from '@/modules/events/hooks/useEventTemplates';
+import { CalendarModule } from '@/modules/events/modules';
 
 const DashboardPage: React.FC = () => {
   const user = useUser();
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const { events, isLoading: areEventsLoading, createEvent, updateEvent, deleteEvent } = useEvents(user?.id);
-  const { templates, isLoading: areTemplatesLoading, createTemplate, updateTemplate, deleteTemplate, duplicateTemplate } = useEventTemplates(user?.id);
-
-  useEffect(() => {
-    if (!areEventsLoading && !areTemplatesLoading) {
-      setIsLoading(false);
-    }
-  }, [areEventsLoading, areTemplatesLoading]);
-
-  if (isLoading || areEventsLoading || areTemplatesLoading) {
-    return <div className={styles.loader}>Загрузка календаря...</div>;
-  }
 
   if (!user) {
     return <div className={styles.loader}>Пользователь не найден...</div>;
   }
 
+  const handleEventClick = (eventId: string, date: string) => {
+    // Навигация через window.location для простоты
+    window.location.href = `/day/${date}`;
+  };
+
+  const handleDateClick = (date: string) => {
+    window.location.href = `/day/${date}`;
+  };
 
   return (
-    <>
-      <Calendar
-        events={events || []}
-        userId={user?.id || ''}
-        onCreateEvent={createEvent}
-        onUpdateEvent={updateEvent}
-        onDeleteEvent={deleteEvent}
-        customTemplates={templates || []}
-        onCreateTemplate={createTemplate}
-        onEditTemplate={updateTemplate}
-        onDeleteTemplate={deleteTemplate}
-        onDuplicateTemplate={duplicateTemplate}
+    <div className={styles.container}>
+      <CalendarModule
+        userId={user?.id}
+        onEventClick={handleEventClick}
+        onDateClick={handleDateClick}
       />
-    </>
+    </div>
   );
 };
 

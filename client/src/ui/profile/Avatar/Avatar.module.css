@@ -1,0 +1,87 @@
+.avatar {
+  position: relative;
+  display: inline-block;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f3f4f6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Sizes */
+.small {
+  width: 32px;
+  height: 32px;
+}
+
+.medium {
+  width: 48px;
+  height: 48px;
+}
+
+.large {
+  width: 64px;
+  height: 64px;
+}
+
+.xl {
+  width: 96px;
+  height: 96px;
+}
+
+/* Status indicator */
+.statusIndicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.small .statusIndicator {
+  width: 8px;
+  height: 8px;
+  bottom: 1px;
+  right: 1px;
+  border-width: 1px;
+}
+
+.xl .statusIndicator {
+  width: 16px;
+  height: 16px;
+  bottom: 4px;
+  right: 4px;
+  border-width: 3px;
+}
+
+/* Status colors */
+.online {
+  background: #10b981;
+}
+
+.offline {
+  background: #6b7280;
+}
+
+.away {
+  background: #f59e0b;
+}

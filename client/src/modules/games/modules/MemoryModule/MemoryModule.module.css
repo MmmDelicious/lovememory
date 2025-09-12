@@ -1,0 +1,239 @@
+/* MemoryModule - модуль игры "Мемори" */
+
+.memoryModule {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 3rem;
+  text-align: center;
+}
+
+.waiting h2 {
+  color: var(--color-primary, #3498db);
+  margin-bottom: 0.5rem;
+}
+
+.waiting p {
+  color: var(--color-text-secondary, #7f8c8d);
+  font-size: 1.125rem;
+}
+
+.playersList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.playerCard {
+  padding: 1rem 1.5rem;
+  border: 2px solid var(--color-border, #e0e0e0);
+  border-radius: 0.75rem;
+  background: var(--color-background, #ffffff);
+  text-align: center;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.playerCard:hover {
+  border-color: var(--color-primary, #3498db);
+  transform: translateY(-2px);
+}
+
+.gameResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 3rem;
+  background: var(--color-surface, #f8f9fa);
+  border-radius: 1rem;
+  text-align: center;
+}
+
+.gameResults h2 {
+  color: var(--color-success, #27ae60);
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.finalStats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 200px;
+}
+
+.statItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--color-background, #ffffff);
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.statItem span:first-child {
+  color: var(--color-text-secondary, #7f8c8d);
+}
+
+.statItem span:last-child {
+  color: var(--color-primary, #3498db);
+  font-weight: 600;
+}
+
+.finalActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.newGameButton, .returnButton {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.newGameButton {
+  background: var(--color-primary, #3498db);
+  color: white;
+}
+
+.newGameButton:hover {
+  background: var(--color-primary-dark, #2980b9);
+  transform: translateY(-2px);
+}
+
+.returnButton {
+  background: var(--color-text-secondary, #7f8c8d);
+  color: white;
+}
+
+.returnButton:hover {
+  background: var(--color-text, #2c3e50);
+  transform: translateY(-2px);
+}
+
+.loading, .error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  text-align: center;
+  min-height: 50vh;
+}
+
+.error {
+  color: var(--color-error, #e74c3c);
+}
+
+.error h3 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.error p {
+  margin-bottom: 2rem;
+  opacity: 0.8;
+}
+
+.error button {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: var(--color-primary, #3498db);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.error button:hover {
+  background: var(--color-primary-dark, #2980b9);
+  transform: translateY(-2px);
+}
+
+.memoryPlaceholder {
+  text-align: center;
+  padding: 3rem;
+  background: var(--color-surface, #f8f9fa);
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+}
+
+.memoryPlaceholder h2 {
+  color: var(--color-primary, #3498db);
+  margin: 0;
+}
+
+.memoryPlaceholder p {
+  color: var(--color-text-secondary, #7f8c8d);
+  max-width: 500px;
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .memoryModule {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+  
+  .waiting, .gameResults {
+    padding: 2rem 1rem;
+  }
+  
+  .finalActions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .newGameButton, .returnButton {
+    width: 100%;
+  }
+  
+  .finalStats {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .memoryModule {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+  
+  .gameResults h2 {
+    font-size: 1.5rem;
+  }
+  
+  .statItem {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}

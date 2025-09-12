@@ -1,0 +1,11 @@
+.mascotContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.mascotPositioner {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}

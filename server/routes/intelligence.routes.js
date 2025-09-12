@@ -24,48 +24,11 @@ router.post('/chat', authenticateToken, async (req, res, next) => {
 
 router.post('/generate-date', authenticateToken, async (req, res, next) => {
   try {
+    const dateGenerationService = require('../services/dateGeneration.service');
+    const result = await dateGenerationService.generate(req.body);
     res.json({
       success: true,
-      data: {
-        options: [
-          {
-            id: "temp_1",
-            title: "Romantic evening",
-            description: "Walk + dinner in cozy restaurant",
-            schedule: [
-              {
-                time: "19:00",
-                endTime: "20:30",
-                activity: "City center walk",
-                description: "Leisurely walk and conversation"
-              },
-              {
-                time: "21:00", 
-                endTime: "22:30",
-                activity: "Restaurant dinner",
-                description: "Romantic dinner"
-              }
-            ],
-            estimatedCost: 3000,
-            duration: 3.5,
-            atmosphere: "romantic",
-            reasoning: "Created based on your preferences",
-            isRealData: false,
-            activitiesCount: 2
-          }
-        ],
-        reasoning: [
-          "Analyzing your preferences...",
-          "Intelligence Core in development...",
-          "Ready! (demo version for now)"
-        ],
-        metadata: {
-          generatedAt: new Date(),
-          usedRealData: false,
-          confidence: 0.5,
-          status: "development"
-        }
-      }
+      data: result
     });
   } catch (error) {
     next(error);

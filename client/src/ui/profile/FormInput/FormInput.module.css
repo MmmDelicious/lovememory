@@ -1,0 +1,129 @@
+.container {
+  width: 100%;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.required {
+  color: #ef4444;
+  margin-left: 0.25rem;
+}
+
+.inputContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.inputContainer:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.inputContainer.error {
+  border-color: #ef4444;
+}
+
+.inputContainer.error:focus-within {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.inputContainer.disabled {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.iconContainer {
+  padding: 0 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #e5e7eb;
+}
+
+.icon {
+  color: #6b7280;
+}
+
+.input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  color: #1f2937;
+  padding: 0.75rem;
+  width: 100%;
+}
+
+.input::placeholder {
+  color: #9ca3af;
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+/* Sizes */
+.small {
+  font-size: 0.875rem;
+}
+
+.small .input {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.small .iconContainer {
+  padding: 0 0.5rem;
+}
+
+.large {
+  font-size: 1.125rem;
+}
+
+.large .input {
+  padding: 1rem 0.75rem;
+  font-size: 1.125rem;
+}
+
+.large .iconContainer {
+  padding: 0 1rem;
+}
+
+.errorText {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Remove icon border when there's no icon */
+.inputContainer:not(:has(.iconContainer)) .input {
+  padding-left: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .label {
+    font-size: 0.8rem;
+  }
+  
+  .input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}

@@ -1,3 +1,9 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .loader {
   display: flex;
   justify-content: center;
@@ -17,76 +23,80 @@
   flex-wrap: wrap;
   gap: var(--space-4);
 }
+
 .calendarTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.calendarNav {
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-.calendarTitle h1 {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  text-transform: capitalize;
-  margin: 0;
-}
-.mainNav {
-    display: flex;
-}
-.calendarNav { display: flex; gap: 4px; }
-.navArrow { width: 24px; height: 24px; border: none; border-radius: 4px; background: transparent; color: var(--color-text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-.navArrow:hover { background: var(--color-background); color: var(--color-text-primary); }
-
-
-.mobileNavToggle {
-    display: none;
+  gap: var(--space-2);
 }
 
-/* Context Menu */
-.contextMenu {
-  background: var(--color-surface);
+.navArrow {
+  padding: var(--space-2);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 4px 0;
-  min-width: 180px;
-  font-size: 14px;
-  font-family: var(--font-family-body);
+  border-radius: var(--radius-2);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.contextMenuItem {
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  color: var(--color-text-primary);
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.navArrow:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-hover);
 }
-.contextMenuItem:hover {
-  background-color: var(--color-primary);
+
+.calendarActions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.viewSwitch {
+  display: flex;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2);
+  overflow: hidden;
+}
+
+.viewBtn {
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.viewBtn:hover {
+  background: var(--color-surface-hover);
+}
+
+.viewBtn.viewActive {
+  background: var(--color-primary);
   color: white;
 }
 
-@media (max-width: 992px) {
-  .mobileNavToggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: transparent;
-    border: none;
-    color: var(--color-text-secondary);
-    font-size: 20px;
-    cursor: pointer;
-  }
-   .mainNav {
-    display: none;
-  }
-  .calendarHeaderMain {
-    padding: var(--space-3);
-  }
-  .calendarTitle h1 {
-    font-size: 1.25rem;
-  }
+.iconBtn {
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
 }

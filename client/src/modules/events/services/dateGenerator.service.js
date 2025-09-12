@@ -140,24 +140,10 @@ const relationshipGraphData = {
     { from: 'creativity', to: 'entertainment', strength: 50, type: 'potential' }
   ]
 };
+// Удалены захардкоженные данные - теперь загружаем с сервера
 const DATE_OPTIONS_DATABASE = {
-  restaurants: [
-    { name: "Ресторан '7 небо'", type: "fine_dining", budget: "high", atmosphere: "romantic", cuisine: "european", rating: 4.8 },
-    { name: "Кафе 'Уют'", type: "casual", budget: "medium", atmosphere: "cozy", cuisine: "local", rating: 4.5 },
-    { name: "Пиццерия 'Мама Мия'", type: "casual", budget: "low", atmosphere: "fun", cuisine: "italian", rating: 4.3 },
-    { name: "Суши-бар 'Сакура'", type: "modern", budget: "medium", atmosphere: "stylish", cuisine: "japanese", rating: 4.6 },
-    { name: "Кофейня 'Зерно'", type: "cafe", budget: "low", atmosphere: "intimate", cuisine: "coffee", rating: 4.4 }
-  ],
-  activities: [
-    { name: "Кинотеатр 'Космос'", type: "entertainment", budget: "medium", duration: 2.5, atmosphere: "relaxed" },
-    { name: "Музей современного искусства", type: "cultural", budget: "low", duration: 2, atmosphere: "intellectual" },
-    { name: "Парк Горького", type: "outdoor", budget: "free", duration: 3, atmosphere: "active" },
-    { name: "Боулинг 'Страйк'", type: "active", budget: "medium", duration: 2, atmosphere: "fun" },
-    { name: "Квест-комната 'Загадка'", type: "entertainment", budget: "medium", duration: 1.5, atmosphere: "exciting" },
-    { name: "Каток 'Лед'", type: "active", budget: "medium", duration: 2, atmosphere: "romantic" },
-    { name: "Планетарий", type: "cultural", budget: "low", duration: 1.5, atmosphere: "romantic" },
-    { name: "Фотопрогулка по центру", type: "creative", budget: "free", duration: 3, atmosphere: "creative" }
-  ],
+  restaurants: [], // Загружается через API
+  activities: [], // Загружается через API
   timing: [
     { period: "morning", start: "10:00", description: "утренний" },
     { period: "afternoon", start: "14:00", description: "дневной" },

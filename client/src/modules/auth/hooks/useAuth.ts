@@ -2,8 +2,8 @@
  * Auth hooks for managing authentication state
  */
 import { useCallback } from 'react'
-import { useAppSelector, useAppDispatch } from '@app/store/hooks'
-import { authService } from '../services'
+import { useAppSelector, useAppDispatch } from '../../../store/hooks'
+import { authService } from '../../../services'
 import type { LoginRequest, RegisterRequest } from '../types'
 
 // Note: These will be connected to the actual store slice later

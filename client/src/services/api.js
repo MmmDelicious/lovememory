@@ -35,33 +35,20 @@ api.interceptors.request.use(
   }
 );
 
+// Токены теперь управляются через httpOnly cookies, эти функции больше не нужны
 const getAuthToken = () => {
-  try {
-    return localStorage.getItem('authToken');
-  } catch (error) {
-    console.warn('Failed to get auth token from localStorage:', error);
-    return null;
-  }
+  // Токен недоступен в JavaScript - он в httpOnly cookie
+  return null;
 };
 
 const setAuthToken = (token) => {
-  try {
-    if (token) {
-      localStorage.setItem('authToken', token);
-    } else {
-      localStorage.removeItem('authToken');
-    }
-  } catch (error) {
-    console.warn('Failed to set auth token in localStorage:', error);
-  }
+  // Токен устанавливается сервером в httpOnly cookie, ничего не делаем
+  console.warn('setAuthToken deprecated: tokens are now managed via httpOnly cookies');
 };
 
 const clearAuthToken = () => {
-  try {
-    localStorage.removeItem('authToken');
-  } catch (error) {
-    console.warn('Failed to clear auth token:', error);
-  }
+  // Токен очищается при logout запросе на сервер, ничего не делаем
+  console.warn('clearAuthToken deprecated: tokens are now managed via httpOnly cookies');
 };
 api.interceptors.response.use(
   (response) => {
@@ -84,20 +71,20 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401) {
       if (!error.config?.url?.includes('/auth/me')) {
-        console.log('🟡 API: Got 401 error, user not authenticated');
+        console.log('[API] Got 401 error, user not authenticated');
       }
-      clearAuthToken();
+      // httpOnly cookie будет автоматически обработан браузером
       return Promise.reject(error);
     }
 
     if (error.response?.status >= 500) {
-      console.log('🟡 API: Got 5xx error, but skipping redirect for debugging');
+      console.log('[API] Got 5xx error, but skipping redirect for debugging');
       return Promise.reject(error);
     }
 
     if (!error.response && error.code !== 'ERR_CANCELED') {
       if (!error.config?.url?.includes('/auth/me')) {
-        console.log('🟡 API: Network error - server may be down');
+        console.log('[API] Network error - server may be down');
       }
       return Promise.reject(error);
     }
@@ -106,5 +93,6 @@ api.interceptors.response.use(
   }
 );
 
+// Экспорты оставляем для обратной совместимости, но функции deprecated
 export { getAuthToken, setAuthToken, clearAuthToken };
 export default api;

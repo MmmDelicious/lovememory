@@ -42,29 +42,16 @@ const FeedbackNotification: React.FC<FeedbackNotificationProps> = ({
   const loadPendingFeedback = async () => {
     try {
       setIsLoading(true);
-      // В реальной реализации здесь будет запрос к API для получения рекомендаций без фидбэка
-      // Пока создаем mock данные для демонстрации
-      const mockRecommendations: PendingRecommendation[] = [
-        {
-          id: '1',
-          pair_id: pairId,
-          entity_type: 'place',
-          entity_id: 'restaurant_123',
-          entity_data: {
-            name: 'Кафе "Уютное место"',
-            description: 'Романтичное кафе с видом на город',
-            location: 'ул. Пушкина, 15'
-          },
-          recommendation_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 дня назад
-          days_passed: 2
-        }
-      ];
-
+      // Загружаем рекомендации ожидающие фидбэк с сервера
+      const response = await feedbackService.getPendingFeedback(pairId);
+      
       // Фильтруем только те рекомендации, которые старше 1 дня
-      const oldRecommendations = mockRecommendations.filter(r => r.days_passed >= 1);
+      const oldRecommendations = response.data.filter((r: PendingRecommendation) => r.days_passed >= 1);
       setPendingRecommendations(oldRecommendations);
     } catch (error) {
       console.error('Error loading pending feedback:', error);
+      // Если API недоступен, показываем пустой список
+      setPendingRecommendations([]);
     } finally {
       setIsLoading(false);
     }

@@ -1,0 +1,144 @@
+.brandingPanel {
+  flex: 1;
+  min-width: 50%;
+  background: linear-gradient(135deg, #FF6B5A 0%, #FF8A75 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.brandingPanel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.brandingPanel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.brandingContent {
+  text-align: center;
+  color: white;
+  z-index: 2;
+  position: relative;
+}
+
+.heart3D {
+  width: 120px;
+  height: 108px;
+  margin: 0 auto 2rem;
+  position: relative;
+  animation: float 3s ease-in-out infinite;
+}
+
+.heart3D::before,
+.heart3D::after {
+  content: '';
+  width: 60px;
+  height: 96px;
+  position: absolute;
+  left: 50px;
+  transform: rotate(-45deg);
+  transform-origin: 0 100%;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+  border-radius: 60px 60px 0 0;
+  box-shadow: 0 10px 30px rgba(238, 90, 82, 0.3);
+}
+
+.heart3D::after {
+  left: 0;
+  transform: rotate(45deg);
+  transform-origin: 100% 100%;
+}
+
+.heartGlow {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  background: radial-gradient(circle, rgba(255, 107, 107, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.brandingTitle {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  font-family: var(--font-family-heading);
+}
+
+.heartIcon {
+  display: inline-block;
+  animation: heartPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(236, 72, 153, 0.4));
+}
+
+@keyframes heartPulse {
+  0%, 100% { 
+    transform: translateY(0px) scale(1); 
+    filter: drop-shadow(0 4px 8px rgba(236, 72, 153, 0.4));
+  }
+  50% { 
+    transform: translateY(-4px) scale(1.1); 
+    filter: drop-shadow(0 8px 16px rgba(236, 72, 153, 0.6));
+  }
+}
+
+.brandingText {
+  font-size: 1.125rem;
+  opacity: 0.9;
+  line-height: 1.6;
+  max-width: 300px;
+  margin: 0 auto;
+  font-family: var(--font-family-body);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+
+@media (max-width: 768px) {
+  .brandingPanel {
+    flex: none;
+    min-height: 40vh;
+    padding: 2rem 1rem;
+  }
+  
+  .brandingTitle {
+    font-size: 2rem;
+  }
+  
+  .brandingText {
+    font-size: 1rem;
+  }
+}

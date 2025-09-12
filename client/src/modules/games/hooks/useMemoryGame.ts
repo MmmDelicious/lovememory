@@ -1,89 +1,104 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 
-interface Card {
-  id: number;
+type Difficulty = 'easy' | 'medium' | 'hard';
+
+interface MemoryCard {
+  id: string;
   value: string;
   isFlipped: boolean;
   isMatched: boolean;
+  index: number;
 }
 
-interface UseMemoryGameState {
-  localFlippedCards: number[];
-  isProcessing: boolean;
-  lastMoveTime: number;
-}
-
-export const useMemoryGame = (gameState: any, user: any, makeMove: Function) => {
-  const [state, setState] = useState<UseMemoryGameState>({
-    localFlippedCards: [],
-    isProcessing: false,
-    lastMoveTime: 0
-  });
-
-  const cards = gameState?.cards || [];
-  const currentPlayerId = gameState?.currentPlayerId;
-  const isPlayerTurn = currentPlayerId === user?.id;
-  const gameFinished = gameState?.status === 'finished';
-
-  // Синхронизация с сменой хода
-  useEffect(() => {
-    if (gameState?.currentPlayerId !== currentPlayerId) {
-      setState(prev => ({
-        ...prev,
-        localFlippedCards: [],
-        isProcessing: false
-      }));
-    }
-  }, [gameState?.currentPlayerId, currentPlayerId]);
-
-  // Синхронизация с серверным состоянием карточек
-  useEffect(() => {
-    if (gameState && gameState.cards) {
-      const serverFlippedCards = gameState.cards
-        .filter((card: Card) => card.isFlipped && !card.isMatched)
-        .map((card: Card) => card.id);
-      
-      if (JSON.stringify(serverFlippedCards.sort()) !== JSON.stringify(state.localFlippedCards.sort())) {
-        setState(prev => ({ ...prev, localFlippedCards: serverFlippedCards }));
+/**
+ * Хук для логики игры "Мемори"
+ * Содержит вспомогательные функции для работы с картами
+ */
+export const useMemoryGame = (difficulty: Difficulty) => {
+  // Генерация пар символов для карт
+  const generateCardValues = useCallback((): string[] => {
+    const symbols = ['🎉', '🎊', '🎈', '🎁', '🎂', '🍰', '🌟', '⭐', '💎', '💰', '🏆', '🎯', '🎪', '🎭', '🎨', '🎵', '🎶', '🎸', '🎹', '🎺', '🎻', '🎤', '🎧', '🎬', '🎮', '🕹️', '🎲', '🃏'];
+    
+    const pairCount = (() => {
+      switch (difficulty) {
+        case 'easy': return 6;   // 3x4 = 12 карт
+        case 'medium': return 8; // 4x4 = 16 карт  
+        case 'hard': return 12;  // 4x6 = 24 карты
+        default: return 8;
       }
+    })();
+    
+    // Выбираем случайные символы и дублируем их
+    const selectedSymbols = symbols.slice(0, pairCount);
+    return [...selectedSymbols, ...selectedSymbols];
+  }, [difficulty]);
+
+  // Перемешивание массива (алгоритм Фишера-Йетса)
+  const shuffleArray = useCallback(<T>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-  }, [gameState?.cards, state.localFlippedCards]);
+    return shuffled;
+  }, []);
 
-  const handleCardClick = useCallback((cardId: number) => {
-    const now = Date.now();
-    if (now - state.lastMoveTime < 500) return;
-
-    if (!isPlayerTurn || state.isProcessing || gameFinished) return;
-
-    const card = cards.find((c: Card) => c.id === cardId);
-    if (!card || card.isMatched || card.isFlipped) return;
-
-    // Не больше 2 карт за ход
-    if (state.localFlippedCards.length >= 2) return;
-
-    // Проверяем, что карта еще не открыта локально
-    if (state.localFlippedCards.includes(cardId)) return;
-
-    setState(prev => ({ 
-      ...prev, 
-      lastMoveTime: now,
-      localFlippedCards: [...prev.localFlippedCards, cardId],
-      isProcessing: prev.localFlippedCards.length === 1
+  // Инициализация карт
+  const initializeCards = useCallback((): MemoryCard[] => {
+    const values = generateCardValues();
+    const shuffledValues = shuffleArray(values);
+    
+    return shuffledValues.map((value, index) => ({
+      id: `card-${index}`,
+      value,
+      isFlipped: false,
+      isMatched: false,
+      index
     }));
+  }, [generateCardValues, shuffleArray]);
 
-    // Отправляем ход на сервер
-    try {
-      makeMove({ action: 'flip_card', cardId });
-    } catch (error) {
-      console.error('Error making move:', error);
+  // Проверка совпадения карт
+  const checkMatch = useCallback((card1: MemoryCard, card2: MemoryCard): boolean => {
+    return card1.value === card2.value;
+  }, []);
+
+  // Проверка завершения игры
+  const isGameFinished = useCallback((cards: MemoryCard[]): boolean => {
+    return cards.length > 0 && cards.every(card => card.isMatched);
+  }, []);
+
+  // Подсчет очков
+  const calculateScore = useCallback((moves: number, timeElapsed: number, matches: number): number => {
+    const baseScore = matches * 100;
+    const timeBonus = Math.max(0, 300 - timeElapsed); // Бонус за быстроту
+    const movesPenalty = Math.max(0, moves - matches) * 5; // Штраф за лишние ходы
+    const difficultyMultiplier = (() => {
+      switch (difficulty) {
+        case 'easy': return 1;
+        case 'medium': return 1.5;
+        case 'hard': return 2;
+        default: return 1;
+      }
+    })();
+    
+    return Math.round((baseScore + timeBonus - movesPenalty) * difficultyMultiplier);
+  }, [difficulty]);
+
+  // Получение размеров сетки для доски
+  const getBoardDimensions = useCallback(() => {
+    switch (difficulty) {
+      case 'easy': return { rows: 3, cols: 4 };
+      case 'medium': return { rows: 4, cols: 4 };
+      case 'hard': return { rows: 4, cols: 6 };
+      default: return { rows: 4, cols: 4 };
     }
-  }, [isPlayerTurn, state.isProcessing, gameFinished, cards, state.localFlippedCards, state.lastMoveTime, makeMove]);
+  }, [difficulty]);
 
   return {
-    ...state,
-    cards,
-    isPlayerTurn,
-    gameFinished,
-    handleCardClick
+    initializeCards,
+    checkMatch,
+    isGameFinished,
+    calculateScore,
+    getBoardDimensions
   };
 };

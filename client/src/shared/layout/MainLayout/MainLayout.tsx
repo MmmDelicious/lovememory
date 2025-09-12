@@ -1,11 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
 import MobileLayout from '../MobileLayout/MobileLayout';
-import DashboardPage from '../../pages/DashboardPage/DashboardPage';
-import MobileDashboard from '../../../modules/dashboard/pages/MobileDashboard/MobileDashboard';
-import GamesPage from '../../pages/GamesPage/GamesPage';
-import MobileGames from '../../../modules/games/pages/GamesPage/MobileGames';
-import ProfilePage from '../../../modules/users/pages/ProfilePage/ProfilePage';
 import NotificationDropdown from '../../components/NotificationDropdown/NotificationDropdown';
 import UserDropdown from '../../components/UserDropdown/UserDropdown';
 import { 
@@ -50,19 +45,19 @@ const MainLayout: React.FC = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
   const navigationItems = [
+    // ИГРЫ ВРЕМЕННО ОТКЛЮЧЕНЫ
+    // {
+    //   path: '/games',
+    //   icon: <Gamepad2 size={20} />,
+    //   label: 'Игры',
+    //   active: location.pathname.startsWith('/games')
+    // },
     {
-      path: '/dashboard',
-      icon: <Home size={20} />,
-      label: 'Главная',
-      active: location.pathname === '/dashboard'
+      path: '/calendar',
+      icon: <Calendar size={20} />,
+      label: 'Календарь',
+      active: location.pathname === '/calendar' || location.pathname === '/dashboard'
     },
-    {
-      path: '/games',
-      icon: <Gamepad2 size={20} />,
-      label: 'Игры',
-      active: location.pathname.startsWith('/games')
-    },
-
     {
       path: '/lessons',
       icon: <BookOpen size={20} />,
@@ -80,25 +75,9 @@ const MainLayout: React.FC = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
   if (isMobile) {
-    const renderMobileContent = () => {
-      switch (location.pathname) {
-        case '/dashboard':
-          return <MobileDashboard />;
-        case '/games':
-          return <MobileGames />;
-
-        case '/profile':
-          return <ProfilePage />;
-        default:
-          if (location.pathname.startsWith('/games/')) {
-            return <Outlet />;
-          }
-          return <MobileDashboard />;
-      }
-    };
     return (
       <MobileLayout>
-        {renderMobileContent()}
+        <Outlet />
       </MobileLayout>
     );
   }
@@ -132,7 +111,7 @@ const MainLayout: React.FC = () => {
             <div className={styles.userSection}>
               {}
               <div className={styles.coinsDisplay}>
-                <span className="text-sm font-medium text-gray-700">💰 {user?.coins || 1000}</span>
+                <span className="text-sm font-medium text-gray-700">Монеты: {user?.coins || 1000}</span>
               </div>
               {}
               <NotificationDropdown />

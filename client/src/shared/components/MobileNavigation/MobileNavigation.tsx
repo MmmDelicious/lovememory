@@ -8,9 +8,9 @@ interface MobileNavigationProps {
 const MobileNavigation: React.FC<MobileNavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
     {
-      id: 'dashboard',
-      label: 'Главная',
-      icon: Home
+      id: 'calendar',
+      label: 'Календарь',
+      icon: Calendar
     },
     {
       id: 'games',
@@ -26,11 +26,6 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({ activeTab, onTabCha
       id: 'lessons',
       label: 'Уроки',
       icon: BookOpen
-    },
-    {
-      id: 'insights',
-      label: 'Аналитика',
-      icon: BarChart3
     },
     {
       id: 'profile',

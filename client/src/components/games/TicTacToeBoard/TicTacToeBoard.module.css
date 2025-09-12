@@ -1,0 +1,122 @@
+/* TicTacToeBoard - компонент доски крестиков-ноликов */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--color-surface, #f8f9fa);
+  border-radius: 1rem;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.cell {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-border, #e0e0e0);
+  border-radius: 0.75rem;
+  background: var(--color-background, #ffffff);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0;
+}
+
+.cell:hover:not(.disabled):not(.filled) {
+  border-color: var(--color-primary, #3498db);
+  background: var(--color-primary-light, #ebf3fd);
+  transform: scale(1.05);
+}
+
+.cell.filled {
+  cursor: not-allowed;
+  border-color: var(--color-success, #27ae60);
+}
+
+.cell.winner {
+  border-color: var(--color-warning, #f39c12);
+  background: var(--color-warning-light, #fef9e7);
+  animation: winner-pulse 1s ease-in-out infinite alternate;
+}
+
+.cell.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.symbol {
+  font-size: 2rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  animation: symbol-appear 0.3s ease-out;
+}
+
+.symbolX {
+  color: var(--color-primary, #3498db);
+}
+
+.symbolO {
+  color: var(--color-error, #e74c3c);
+}
+
+@keyframes symbol-appear {
+  0% {
+    transform: scale(0) rotate(180deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes winner-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 var(--color-warning, #f39c12);
+  }
+  100% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .board {
+    max-width: 250px;
+    gap: 0.375rem;
+    padding: 0.75rem;
+  }
+  
+  .cell {
+    width: 70px;
+    height: 70px;
+    border-radius: 0.5rem;
+  }
+  
+  .symbol {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .board {
+    max-width: 200px;
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
+  
+  .cell {
+    width: 60px;
+    height: 60px;
+    border-radius: 0.375rem;
+  }
+  
+  .symbol {
+    font-size: 1.5rem;
+  }
+}

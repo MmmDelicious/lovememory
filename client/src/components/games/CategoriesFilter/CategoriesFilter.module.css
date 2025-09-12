@@ -1,0 +1,32 @@
+.container {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 1rem 0;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .container {
+    margin-bottom: 1.5rem;
+  }
+  
+  .title {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .tabs {
+    gap: 0.5rem;
+  }
+}
