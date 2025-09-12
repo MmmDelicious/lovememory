@@ -1,20 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { useUser, useAuthLoading } from '../../../../store/hooks';
+import { useUser, useAuthLoading } from '@/store';
 import { usePairing } from '../../hooks/usePairing';
-import { useEvents } from '../../../events/hooks/useEvents';
+import { useEvents } from '@/modules/events/hooks/useEvents';
 import styles from './ProfilePage.module.css';
-import userService from '../../services/user.service';
-import interestService from '../../services/interest.service';
-import pairService from '../../services/pair.service';
+import { userService, pairService } from '@/services';
+import { interestService } from '../../services';
 import { 
   FaUser, FaEnvelope, FaMapMarkerAlt, FaBirthdayCake, 
   FaCoins, FaCalendarAlt, FaGamepad, FaCommentDots, FaChartLine,
   FaHeart, FaStar, FaEdit, FaShare, FaUsers, FaPlus
 } from 'react-icons/fa';
-import manAvatar from '../../../../shared/assets/man.png';
-import womanAvatar from '../../../../shared/assets/woman.png';
-import defaultAvatar from '../../../../shared/assets/react.svg';
+import manAvatar from '@/shared/assets/man.png';
+import womanAvatar from '@/shared/assets/woman.png';
+import defaultAvatar from '@/shared/assets/react.svg';
 
 interface UserInterest {
   id: string;

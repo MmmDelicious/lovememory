@@ -6,7 +6,7 @@ import styles from './AIChat.module.css';
 const MAX_PROMPT_LENGTH = 500;
 
 const AIChat = () => {
-  const { isLoading } = useAIChat();
+  const { isLoading } = useAIMascot();
   
   const { sendMessageToAI, setMessage } = useMascotActions();
   

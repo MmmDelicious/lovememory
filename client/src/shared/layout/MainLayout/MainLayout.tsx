@@ -183,11 +183,6 @@ const MainLayout: React.FC = () => {
         <Outlet />
       </main>
       {}
-      <div className={styles.backgroundElements}>
-        <div className={styles.floatingHeart} style={{ '--delay': '0s' } as React.CSSProperties}>💕</div>
-        <div className={styles.floatingHeart} style={{ '--delay': '3s' } as React.CSSProperties}>💖</div>
-        <div className={styles.floatingHeart} style={{ '--delay': '6s' } as React.CSSProperties}>💝</div>
-      </div>
     </div>
   );
 };

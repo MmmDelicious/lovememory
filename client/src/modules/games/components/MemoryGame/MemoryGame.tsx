@@ -2,7 +2,7 @@ import React from 'react';
 import MemoryCard from './MemoryCard';
 import { useMemoryGame } from '../../hooks/useMemoryGame';
 import styles from './MemoryGame.module.css';
-import '../../../../index.css';
+import '@/index.css';
 
 interface MemoryGameProps {
   gameState: any;

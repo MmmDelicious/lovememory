@@ -39,7 +39,7 @@ const ScrollElements: React.FC = () => {
         }}
       >
         <img 
-          src="/src/assets/pictures/single-3d-heart--glossy--pastel-pink--soft-shadows.png" 
+          src="/src/shared/assets/pictures/single-3d-heart--glossy--pastel-pink--soft-shadows.png" 
           alt="" 
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
@@ -52,7 +52,7 @@ const ScrollElements: React.FC = () => {
         }}
       >
         <img 
-          src="/src/assets/pictures/small-5-petal-flower--vector-style--pastel-pink--i.png" 
+          src="/src/shared/assets/pictures/small-5-petal-flower--vector-style--pastel-pink--i.png" 
           alt="" 
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
@@ -65,7 +65,7 @@ const ScrollElements: React.FC = () => {
         }}
       >
         <img 
-          src="/src/assets/pictures/single-tiny-pixelated-heart--pastel-red--isolated-.png" 
+          src="/src/shared/assets/pictures/single-tiny-pixelated-heart--pastel-red--isolated-.png" 
           alt="" 
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
@@ -78,7 +78,7 @@ const ScrollElements: React.FC = () => {
         }}
       >
         <img 
-          src="/src/assets/pictures/thin-pastel-lavender-glowing-ring--3d-style--isola.png" 
+          src="/src/shared/assets/pictures/thin-pastel-lavender-glowing-ring--3d-style--isola.png" 
           alt="" 
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />

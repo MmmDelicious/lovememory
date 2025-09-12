@@ -16,7 +16,7 @@ const AIToggleButton = () => {
       aria-label="Toggle AI Assistant"
     >
       <div className={styles.lottieIcon}>
-        <Lottie animationData={mascotIcon} loop={true} />
+        <Lottie animationData={JSON.parse(JSON.stringify(mascotIcon))} loop={true} />
       </div>
     </button>
   );

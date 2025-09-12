@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Lottie from 'lottie-react';
-import Worker404 from '../../../assets/Worker404.json';
-import Worker500 from '../../../assets/Worker500.json';
+import Worker404 from '../../assets/Worker404.json';
+import Worker500 from '../../assets/Worker500.json';
 import styles from './ErrorDisplay.module.css';
 const ErrorDisplay = ({ 
   errorCode = 404, 
@@ -77,7 +77,7 @@ const ErrorDisplay = ({
       <div className={styles.errorContent}>
         <div className={styles.animationContainer}>
           <Lottie 
-            animationData={animationData} 
+            animationData={JSON.parse(JSON.stringify(animationData))} 
             loop={true}
             className={styles.lottieAnimation}
           />

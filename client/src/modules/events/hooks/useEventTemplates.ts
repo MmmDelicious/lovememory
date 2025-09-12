@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import eventTemplateService from '../services/eventTemplate.service';
+import { eventTemplateService } from '@/services';
 import { EventTemplateData } from '../components/EventTemplateModal/EventTemplateModal';
 export const useEventTemplates = (userId?: string) => {
   const [templates, setTemplates] = useState<EventTemplateData[]>([]);

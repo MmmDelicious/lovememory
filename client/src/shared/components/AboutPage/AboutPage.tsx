@@ -104,7 +104,7 @@ const AboutPage: React.FC = () => {
               }}>
                 Ваша история любви с LoveMemory
                 <img 
-                  src="/src/assets/pictures/single-3d-heart--glossy--pastel-pink--soft-shadows.png"
+                  src="/src/shared/assets/pictures/single-3d-heart--glossy--pastel-pink--soft-shadows.png"
                   alt="💖"
                   style={{width: '48px', height: '48px', marginLeft: '16px', verticalAlign: 'middle'}}
                 />
@@ -145,7 +145,7 @@ const AboutPage: React.FC = () => {
           <div className={`${styles.sectionContent} grid-modern grid-modern--40-60`}>
             <div className={`${styles.animationContainer} animate-slide-left floating-element--slow`}>
               <Lottie 
-                animationData={relationshipAnimation} 
+                animationData={JSON.parse(JSON.stringify(relationshipAnimation))} 
                 loop={true}
                 className={styles.lottieAnimation}
               />
@@ -162,7 +162,7 @@ const AboutPage: React.FC = () => {
                 <div className={`${styles.aiCard} reveal-up`} style={{'--delay': '0.1s'} as React.CSSProperties}>
                   <div className={styles.aiCardIcon}>
                     <img 
-                      src="/src/assets/pictures/single-3d-heart--glossy--pastel-pink--soft-shadows.png"
+                      src="/src/shared/assets/pictures/single-3d-heart--glossy--pastel-pink--soft-shadows.png"
                       alt="AI Gift"
                       style={{width: '30px', height: '30px', objectFit: 'contain'}}
                     />
@@ -176,7 +176,7 @@ const AboutPage: React.FC = () => {
                 <div className={`${styles.aiCard} reveal-up`} style={{'--delay': '0.2s'} as React.CSSProperties}>
                   <div className={styles.aiCardIcon}>
                     <img 
-                      src="/src/assets/pictures/tiny-envelope-with-heart-seal--minimal-flat-vector.png"
+                      src="/src/shared/assets/pictures/tiny-envelope-with-heart-seal--minimal-flat-vector.png"
                       alt="AI Date"
                       style={{width: '30px', height: '30px', objectFit: 'contain'}}
                     />
@@ -190,7 +190,7 @@ const AboutPage: React.FC = () => {
                 <div className={`${styles.aiCard} reveal-up`} style={{'--delay': '0.3s'} as React.CSSProperties}>
                   <div className={styles.aiCardIcon}>
                     <img 
-                      src="/src/assets/pictures/small-5-petal-flower--vector-style--pastel-pink--i.png"
+                      src="/src/shared/assets/pictures/small-5-petal-flower--vector-style--pastel-pink--i.png"
                       alt="AI Interests"
                       style={{width: '30px', height: '30px', objectFit: 'contain'}}
                     />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { eventService } from '../../../services';
+import { eventService } from '../services';
 export const EVENT_TYPE_COLORS = {
   plan: '#D97A6C',        // основной тёплый терракотовый
   memory: '#C78986',      // тёплый пыльно-розовый

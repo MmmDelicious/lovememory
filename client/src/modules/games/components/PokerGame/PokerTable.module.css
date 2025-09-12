@@ -466,7 +466,7 @@
     position: absolute;
     width: 30px;
     height: 30px;
-    background-image: url('../../assets/pictures/single-3d-heart--glossy--pastel-pink--soft-shadows.png');
+    background-image: url('/src/shared/assets/pictures/single-3d-heart--glossy--pastel-pink--soft-shadows.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -508,7 +508,7 @@
 .heartIcon { 
     width: 39px; 
     height: 39px; 
-    background-image: url('../../assets/pictures/tiny-single-ecg-line-with-heart-peak--pastel-pink-.png');
+    background-image: url('/src/shared/assets/pictures/tiny-single-ecg-line-with-heart-peak--pastel-pink-.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;

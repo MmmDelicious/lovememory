@@ -1,4 +1,4 @@
-import eventService from './event.service';
+import eventService from './event.service.js';
 import { differenceInDays, format, subDays, subWeeks, subMonths, subYears } from 'date-fns';
 import { ru } from 'date-fns/locale';
 class MemoriesService {

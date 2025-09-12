@@ -85,7 +85,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         aria-label="Уведомления"
       >
         <img 
-          src="/src/assets/pictures/tiny-envelope-with-heart-seal--minimal-flat-vector.png"
+          src="/src/shared/assets/pictures/tiny-envelope-with-heart-seal--minimal-flat-vector.png"
           alt="Уведомления"
           className={styles.notificationIcon}
         />
@@ -111,7 +111,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
             {notificationList.length === 0 ? (
               <div className={styles.emptyState}>
                 <img 
-                  src="/src/assets/pictures/tiny-envelope-with-heart-seal--minimal-flat-vector.png"
+                  src="/src/shared/assets/pictures/tiny-envelope-with-heart-seal--minimal-flat-vector.png"
                   alt=""
                   className={styles.emptyStateIcon}
                 />

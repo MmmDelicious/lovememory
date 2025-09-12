@@ -6,21 +6,20 @@ import MainLayout from './shared/layout/MainLayout/MainLayout';
 import GameLayout from './shared/layout/GameLayout/GameLayout';
 import { ErrorBoundary } from './shared/components/ErrorBoundary/ErrorBoundary';
 
-// Lazy loading для основных страниц
-const AuthPage = React.lazy(() => import('./modules/auth/pages/AuthPage/AuthPage'));
+// Простые страницы-роуты из папки pages/
+const AuthPage = React.lazy(() => import('./pages/AuthPage'));
 const AboutPage = React.lazy(() => import('./shared/components/AboutPage/AboutPage'));
-const DashboardPage = React.lazy(() => import('./modules/dashboard/pages/DashboardPage/DashboardPage'));
+const DashboardPage = React.lazy(() => import('./pages/DashboardPage'));
+const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
+const GamesPage = React.lazy(() => import('./pages/GamesPage'));
+const GameLobbyPage = React.lazy(() => import('./pages/GameLobbyPage'));
+
 const DayDetailPage = React.lazy(() => import('./modules/events/pages/DayDetailPage/DayDetailPage'));
-const ProfilePage = React.lazy(() => import('./modules/users/pages/ProfilePage/ProfilePage'));
-const GamesPage = React.lazy(() => import('./modules/games/pages/GamesPage/GamesPage'));
 const LessonsPage = React.lazy(() => import('./modules/education/pages/LessonsPage/LessonsPage'));
 const TournamentsPage = React.lazy(() => import('./modules/games/pages/TournamentsPage/TournamentsPage'));
 const TournamentPage = React.lazy(() => import('./modules/games/pages/TournamentPage/TournamentPage'));
-
-const GameLobbyPage = React.lazy(() => import('./modules/games/pages/GameLobbyPage/GameLobbyPage'));
 const GameRoomPage = React.lazy(() => import('./modules/games/pages/GameRoomPage/GameRoomPage'));
 const PokerPage = React.lazy(() => import('./modules/games/pages/PokerPage/PokerPage'));
-// const ErrorPage = React.lazy(() => import('./pages/ErrorPage/ErrorPage')); // TODO: Create ErrorPage
 
 const AuthCallbackPage = React.lazy(() => import('./modules/auth/pages/AuthCallbackPage/AuthCallbackPage'));
 const OnboardingInterestsPage = React.lazy(() => import('./modules/users/pages/OnboardingInterestsPage/OnboardingInterestsPage'));

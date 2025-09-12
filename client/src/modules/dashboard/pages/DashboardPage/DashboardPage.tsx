@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useUser } from '../../../../store/hooks';
+import { useUser } from '@/store';
 import styles from './DashboardPage.module.css';
-import Calendar from '../../../events/components/Calendar/Calendar';
-import { useEvents } from '../../../events/hooks/useEvents';
-import { useEventTemplates } from '../../../events/hooks/useEventTemplates';
+import Calendar from '@/modules/events/components/Calendar/Calendar';
+import { useEvents } from '@/modules/events/hooks/useEvents';
+import { useEventTemplates } from '@/modules/events/hooks/useEventTemplates';
 
 const DashboardPage: React.FC = () => {
   const user = useUser();
@@ -26,10 +26,6 @@ const DashboardPage: React.FC = () => {
     return <div className={styles.loader}>Пользователь не найден...</div>;
   }
 
-  const handleCreateTemplate = () => {};
-  const handleEditTemplate = (template: any) => {};
-  const handleDeleteTemplate = (template: any) => {};
-  const handleDuplicateTemplate = (template: any) => {};
 
   return (
     <>
@@ -40,10 +36,10 @@ const DashboardPage: React.FC = () => {
         onUpdateEvent={updateEvent}
         onDeleteEvent={deleteEvent}
         customTemplates={templates || []}
-        onCreateTemplate={handleCreateTemplate}
-        onEditTemplate={handleEditTemplate}
-        onDeleteTemplate={handleDeleteTemplate}
-        onDuplicateTemplate={handleDuplicateTemplate}
+        onCreateTemplate={createTemplate}
+        onEditTemplate={updateTemplate}
+        onDeleteTemplate={deleteTemplate}
+        onDuplicateTemplate={duplicateTemplate}
       />
     </>
   );

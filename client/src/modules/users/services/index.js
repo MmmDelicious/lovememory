@@ -1,5 +1,5 @@
-import pairService from './pair.service.js';
-import userService from './user.service.js';
+// Re-export общих сервисов + специфичные для модуля
+import { pairService, userService } from '@/services';
 import interestService from './interest.service.js';
 
 export {

@@ -382,27 +382,6 @@ const GamesPage: React.FC = () => {
         </div>
       </section>
       {}
-      <section className={styles.ctaSection}>
-        <div className={styles.ctaContent}>
-          <h2 className={styles.ctaTitle}>Готовы начать?</h2>
-          <p className={styles.ctaSubtitle}>
-            Выберите игру — и поехали
-          </p>
-          <div className={styles.ctaActions}>
-            <Link to="/games/tic-tac-toe" className={styles.ctaButton}>
-              <Play size={18} />
-              Начать игру
-            </Link>
-            <button 
-              onClick={handleRandomGame}
-              className={`${styles.ctaButton} ${styles.ctaButtonSecondary}`}
-            >
-              <Shuffle size={16} />
-              Случайная игра
-            </button>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };

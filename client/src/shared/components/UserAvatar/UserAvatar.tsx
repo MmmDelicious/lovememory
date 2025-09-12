@@ -1,7 +1,7 @@
 import React from 'react';
 import Avatar from '../Avatar/Avatar';
-import maleAvatar from '../../../assets/man.png';
-import femaleAvatar from '../../../assets/woman.png';
+import maleAvatar from '../../assets/man.png';
+import femaleAvatar from '../../assets/woman.png';
 import styles from './UserAvatar.module.css';
 interface User {
   name?: string;

@@ -5,6 +5,7 @@ import AIChat from '../AIChat/AIChat';
 import AIToggleButton from '../AIToggleButton/AIToggleButton';
 import FreeRoamMascot from '../../../../shared/mascot/FreeRoamMascot/FreeRoamMascot';
 import DateGeneratorModal from '../../../events/components/DateGeneratorModal/DateGeneratorModal';
+import globalMascotAnimation from '../../../../shared/assets/AI.json';
 
 const AIChatInterface = () => {
   const { isVisible, isChatOpen, isLoading } = useAIMascot();
@@ -66,7 +67,7 @@ const AIChatInterface = () => {
       {isVisible && (
         <FreeRoamMascot 
           state={globalMascot} 
-          animationData={globalMascot.animationData}
+          animationData={JSON.parse(JSON.stringify(globalMascotAnimation))}
           onClick={toggleChat}
           isAILoading={isLoading}
         />

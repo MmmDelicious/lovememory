@@ -28,7 +28,7 @@ const StaticMascot = ({ message, animationData, bubbleKey, onAvatarClick, isErro
         className={`${styles.avatar} ${isAnnoyed || isShaking ? styles.shaking : ''}`}
         onClick={handleClick}
       >
-        <Lottie animationData={animationData} loop={true} />
+        <Lottie animationData={JSON.parse(JSON.stringify(animationData))} loop={true} />
       </div>
       <div key={bubbleKey} className={`${styles.speechBubble} ${mode === 'register' ? styles.speechBubbleRegister : ''}`}>
         <p>{message}</p>
