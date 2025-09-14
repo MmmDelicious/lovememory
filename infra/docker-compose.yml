@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # PostgreSQL с PgVector
+  postgres:
+    image: pgvector/pgvector:pg15
+    environment:
+      POSTGRES_DB: lovememory
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis для кэширования
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Node.js сервер
+  server:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - DB_URL=postgresql://postgres:postgres@postgres:5432/lovememory
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../server:/app
+      - /app/node_modules
+    command: npm run dev
+
+  # AI Python сервис
+  ai-service:
+    build:
+      context: ../ai
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - DB_URL=postgresql://postgres:postgres@postgres:5432/lovememory
+      - REDIS_URL=redis://redis:6379
+      - NODE_SERVER_URL=http://server:5000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../ai:/app
+      - ai_models:/app/models
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+
+  # React клиент
+  client:
+    build:
+      context: ../client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+      - VITE_AI_SERVICE_URL=http://localhost:8001
+    volumes:
+      - ../client:/app
+      - /app/node_modules
+    command: npm run dev
+
+volumes:
+  postgres_data:
+  redis_data:
+  ai_models:

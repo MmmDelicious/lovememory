@@ -15,6 +15,7 @@ const lessonRoutes = require('./lesson.routes');
 const activityTrackerRoutes = require('./activityTracker.routes');
 const interestRoutes = require('./interest.routes');
 const feedbackRoutes = require('./feedback.routes');
+const recommendationRoutes = require('./recommendation.routes');
 
 const router = Router();
 
@@ -34,5 +35,6 @@ router.use('/lessons', lessonRoutes);
 router.use('/activity-tracker', activityTrackerRoutes);
 router.use('/interests', interestRoutes);
 router.use('/feedback', feedbackRoutes);
+router.use('/recommendations', recommendationRoutes);
 
 module.exports = router;

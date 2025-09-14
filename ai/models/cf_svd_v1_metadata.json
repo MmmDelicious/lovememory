@@ -1,0 +1,17 @@
+{
+  "model_id": "cf_svd_v1",
+  "type": "collaborative_filtering",
+  "version": "1.0",
+  "trained_on": {
+    "num_users": 3999,
+    "num_items": 75,
+    "num_interactions": 232208
+  },
+  "parameters": {
+    "n_factors": 5,
+    "learning_rate": 0.005,
+    "regularization": 0.02,
+    "n_epochs": 100
+  },
+  "created_at": "2025-09-12T19:07:03.542899"
+}

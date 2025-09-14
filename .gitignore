@@ -18,3 +18,10 @@ Misc
 .DS_Store
 nano.js
 openai-gpt-image-mcp
+# AI Data and Models
+ai/data/
+ai/models/*.pkl
+ai/models/*.txt
+ai/__pycache__/
+ai/ai/
+*.pyc
