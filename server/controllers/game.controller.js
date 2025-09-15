@@ -1,5 +1,18 @@
 const gameService = require('../services/game.service');
-const GameManager = require('../compiled/gameLogic/GameManagerNew');
+// Временная заглушка GameManager до исправления TS компиляции
+const GameManager = {
+  createGame: (roomId, gameType, playerInfo, options) => {
+    console.log(`🎮 [CONTROLLER STUB] Creating game ${gameType} for room ${roomId}`);
+    return { gameState: 'waiting', players: [], roomId };
+  },
+  getGame: (roomId) => {
+    console.log(`🎮 [CONTROLLER STUB] Getting game for room ${roomId}`);
+    return null;
+  },
+  removeGame: (roomId) => {
+    console.log(`🎮 [CONTROLLER STUB] Removing game for room ${roomId}`);
+  }
+};
 const activityService = require('../services/activity.service');
 class GameController {
   async getRooms(req, res, next) {

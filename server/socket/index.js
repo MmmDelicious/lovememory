@@ -3,7 +3,20 @@ const jwt = require('jsonwebtoken');
 const { GameRoom, User } = require('../models');
 const gameService = require('../services/game.service');
 const economyService = require('../services/economy.service');
-const GameManager = require('../compiled/gameLogic/GameManagerNew').default;
+// Временная заглушка GameManager до исправления TS импортов
+const GameManager = {
+  createGame: (roomId, gameType, playerInfo, options) => {
+    console.log(`🎮 [STUB] Creating game ${gameType} for room ${roomId}`);
+    return { gameState: 'waiting', players: [], roomId };
+  },
+  getGame: (roomId) => {
+    console.log(`🎮 [STUB] Getting game for room ${roomId}`);
+    return null; // Временно возвращаем null
+  },
+  removeGame: (roomId) => {
+    console.log(`🎮 [STUB] Removing game for room ${roomId}`);
+  }
+};
 
 const quizUpdateIntervals = new Map();
 
