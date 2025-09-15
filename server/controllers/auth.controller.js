@@ -2,11 +2,13 @@ const jwt = require('jsonwebtoken');
 const authService = require('../services/auth.service');
 const userService = require('../services/user.service');
 const activityService = require('../services/activity.service');
+
 const generateToken = (user) => {
   return jwt.sign({ userId: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
     expiresIn: '24h',
   });
 };
+
 const sendAuthResponse = (res, user, token) => {
   res.cookie('authToken', token, {
     httpOnly: true,
@@ -17,6 +19,7 @@ const sendAuthResponse = (res, user, token) => {
   
   res.json({ user });
 };
+
 const register = async (req, res, next) => {
   try {
     const { user } = await authService.register(req.body);
@@ -42,6 +45,7 @@ const register = async (req, res, next) => {
     next(error);
   }
 };
+
 const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -66,10 +70,12 @@ const login = async (req, res, next) => {
     next(error);
   }
 };
+
 const logout = (req, res) => {
   res.clearCookie('authToken');
   res.status(200).json({ message: 'Logged out successfully' });
 };
+
 const googleCallback = async (req, res, next) => {
   try {
     const fullUser = await userService.getProfile(req.user.id);

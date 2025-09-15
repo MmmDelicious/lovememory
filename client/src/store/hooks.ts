@@ -46,7 +46,7 @@ import {
   loginUser,
   registerUser,
   logoutUser,
-} from './slices/authSlice';
+} from '../modules/auth/store/authSlice';
 
 // Типизированные хуки для использования в компонентах
 export const useAppDispatch = () => useDispatch<AppDispatch>();
@@ -173,8 +173,8 @@ export const useMascotActions = () => {
             sendMessageToAI: async (message: string, context?: any) => {
           dispatch(setAILoading(true));
           try {
-            const { askAI } = await import('../services/ai.service');
-            const response = await askAI(message, context);
+            const { aiAPI } = await import('@api/ai');
+            const response = await aiAPI.askAI({ prompt: message, context });
             
         
             if (response.intent === 'GENERATE_DATE' && response.data?.options) {

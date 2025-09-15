@@ -1,6 +1,6 @@
 import React from 'react';
 import { Avatar, FormInput } from '../../../ui/profile';
-import { Heart, Users, Mail, X, Plus, Loader2 } from 'lucide-react';
+// Импорты иконок убраны для минималистичного дизайна
 import styles from './PairConnectionCard.module.css';
 
 interface Partner {
@@ -15,11 +15,12 @@ interface Partner {
 interface PairConnectionCardProps {
   partner?: Partner;
   isConnected: boolean;
-  connectionStatus?: 'pending' | 'accepted' | 'rejected';
+  connectionStatus?: 'pending' | 'active' | 'unpaired';
   onSendRequest?: (email: string) => void;
   onDisconnect?: () => void;
   onAcceptRequest?: () => void;
   onRejectRequest?: () => void;
+  onFixMutualRequests?: () => void;
   loading?: boolean;
   error?: string;
   variant?: 'default' | 'sidebar';
@@ -38,6 +39,7 @@ const PairConnectionCard: React.FC<PairConnectionCardProps> = ({
   onDisconnect,
   onAcceptRequest,
   onRejectRequest,
+  onFixMutualRequests,
   loading = false,
   error,
   variant = 'default',
@@ -48,7 +50,7 @@ const PairConnectionCard: React.FC<PairConnectionCardProps> = ({
 
   const partnerName = partner 
     ? [partner.first_name, partner.last_name].filter(Boolean).join(' ') || 'Партнер'
-    : null;
+    : undefined;
 
   const handleSendRequest = () => {
     if (email.trim() && onSendRequest) {
@@ -58,74 +60,92 @@ const PairConnectionCard: React.FC<PairConnectionCardProps> = ({
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !loading && email.trim()) {
+      e.preventDefault();
+      handleSendRequest();
+    }
+  };
+
   // Вариант для сайдбара
   if (variant === 'sidebar') {
     return (
-      <div className={`${styles.sidebarPartnerCard} ${className}`}>
-        <h4 className={styles.sidebarTitle}>👥 Партнер</h4>
+      <div className={`${styles.sidebarPartnerCard} ${isConnected ? styles.connected : ''} ${className}`}>
         {isConnected && partner ? (
-          <div className={styles.partnerInfo}>
-            <Avatar
-              src={partner.avatarUrl}
-              alt={partnerName}
-              size="small"
-              gender={partner.gender}
-              className={styles.partnerAvatar}
-            />
-            <div className={styles.partnerDetails}>
-              <h4>{partnerName}</h4>
-              <p>{partner.email}</p>
-            </div>
-            {onDisconnect && (
-              <button 
-                onClick={onDisconnect} 
-                className={styles.sidebarDisconnectButton}
-                disabled={loading}
-                title="Отключить партнера"
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className={styles.connectPartnerSection}>
-            <p className={styles.noPartnerText}>Партнер не подключен</p>
-            {showEmailInput ? (
-              <div className={styles.emailInputSection}>
-                <FormInput
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email@example.com"
-                  className={styles.emailInput}
+          <>
+            <h4 className={styles.sidebarTitle}>{partnerName}</h4>
+            <div className={styles.partnerInfo}>
+              <div className={styles.partnerAvatarWrapper}>
+                <Avatar
+                  src={partner.avatarUrl}
+                  alt={partnerName}
+                  size="small"
+                  gender={partner.gender}
+                  className={styles.partnerAvatar}
                 />
-                <div className={styles.inputActions}>
-                  <button
-                    onClick={handleSendRequest}
-                    disabled={!email.trim() || loading}
-                    className={styles.sendButton}
-                  >
-                    {loading ? <Loader2 size={14} className={styles.spinner} /> : <Mail size={14} />}
-                  </button>
-                  <button
-                    onClick={() => setShowEmailInput(false)}
-                    className={styles.cancelButton}
-                  >
-                    <X size={14} />
-                  </button>
+                <div className={styles.onlineIndicator}></div>
+              </div>
+              <div className={styles.partnerDetails}>
+                <p className={styles.partnerEmail}>{partner.email}</p>
+                <div className={styles.connectionBadge}>
+                  <span>Подключен</span>
                 </div>
               </div>
-            ) : (
-              <button
-                onClick={() => setShowEmailInput(true)}
-                className={styles.connectButton}
-                disabled={loading}
-              >
-                <Plus size={14} />
-                Пригласить партнера
-              </button>
-            )}
-          </div>
+              {onDisconnect && (
+                <button 
+                  onClick={onDisconnect} 
+                  className={styles.sidebarDisconnectButton}
+                  disabled={loading}
+                  title="Отключить партнера"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <h4 className={styles.sidebarTitle}>Партнер</h4>
+            <div className={styles.connectPartnerSection}>
+              <p className={styles.noPartnerText}>Партнер не подключен</p>
+              {showEmailInput ? (
+                <div className={styles.emailInputSection}>
+                  <div onKeyPress={handleKeyPress}>
+                    <FormInput
+                      type="email"
+                      value={email}
+                      onChange={setEmail}
+                      placeholder="email@example.com"
+                      className={styles.emailInput}
+                    />
+                  </div>
+                  <div className={styles.inputActions}>
+                    <button
+                      onClick={handleSendRequest}
+                      disabled={!email.trim() || loading}
+                      className={styles.sendButton}
+                    >
+                      {loading ? 'Отправка...' : 'Отправить'}
+                    </button>
+                    <button
+                      onClick={() => setShowEmailInput(false)}
+                      className={styles.cancelButton}
+                    >
+                      Отмена
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowEmailInput(true)}
+                  className={styles.connectButton}
+                  disabled={loading}
+                >
+                  Пригласить партнера
+                </button>
+              )}
+            </div>
+          </>
         )}
         {error && (
           <p className={styles.errorText}>{error}</p>
@@ -139,10 +159,7 @@ const PairConnectionCard: React.FC<PairConnectionCardProps> = ({
     return (
       <div className={`${styles.card} ${styles.connected} ${className}`}>
         <div className={styles.header}>
-          <div className={styles.statusIcon}>
-            <Heart size={20} className={styles.heartIcon} />
-          </div>
-          <h3 className={styles.title}>Ваша пара</h3>
+          <h3 className={styles.title}>{partnerName}</h3>
         </div>
 
         <div className={styles.partnerInfo}>
@@ -159,11 +176,8 @@ const PairConnectionCard: React.FC<PairConnectionCardProps> = ({
           </div>
         </div>
 
-        <div className={styles.connectionStats}>
-          <div className={styles.stat}>
-            <Users size={16} />
-            <span>Подключены</span>
-          </div>
+        <div className={styles.connectionStatus}>
+          <div className={styles.statusBadge}>Подключен</div>
         </div>
 
         {onDisconnect && (
@@ -172,22 +186,59 @@ const PairConnectionCard: React.FC<PairConnectionCardProps> = ({
             className={styles.disconnectButton}
             disabled={loading}
           >
-            {loading ? <Loader2 size={16} className={styles.spinner} /> : <X size={16} />}
-            Отключить
+            {loading ? 'Отключение...' : 'Отключить'}
           </button>
         )}
       </div>
     );
   }
 
-  // Ожидающий запрос
+  // Входящий запрос (сначала проверяем его, чтобы показать кнопки "Принять"/"Отклонить")
+  if (connectionStatus === 'pending' && partner && onAcceptRequest && onRejectRequest) {
+    return (
+      <div className={`${styles.card} ${styles.incoming} ${className}`}>
+        <div className={styles.header}>
+          <h3 className={styles.title}>Входящий запрос</h3>
+        </div>
+
+        <div className={styles.partnerInfo}>
+          <Avatar
+            src={partner.avatarUrl}
+            alt={partnerName}
+            size="medium"
+            gender={partner.gender}
+          />
+          <div className={styles.partnerDetails}>
+            <h4 className={styles.partnerName}>{partnerName}</h4>
+            <p className={styles.partnerEmail}>{partner.email}</p>
+          </div>
+        </div>
+
+        <div className={styles.actions}>
+          <button 
+            onClick={onAcceptRequest} 
+            className={styles.acceptButton}
+            disabled={loading}
+          >
+            {loading ? 'Принятие...' : 'Принять'}
+          </button>
+          <button 
+            onClick={onRejectRequest} 
+            className={styles.rejectButton}
+            disabled={loading}
+          >
+            Отклонить
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Ожидающий ответ на исходящий запрос
   if (connectionStatus === 'pending') {
     return (
       <div className={`${styles.card} ${styles.pending} ${className}`}>
         <div className={styles.header}>
-          <div className={styles.statusIcon}>
-            <Loader2 size={20} className={styles.spinner} />
-          </div>
           <h3 className={styles.title}>Ожидание ответа</h3>
         </div>
 
@@ -213,90 +264,41 @@ const PairConnectionCard: React.FC<PairConnectionCardProps> = ({
     );
   }
 
-  // Входящий запрос
-  if (connectionStatus === 'accepted' && partner && onAcceptRequest && onRejectRequest) {
-    return (
-      <div className={`${styles.card} ${styles.incoming} ${className}`}>
-        <div className={styles.header}>
-          <div className={styles.statusIcon}>
-            <Mail size={20} />
-          </div>
-          <h3 className={styles.title}>Запрос на подключение</h3>
-        </div>
-
-        <div className={styles.partnerInfo}>
-          <Avatar
-            src={partner.avatarUrl}
-            alt={partnerName}
-            size="medium"
-            gender={partner.gender}
-          />
-          <div className={styles.partnerDetails}>
-            <h4 className={styles.partnerName}>{partnerName}</h4>
-            <p className={styles.partnerEmail}>{partner.email}</p>
-          </div>
-        </div>
-
-        <div className={styles.actions}>
-          <button 
-            onClick={onAcceptRequest} 
-            className={styles.acceptButton}
-            disabled={loading}
-          >
-            {loading ? <Loader2 size={16} className={styles.spinner} /> : <Heart size={16} />}
-            Принять
-          </button>
-          <button 
-            onClick={onRejectRequest} 
-            className={styles.rejectButton}
-            disabled={loading}
-          >
-            <X size={16} />
-            Отклонить
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // Не подключен - показываем форму подключения
   return (
     <div className={`${styles.card} ${styles.notConnected} ${className}`}>
-      <div className={styles.header}>
-        <div className={styles.statusIcon}>
-          <Plus size={20} />
+        <div className={styles.header}>
+          <h3 className={styles.title}>Подключить партнера</h3>
         </div>
-        <h3 className={styles.title}>Подключить партнера</h3>
-      </div>
 
       <p className={styles.description}>
         Отправьте приглашение партнеру по email, чтобы начать делиться воспоминаниями вместе.
       </p>
 
-      {error && (
-        <div className={styles.error}>
-          <X size={16} />
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className={styles.error}>
+            {error}
+          </div>
+        )}
 
       {showEmailInput ? (
         <div className={styles.emailForm}>
-          <FormInput
-            type="email"
-            value={email}
-            onChange={setEmail}
-            placeholder="email@example.com"
-            icon={Mail}
-          />
+          <div onKeyPress={handleKeyPress}>
+            <FormInput
+              type="email"
+              value={email}
+              onChange={setEmail}
+              placeholder="email@example.com"
+            />
+          </div>
           <div className={styles.formActions}>
             <button 
               onClick={handleSendRequest} 
               className={styles.sendButton}
               disabled={loading || !email.trim()}
             >
-              {loading ? <Loader2 size={16} className={styles.spinner} /> : <Mail size={16} />}
-              Отправить
+              {loading ? 'Отправка...' : 'Отправить'}
             </button>
             <button 
               onClick={() => {
@@ -305,7 +307,6 @@ const PairConnectionCard: React.FC<PairConnectionCardProps> = ({
               }} 
               className={styles.cancelButton}
             >
-              <X size={16} />
               Отмена
             </button>
           </div>
@@ -315,7 +316,6 @@ const PairConnectionCard: React.FC<PairConnectionCardProps> = ({
           onClick={() => setShowEmailInput(true)} 
           className={styles.connectButton}
         >
-          <Plus size={16} />
           Пригласить партнера
         </button>
       )}

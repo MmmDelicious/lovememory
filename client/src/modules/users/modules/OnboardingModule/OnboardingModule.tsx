@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FormInput, InterestBadge } from '../../../../ui/profile';
-import { getAllInterests } from '../../../../services/interest.service.js';
+import { usersAPI } from '@api/users';
 import { ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import styles from './OnboardingModule.module.css';
 
@@ -48,7 +48,7 @@ const OnboardingModule: React.FC<OnboardingModuleProps> = ({
     const loadInterests = async () => {
       try {
         setInterestsLoading(true);
-        const interests = await getAllInterests();
+        const interests = await usersAPI.getAllInterests();
         setAvailableInterests(interests || []);
       } catch (error) {
         console.error('Error loading interests:', error);
@@ -136,7 +136,9 @@ const OnboardingModule: React.FC<OnboardingModuleProps> = ({
 
   const renderWelcomeStep = () => (
     <div className={styles.welcomeStep}>
-      <div className={styles.welcomeIcon}>🎉</div>
+      <div className={styles.welcomeIcon}>
+        <Check size={48} />
+      </div>
       <h2 className={styles.welcomeTitle}>Добро пожаловать в LoveMemory!</h2>
       <p className={styles.welcomeText}>
         Давайте настроим ваш профиль, чтобы найти идеальную совместимость с партнером.
@@ -144,15 +146,21 @@ const OnboardingModule: React.FC<OnboardingModuleProps> = ({
       </p>
       <div className={styles.features}>
         <div className={styles.feature}>
-          <span className={styles.featureIcon}>❤️</span>
+          <div className={styles.featureIcon}>
+            <ChevronRight size={24} />
+          </div>
           <span>Находите общие интересы</span>
         </div>
         <div className={styles.feature}>
-          <span className={styles.featureIcon}>🎯</span>
+          <div className={styles.featureIcon}>
+            <ChevronRight size={24} />
+          </div>
           <span>Получайте персональные рекомендации</span>
         </div>
         <div className={styles.feature}>
-          <span className={styles.featureIcon}>🤝</span>
+          <div className={styles.featureIcon}>
+            <ChevronRight size={24} />
+          </div>
           <span>Укрепляйте отношения</span>
         </div>
       </div>
@@ -175,9 +183,9 @@ const OnboardingModule: React.FC<OnboardingModuleProps> = ({
           <p className={styles.preferenceLabel}>Как сильно вам это нравится?</p>
           <div className={styles.preferenceButtons}>
             {[
-              { key: 'love', label: 'Обожаю', emoji: '❤️' },
-              { key: 'like', label: 'Нравится', emoji: '👍' },
-              { key: 'neutral', label: 'Нейтрально', emoji: '😐' }
+              { key: 'love', label: 'Обожаю' },
+              { key: 'like', label: 'Нравится' },
+              { key: 'neutral', label: 'Нейтрально' }
             ].map(pref => (
               <button
                 key={pref.key}
@@ -186,7 +194,6 @@ const OnboardingModule: React.FC<OnboardingModuleProps> = ({
                   currentPreference === pref.key ? styles.active : ''
                 }`}
               >
-                <span className={styles.preferenceEmoji}>{pref.emoji}</span>
                 {pref.label}
               </button>
             ))}

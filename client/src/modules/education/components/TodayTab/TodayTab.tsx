@@ -4,7 +4,7 @@ import { Clock, Star, Heart, Coffee, MessageCircle, Target, Users, Coins, Calend
 import Lottie from 'lottie-react';
 import { getLessonAnimation } from '../../assets/lessons';
 import { lessonUtils, type Lesson } from '../../../../shared/utils/lessonUtils';
-import { lessonService } from '../../../../services/lesson.service';
+import { lessonsAPI } from '@api/lessons';
 import styles from './TodayTab.module.css';
 
 interface TodayTabProps {
@@ -20,6 +20,7 @@ interface TodayTabProps {
   lessonsCompleted?: number;
   coinsEarned?: number;
   onLessonCompleted?: () => void;
+  onInvitePartner?: () => void;
 }
 
 interface RecommendationCard {
@@ -46,7 +47,8 @@ const TodayTab: React.FC<TodayTabProps> = ({
   streakDays = 0,
   lessonsCompleted = 0,
   coinsEarned = 0,
-  onLessonCompleted
+  onLessonCompleted,
+  onInvitePartner
 }) => {
   const [isStarting, setIsStarting] = useState(false);
   const [animationData, setAnimationData] = useState<any>(null);
@@ -246,7 +248,7 @@ const TodayTab: React.FC<TodayTabProps> = ({
     
     try {
       // Отправляем завершение урока на сервер
-      await lessonService.completeLesson(lesson.id, completionFeedback);
+      await lessonsAPI.completeLesson(lesson.id);
       
       // Уведомляем родительский компонент
       onComplete(completionFeedback || 'Урок завершен успешно!');
@@ -517,7 +519,11 @@ const TodayTab: React.FC<TodayTabProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <button className="btn-prototype btn-prototype--outline">
+        <button 
+          className="btn-prototype btn-prototype--outline"
+          onClick={onInvitePartner}
+          disabled={!onInvitePartner}
+        >
           <Users size={20} />
           Пригласить партнера
         </button>

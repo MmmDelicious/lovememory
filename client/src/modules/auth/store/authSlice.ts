@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { authService } from '../../services';
+import { authAPI as authService } from '@api/auth';
 
 export interface User {
   id: string;
@@ -37,7 +37,6 @@ export interface AuthSliceState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  // Состояние ошибок валидации формы
   fieldErrors: Record<string, boolean>;
   isFormError: boolean;
 }
@@ -56,12 +55,10 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials: LoginCredentials, { rejectWithValue, dispatch }) => {
     try {
-      // Сервер теперь возвращает { user }, токен находится в httpOnly cookie
-      const { user } = await authService.login(credentials.email, credentials.password);
+      const response = await authService.login(credentials);
       
-      return user; // Возвращаем только данные пользователя
+      return response.user;
     } catch (error: any) {
-      // Более детальная обработка ошибок
       let errorMessage = 'Ошибка входа';
       
       if (error.response?.data?.message) {
@@ -87,12 +84,10 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async (credentials: RegisterCredentials, { rejectWithValue, dispatch }) => {
     try {
-      // ТЕСТ: Включаем настоящий API вызов
-      const { user } = await authService.register(credentials);
+      const response = await authService.register(credentials);
       
-      return user; // Возвращаем только данные пользователя
+      return response.user;
     } catch (error: any) {
-      // Более детальная обработка ошибок регистрации
       let errorMessage = 'Ошибка регистрации';
       
       if (error.response?.data?.message) {
@@ -123,8 +118,6 @@ export const logoutUser = createAsyncThunk(
       await authService.logout();
       return;
     } catch (error: any) {
-      console.warn('Logout failed on server, clearing client session anyway:', error);
-      // Продолжаем logout на клиенте даже если сервер недоступен
       return;
     }
   }
@@ -163,7 +156,6 @@ const authSlice = createSlice({
       state.fieldErrors = {};
       state.isFormError = false;
     },
-    // Actions для управления ошибками валидации формы
     setFieldErrors: (state, action: PayloadAction<Record<string, boolean>>) => {
       state.fieldErrors = action.payload;
     },
@@ -188,7 +180,6 @@ const authSlice = createSlice({
         state.error = null;
         state.fieldErrors = {};
         state.isFormError = false;
-        // Логика с localStorage удалена, так как токен управляется httpOnly cookie
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -219,7 +210,6 @@ const authSlice = createSlice({
         state.isLoading = false;
       })
       .addCase(logoutUser.rejected, (state) => {
-        // Даже если logout на сервере неуспешен, очищаем состояние клиента
         state.user = null;
         state.isAuthenticated = false;
         state.error = null;
@@ -242,8 +232,8 @@ export const {
   clearFormErrors
 } = authSlice.actions;
 
-// Селекторы для ошибок валидации формы
 export const selectFieldErrors = (state: { auth: AuthSliceState }) => state.auth.fieldErrors;
 export const selectIsFormError = (state: { auth: AuthSliceState }) => state.auth.isFormError;
 
+export { authSlice };
 export default authSlice.reducer;

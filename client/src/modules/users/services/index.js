@@ -1,9 +1,5 @@
-// Re-export общих сервисов + специфичные для модуля
-import { pairService, userService } from '@/services';
-import interestService from './interest.service.js';
+import { pairsAPI, usersAPI } from '@api';
 
-export {
-  pairService,
-  userService,
-  interestService
-};
+export const pairService = pairsAPI;
+export const userService = usersAPI;  
+export const interestService = usersAPI;

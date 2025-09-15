@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DayDetailModule } from '../../modules';
-import { useAuth } from '../../../modules/auth/hooks/useAuth';
+import { useAuth } from '../../../auth/hooks/useAuth';
 import styles from './DayDetailPage.module.css';
 /**
  * Тонкая страница детального просмотра дня

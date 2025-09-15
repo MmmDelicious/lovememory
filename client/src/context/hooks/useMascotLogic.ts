@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useUser } from '../../store/hooks';
-import { askAI } from '../../services/ai.service';
+import { aiAPI } from '@api/ai';
 import smartMascotService from '../../services/smartMascot.service';
 import { MASCOT_CONFIG } from '../../shared/mascot/config/mascot.config.js';
 import runnerAnimation from '../../shared/assets/running-character.json';

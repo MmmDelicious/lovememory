@@ -80,8 +80,12 @@ const ProfileModule: React.FC<ProfileModuleProps> = ({
   const { 
     pairing, 
     isLoading: isPairingLoading, 
+    error: pairingError,
     sendRequest, 
-    deletePairing 
+    acceptRequest,
+    rejectRequest,
+    deletePairing,
+    fixMutualRequests
   } = usePairing({ id: userId } as any);
 
   // Загрузка данных пользователя
@@ -171,16 +175,89 @@ const ProfileModule: React.FC<ProfileModuleProps> = ({
     try {
       await sendRequest(email);
     } catch (err) {
-      console.error('Error sending pair request:', err);
+      // Toast уведомления обрабатываются в usePairing хуке
+    }
+  };
+
+  const handleAcceptPairRequest = async () => {
+    try {
+      const requestId = pairing?.id; // Используем ID запроса из pairing
+      if (requestId) {
+        await acceptRequest(requestId);
+      }
+    } catch (err) {
+      // Toast уведомления обрабатываются в usePairing хуке
+    }
+  };
+
+  const handleRejectPairRequest = async () => {
+    try {
+      const requestId = pairing?.id; // Используем ID запроса из pairing
+      if (requestId) {
+        await rejectRequest(requestId);
+      }
+    } catch (err) {
+      // Toast уведомления обрабатываются в usePairing хуке
     }
   };
 
   const handleDisconnectPair = async () => {
     try {
-      await deletePairing();
+      const pairId = pairing?.id;
+      if (pairId) {
+        await deletePairing(pairId);
+      }
     } catch (err) {
-      console.error('Error disconnecting pair:', err);
+      // Toast уведомления обрабатываются в usePairing хуке
     }
+  };
+
+  const handleFixMutualRequests = async () => {
+    try {
+      await fixMutualRequests();
+    } catch (err) {
+      // Toast уведомления обрабатываются в usePairing хуке
+    }
+  };
+
+  // Получаем данные партнера для отображения  
+  const getPairPartner = () => {
+    if (!pairing || pairing.status === 'unpaired') return null;
+    
+    if (pairing.status === 'active') {
+      return pairing.partner;
+    }
+    
+    if (pairing.status === 'pending') {
+      // Для pending запросов определяем партнера из Requester/Receiver
+      const isIncoming = pairing.user2_id === userId;
+      
+      // Партнер - это тот, кто НЕ является текущим пользователем
+      const partnerData = isIncoming ? pairing.Requester : pairing.Receiver;
+      
+      if (partnerData) {
+        return {
+          id: partnerData.id,
+          first_name: partnerData.first_name || partnerData.display_name,
+          last_name: '', // На сервере только first_name и display_name
+          email: partnerData.email,
+          gender: partnerData.gender,
+          avatarUrl: partnerData.avatarUrl
+        };
+      }
+    }
+    
+    return null;
+  };
+
+  // Проверяем, является ли запрос входящим (нужно принимать/отклонять)
+  const isIncomingRequest = () => {
+    return pairing?.status === 'pending' && pairing.user2_id === userId;
+  };
+
+  // Проверяем, является ли запрос исходящим (нужно отменять)
+  const isOutgoingRequest = () => {
+    return pairing?.status === 'pending' && pairing.user1_id === userId;
   };
 
   const handleRemoveInterest = async (interestId: string) => {
@@ -231,12 +308,16 @@ const ProfileModule: React.FC<ProfileModuleProps> = ({
         
         {/* Подключение к партнеру */}
         <PairConnectionCard
-          partner={pairing?.partner}
-          isConnected={!!pairing?.partner}
+          partner={getPairPartner()}
+          isConnected={pairing?.status === 'active'}
           connectionStatus={pairing?.status}
-          onSendRequest={handleSendPairRequest}
-          onDisconnect={handleDisconnectPair}
+          onSendRequest={pairing?.status === 'unpaired' ? handleSendPairRequest : undefined}
+          onAcceptRequest={isIncomingRequest() ? handleAcceptPairRequest : undefined}
+          onRejectRequest={isIncomingRequest() ? handleRejectPairRequest : undefined}
+          onDisconnect={pairing?.status === 'active' || isOutgoingRequest() ? handleDisconnectPair : undefined}
+          onFixMutualRequests={pairing?.status === 'pending' ? handleFixMutualRequests : undefined}
           loading={isPairingLoading}
+          error={pairingError}
           className={styles.sidebarPartnerCard}
           variant="sidebar"
         />
@@ -253,6 +334,33 @@ const ProfileModule: React.FC<ProfileModuleProps> = ({
             variant="grid"
           />
         </div>
+
+        {/* Подключение к партнёру - большая версия */}
+        {(!pairing || pairing?.status !== 'active') && (
+          <div className={styles.pairingSection}>
+            <div className={styles.sectionHeader}>
+              <h3 className={styles.sectionTitle}>
+                <span className={styles.titleIcon}>💕</span>
+                Партнёр
+              </h3>
+            </div>
+            
+            <PairConnectionCard
+              partner={getPairPartner()}
+              isConnected={pairing?.status === 'active'}
+              connectionStatus={pairing?.status}
+              onSendRequest={pairing?.status === 'unpaired' ? handleSendPairRequest : undefined}
+              onAcceptRequest={isIncomingRequest() ? handleAcceptPairRequest : undefined}
+              onRejectRequest={isIncomingRequest() ? handleRejectPairRequest : undefined}
+              onDisconnect={pairing?.status === 'active' || isOutgoingRequest() ? handleDisconnectPair : undefined}
+              onFixMutualRequests={pairing?.status === 'pending' ? handleFixMutualRequests : undefined}
+              loading={isPairingLoading}
+              error={pairingError}
+              className={styles.mainPartnerCard}
+              variant="default"
+            />
+          </div>
+        )}
 
         {/* Интересы */}
         <div className={styles.interestsSection}>

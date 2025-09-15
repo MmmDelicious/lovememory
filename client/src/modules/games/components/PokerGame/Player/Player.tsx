@@ -1,6 +1,6 @@
 import React from 'react';
 import UserAvatar from '../../UserAvatar/UserAvatar';
-import { User } from '../../../store/slices/authSlice';
+import { User } from '../../../../modules/auth/store/authSlice';
 import PlayingCard from '../../PlayingCard/PlayingCard';
 import type { PlayerProps } from '../../../../types/game.types';
 import styles from './Player.module.css';

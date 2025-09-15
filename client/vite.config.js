@@ -12,6 +12,7 @@ export default defineConfig({
       '@app': path.resolve(__dirname, './src/app'),
       '@layouts': path.resolve(__dirname, './src/layouts'),
       '@assets': path.resolve(__dirname, './src/assets'),
+      '@api': path.resolve(__dirname, './src/shared/api'),
     },
   },
   server: {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Calendar, Clock, DollarSign, MapPin, Star, Check } from 'lucide-react';
-import dateGeneratorService from '../../services/dateGenerator.service';
+import { dateGeneratorAPI } from '@api/dateGenerator';
 import styles from './DateGeneratorModal.module.css';
 
 import type { DateOption, DateScheduleItem } from '../../../types/common';
@@ -52,10 +52,10 @@ const DateGeneratorModal: React.FC<DateGeneratorModalProps> = ({
     
     try {
       // Анализ данных пользователя
-      await dateGeneratorService.analyzeUserData();
+      await dateGeneratorAPI.analyzeUserData();
       
       // Показываем рассуждения по шагам
-      const steps = dateGeneratorService.getReasoningSteps();
+      const steps = dateGeneratorAPI.getReasoningSteps();
       
       for (let i = 0; i < steps.length; i++) {
         await new Promise(resolve => setTimeout(resolve, 1500)); // Задержка между шагами
@@ -64,7 +64,7 @@ const DateGeneratorModal: React.FC<DateGeneratorModalProps> = ({
       
       // Генерируем варианты свиданий
       await new Promise(resolve => setTimeout(resolve, 1000));
-      const result = await dateGeneratorService.generateDateOptions();
+      const result = await dateGeneratorAPI.generateDateOptions();
       
       // Сохраняем информацию о местоположении для отладки
       if (result.userLocation) {
@@ -72,7 +72,7 @@ const DateGeneratorModal: React.FC<DateGeneratorModalProps> = ({
       }
       
       // Показываем финальные шаги рассуждений
-      const finalSteps = dateGeneratorService.getReasoningSteps().slice(steps.length);
+      const finalSteps = dateGeneratorAPI.getReasoningSteps().slice(steps.length);
       for (const step of finalSteps) {
         await new Promise(resolve => setTimeout(resolve, 800));
         setReasoningSteps(prev => [...prev, step]);
@@ -114,7 +114,7 @@ const DateGeneratorModal: React.FC<DateGeneratorModalProps> = ({
     
     setIsLoading(true);
     try {
-      const event = await dateGeneratorService.createDateEvent(selectedOption, selectedDate);
+      const event = await dateGeneratorAPI.createDateEvent(selectedOption, selectedDate);
       
       if (onEventCreated) {
         onEventCreated(event);

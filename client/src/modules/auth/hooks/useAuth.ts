@@ -3,7 +3,7 @@
  */
 import { useCallback } from 'react'
 import { useAppSelector, useAppDispatch } from '../../../store/hooks'
-import { authService } from '../../../services'
+import { authAPI as authService } from '@api/auth'
 import type { LoginRequest, RegisterRequest } from '../types'
 
 // Note: These will be connected to the actual store slice later

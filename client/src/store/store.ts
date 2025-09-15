@@ -1,17 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authSlice from './slices/authSlice';
+import { authSlice } from '../modules/auth/store/authSlice';
 import gameSlice from './slices/gameSlice'; 
 import mascotSlice from './slices/mascotSlice';
 import eventMascotSlice from './slices/eventMascotSlice';
-// import { socketMiddleware } from './middleware/socketMiddleware';
 
-/**
- * Настоящий Redux store
- * Убираем все циклические зависимости
- */
 export const store = configureStore({
   reducer: {
-    auth: authSlice,
+    auth: authSlice.reducer,
     game: gameSlice,
     mascot: mascotSlice,
     eventMascot: eventMascotSlice

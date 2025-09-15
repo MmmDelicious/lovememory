@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '@app';
 import { io, Socket } from 'socket.io-client';
 import type { PokerGameState } from '../../../types/game.types';
-import gameService from '../services/game.service';
+import { gamesAPI } from '@api/games';
 
 interface RoomData {
   id: string;
@@ -234,7 +234,7 @@ export const usePokerGame = (roomId: string | undefined) => {
   useEffect(() => {
     const fetchRoomData = async () => {
       try {
-        const rooms = await gameService.getRooms('poker');
+        const rooms = await gamesAPI.getRooms('poker');
         const room = rooms.find((r: any) => r.id === roomId);
         if (room) {
           setState(prev => ({ ...prev, roomData: room }));

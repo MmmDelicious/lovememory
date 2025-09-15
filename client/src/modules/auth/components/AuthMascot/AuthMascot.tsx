@@ -38,4 +38,11 @@ const AuthMascotComponent: React.FC<AuthMascotProps> = ({
 };
 
 // Мемоизируем компонент для предотвращения лишних перерисовок
-export const AuthMascot = React.memo(AuthMascotComponent);
+export const AuthMascot = React.memo(AuthMascotComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.mode === nextProps.mode &&
+    prevProps.message === nextProps.message &&
+    prevProps.hasErrors === nextProps.hasErrors &&
+    prevProps.onAvatarClick === nextProps.onAvatarClick
+  );
+});

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './Sidebar.module.css';
 import Button from '../../components/Button/Button';
-import eventService from '../../../modules/events/services/event.service';
+import { eventsAPI } from '@api/events';
 import RecurrenceSelector from '../../../modules/events/components/Calendar/RecurrenceSelector';
 import { toast } from '../../../context/ToastContext';
 import { 
@@ -150,8 +150,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [isSelectOpen]);
   const fetchMedia = useCallback(async (eventId: string) => {
     try {
-      const response = await eventService.getMediaForEvent(eventId);
-      setMedia(response.data);
+      const media = await eventsAPI.getMediaForEvent(eventId);
+      setMedia(media);
     } catch (error) {
       console.error('Error fetching media:', error);
     }
@@ -195,7 +195,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     const file = e.target.files?.[0];
     if (file && eventData?.id) {
       try {
-        await eventService.uploadFile(eventData.id, file);
+        await eventsAPI.uploadFile(eventData.id, file);
         fetchMedia(eventData.id);
         e.target.value = '';
       } catch (error) {
@@ -205,7 +205,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [eventData?.id, fetchMedia]);
   const handleDeleteMedia = useCallback(async (mediaId: string) => {
     try {
-      await eventService.deleteMedia(mediaId);
+      await eventsAPI.deleteMedia(mediaId);
       if (eventData?.id) {
         fetchMedia(eventData.id);
       }
@@ -381,7 +381,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div className={styles.mediaGrid}>
                   {media.map(m => (
                     <div key={m.id} className={styles.mediaItem}>
-                      <img src={`${eventService.FILES_BASE_URL}${m.file_url}`} alt="" />
+                      <img src={eventsAPI.getFileUrl(m.file_url)} alt="" />
                       <button
                         type="button"
                         className={styles.deleteMediaButton}

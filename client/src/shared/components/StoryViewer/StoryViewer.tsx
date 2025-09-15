@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useRef } from 'react';
 import { FaPlay, FaPause, FaMapMarkerAlt } from 'react-icons/fa';
-import eventService from '../../../modules/events/services/event.service';
+import eventService from '../../../services/event.service';
 import Button from '../Button/Button';
 import useDayStory from '../../../modules/events/hooks/useDayStory';
 import styles from './StoryViewer.module.css';

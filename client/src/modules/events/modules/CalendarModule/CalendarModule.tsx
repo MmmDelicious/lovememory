@@ -16,6 +16,9 @@ import { EVENT_TYPE_COLORS } from '../../hooks/useEvents';
 import StoryViewer from '../../../../shared/components/StoryViewer/StoryViewer';
 import Sidebar from '../../../../shared/layout/Sidebar/Sidebar';
 import DateGeneratorModal from '../../components/DateGeneratorModal/DateGeneratorModal';
+import { usePairing } from '../../../users/hooks/usePairing';
+import { useUser } from '../../../../store/hooks';
+import { apiClient } from '../../../../shared/api';
 import styles from './CalendarModule.module.css';
 
 interface CalendarModuleProps {
@@ -51,6 +54,8 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
 }) => {
   // Хуки для данных и логики
   const navigate = useNavigate();
+  const user = useUser();
+  const { pairing } = usePairing(user);
   const { events, isLoading: eventsLoading, createEvent, updateEvent, deleteEvent } = useEvents(userId);
   const { templates, createTemplate, updateTemplate, deleteTemplate } = useEventTemplates(userId);
   
@@ -74,10 +79,19 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   
+  // AI Actions States
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingType, setProcessingType] = useState<string | null>(null);
+  const [aiResults, setAiResults] = useState<any>(null);
+  const [showResults, setShowResults] = useState(false);
+  
   // Рефы для календаря и drag & drop
   const calendarRef = useRef<FullCalendar>(null);
   const templateContainerRef = useRef<HTMLDivElement>(null);
   const customTemplatesRef = useRef<HTMLDivElement>(null);
+  
+  // Получаем pairId из данных пары
+  const pairId = pairing && (pairing as any)?.status === 'active' ? (pairing as any)?.id : null;
   
   // Хук календаря для сложной логики
   const {
@@ -138,8 +152,8 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
 
   // 🎬 Story функции из legacy
   const openStoryMode = useCallback((date: string) => {
-    const dayEvents = events.filter(event => 
-      event.start.split('T')[0] === date
+    const dayEvents = events.filter((event: any) => 
+      event.start && event.start.split('T')[0] === date
     );
     
     if (dayEvents.length === 0) {
@@ -208,6 +222,122 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
       toast.success('Свидание успешно добавлено в календарь!');
     }
   }, [onCreateEvent, toast]);
+
+  // 🤝 Обработчик поиска общих интересов
+  const handleFindCommonInterests = useCallback(async () => {
+    if (!pairId) {
+      toast.error('Нет активной пары для анализа интересов');
+      return;
+    }
+
+    setIsProcessing(true);
+    setProcessingType('interests');
+    
+    try {
+      
+      const pairResponse = await apiClient.get(`/pair/status`);
+      const pair = pairResponse.pair;
+      
+      if (!pair) {
+        throw new Error('Пара не найдена');
+      }
+
+      const commonInterests = await apiClient.get(`/intelligence-enhanced/interests/common/${pair.user1_id}/${pair.user2_id}`);
+      
+      setAiResults({
+        type: 'interests',
+        data: commonInterests,
+        pair: pair,
+        timestamp: new Date().toISOString()
+      });
+      setShowResults(true);
+      
+      toast.success(`Найдено ${commonInterests.length} общих интересов!`);
+      
+    } catch (error) {
+      toast.error('Ошибка при поиске общих интересов');
+    } finally {
+      setIsProcessing(false);
+      setProcessingType(null);
+    }
+  }, [pairId, toast]);
+
+  // 🎁 Обработчик подбора подарков
+  const handleRecommendGifts = useCallback(async () => {
+    if (!pairId) {
+      toast.error('Нет активной пары для подбора подарков');
+      return;
+    }
+
+    setIsProcessing(true);
+    setProcessingType('gifts');
+    
+    try {
+      
+      const recommendations = await apiClient.get(`/intelligence-enhanced/gifts/${pairId}`, {
+        params: { top_k: 10 }
+      });
+      
+      setAiResults({
+        type: 'gifts',
+        data: recommendations,
+        timestamp: new Date().toISOString()
+      });
+      setShowResults(true);
+      
+      toast.success(`Подобрано ${recommendations.length} рекомендаций подарков!`);
+      
+    } catch (error) {
+      toast.error('Ошибка при подборе подарков');
+    } finally {
+      setIsProcessing(false);
+      setProcessingType(null);
+    }
+  }, [pairId, toast]);
+
+  // 💕 Обработчик генерации свидания
+  const handleGenerateDate = useCallback(async () => {
+    if (!pairId) {
+      toast.error('Нет активной пары для генерации свидания');
+      return;
+    }
+
+    setIsProcessing(true);
+    setProcessingType('date');
+    
+    try {
+      console.log('💕 Генерируем свидание для пары:', pairId);
+      
+      // Генерируем свидание через enhanced AI с логированием
+      const dateResult = await apiClient.post('/intelligence-enhanced/generate-date-enhanced', {
+        context: {
+          pairId: pairId,
+          preferences: {
+            atmosphere: 'romantic',
+            budget: 'medium',
+            duration: 3
+          }
+        }
+      });
+      
+      setAiResults({
+        type: 'date',
+        data: dateResult,
+        timestamp: new Date().toISOString()
+      });
+      setShowResults(true);
+      
+      console.log('✅ Свидание сгенерировано:', dateResult);
+      toast.success('Варианты свидания сгенерированы!');
+      
+    } catch (error) {
+      console.error('❌ Ошибка при генерации свидания:', error);
+      toast.error('Ошибка при генерации свидания');
+    } finally {
+      setIsProcessing(false);
+      setProcessingType(null);
+    }
+  }, [pairId, toast]);
 
   // 📤 Sidebar функции из legacy
   const handleCloseSidebar = useCallback(() => {
@@ -424,13 +554,13 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
             />
             
             <EventTemplatesList
-              templates={templates}
+              templates={templates as any[]}
               defaultTemplates={defaultTemplates}
               onCreateTemplate={() => {/* Логика создания шаблона */}}
               onEditTemplate={() => {/* Логика редактирования */}}
               onDeleteTemplate={deleteTemplate}
-              templateContainerRef={templateContainerRef}
-              customTemplatesRef={customTemplatesRef}
+              templateContainerRef={templateContainerRef as React.RefObject<HTMLDivElement>}
+              customTemplatesRef={customTemplatesRef as React.RefObject<HTMLDivElement>}
             />
           </aside>
         )}
@@ -471,10 +601,7 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
         <StoryViewer
           isOpen={isStoryViewerOpen}
           onClose={closeStoryMode}
-          targetDate={storyViewerDate}
-          events={events.filter(event => 
-            event.start.split('T')[0] === storyViewerDate
-          )}
+          date={storyViewerDate}
         />
       )}
 
@@ -500,13 +627,119 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
         </div>
       )}
 
+      {/* 🎯 AI Actions Panel */}
+      <div className={styles.aiActionsPanel}>
+        <button 
+          className={`${styles.aiActionButton} ${isProcessing && processingType === 'interests' ? styles.processing : ''}`}
+          onClick={handleFindCommonInterests}
+          disabled={isProcessing}
+          title="Найти общие интересы"
+        >
+          {isProcessing && processingType === 'interests' ? '⏳' : '🤝'} Общие интересы
+        </button>
+        
+        <button 
+          className={`${styles.aiActionButton} ${isProcessing && processingType === 'gifts' ? styles.processing : ''}`}
+          onClick={handleRecommendGifts}
+          disabled={isProcessing}
+          title="Подобрать подарки"
+        >
+          {isProcessing && processingType === 'gifts' ? '⏳' : '🎁'} Подарки
+        </button>
+        
+        <button 
+          className={`${styles.aiActionButton} ${isProcessing && processingType === 'date' ? styles.processing : ''}`}
+          onClick={handleGenerateDate}
+          disabled={isProcessing}
+          title="Сгенерировать свидание"
+        >
+          {isProcessing && processingType === 'date' ? '⏳' : '💕'} Свидание
+        </button>
+      </div>
+
+      {/* 📊 AI Results Modal */}
+      {showResults && aiResults && (
+        <div className={styles.aiResultsModal}>
+          <div className={styles.aiResultsContent}>
+            <div className={styles.aiResultsHeader}>
+              <h3>
+                {aiResults.type === 'interests' && '🤝 Общие интересы'}
+                {aiResults.type === 'gifts' && '🎁 Рекомендации подарков'}
+                {aiResults.type === 'date' && '💕 Варианты свидания'}
+              </h3>
+              <button 
+                className={styles.closeButton}
+                onClick={() => setShowResults(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className={styles.aiResultsBody}>
+              {aiResults.type === 'interests' && (
+                <div className={styles.interestsResults}>
+                  <p><strong>Найдено общих интересов:</strong> {aiResults.data.length}</p>
+                  {aiResults.data.slice(0, 10).map((interest: any, index: number) => (
+                    <div key={index} className={styles.interestItem}>
+                      <span className={styles.interestName}>{interest.interest.name}</span>
+                      <span className={styles.interestCategory}>({interest.interest.category})</span>
+                      <span className={styles.compatibilityScore}>
+                        Совместимость: {interest.compatibility_score}/10
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {aiResults.type === 'gifts' && (
+                <div className={styles.giftsResults}>
+                  <p><strong>Подобрано рекомендаций:</strong> {aiResults.data.length}</p>
+                  {aiResults.data.slice(0, 5).map((gift: any, index: number) => (
+                    <div key={index} className={styles.giftItem}>
+                      <h4>{gift.title}</h4>
+                      <p>{gift.category}</p>
+                      <p><strong>Оценка:</strong> {gift.score?.toFixed(2)}</p>
+                      {gift.reasons && (
+                        <p><strong>Причины:</strong> {gift.reasons.join(', ')}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {aiResults.type === 'date' && (
+                <div className={styles.dateResults}>
+                  {aiResults.data.options?.map((option: any, index: number) => (
+                    <div key={index} className={styles.dateOption}>
+                      <h4>Вариант {index + 1}</h4>
+                      <p><strong>Длительность:</strong> {option.duration} часов</p>
+                      <p><strong>Стоимость:</strong> {option.cost} руб</p>
+                      <div className={styles.dateSchedule}>
+                        {option.schedule?.map((item: any, i: number) => (
+                          <div key={i} className={styles.scheduleItem}>
+                            <span>{item.time}</span> - <span>{item.activity}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className={styles.aiResultsFooter}>
+              <small>Создано: {new Date(aiResults.timestamp).toLocaleString()}</small>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 💕 DateGenerator Modal из legacy */}
       {isDateGeneratorOpen && (
         <DateGeneratorModal
           isOpen={isDateGeneratorOpen}
           onClose={() => setIsDateGeneratorOpen(false)}
-          onSubmit={handleDateGenerated}
-          userId={userId}
+          onEventCreated={handleDateGenerated}
         />
       )}
 

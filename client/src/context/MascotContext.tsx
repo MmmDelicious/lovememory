@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useCallback, useEffect } from 'react';
 import globalMascotAnimation from '../shared/assets/AI.json';
-import { askAI } from '../services/ai.service';
+import { aiAPI } from '@api/ai';
 import { MASCOT_CONFIG } from '../shared/mascot/config/mascot.config.js';
 import { useMascotLogic } from './hooks/useMascotLogic';
 import { MascotContextType, MascotTarget, MascotConfig } from './types/MascotTypes';
@@ -140,7 +140,7 @@ export const MascotProvider: React.FC<MascotProviderProps> = ({ children }) => {
         const randomResponse = responses[Math.floor(Math.random() * responses.length)];
         setGlobalMascotMessage(randomResponse);
       } else {
-        const response = await askAI(prompt, context);
+        const response = await aiAPI.askAI({ prompt, context });
         setGlobalMascotMessage(response.text);
       }
     } catch (error) {

@@ -48,6 +48,14 @@
   width: 100%;
 }
 
+.pairingSection {
+  width: 100%;
+}
+
+.mainPartnerCard {
+  /* Стили для большой карточки партнёра в основной части */
+}
+
 .interestsSection {
   width: 100%;
 }

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, BookOpen, ToggleLeft, ToggleRight, Users, User } from 'lucide-react';
 import TodayTab from '../../components/TodayTab/TodayTab';
 import ThemesTab from '../../components/ThemesTab/ThemesTab';
-import { lessonService } from '../../../../services/lesson.service';
+import { lessonsAPI } from '@api/lessons';
 import { lessonUtils } from '../../../../shared/utils/lessonUtils';
 import styles from './LessonsModule.module.css';
 
@@ -186,6 +186,7 @@ export const LessonsModule: React.FC<LessonsModuleProps> = ({
                 lessonsCompleted={progress?.user?.totalCompleted || 12}
                 coinsEarned={progress?.user?.totalCoinsEarned || 450}
                 onLessonCompleted={handleLessonCompleted}
+                onInvitePartner={() => window.open('/profile', '_blank')}
               />
             </motion.div>
           )}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '@/store';
-import { tournamentService } from '../../services/tournament.service';
+import { gamesAPI } from '@api/games';
 import { TournamentBracket } from '../../components/Tournament/TournamentBracket';
 import { TournamentLobby } from '../../components/Tournament/TournamentLobby';
 import { TournamentHeader } from '../../components/Tournament/TournamentHeader';

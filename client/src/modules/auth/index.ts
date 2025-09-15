@@ -11,6 +11,6 @@ export * from './modules';
 export { useAuth } from './hooks/useAuth';
 export { useAuthForm } from './hooks/useAuthForm';
 
-// Services
-export { authService } from './services/auth.service.js';
+// Services - use unified API
+export { authAPI as authService } from '@api/auth';
 export { authSlice } from './store/authSlice'

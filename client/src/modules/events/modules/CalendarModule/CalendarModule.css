@@ -1,0 +1,378 @@
+/* Calendar Module styles */
+
+/* AI Actions Panel */
+.aiActionsPanel {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.aiActionButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  min-width: 150px;
+  text-align: left;
+}
+
+.aiActionButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.aiActionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.aiActionButton.processing {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* AI Results Modal */
+.aiResultsModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.aiResultsContent {
+  background: white;
+  border-radius: 16px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.aiResultsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px 16px 0 0;
+}
+
+.aiResultsHeader h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.aiResultsBody {
+  padding: 20px;
+}
+
+.aiResultsFooter {
+  padding: 15px 20px;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  border-radius: 0 0 16px 16px;
+  text-align: center;
+}
+
+/* Interest Results */
+.interestsResults {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.interestItem {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.interestName {
+  font-weight: 600;
+  color: #333;
+}
+
+.interestCategory {
+  font-size: 12px;
+  color: #666;
+  background: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.compatibilityScore {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: #28a745;
+}
+
+/* Gift Results */
+.giftsResults {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.giftItem {
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.giftItem h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.giftItem p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Date Results */
+.dateResults {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.dateOption {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.dateOption h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.dateSchedule {
+  margin-top: 10px;
+}
+
+.scheduleItem {
+  display: flex;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 14px;
+}
+
+.scheduleItem:last-child {
+  border-bottom: none;
+}
+
+/* Existing calendar styles */
+.calendarContainer {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.monthNavigation {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navButton {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.navButton:hover {
+  background: #e9ecef;
+}
+
+.currentMonth {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.calendarActions {
+  display: flex;
+  gap: 10px;
+}
+
+.actionButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.actionButton:hover {
+  background: #0056b3;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: #dee2e6;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dayHeader {
+  background: #f8f9fa;
+  padding: 15px 10px;
+  text-align: center;
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+}
+
+.dayCell {
+  background: white;
+  min-height: 120px;
+  padding: 8px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dayCell:hover {
+  background: #f8f9fa;
+}
+
+.dayCell.otherMonth {
+  background: #f8f9fa;
+  color: #adb5bd;
+}
+
+.dayCell.today {
+  background: #e3f2fd;
+}
+
+.dayCell.hasEvents {
+  background: #fff3cd;
+}
+
+.dayNumber {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.eventList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.eventItem {
+  background: #007bff;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eventItem.memory {
+  background: #28a745;
+}
+
+.eventItem.date {
+  background: #e83e8c;
+}
+
+.eventItem.note {
+  background: #6c757d;
+}
+
+.contextMenu {
+  position: absolute;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.contextMenu button {
+  display: block;
+  width: 100%;
+  padding: 10px 15px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.contextMenu button:hover {
+  background: #f8f9fa;
+}
+
+.contextMenu button.deleteButton {
+  color: #dc3545;
+}
+
+.contextMenu button.deleteButton:hover {
+  background: #f8d7da;
+}

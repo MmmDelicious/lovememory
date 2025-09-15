@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaStar, FaHeart, FaTimes, FaClock } from 'react-icons/fa';
 import FeedbackModal from '../FeedbackModal/FeedbackModal';
-import feedbackService from '../../services/feedback.service';
+import feedbackService from '../../../services/feedback.service';
 import styles from './FeedbackNotification.module.css';
 
 interface PendingRecommendation {

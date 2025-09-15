@@ -8,6 +8,13 @@ class PairService {
       error.statusCode = 400;
       throw error;
     }
+
+    // Автоматически исправляем взаимные запросы при каждом запросе статуса
+    try {
+      await this.fixMutualRequests(userId);
+    } catch (error) {
+      console.warn('🔗 Failed to fix mutual requests:', error.message);
+    }
     
     // Ищем активную пару
     const activePair = await Pair.findOne({
@@ -105,7 +112,8 @@ class PairService {
         throw error;
     }
 
-    const existingPair = await Pair.findOne({
+    // Проверяем существующие запросы
+    const existingPairs = await Pair.findAll({
         where: {
             [Op.or]: [
                 { user1_id: requesterId, user2_id: partner.id },
@@ -114,7 +122,35 @@ class PairService {
         }
     });
 
-    if (existingPair) {
+    // Если есть взаимные запросы - автоматически принимаем
+    if (existingPairs.length > 0) {
+        const existingPair = existingPairs[0];
+        
+        // Если это тот же запрос от того же пользователя
+        if (existingPair.user1_id === requesterId) {
+            const error = new Error('Запрос на создание пары с этим пользователем уже существует.');
+            error.statusCode = 409;
+            throw error;
+        }
+        
+        // Если это встречный запрос - автоматически принимаем!
+        if (existingPair.user1_id === partner.id && existingPair.user2_id === requesterId && existingPair.status === 'pending') {
+            // Удаляем любые дублирующие записи
+            if (existingPairs.length > 1) {
+                await Pair.destroy({
+                    where: {
+                        id: { [Op.in]: existingPairs.slice(1).map(p => p.id) }
+                    }
+                });
+            }
+            
+            // Принимаем существующий запрос
+            existingPair.status = 'active';
+            await existingPair.save();
+            
+            return existingPair;
+        }
+        
         const error = new Error('Запрос на создание пары с этим пользователем уже существует.');
         error.statusCode = 409;
         throw error;
@@ -128,6 +164,54 @@ class PairService {
     return newPair;
   }
 
+  // Функция для исправления дублирующих запросов
+  async fixMutualRequests(userId) {
+    // Находим все pending запросы пользователя (исходящие и входящие)
+    const allPairs = await Pair.findAll({
+      where: {
+        [Op.or]: [
+          { user1_id: userId, status: 'pending' },
+          { user2_id: userId, status: 'pending' }
+        ]
+      }
+    });
+
+    const pairsByPartner = {};
+    
+    // Группируем по партнёрам
+    allPairs.forEach(pair => {
+      const partnerId = pair.user1_id === userId ? pair.user2_id : pair.user1_id;
+      if (!pairsByPartner[partnerId]) {
+        pairsByPartner[partnerId] = [];
+      }
+      pairsByPartner[partnerId].push(pair);
+    });
+
+    // Обрабатываем взаимные запросы
+    for (const [partnerId, pairs] of Object.entries(pairsByPartner)) {
+      if (pairs.length > 1) {
+        // Есть взаимные запросы - объединяем их
+        const mainPair = pairs[0];
+        const duplicates = pairs.slice(1);
+        
+        // Удаляем дубли
+        await Pair.destroy({
+          where: {
+            id: { [Op.in]: duplicates.map(p => p.id) }
+          }
+        });
+        
+        // Активируем основную пару
+        mainPair.status = 'active';
+        await mainPair.save();
+        
+        console.log(`🔗 Fixed mutual requests between users ${userId} and ${partnerId}`);
+      }
+    }
+    
+    return true;
+  }
+
   async acceptPairRequest(pairId, userId) {
     const pair = await Pair.findByPk(pairId);
     if (!pair || pair.user2_id !== userId) {
@@ -138,6 +222,19 @@ class PairService {
     pair.status = 'active';
     await pair.save();
     return pair;
+  }
+
+  async rejectPairRequest(pairId, userId) {
+    const pair = await Pair.findByPk(pairId);
+    if (!pair || pair.user2_id !== userId) {
+      const error = new Error('Запрос на создание пары не найден или адресован не вам.');
+      error.statusCode = 404;
+      throw error;
+    }
+    
+    // Удаляем запрос вместо изменения статуса
+    await pair.destroy();
+    return { message: 'Запрос на создание пары отклонен.' };
   }
 
   async deletePair(pairId, userId) {

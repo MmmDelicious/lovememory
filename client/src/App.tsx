@@ -8,8 +8,7 @@ import AppRoutes from './AppRoutes';
 import GlobalMascot from './shared/mascot/GlobalMascot/GlobalMascot';
 import AIChatInterface from './modules/ai/components/AIChatInterface/AIChatInterface';
 import { useAuthActions } from './store/hooks';
-import { clearAuthToken } from './services/api';
-import { authService } from './services';
+import { authService } from './modules/auth';
 
 const AppInitializer: React.FC = () => {
   const { setUser, setLoading } = useAuthActions();
@@ -26,8 +25,8 @@ const AppInitializer: React.FC = () => {
         setUser(userData);
       } catch (error) {
         // Это нормальное поведение когда пользователь не авторизован
-        // Очищаем только localStorage, httpOnly cookie управляется сервером
-        clearAuthToken();
+        // httpOnly cookie управляется сервером автоматически
+        console.log('[Auth] User not authenticated - this is normal');
       }
       
       setLoading(false);

@@ -24,7 +24,8 @@
       "@modules/*": ["./src/modules/*"],
       "@app/*": ["./src/app/*"],
       "@layouts/*": ["./src/layouts/*"],
-      "@assets/*": ["./src/assets/*"]
+      "@assets/*": ["./src/assets/*"],
+      "@api/*": ["./src/shared/api/*"]
     }
   },
   "include": [

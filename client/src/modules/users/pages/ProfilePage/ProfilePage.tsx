@@ -43,7 +43,7 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleAddInterest = () => {
-    navigate('/profile/interests');
+    navigate('/onboarding/interests');
   };
 
   if (!user) {

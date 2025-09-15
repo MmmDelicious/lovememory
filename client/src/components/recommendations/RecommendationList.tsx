@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import RecommendationCard from './RecommendationCard';
-import recommendationService from '../../services/recommendation.service';
+import { recommendationsAPI } from '@api/recommendations';
 import './RecommendationList.css';
 
 interface RecommendationItem {
@@ -38,17 +38,13 @@ const RecommendationList: React.FC<RecommendationListProps> = ({
       setLoading(true);
       setError(null);
       
-      const response = await recommendationService.getRecommendations(
+      const response = await recommendationsAPI.getRecommendations(
         pairId, 
         topK, 
         userLocation
       );
       
-      if (response.success) {
-        setRecommendations(response.data.recommendations);
-      } else {
-        setError(response.message || 'Ошибка загрузки рекомендаций');
-      }
+      setRecommendations(response || []);
     } catch (err) {
       console.error('Error loading recommendations:', err);
       setError('Не удалось загрузить рекомендации');
@@ -62,7 +58,7 @@ const RecommendationList: React.FC<RecommendationListProps> = ({
       setSelectedItem(item);
       
       // Логируем клик
-      await recommendationService.logRecommendationClick(pairId, item);
+      await recommendationsAPI.logRecommendationClick(pairId, item);
       
       console.log('Selected recommendation:', item);
     } catch (err) {

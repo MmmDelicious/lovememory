@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import eventService from '../services/event.service';
+import { eventsAPI } from '@api/events';
 import { toast } from '../../../context/ToastContext';
 
 interface StorySlide {
@@ -91,8 +91,7 @@ const useDayStory = () => {
   const loadDayStory = useCallback(async (date: string) => {
     setIsLoading(true);
     try {
-      const response = await eventService.getEvents();
-      const allEvents = response.data;
+      const allEvents = await eventsAPI.getEvents();
       
       // Filter events for the specific date
       const dayEvents = allEvents.filter((event: any) => 
@@ -109,10 +108,10 @@ const useDayStory = () => {
       const eventsWithMedia = await Promise.all(
         dayEvents.map(async (event: any) => {
           try {
-            const mediaResponse = await eventService.getMediaForEvent(event.id);
+            const media = await eventsAPI.getMediaForEvent(event.id);
             return {
               ...event,
-              media: mediaResponse.data || []
+              media: media || []
             };
           } catch (error) {
             console.error('Error loading media for event:', event.id, error);
@@ -215,7 +214,7 @@ const useDayStory = () => {
 
   const setEventAsDayCover = useCallback(async (eventId: string, mediaId: string) => {
     try {
-      await eventService.setDayCover(eventId, mediaId);
+      await eventsAPI.setDayCover({ eventId, mediaId });
       toast.success('Обложка дня установлена');
     } catch (error) {
       console.error('Error setting day cover:', error);

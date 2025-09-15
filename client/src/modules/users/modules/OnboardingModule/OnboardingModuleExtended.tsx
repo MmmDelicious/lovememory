@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAllInterests } from '../../services/interest.service';
 import { Interest, SelectedInterest } from '../../types';
+import { Check, ChevronRight } from 'lucide-react';
 import styles from './OnboardingModuleExtended.module.css';
 
 interface OnboardingModuleExtendedProps {
@@ -208,20 +209,28 @@ const OnboardingModuleExtended: React.FC<OnboardingModuleExtendedProps> = ({
 
   const renderWelcomeStep = () => (
     <div className={styles.welcomeStep}>
-      <div className={styles.welcomeIcon}>🎯</div>
+      <div className={styles.welcomeIcon}>
+        <Check size={48} />
+      </div>
       <h2>Добро пожаловать в LoveMemory!</h2>
       <p>Мы поможем вам найти идеальные подарки, спланировать романтические свидания и открыть общие интересы с партнером.</p>
       <div className={styles.features}>
         <div className={styles.feature}>
-          <span className={styles.featureIcon}>🎁</span>
+          <div className={styles.featureIcon}>
+            <ChevronRight size={24} />
+          </div>
           <span>Персонализированные подарки</span>
         </div>
         <div className={styles.feature}>
-          <span className={styles.featureIcon}>💕</span>
+          <div className={styles.featureIcon}>
+            <ChevronRight size={24} />
+          </div>
           <span>Идеальные свидания</span>
         </div>
         <div className={styles.feature}>
-          <span className={styles.featureIcon}>🔍</span>
+          <div className={styles.featureIcon}>
+            <ChevronRight size={24} />
+          </div>
           <span>Поиск общих интересов</span>
         </div>
       </div>
@@ -239,10 +248,10 @@ const OnboardingModuleExtended: React.FC<OnboardingModuleExtendedProps> = ({
               className={`${styles.preferenceButton} ${currentPreference === pref ? styles.active : ''}`}
               onClick={() => setCurrentPreference(pref)}
             >
-              {pref === 'love' && '❤️ Люблю'}
-              {pref === 'like' && '👍 Нравится'}
-              {pref === 'neutral' && '😐 Нейтрально'}
-              {pref === 'dislike' && '👎 Не нравится'}
+              {pref === 'love' && 'Люблю'}
+              {pref === 'like' && 'Нравится'}
+              {pref === 'neutral' && 'Нейтрально'}
+              {pref === 'dislike' && 'Не нравится'}
             </button>
           ))}
         </div>
@@ -298,9 +307,9 @@ const OnboardingModuleExtended: React.FC<OnboardingModuleExtendedProps> = ({
               className={`${styles.budgetButton} ${budget.dateBudget === option ? styles.active : ''}`}
               onClick={() => handleBudgetChange('dateBudget', option)}
             >
-              {option === 'low' && '💰 Бюджетный (до 2000₽)'}
-              {option === 'medium' && '💳 Средний (2000-5000₽)'}
-              {option === 'high' && '💎 Премиум (5000₽+)'}
+              {option === 'low' && 'Бюджетный (до 2000₽)'}
+              {option === 'medium' && 'Средний (2000-5000₽)'}
+              {option === 'high' && 'Премиум (5000₽+)'}
             </button>
           ))}
         </div>
@@ -315,9 +324,9 @@ const OnboardingModuleExtended: React.FC<OnboardingModuleExtendedProps> = ({
               className={`${styles.budgetButton} ${budget.giftBudget === option ? styles.active : ''}`}
               onClick={() => handleBudgetChange('giftBudget', option)}
             >
-              {option === 'low' && '🎁 Символичные (до 1000₽)'}
-              {option === 'medium' && '💝 Значимые (1000-5000₽)'}
-              {option === 'high' && '💎 Роскошные (5000₽+)'}
+              {option === 'low' && 'Символичные (до 1000₽)'}
+              {option === 'medium' && 'Значимые (1000-5000₽)'}
+              {option === 'high' && 'Роскошные (5000₽+)'}
             </button>
           ))}
         </div>
@@ -333,10 +342,10 @@ const OnboardingModuleExtended: React.FC<OnboardingModuleExtendedProps> = ({
       {(['morning', 'afternoon', 'evening', 'night'] as const).map(period => (
         <div key={period} className={styles.timePreference}>
           <label>
-            {period === 'morning' && '🌅 Утро (6:00-12:00)'}
-            {period === 'afternoon' && '☀️ День (12:00-18:00)'}
-            {period === 'evening' && '🌆 Вечер (18:00-24:00)'}
-            {period === 'night' && '🌙 Ночь (0:00-6:00)'}
+            {period === 'morning' && 'Утро (6:00-12:00)'}
+            {period === 'afternoon' && 'День (12:00-18:00)'}
+            {period === 'evening' && 'Вечер (18:00-24:00)'}
+            {period === 'night' && 'Ночь (0:00-6:00)'}
           </label>
           <div className={styles.timeSlider}>
             <input
@@ -360,15 +369,17 @@ const OnboardingModuleExtended: React.FC<OnboardingModuleExtendedProps> = ({
       <p>Как вы предпочитаете выражать и получать любовь?</p>
       
       {([
-        { key: 'quality_time', name: 'Качественное время', emoji: '⏰', desc: 'Время вместе, разговоры' },
-        { key: 'physical_touch', name: 'Физическое прикосновение', emoji: '🤗', desc: 'Объятия, поцелуи, прикосновения' },
-        { key: 'words_of_affirmation', name: 'Слова поддержки', emoji: '💬', desc: 'Комплименты, слова любви' },
-        { key: 'acts_of_service', name: 'Акты служения', emoji: '🤝', desc: 'Помощь, забота, услуги' },
-        { key: 'receiving_gifts', name: 'Получение подарков', emoji: '🎁', desc: 'Сюрпризы, подарки, знаки внимания' }
-      ] as const).map(({ key, name, emoji, desc }) => (
+        { key: 'quality_time', name: 'Качественное время', desc: 'Время вместе, разговоры' },
+        { key: 'physical_touch', name: 'Физическое прикосновение', desc: 'Объятия, поцелуи, прикосновения' },
+        { key: 'words_of_affirmation', name: 'Слова поддержки', desc: 'Комплименты, слова любви' },
+        { key: 'acts_of_service', name: 'Акты служения', desc: 'Помощь, забота, услуги' },
+        { key: 'receiving_gifts', name: 'Получение подарков', desc: 'Сюрпризы, подарки, знаки внимания' }
+      ] as const).map(({ key, name, desc }) => (
         <div key={key} className={styles.loveLanguageItem}>
           <div className={styles.loveLanguageHeader}>
-            <span className={styles.loveLanguageEmoji}>{emoji}</span>
+            <div className={styles.loveLanguageEmoji}>
+              <ChevronRight size={24} />
+            </div>
             <div>
               <div className={styles.loveLanguageName}>{name}</div>
               <div className={styles.loveLanguageDesc}>{desc}</div>
@@ -392,7 +403,9 @@ const OnboardingModuleExtended: React.FC<OnboardingModuleExtendedProps> = ({
 
   const renderCompleteStep = () => (
     <div className={styles.completeStep}>
-      <div className={styles.completeIcon}>🎉</div>
+      <div className={styles.completeIcon}>
+        <Check size={48} />
+      </div>
       <h2>Отлично! Ваш профиль готов</h2>
       <div className={styles.summary}>
         <div className={styles.summaryItem}>

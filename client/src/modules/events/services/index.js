@@ -1,7 +1,7 @@
-import eventService from './event.service.js';
-import memoriesService from './memories.service.js';
-import placesService from './places.service.js';
-import dateGeneratorService from './dateGenerator.service.js';
+import eventService from '../../../services/event.service.js';
+import memoriesService from '../../../services/memories.service.js';
+import placesService from '../../../services/places.service.js';
+import dateGeneratorService from '../../../services/dateGenerator.service.js';
 
 export { 
   eventService,

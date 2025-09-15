@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useUser } from '../../../store/hooks';
-import gameService from '../services/game.service';
+import { gamesAPI } from '@api/games';
 import type { GameRoom, UseGameLobbyReturn } from '../../../types/game.types';
 const SOCKET_URL =
   import.meta.env.VITE_SOCKET_URL ||
@@ -19,7 +19,7 @@ export const useGameLobby = (gameType: string): UseGameLobbyReturn => {
     try {
       setIsLoading(true);
       setError(null);
-      const fetchedRooms = await gameService.getRooms(gameType);
+      const fetchedRooms = await gamesAPI.getRooms(gameType);
       setRooms(Array.isArray(fetchedRooms) ? fetchedRooms : []);
     } catch (err) {
       console.error("Failed to fetch rooms:", err);
@@ -55,7 +55,7 @@ export const useGameLobby = (gameType: string): UseGameLobbyReturn => {
     };
   }, [token, fetchRooms]);
   const createRoom = async (formData: any): Promise<GameRoom> => {
-    const newRoom = await gameService.createRoom(formData);
+    const newRoom = await gamesAPI.createRoom(formData);
     fetchRooms();
     return newRoom;
   };
