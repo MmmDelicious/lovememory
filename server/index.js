@@ -15,6 +15,7 @@ const { initSocket } = require('./socket');
 const errorHandler = require('./middleware/errorHandler.middleware');
 const apiRouter = require('./routes');
 const { checkRedisHealth } = require('./config/redis');
+const { initClickHouse } = require('./config/clickhouse');
 require('./config/passport');
 
 const app = express();
@@ -84,7 +85,17 @@ const startServer = async () => {
   try {
     await sequelize.authenticate();
 
-    await sequelize.sync({ alter: false });
+    // Временно отключаем синхронизацию моделей
+    // await sequelize.sync({ alter: false });
+    
+    // Инициализируем ClickHouse
+    try {
+      await initClickHouse();
+      console.log('✅ ClickHouse initialized successfully');
+    } catch (clickhouseError) {
+      console.error('⚠️ ClickHouse initialization failed:', clickhouseError);
+      console.log('🔄 Server will continue without ClickHouse analytics');
+    }
     
     // Автозаполнение базы данных начальными данными
     if (process.env.NODE_ENV === 'production') {

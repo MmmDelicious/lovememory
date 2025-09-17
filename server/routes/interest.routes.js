@@ -123,4 +123,74 @@ router.post('/users/:userId/:interestId/activity',
   interestController.updateInterestActivity
 );
 
+/**
+ * GET /interests/users/:userId/analytics - Получить аналитику интересов пользователя
+ */
+router.get('/users/:userId/analytics',
+  [
+    param('userId').isUUID().withMessage('Invalid user ID')
+  ],
+  validationMiddleware.handleValidationErrors,
+  interestController.getUserInterestsAnalytics
+);
+
+/**
+ * GET /interests/analytics/top - Получить топ интересы с аналитикой
+ */
+router.get('/analytics/top',
+  [
+    query('limit').optional().isInt({ min: 1, max: 100 }),
+    query('days').optional().isInt({ min: 1, max: 365 })
+  ],
+  validationMiddleware.handleValidationErrors,
+  interestController.getTopInterestsAnalytics
+);
+
+/**
+ * GET /interests/users/:userId/similar - Найти похожих пользователей
+ */
+router.get('/users/:userId/similar',
+  [
+    param('userId').isUUID().withMessage('Invalid user ID'),
+    query('limit').optional().isInt({ min: 1, max: 50 })
+  ],
+  validationMiddleware.handleValidationErrors,
+  interestController.findSimilarUsers
+);
+
+/**
+ * GET /interests/users/:userId/recommendations - Получить рекомендации интересов
+ */
+router.get('/users/:userId/recommendations',
+  [
+    param('userId').isUUID().withMessage('Invalid user ID'),
+    query('limit').optional().isInt({ min: 1, max: 20 })
+  ],
+  validationMiddleware.handleValidationErrors,
+  interestController.getInterestRecommendations
+);
+
+/**
+ * POST /interests/users/:userId/embedding/update - Обновить эмбеддинг пользователя
+ */
+router.post('/users/:userId/embedding/update',
+  [
+    param('userId').isUUID().withMessage('Invalid user ID')
+  ],
+  validationMiddleware.handleValidationErrors,
+  interestController.updateUserEmbedding
+);
+
+/**
+ * POST /interests/users/:userId/compatibility - Вычислить совместимость с другим пользователем
+ */
+router.post('/users/:userId/compatibility',
+  [
+    param('userId').isUUID().withMessage('Invalid user ID'),
+    body('targetUserId').isUUID().withMessage('Valid targetUserId is required')
+  ],
+  validationMiddleware.handleValidationErrors,
+  interestController.calculateUserCompatibility
+);
+
 module.exports = router;

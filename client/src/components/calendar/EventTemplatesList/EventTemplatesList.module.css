@@ -70,15 +70,31 @@
   cursor: grab;
   transition: all 0.2s ease;
   margin-bottom: 4px;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .templateItem:hover {
   border-color: #adb5bd;
   background: #f8f9fa;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .templateItem:active {
   cursor: grabbing;
+  transform: scale(0.98);
+}
+
+.templateItem[draggable="true"] {
+  cursor: grab;
+}
+
+.templateItem[draggable="true"]:active {
+  cursor: grabbing;
+  opacity: 0.8;
 }
 
 .colorDot {

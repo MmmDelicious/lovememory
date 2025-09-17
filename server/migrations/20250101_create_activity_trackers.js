@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'Users',
+          model: 'users',
           key: 'id',
         },
         onUpdate: 'CASCADE',
@@ -21,12 +21,6 @@ module.exports = {
       pair_id: {
         type: Sequelize.UUID,
         allowNull: true,
-        references: {
-          model: 'Pairs',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
       },
       daily_steps: {
         type: Sequelize.INTEGER,

@@ -13,13 +13,17 @@
     "typecheck": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .js,.ts",
-    "lint:fix": "eslint . --ext .js,.ts --fix"
+    "lint:fix": "eslint . --ext .js,.ts --fix",
+    "clickhouse:deploy": "node scripts/deploy-clickhouse.js",
+    "clickhouse:migrate": "node scripts/migrate-to-clickhouse.js",
+    "clickhouse:init": "node -e \"require('./config/clickhouse').initClickHouse().then(() => console.log('✅ ClickHouse initialized'))\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@clickhouse/client": "^1.12.1",
     "@google/generative-ai": "^0.24.1",
     "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",

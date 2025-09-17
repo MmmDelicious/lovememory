@@ -97,17 +97,18 @@ const EventTemplate = sequelize.define('EventTemplate', {
   }
 }, {
   tableName: 'event_templates',
-  indexes: [
-    {
-      fields: ['userId', 'is_active']
-    },
-    {
-      fields: ['event_type']
-    },
-    {
-      fields: ['usage_count']
-    }
-  ]
+  // Временно отключены индексы до создания всех колонок
+  // indexes: [
+  //   {
+  //     fields: ['user_id', 'is_active']
+  //   },
+  //   {
+  //     fields: ['event_type']
+  //   },
+  //   {
+  //     fields: ['usage_count']
+  //   }
+  // ]
 });
 EventTemplate.associate = (models) => {
   EventTemplate.belongsTo(models.User, { foreignKey: 'userId' });

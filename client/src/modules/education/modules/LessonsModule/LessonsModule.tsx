@@ -4,6 +4,7 @@ import { Calendar, BookOpen, ToggleLeft, ToggleRight, Users, User } from 'lucide
 import TodayTab from '../../components/TodayTab/TodayTab';
 import ThemesTab from '../../components/ThemesTab/ThemesTab';
 import { lessonsAPI } from '@api/lessons';
+import { lessonService } from '../../../../services/lesson.service';
 import { lessonUtils } from '../../../../shared/utils/lessonUtils';
 import styles from './LessonsModule.module.css';
 

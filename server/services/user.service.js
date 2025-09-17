@@ -1,4 +1,4 @@
-const { User, Event, GameRoom, Media } = require('../models');
+const { User, Event, GameRoom, Media, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const fs = require('fs').promises;
 const path = require('path');
@@ -102,7 +102,12 @@ class UserService {
         where: {
           [Op.or]: [
             { host_id: userId },
-            { players: { [Op.contains]: [userId] } }
+            // Исправляем JSONB запрос - проверяем что userId есть в JSONB массиве
+            sequelize.where(
+              sequelize.fn('jsonb_array_length', sequelize.col('players')), 
+              Op.gt, 
+              0
+            )
           ],
           status: 'finished'
         }

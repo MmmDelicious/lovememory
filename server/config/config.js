@@ -7,7 +7,12 @@ module.exports = {
     host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
-    logging: false
+    logging: false,
+    define: {
+      underscored: true,        // snake_case для всех полей и таблиц
+      freezeTableName: false,   // разрешает pluralization
+      timestamps: true          // created_at, updated_at
+    }
   },
   test: {
     username: process.env.DB_USER || 'postgres',

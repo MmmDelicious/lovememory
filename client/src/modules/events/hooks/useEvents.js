@@ -10,6 +10,17 @@ export const EVENT_TYPE_COLORS = {
   gift: '#E0B070',        // тёплое золото
   deadline: '#9C7CA5'    // приглушенный лиловый
 };
+
+export const TYPE_LABELS = {
+  plan: 'План',
+  memory: 'Воспоминание',
+  anniversary: 'Годовщина',
+  birthday: 'День рождения',
+  travel: 'Путешествие',
+  date: 'Свидание',
+  gift: 'Подарок',
+  deadline: 'Дедлайн'
+};
 const formatTime = (date) => new Date(date).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 const formatEvent = (event, userId) => {
   if (!event) return null;

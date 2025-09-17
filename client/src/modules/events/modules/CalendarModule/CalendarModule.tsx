@@ -12,7 +12,7 @@ import { useEventTemplates } from '../../hooks/useEventTemplates';
 import { useMascot } from '../../../../context/MascotContext';
 import { toast } from '../../../../context/ToastContext';
 import { darken } from '../../../../shared/utils/color';
-import { EVENT_TYPE_COLORS } from '../../hooks/useEvents';
+import { EVENT_TYPE_COLORS, TYPE_LABELS } from '../../hooks/useEvents';
 import StoryViewer from '../../../../shared/components/StoryViewer/StoryViewer';
 import Sidebar from '../../../../shared/layout/Sidebar/Sidebar';
 import DateGeneratorModal from '../../components/DateGeneratorModal/DateGeneratorModal';
@@ -113,6 +113,13 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
   // Маскот
   const { hideMascot, registerMascotTargets, startMascotLoop, stopMascotLoop, clearMascotTargets } = useMascot();
 
+  // Шаблоны по умолчанию (перемещено выше useEffect)
+  const defaultTemplates = Object.entries(EVENT_TYPE_COLORS).map(([type, color]) => ({
+    type,
+    label: TYPE_LABELS[type] || type,
+    color
+  }));
+
   // Обработчики событий
   async function handleCreateEvent(eventData: any) {
     try {
@@ -174,6 +181,25 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
   const handleContextMenuClose = useCallback(() => {
     setContextMenu({ show: false, x: 0, y: 0, event: null });
   }, []);
+
+  // Закрытие контекстного меню при клике вне его
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (contextMenu.show) {
+        handleContextMenuClose();
+      }
+    };
+
+    if (contextMenu.show) {
+      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('contextmenu', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('contextmenu', handleClickOutside);
+    };
+  }, [contextMenu.show, handleContextMenuClose]);
 
   const handleContextMenuAction = useCallback((action: 'delete' | 'view' | 'edit' | 'story') => {
     if (!contextMenu.event) return;
@@ -363,6 +389,44 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
     navigate(`/day/${date}`);
   }, [navigate]);
 
+  // Обработка drop шаблонов на календарь
+  const handleReceive = useCallback(async (eventInfo: any) => {
+    const { event } = eventInfo;
+    
+    try {
+      // Данные из перетаскиваемого шаблона
+      const eventType = event.extendedProps.eventType || 'plan';
+      const templateId = event.extendedProps.templateId;
+      const description = event.extendedProps.description || '';
+      
+      // Создаем событие
+      const eventData = {
+        title: event.title,
+        description: description,
+        event_date: event.startStr,
+        end_date: event.endStr,
+        event_type: eventType,
+        is_all_day: event.allDay,
+        template_id: templateId
+      };
+      
+      await handleCreateEvent(eventData);
+      
+      // Удаляем временное событие, так как мы создали новое через API
+      event.remove();
+      
+      // Открываем sidebar для редактирования нового события
+      setSelectedDate(event.startStr.split('T')[0]);
+      setSelectedEvent(eventData);
+      setSidebarOpen(true);
+      
+    } catch (error) {
+      console.error('Ошибка при создании события из шаблона:', error);
+      event.remove();
+      toast.error('Не удалось создать событие');
+    }
+  }, [handleCreateEvent, toast]);
+
   // Обработка кликов
   const handleDateCellClick = (dateStr: string) => {
     if (onDateClick) {
@@ -415,37 +479,45 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
     
     const createDraggable = (container: HTMLElement) => {
       try {
-        return new Draggable(container, {
+        const draggable = new Draggable(container, {
           itemSelector: '.js-template-item',
-          eventData: (el) => ({
-            title: el.getAttribute('data-title') || 'Событие',
-            extendedProps: {
-              eventType: el.getAttribute('data-type') || 'plan',
-              templateId: el.getAttribute('data-template-id'),
-              description: el.getAttribute('data-description') || '',
-            },
-            backgroundColor: el.getAttribute('data-color') || EVENT_TYPE_COLORS.plan,
-            duration: el.getAttribute('data-duration') || null,
-            allDay: el.getAttribute('data-is-all-day') === 'true',
-          }),
+          eventData: (el) => {
+            const data = {
+              title: el.getAttribute('data-title') || 'Событие',
+              extendedProps: {
+                eventType: el.getAttribute('data-type') || 'plan',
+                templateId: el.getAttribute('data-template-id'),
+                description: el.getAttribute('data-description') || '',
+              },
+              backgroundColor: el.getAttribute('data-color') || EVENT_TYPE_COLORS.plan,
+              duration: el.getAttribute('data-duration') || null,
+              allDay: el.getAttribute('data-is-all-day') === 'true',
+            };
+            return data;
+          },
         });
+        return draggable;
       } catch (error) {
-        console.warn('Ошибка при создании Draggable:', error);
+        console.error('Ошибка при создании Draggable:', error);
         return null;
       }
     };
     
-    if (templateContainerRef.current) {
-      const draggable = createDraggable(templateContainerRef.current);
-      if (draggable) draggables.push(draggable);
-    }
-    
-    if (customTemplatesRef.current) {
-      const draggable = createDraggable(customTemplatesRef.current);
-      if (draggable) draggables.push(draggable);
-    }
+    // Добавляем небольшую задержку чтобы убедиться что DOM готов
+    const timeoutId = setTimeout(() => {
+      if (templateContainerRef.current) {
+        const draggable = createDraggable(templateContainerRef.current);
+        if (draggable) draggables.push(draggable);
+      }
+      
+      if (customTemplatesRef.current) {
+        const draggable = createDraggable(customTemplatesRef.current);
+        if (draggable) draggables.push(draggable);
+      }
+    }, 100);
     
     return () => {
+      clearTimeout(timeoutId);
       draggables.forEach(draggable => {
         if (draggable && typeof draggable.destroy === 'function') {
           try {
@@ -456,7 +528,7 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
         }
       });
     };
-  }, [templates]);
+  }, [templates, defaultTemplates]);
 
   // Render функция событий
   const renderEventContent = (eventInfo: EventContentArg) => {
@@ -497,15 +569,9 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
     return result;
   };
 
+
   const miniDays = getMiniCalendarDays(currentDate);
   const monthLabel = currentTitle || currentDate.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
-
-  // Шаблоны по умолчанию
-  const defaultTemplates = Object.entries(EVENT_TYPE_COLORS).map(([type, color]) => ({
-    type,
-    label: type,
-    color
-  }));
 
   if (eventsLoading && events.length === 0) {
     return (
@@ -584,6 +650,7 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
             eventDrop={handleEventDrop}
             eventClick={handleEventClickInternal}
             dateClick={(info) => handleDateCellClick(info.dateStr)}
+            eventReceive={handleReceive}
             eventDidMount={(info) => {
               // Добавляем контекстное меню на события
               info.el.addEventListener('contextmenu', (e: MouseEvent) => {
@@ -609,20 +676,24 @@ export const CalendarModule: React.FC<CalendarModuleProps> = ({
       {contextMenu.show && (
         <div 
           className={styles.contextMenu}
-          style={{ left: contextMenu.x, top: contextMenu.y }}
-          onMouseLeave={handleContextMenuClose}
+          style={{ 
+            left: `${contextMenu.x}px`, 
+            top: `${contextMenu.y}px`,
+            transform: contextMenu.x > window.innerWidth / 2 ? 'translateX(-100%)' : 'none'
+          }}
+          onClick={(e) => e.stopPropagation()}
         >
           <button onClick={() => handleContextMenuAction('view')}>
-            Посмотреть день
+            📅 Посмотреть день
           </button>
           <button onClick={() => handleContextMenuAction('edit')}>
-            Редактировать
+            ✏️ Редактировать
           </button>
           <button onClick={() => handleContextMenuAction('story')}>
-            Показать как сторис
+            🎬 Показать как сторис
           </button>
           <button onClick={() => handleContextMenuAction('delete')} className={styles.deleteButton}>
-            Удалить
+            🗑️ Удалить
           </button>
         </div>
       )}
